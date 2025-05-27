@@ -1,130 +1,125 @@
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
 import Toolbar from '@mui/material/Toolbar';
 import IconButton from '@mui/material/IconButton';
 import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
 import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Avatar from '@mui/material/Avatar';
+import CloseIcon from '@mui/icons-material/Close';
+import Drawer from '@mui/material/Drawer';
+import Box from '@mui/material/Box';
+import List from '@mui/material/List';
+import ListItem from '@mui/material/ListItem';
+import ListItemIcon from '@mui/material/ListItemIcon';
+import ListItemText from '@mui/material/ListItemText';
+import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
+import EventIcon from '@mui/icons-material/Event';
 import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
-import AdbIcon from '@mui/icons-material/Adb';
+import CallIcon from '@mui/icons-material/Call';
+import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import logo from '../ima/Logo-pilotos.png';
 
-const pages = ['Nuestra Historia', 'Nuestro impacto', 'Lo que Hacemos', 'Noticias y Eventos', 'Apoyanos', 'Contacto'];
+const menuItems = [
+  { text: 'Calendario', icon: <CalendarMonthIcon /> },
+  { text: 'Noticias y Eventos', icon: <EventIcon /> },
+  { text: 'Logros', icon: <EmojiEventsIcon /> },
+  { text: 'Contactanos', icon: <CallIcon /> },
+  { text: 'Voluntariado', icon: <PersonAddIcon /> }
+];
 
-function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState(null);
-  const [anchorElUser, setAnchorElUser] = React.useState(null);
+const navLinks = [
+  'NUESTRA HISTORIA',
+  'LO QUE HACEMOS',
+  'TIENDA',
+  'DONAR'
+];
 
-  const handleOpenNavMenu = (event) => {
-    setAnchorElNav(event.currentTarget);
-  };
-  const handleOpenUserMenu = (event) => {
-    setAnchorElUser(event.currentTarget);
-  };
+export default function CustomNavbar() {
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
 
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
-  };
-
-  const handleCloseUserMenu = () => {
-    setAnchorElUser(null);
+  const toggleDrawer = () => {
+    setDrawerOpen((prev) => !prev);
   };
 
   return (
-    <AppBar
-      position="fixed"
-      sx={{
-        top:0,
-        width: '100%',
-        height: '12.5vh', // 1/8 del alto del navegador
-        justifyContent: 'center',
-      }}
-    >
-      <Container maxWidth="xl" sx={{ height: '100%' }}>
-        <Toolbar disableGutters sx={{ height: '100%' }}>
-          
-          <Typography
-            variant="h6"
-            noWrap
-            component="a"
-            href="#app-bar-with-responsive-menu"
+    <>
+      <AppBar position="fixed" sx={{ backgroundColor: '#0c005a', zIndex: 1301 }}>
+        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+            <Box component="img" src={logo} alt="Logo Pilotos" sx={{ height: 50 }} />
+
+            <Box sx={{ display: 'flex', gap: 3 }}>
+              {navLinks.map((link) => (
+                <Button
+                  key={link}
+                  sx={{
+                    color: 'white',
+                    fontWeight: 'bold',
+                    fontSize: '0.9rem',
+                    fontFamily: '"Bebas Neue", sans-serif',
+                    '&:hover': {
+                      color: '#c62828',
+                    },
+                  }}
+                >
+                  {link}
+                </Button>
+              ))}
+            </Box>
+          </Box>
+
+          <IconButton
+            onClick={toggleDrawer}
+            color="inherit"
             sx={{
-              mr: 2,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'fantasy',
-              fontWeight: 900,
-              fontSize: 45,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
+              '&:hover': {
+                color: '#c62828',
+              },
             }}
           >
-            Pilotos
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="account of current user"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: 'block', md: 'none' }  }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page} onClick={handleCloseNavMenu}>
-                  <Typography textAlign="center" >{page}</Typography>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
-          <AdbIcon sx={{ display: { xs: 'flex', md: 'none' }, mr: 1 }} />
-          
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Button
-                key={page}
-                onClick={handleCloseNavMenu}
-                sx={{ my: 2, color: 'white', display: 'block', fontFamily: 'fantasy', fontSize: 20 }}
-              >
-                {page}
-              </Button>
-            ))}
-          </Box>
-          <Box sx={{ flexGrow: 0 }}>
-            <Tooltip title="Open settings">
-              <IconButton onClick={handleOpenUserMenu} sx={{ p: 0 }}>
-                <Avatar  src="/src/Ima/james.png" />
-              </IconButton>
-            </Tooltip>
-            
-          </Box>
+            {drawerOpen ? <CloseIcon /> : <MenuIcon />}
+            <Typography sx={{ ml: 1, fontWeight: 'bold', fontFamily: '"Bebas Neue", sans-serif' }}>MENÚ</Typography>
+          </IconButton>
         </Toolbar>
-      </Container>
-    </AppBar>
+      </AppBar>
+
+      <Drawer
+        anchor="top"
+        open={drawerOpen}
+        onClose={toggleDrawer}
+        ModalProps={{ keepMounted: true }}
+        PaperProps={{ sx: { mt: '64px', zIndex: 1200 } }}
+      >
+        <Box
+          sx={{ width: '100%', p: 3 }}
+          role="presentation"
+          onClick={toggleDrawer}
+          onKeyDown={toggleDrawer}
+        >
+          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', fontFamily: '"Bebas Neue", sans-serif' }}>
+          </Typography>
+          <List>
+            {menuItems.map((item) => (
+              <ListItem button key={item.text}>
+                <ListItemIcon>{item.icon}</ListItemIcon>
+                <ListItemText
+                  primary={item.text}
+                  primaryTypographyProps={{
+                    fontFamily: '"Bebas Neue", sans-serif',
+                    fontWeight: 'bold',
+                    fontSize: '0.95rem',
+                    sx: {
+                      '&:hover': {
+                        color: '#c62828',
+                      },
+                    },
+                  }}
+                />
+              </ListItem>
+            ))}
+          </List>
+        </Box>
+      </Drawer>
+    </>
   );
 }
-
-export default ResponsiveAppBar;
