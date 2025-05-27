@@ -7,7 +7,7 @@ function App() {
 	return (
 		<>
 			<div>
-				<h1>Ayuda ya no quiero :"v</h1>
+				<h1>Pagina Principal</h1>
 			</div>
 		</>
 	);
