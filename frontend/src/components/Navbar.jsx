@@ -19,7 +19,10 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import logo from '../ima/Logo-pilotos.png';
 
+
 const menuItems = [
+  { text: 'Categoria', icon: <PersonAddIcon/> },
+  { text: 'Jugadores', icon: <PersonAddIcon /> },
   { text: 'Calendario', icon: <CalendarMonthIcon /> },
   { text: 'Noticias y Eventos', icon: <EventIcon /> },
   { text: 'Logros', icon: <EmojiEventsIcon /> },
@@ -43,6 +46,7 @@ export default function CustomNavbar() {
 
   return (
     <>
+    
       <AppBar position="fixed" sx={{ backgroundColor: '#0c005a', zIndex: 1301 }}>
         <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -121,5 +125,6 @@ export default function CustomNavbar() {
         </Box>
       </Drawer>
     </>
+
   );
 }
