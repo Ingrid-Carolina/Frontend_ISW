@@ -7,7 +7,8 @@ import CustomNavbar from './components/Navbar.jsx';
 import Footer from './components/Footer.jsx'; 
 import Home from './pages/Home';
 import NuestraHistoria from './pages/NuestraHistoria';
-
+import Logros from './pages/Logros';
+import Voluntariado from './pages/Voluntariado'
 
 function App() {
 	return (
@@ -17,6 +18,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/historia" element={<NuestraHistoria />} />
+        <Route path="/logros" element={<Logros />} />
+        <Route path="/voluntariado" element={<Voluntariado />} />
       </Routes>
       <Footer/>
     </Router>

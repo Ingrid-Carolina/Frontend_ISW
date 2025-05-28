@@ -19,116 +19,206 @@ import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EmojiPeopleRoundedIcon from '@mui/icons-material/EmojiPeopleRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
 import logo from '../ima/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
 const menuItems = [
-  { text: 'Categoria', icon: <GroupsRoundedIcon/> },
-  { text: 'Jugadores', icon: <EmojiPeopleRoundedIcon /> },
-  { text: 'Calendario', icon: <CalendarMonthIcon /> },
-  { text: 'Noticias y Eventos', icon: <EventIcon /> },
-  { text: 'Logros', icon: <EmojiEventsIcon /> },
-  { text: 'Contactanos', icon: <CallIcon /> },
-  { text: 'Voluntariado', icon: <PersonAddIcon /> }
+	{ text: 'Categoria', icon: <GroupsRoundedIcon /> },
+	{ text: 'Jugadores', icon: <EmojiPeopleRoundedIcon /> },
+	{ text: 'Calendario', icon: <CalendarMonthIcon /> },
+	{ text: 'Noticias y Eventos', icon: <EventIcon /> },
+	{ text: 'Logros', icon: <EmojiEventsIcon />, path: '/logros' },
+	{ text: 'Contactanos', icon: <CallIcon /> },
+	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
 ];
 
 const navLinks = [
-  { text: 'NUESTRA HISTORIA', path: '/historia' },
-  { text: 'LO QUE HACEMOS', path: '/quehacemos' },
-  { text: 'TIENDA', path: '/tienda' },
-  { text: 'DONAR', path: '/donar' }
+	{ text: 'NUESTRA HISTORIA', path: '/historia' },
+	{ text: 'LO QUE HACEMOS', path: '/quehacemos' },
+	{ text: 'TIENDA', path: '/tienda' },
 ];
 
 export default function CustomNavbar() {
-  const [drawerOpen, setDrawerOpen] = React.useState(false);
+	const [drawerOpen, setDrawerOpen] = React.useState(false);
+	const [donarAnchorEl, setDonarAnchorEl] = React.useState(null);
 
-  const toggleDrawer = () => {
-    setDrawerOpen((prev) => !prev);
-  };
+	const toggleDrawer = () => {
+		setDrawerOpen(prev => !prev);
+	};
 
-  return (
-    <>
-    
-      <AppBar position="fixed" sx={{ backgroundColor: '#0c005a', zIndex: 1301 }}>
-        <Toolbar sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-            <Box component="img" src={logo} alt="Logo Pilotos" sx={{ height: 50 }} />
+	const handleDonarClick = event => {
+		setDonarAnchorEl(donarAnchorEl ? null : event.currentTarget);
+	};
 
-            <Box sx={{ display: 'flex', gap: 3 }}>
-              {navLinks.map((link) => (
-                <Button
-                  key={link.text}
-                  component={Link}
-                  to={link.path}
-                  sx={{
-                    color: 'white',
-                    fontWeight: 'bold',
-                    fontSize: '0.9rem',
-                    fontFamily: '"Bebas Neue", sans-serif',
-                    '&:hover': {
-                      color: '#c62828',
-                    },
-                  }}
-                >
-                  {link.text}
-                </Button>
-              ))}
-            </Box>
-          </Box>
+	const handleDonarClose = () => {
+		setDonarAnchorEl(null);
+	};
 
-          <IconButton
-            onClick={toggleDrawer}
-            color="inherit"
-            sx={{
-              '&:hover': {
-                color: '#c62828',
-              },
-            }}
-          >
-            {drawerOpen ? <CloseIcon /> : <MenuIcon />}
-            <Typography sx={{ ml: 1, fontWeight: 'bold', fontFamily: '"Bebas Neue", sans-serif' }}>MENÚ</Typography>
-          </IconButton>
-        </Toolbar>
-      </AppBar>
+	return (
+		<>
+			<AppBar
+				position='fixed'
+				sx={{ backgroundColor: '#0c005a', zIndex: 1301 }}
+			>
+				<Toolbar
+					sx={{
+						display: 'flex',
+						justifyContent: 'space-between',
+						alignItems: 'center',
+					}}
+				>
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+						<Link to='/'>
+							<Box
+								component='img'
+								src={logo}
+								alt='Logo Pilotos'
+								sx={{ height: 50, cursor: 'pointer' }}
+							/>
+						</Link>
+						<Box sx={{ display: 'flex', gap: 3 }}>
+							{navLinks.map(link => (
+								<Button
+									key={link.text}
+									component={Link}
+									to={link.path}
+									sx={{
+										color: 'white',
+										fontWeight: 'bold',
+										fontSize: '0.9rem',
+										fontFamily: '"Bebas Neue", sans-serif',
+										'&:hover': { color: '#c62828' },
+									}}
+								>
+									{link.text}
+								</Button>
+							))}
+							<Button
+								onClick={handleDonarClick}
+								sx={{
+									color: 'white',
+									fontWeight: 'bold',
+									fontSize: '0.9rem',
+									fontFamily: '"Bebas Neue", sans-serif',
+									'&:hover': { color: '#c62828' },
+									'&:focus': { outline: 'none' },
+								}}
+							>
+								DONAR
+							</Button>
+							<Menu
+								anchorEl={donarAnchorEl}
+								open={Boolean(donarAnchorEl)}
+								onClose={handleDonarClose}
+								anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
+								transformOrigin={{ vertical: 'top', horizontal: 'left' }}
+								sx={{ zIndex: 1400 }}
+								PaperProps={{
+									sx: {
+										backgroundColor: '#0c005a',
+										color: 'white',
+										borderRadius: 1,
+										mt: 1,
+									},
+								}}
+								MenuListProps={{ disablePadding: true }}
+							>
+								<MenuItem
+									onClick={handleDonarClose}
+									sx={{
+										fontFamily: '"Bebas Neue", sans-serif',
+										fontWeight: 'bold',
+										fontSize: '0.95rem',
+										'&:hover': { backgroundColor: '#0c005a', color: '#c62828' },
+									}}
+								>
+									Donar Indumentaria/Equipo
+								</MenuItem>
+								<MenuItem
+									onClick={handleDonarClose}
+									sx={{
+										fontFamily: '"Bebas Neue", sans-serif',
+										fontWeight: 'bold',
+										fontSize: '0.95rem',
+										'&:hover': { backgroundColor: '#0c005a', color: '#c62828' },
+									}}
+								>
+									Donar Dinero
+								</MenuItem>
+							</Menu>
+						</Box>
+					</Box>
 
-      <Drawer
-        anchor="top"
-        open={drawerOpen}
-        onClose={toggleDrawer}
-        ModalProps={{ keepMounted: true }}
-        PaperProps={{ sx: { mt: '64px', zIndex: 1200 } }}
-      >
-        <Box
-          sx={{ width: '100%', p: 3 }}
-          role="presentation"
-          onClick={toggleDrawer}
-          onKeyDown={toggleDrawer}
-        >
-          <Typography variant="h6" sx={{ mb: 2, fontWeight: 'bold', fontFamily: '"Bebas Neue", sans-serif' }}>
-          </Typography>
-          <List>
-            {menuItems.map((item) => (
-              <ListItem button key={item.text}>
-                <ListItemIcon>{item.icon}</ListItemIcon>
-                <ListItemText
-                  primary={item.text}
-                  primaryTypographyProps={{
-                    fontFamily: '"Bebas Neue", sans-serif',
-                    fontWeight: 'bold',
-                    fontSize: '0.95rem',
-                    sx: {
-                      '&:hover': {
-                        color: '#c62828',
-                      },
-                    },
-                  }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        </Box>
-      </Drawer>
-    </>
+					<IconButton
+						onClick={toggleDrawer}
+						color='inherit'
+						sx={{ '&:hover': { color: '#c62828' } }}
+					>
+						{drawerOpen ? <CloseIcon /> : <MenuIcon />}
+						<Typography
+							sx={{
+								ml: 1,
+								fontWeight: 'bold',
+								fontFamily: '"Bebas Neue", sans-serif',
+							}}
+						>
+							MENÚ
+						</Typography>
+					</IconButton>
+				</Toolbar>
+			</AppBar>
 
-  );
+			<Drawer
+				anchor='top'
+				open={drawerOpen}
+				onClose={toggleDrawer}
+				ModalProps={{ keepMounted: true }}
+				PaperProps={{ sx: { mt: '64px', zIndex: 1200 } }}
+			>
+				<Box
+					sx={{ width: '100%', p: 3 }}
+					role='presentation'
+					onClick={toggleDrawer}
+					onKeyDown={toggleDrawer}
+				>
+					<List>
+						{menuItems.map(item => {
+							const isLink = !!item.path;
+							const listItemProps = {
+								button: true,
+								component: isLink ? Link : 'div',
+								...(isLink && { to: item.path }),
+								sx: {
+									textDecoration: 'none',
+									color: 'inherit',
+									'&:hover .MuiListItemText-primary': {
+										color: '#c62828',
+									},
+								},
+							};
+
+							return (
+								<ListItem key={item.text} {...listItemProps}>
+									<ListItemIcon sx={{ color: 'inherit' }}>
+										{item.icon}
+									</ListItemIcon>
+									<ListItemText
+										primary={item.text}
+										primaryTypographyProps={{
+											fontFamily: '"Bebas Neue", sans-serif',
+											fontWeight: 'bold',
+											fontSize: '0.95rem',
+											color: 'inherit',
+										}}
+									/>
+								</ListItem>
+							);
+						})}
+					</List>
+				</Box>
+			</Drawer>
+		</>
+	);
 }
