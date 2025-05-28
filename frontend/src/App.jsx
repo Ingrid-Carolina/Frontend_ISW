@@ -9,6 +9,8 @@ import Home from './pages/Home';
 import NuestraHistoria from './pages/NuestraHistoria';
 import Logros from './pages/Logros';
 import Voluntariado from './pages/Voluntariado'
+import Categorias from './pages/Categorias';
+import Jugadores from './pages/Juagadores';
 
 function App() {
 	return (
@@ -18,6 +20,8 @@ function App() {
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/historia" element={<NuestraHistoria />} />
+        <Route path="/Categoria" element={<Categorias/>} />
+        <Route path="/Jugadores" element={<Jugadores/>} />
         <Route path="/logros" element={<Logros />} />
         <Route path="/voluntariado" element={<Voluntariado />} />
       </Routes>

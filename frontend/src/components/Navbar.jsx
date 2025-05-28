@@ -25,8 +25,8 @@ import logo from '../ima/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
 const menuItems = [
-	{ text: 'Categoria', icon: <GroupsRoundedIcon /> },
-	{ text: 'Jugadores', icon: <EmojiPeopleRoundedIcon /> },
+	{ text: 'Categoria', icon: <GroupsRoundedIcon /> , path: '/categoria'},
+	{ text: 'Jugadores', icon: <EmojiPeopleRoundedIcon />, path: '/jugadores' },
 	{ text: 'Calendario', icon: <CalendarMonthIcon /> },
 	{ text: 'Noticias y Eventos', icon: <EventIcon /> },
 	{ text: 'Logros', icon: <EmojiEventsIcon />, path: '/logros' },
