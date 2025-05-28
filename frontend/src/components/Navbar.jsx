@@ -17,12 +17,14 @@ import Button from '@mui/material/Button';
 import CallIcon from '@mui/icons-material/Call';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import EmojiPeopleRoundedIcon from '@mui/icons-material/EmojiPeopleRounded';
+import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import logo from '../ima/Logo-pilotos.png';
 
 
 const menuItems = [
-  { text: 'Categoria', icon: <PersonAddIcon/> },
-  { text: 'Jugadores', icon: <PersonAddIcon /> },
+  { text: 'Categoria', icon: <GroupsRoundedIcon/> },
+  { text: 'Jugadores', icon: <EmojiPeopleRoundedIcon /> },
   { text: 'Calendario', icon: <CalendarMonthIcon /> },
   { text: 'Noticias y Eventos', icon: <EventIcon /> },
   { text: 'Logros', icon: <EmojiEventsIcon /> },
