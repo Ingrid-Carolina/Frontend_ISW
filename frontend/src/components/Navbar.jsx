@@ -20,7 +20,7 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EmojiPeopleRoundedIcon from '@mui/icons-material/EmojiPeopleRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import logo from '../ima/Logo-pilotos.png';
-
+import { Link } from 'react-router-dom';
 
 const menuItems = [
   { text: 'Categoria', icon: <GroupsRoundedIcon/> },
@@ -33,10 +33,10 @@ const menuItems = [
 ];
 
 const navLinks = [
-  'NUESTRA HISTORIA',
-  'LO QUE HACEMOS',
-  'TIENDA',
-  'DONAR'
+  { text: 'NUESTRA HISTORIA', path: '/historia' },
+  { text: 'LO QUE HACEMOS', path: '/quehacemos' },
+  { text: 'TIENDA', path: '/tienda' },
+  { text: 'DONAR', path: '/donar' }
 ];
 
 export default function CustomNavbar() {
@@ -57,7 +57,9 @@ export default function CustomNavbar() {
             <Box sx={{ display: 'flex', gap: 3 }}>
               {navLinks.map((link) => (
                 <Button
-                  key={link}
+                  key={link.text}
+                  component={Link}
+                  to={link.path}
                   sx={{
                     color: 'white',
                     fontWeight: 'bold',
@@ -68,7 +70,7 @@ export default function CustomNavbar() {
                     },
                   }}
                 >
-                  {link}
+                  {link.text}
                 </Button>
               ))}
             </Box>
