@@ -25,12 +25,12 @@ import logo from '../ima/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
 const menuItems = [
-	{ text: 'Categoria', icon: <GroupsRoundedIcon /> , path: '/categoria'},
+	{ text: 'Categoria', icon: <GroupsRoundedIcon />, path: '/categoria' },
 	{ text: 'Jugadores', icon: <EmojiPeopleRoundedIcon />, path: '/jugadores' },
-	{ text: 'Calendario', icon: <CalendarMonthIcon /> },
-	{ text: 'Noticias y Eventos', icon: <EventIcon /> },
+	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/Calendario' },
+	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
 	{ text: 'Logros', icon: <EmojiEventsIcon />, path: '/logros' },
-	{ text: 'Contactanos', icon: <CallIcon /> },
+	{ text: 'Contactanos', icon: <CallIcon />, path: '/contacto' },
 	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
 ];
 

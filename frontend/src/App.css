@@ -1,22 +1,19 @@
 #root {
-  height: 100%;
-  margin: 0;
-  display: flex;
-  text-align: center;
-  flex-direction: column;
+	height: 100%;
+	margin: 0;
+	display: flex;
+	text-align: center;
+	flex-direction: column;
 }
 .app-container {
-  display: flex;
-  flex-direction: column;
-  min-height: 200vh;
+	display: flex;
+	flex-direction: column;
+	min-height: 200vh;
 }
 
 .main-content {
-  flex: 1; /* Ocupa el espacio restante, empujando el footer hacia abajo */
+	flex: 1; /* Ocupa el espacio restante, empujando el footer hacia abajo */
 }
-
-
-
 
 .logo {
 	height: 6em;
@@ -46,7 +43,6 @@
 	}
 }
 
-
 .card {
 	padding: 2em;
 }
@@ -54,10 +50,3 @@
 .read-the-docs {
 	color: #888;
 }
-
-
-
-
-
-
-
