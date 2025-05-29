@@ -21,7 +21,7 @@ import EmojiPeopleRoundedIcon from '@mui/icons-material/EmojiPeopleRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
-import logo from '../ima/Logo-pilotos.png';
+import logo from '../Ima/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
 const menuItems = [
