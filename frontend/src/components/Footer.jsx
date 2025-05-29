@@ -3,7 +3,7 @@
 
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
-import logo from '../ima/Logo-pilotos.png';
+import logo from '../Ima/Logo-pilotos.png';
 import Box from '@mui/material/Box';
 import '../components/styles.css';
 
