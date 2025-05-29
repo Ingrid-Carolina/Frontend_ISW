@@ -1,5 +1,6 @@
 // components/Footer.jsx
 import icono from '../ima/IconInsta.png';
+
 import iconof from '../ima/IconF.png';
 import logo from '../ima/Logo-pilotos.png';
 import Box from '@mui/material/Box';
