@@ -49,8 +49,12 @@ footer {
 .social-icon {
 	height: 35px;
 	cursor: pointer;
+	color: white;
 }
 
+.social-icon :hover{
+	color: red;
+}
 .footer-right {
 	text-align: right;
 	font-size: 14px;
