@@ -16,8 +16,10 @@ function App() {
 	return (
 		<>
 		<Router>
-      <CustomNavbar/>
-      <Routes>
+      <div className="app-container">
+        <CustomNavbar/>
+        <main className="main-content">
+        <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/historia" element={<NuestraHistoria />} />
         <Route path="/Categoria" element={<Categorias/>} />
@@ -25,7 +27,12 @@ function App() {
         <Route path="/logros" element={<Logros />} />
         <Route path="/voluntariado" element={<Voluntariado />} />
       </Routes>
+        </main>
+      
       <Footer/>
+      </div>
+      
+
     </Router>
 		</>
 	);

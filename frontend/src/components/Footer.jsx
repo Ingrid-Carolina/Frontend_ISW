@@ -3,53 +3,50 @@ import icono from '../ima/IconInsta.png';
 import iconof from '../ima/IconF.png';
 import logo from '../ima/Logo-pilotos.png';
 import Box from '@mui/material/Box';
-import { Link } from 'react-router-dom';
+import '../components/styles.css';
 
 export default function Footer() {
-  
   return (
-    <footer style={{
-      
-      textAlign: 'center',
-      padding: '10px 350px',
-      backgroundColor: '#000757',
-      color: ' rgb(246, 244, 248)',
-      marginTop: '10000px',
-    }}>
-      
-            <Link to='/'>
-                <Box
-                  component='img'
-                  src={logo}
-                  alt='Logo Pilotos'
-                  sx={{ height: 50, cursor: 'pointer' }}
-                />
-            </Link>
+    <footer className="footer">
+      <Box className="footer-container">
 
-      <Box sx={{ display: 'flex', alignItems: 'start', gap: 2 }}>
-            <Link to='/'>
-							<Box
-								component='img'
-								src={iconof}
-								alt='IconF'
-								sx={{ height: 40, cursor: 'pointer' }}
-							/>
-						</Link>
-            
-            <Link to='/'>
-							<Box
-								component='img'
-								src={icono}
-								alt='IconInsta'
-								sx={{ height: 40, cursor: 'pointer' }}
-							/>
-             
-						</Link>
-           
-            <p>© 2025 - Mi Sitio Web. Todos los derechos reservados.</p>
+        {/* IZQUIERDA */}
+        <Box className="footer-left">
+          <nav>
+            <a href="#Contacto">Contacto</a>
+            <span> | </span>
+            <a href="#privacidad">Política de Privacidad</a>
+          </nav>
+        </Box>
+
+        {/* CENTRO */}
+        <Box className="footer-center">
+          <img src={logo} alt="Logo Pilotos" className="footer-logo" />
+          <div className="social-icons">
+            <a
+              href="https://www.facebook.com/people/Organización-de-Baseball-Menor-Fuerza-Aérea-Hondureña/100057637951305/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src={iconof} alt="Facebook Icon" className="social-icon" />
+            </a>
+
+            <a
+              href="https://www.instagram.com/beisbolfahn/"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <img src={icono} alt="Instagram Icon" className="social-icon" />
+            </a>
+          </div>
+        </Box>
+
+        {/* DERECHA */}
+        <Box className="footer-right">
+          <p>© 2025 - Mi Sitio Web. Todos los derechos reservados.</p>
+        </Box>
+        
       </Box>
-            
-      
     </footer>
   );
 }
