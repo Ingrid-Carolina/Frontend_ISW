@@ -30,10 +30,13 @@ const Eventos = () => {
 	const filteredEvents = eventos.filter(e => e.titulo.toLowerCase().includes(query.toLowerCase()));
 
 	return (
-		<div style={{ padding: '2rem', color: 'black' }}>
-			<h1>Evento</h1>
-			<p>Bienvedido, aqui estaras informado de nuestros proximos Eventos</p>
-		</div>
+		<Box sx={{ p: 4 }}>
+			<Typography variant='h3' fontWeight='bold' textAlign='center' mb={4}>
+				EVENT CALENDAR
+			</Typography>
+
+
+		</Box>
 	);
 };
 
