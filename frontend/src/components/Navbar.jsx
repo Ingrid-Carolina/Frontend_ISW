@@ -25,7 +25,7 @@ import EmojiPeopleRoundedIcon from '@mui/icons-material/EmojiPeopleRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 
-import logo from '../ima/Logo-pilotos.png';
+import logo from '../Ima/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
 const baseMenuItems = [
