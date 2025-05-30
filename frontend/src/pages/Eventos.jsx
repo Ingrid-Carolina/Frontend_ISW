@@ -30,68 +30,72 @@ const Eventos = () => {
 	const filteredEvents = eventos.filter(e => e.titulo.toLowerCase().includes(query.toLowerCase()));
 
 	return (
+		<div style={{ padding: '2rem', color: 'black' }}>
+			<Box sx={{ p: '2rem', color: 'black' }}>
+				<Typography variant='h3' fontWeight='bold' textAlign='center' mb={4}>
+					CALENDARIO DE EVENTOS
+				</Typography>
 
-		<Box sx={{ p: '2rem', color: 'black' }}>
-			<Typography variant='h3' fontWeight='bold' textAlign='center' mb={4}>
-				CALENDARIO DE EVENTOS
-			</Typography>
+				<Box sx={{
+					display: 'flex',
+					gap: 2,
+					flexDirection: { xs: 'column', sm: 'row' },
+					justifyContent: 'center',
+					mb: 4,
+				}}>
+					<TextField variant='outlined'
+						placeholder='Buscar eventos'
+						value={query}
+						onChange={e => setQuery(e.target.value)}
+						InputProps={{
+							startAdornment: <SearchIcon sx={{ mr: 1 }} />,
+						}}
+						sx={{ flex: 1, minWidth: 300 }} />
+					<Button
+						variant='contained'
+						color='error'
+						onClick={() => { }}
+						sx={{ fontWeight: 'bold' }}
+					>
+						Buscar
+					</Button>
+				</Box>
+				{/* Lista de eventos */}
+				<Grid container spacing={3}>
+					{eventos.map((evento, index) => (
+						<Grid item xs={12} key={index}>
+							<Paper elevation={3} sx={{ p: 3 }}>
+								<Typography
+									variant='overline'
+									color='text.secondary'
+									fontWeight='bold'
+								>
+									{new Date(evento.fecha).toLocaleDateString('en-US', {
+										weekday: 'short',
+										month: 'short',
+										day: 'numeric',
+										year: 'numeric',
+									})}
+								</Typography>
+								<Typography variant='h6' fontWeight='bold' mt={1}>
+									{evento.titulo}
+								</Typography>
+								<Typography variant='body2' color='text.secondary'>
+									{evento.hora}
+								</Typography>
+								<Typography variant='body2' color='text.secondary'>
+									<strong>Ubicación:</strong> {evento.lugar}
+								</Typography>
+							</Paper>
+						</Grid>
+					))}
+				</Grid>
 
-			<Box sx={{
-				display: 'flex',
-				gap: 2,
-				flexDirection: { xs: 'column', sm: 'row' },
-				justifyContent: 'center',
-				mb: 4,
-			}}>
-				<TextField variant='outlined'
-					placeholder='Buscar eventos'
-					value={query}
-					onChange={e => setQuery(e.target.value)}
-					InputProps={{
-						startAdornment: <SearchIcon sx={{ mr: 1 }} />,
-					}}
-					sx={{ flex: 1, minWidth: 300 }} />
-				<Button
-					variant='contained'
-					color='error'
-					onClick={() => { }}
-					sx={{ fontWeight: 'bold' }}
-				>
-					Buscar
-				</Button>
 			</Box>
-			{/* Lista de eventos */}
-			<Grid container spacing={3}>
-				{eventos.map((evento, index) => (
-					<Grid item xs={12} key={index}>
-						<Paper elevation={3} sx={{ p: 3 }}>
-							<Typography
-								variant='overline'
-								color='text.secondary'
-								fontWeight='bold'
-							>
-								{new Date(evento.fecha).toLocaleDateString('en-US', {
-									weekday: 'short',
-									month: 'short',
-									day: 'numeric',
-									year: 'numeric',
-								})}
-							</Typography>
-							<Typography variant='h6' fontWeight='bold' mt={1}>
-								{evento.titulo}
-							</Typography>
-							<Typography variant='body2' color='text.secondary'>
-								{evento.hora}
-							</Typography>
-							<Typography variant='body2' color='text.secondary'>
-								<strong>Ubicación:</strong> {evento.lugar}
-							</Typography>
-						</Paper>
-					</Grid>
-				))}
-			</Grid>
 
-		</Box>
+		</div>
+
+
 
 	);
 };
