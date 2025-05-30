@@ -15,7 +15,6 @@ import Calendario from './pages/Calendario.jsx';
 import Eventos from './pages/Eventos.jsx';
 import Contacto from './pages/Contacto.jsx';
 import Tienda from './pages/Tienda.jsx';
-
 function App() {
 	return (
 		<>
