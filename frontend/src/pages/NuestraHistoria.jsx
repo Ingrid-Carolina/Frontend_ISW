@@ -1,7 +1,7 @@
 import React from 'react';
 import { Box, Container, Typography } from '@mui/material';
-import equipoImg from '../ima/equipo.jpg';
-import equipoImg2 from '../ima/equipo2.jpg';
+import equipoImg from '../Ima/equipo.jpg';
+import equipoImg2 from '../Ima/equipo2.jpg';
 
 const NuestraHistoria = () => {
 	return (
