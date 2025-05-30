@@ -24,7 +24,7 @@ const eventos = [
 const Eventos = () => {
 
 	//para filtrar
-	const [query, setQuery] = usestate('');
+	const [query, setQuery] = useState('');
 
 	// filtra por lo que se busq
 	const filteredEvents = eventos.filter(e => e.titulo.toLowerCase().includes(query.toLowerCase()));
