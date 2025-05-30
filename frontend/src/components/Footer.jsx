@@ -1,6 +1,5 @@
 // components/Footer.jsx
 
-
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import logo from '../Ima/Logo-pilotos.png';
@@ -29,7 +28,7 @@ export default function Footer() {
 							target='_blank'
 							rel='noopener noreferrer'
 						>
-							< FacebookIcon className='social-icon' />
+							<FacebookIcon className='social-icon' />
 						</a>
 
 						<a

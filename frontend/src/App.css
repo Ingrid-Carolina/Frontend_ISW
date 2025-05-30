@@ -12,7 +12,7 @@
 }
 
 .main-content {
-	flex: 1; /* Ocupa el espacio restante, empujando el footer hacia abajo */
+	flex: 1;
 }
 
 .logo {
@@ -42,7 +42,6 @@
 		animation: logo-spin infinite 20s linear;
 	}
 }
-
 .card {
 	padding: 2em;
 }

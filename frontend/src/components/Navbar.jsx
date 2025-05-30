@@ -1,33 +1,37 @@
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import MenuIcon from '@mui/icons-material/Menu';
-import CloseIcon from '@mui/icons-material/Close';
 import Drawer from '@mui/material/Drawer';
 import Box from '@mui/material/Box';
+import IconButton from '@mui/material/IconButton';
+import Button from '@mui/material/Button';
+import Typography from '@mui/material/Typography';
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import useMediaQuery from '@mui/material/useMediaQuery';
+import useTheme from '@mui/material/styles/useTheme';
+import MenuIcon from '@mui/icons-material/Menu';
+import CloseIcon from '@mui/icons-material/Close';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EventIcon from '@mui/icons-material/Event';
-import Button from '@mui/material/Button';
 import CallIcon from '@mui/icons-material/Call';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import EmojiPeopleRoundedIcon from '@mui/icons-material/EmojiPeopleRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
-import Menu from '@mui/material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import logo from '../Ima/Logo-pilotos.png';
+import StorefrontIcon from '@mui/icons-material/Storefront';
+
+import logo from '../ima/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
-const menuItems = [
+const baseMenuItems = [
 	{ text: 'Categoria', icon: <GroupsRoundedIcon />, path: '/categoria' },
 	{ text: 'Jugadores', icon: <EmojiPeopleRoundedIcon />, path: '/jugadores' },
-	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/Calendario' },
+	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
 	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
 	{ text: 'Logros', icon: <EmojiEventsIcon />, path: '/logros' },
 	{ text: 'Contactanos', icon: <CallIcon />, path: '/contacto' },
@@ -44,17 +48,12 @@ export default function CustomNavbar() {
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 	const [donarAnchorEl, setDonarAnchorEl] = React.useState(null);
 
-	const toggleDrawer = () => {
-		setDrawerOpen(prev => !prev);
-	};
+	const theme = useTheme();
+	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-	const handleDonarClick = event => {
-		setDonarAnchorEl(donarAnchorEl ? null : event.currentTarget);
-	};
-
-	const handleDonarClose = () => {
-		setDonarAnchorEl(null);
-	};
+	const toggleDrawer = () => setDrawerOpen(prev => !prev);
+	const handleDonarClick = event => setDonarAnchorEl(event.currentTarget);
+	const handleDonarClose = () => setDonarAnchorEl(null);
 
 	return (
 		<>
@@ -78,7 +77,8 @@ export default function CustomNavbar() {
 								sx={{ height: 50, cursor: 'pointer' }}
 							/>
 						</Link>
-						<Box sx={{ display: 'flex', gap: 3 }}>
+
+						<Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
 							{navLinks.map(link => (
 								<Button
 									key={link.text}
@@ -95,6 +95,7 @@ export default function CustomNavbar() {
 									{link.text}
 								</Button>
 							))}
+
 							<Button
 								onClick={handleDonarClick}
 								sx={{
@@ -103,11 +104,11 @@ export default function CustomNavbar() {
 									fontSize: '0.9rem',
 									fontFamily: '"Bebas Neue", sans-serif',
 									'&:hover': { color: '#c62828' },
-									'&:focus': { outline: 'none' },
 								}}
 							>
 								DONAR
 							</Button>
+
 							<Menu
 								anchorEl={donarAnchorEl}
 								open={Boolean(donarAnchorEl)}
@@ -151,6 +152,7 @@ export default function CustomNavbar() {
 						</Box>
 					</Box>
 
+					{/* Drawer Button */}
 					<IconButton
 						onClick={toggleDrawer}
 						color='inherit'
@@ -170,12 +172,22 @@ export default function CustomNavbar() {
 				</Toolbar>
 			</AppBar>
 
+			{/* Drawer */}
 			<Drawer
 				anchor='top'
 				open={drawerOpen}
 				onClose={toggleDrawer}
 				ModalProps={{ keepMounted: true }}
-				PaperProps={{ sx: { mt: '64px', zIndex: 1200 } }}
+				PaperProps={{
+					sx: {
+						mt: '64px',
+						zIndex: 1200,
+						maxHeight: 'calc(100vh - 64px)',
+						overflowY: 'auto',
+						scrollbarWidth: 'none',
+						'&::-webkit-scrollbar': { display: 'none' },
+					},
+				}}
 			>
 				<Box
 					sx={{ width: '100%', p: 3 }}
@@ -184,38 +196,85 @@ export default function CustomNavbar() {
 					onKeyDown={toggleDrawer}
 				>
 					<List>
-						{menuItems.map(item => {
-							const isLink = !!item.path;
-							const listItemProps = {
-								button: true,
-								component: isLink ? Link : 'div',
-								...(isLink && { to: item.path }),
-								sx: {
+						{/* Menu items comunes */}
+						{baseMenuItems.map(item => (
+							<ListItem
+								key={item.text}
+								button
+								component={Link}
+								to={item.path}
+								sx={{
 									textDecoration: 'none',
 									color: 'inherit',
 									'&:hover .MuiListItemText-primary': {
 										color: '#c62828',
 									},
-								},
-							};
+								}}
+							>
+								<ListItemIcon sx={{ color: 'inherit' }}>
+									{item.icon}
+								</ListItemIcon>
+								<ListItemText
+									primary={item.text}
+									primaryTypographyProps={{
+										fontFamily: '"Bebas Neue", sans-serif',
+										fontWeight: 'bold',
+										fontSize: '0.95rem',
+										color: 'inherit',
+									}}
+								/>
+							</ListItem>
+						))}
 
-							return (
-								<ListItem key={item.text} {...listItemProps}>
-									<ListItemIcon sx={{ color: 'inherit' }}>
-										{item.icon}
-									</ListItemIcon>
-									<ListItemText
-										primary={item.text}
-										primaryTypographyProps={{
-											fontFamily: '"Bebas Neue", sans-serif',
-											fontWeight: 'bold',
-											fontSize: '0.95rem',
-											color: 'inherit',
-										}}
-									/>
-								</ListItem>
-							);
-						})}
+						{isMobile && (
+							<ListItem
+								button
+								component={Link}
+								to='/tienda'
+								sx={{
+									textDecoration: 'none',
+									color: 'inherit',
+									'&:hover .MuiListItemText-primary': {
+										color: '#c62828',
+									},
+								}}
+							>
+								<ListItemIcon sx={{ color: 'inherit' }}>
+									<StorefrontIcon />
+								</ListItemIcon>
+								<ListItemText
+									primary='Tienda'
+									primaryTypographyProps={{
+										fontFamily: '"Bebas Neue", sans-serif',
+										fontWeight: 'bold',
+										fontSize: '0.95rem',
+									}}
+								/>
+							</ListItem>
+						)}
+
+						<ListItem
+							sx={{ justifyContent: 'center', mt: 3, display: { md: 'none' } }}
+						>
+							<Button
+								component={Link}
+								to='/donaciones'
+								fullWidth
+								sx={{
+									backgroundColor: '#c62828',
+									color: 'white',
+									fontWeight: 'bold',
+									fontSize: '0.95rem',
+									fontFamily: '"Bebas Neue", sans-serif',
+									borderRadius: 1,
+									maxWidth: { xs: '250px', sm: '300px' },
+									mx: 'auto',
+									'&:hover': { backgroundColor: '#b71c1c' },
+								}}
+							>
+								DONAR
+							</Button>
+						</ListItem>
 					</List>
 				</Box>
 			</Drawer>
