@@ -72,13 +72,14 @@ export default function CustomNavbar() {
 		<>
 			<AppBar
 				position='fixed'
-				sx={{ backgroundColor: '#0c005a', zIndex: 1301 }}
+				sx={{ backgroundColor: '#0c005a', zIndex: 1301, height: '90px'}}
 			>
 				<Toolbar
 					sx={{
 						display: 'flex',
 						justifyContent: 'space-between',
 						alignItems: 'center',
+						minHeight: '90px !important',
 					}}
 				>
 					<Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
@@ -104,7 +105,7 @@ export default function CustomNavbar() {
 								onMouseLeave={handleSubmenuLeave}
 								sx={{ position: 'relative' }}
 							>
-								<Button sx={navBtnStyle}>NUESTRA HISTORIA</Button>
+								<Button sx={navBtnStyle}>Nuestra Historia</Button>
 								{submenuOpen && (
 									<Box
 										sx={submenuBoxStyle}
@@ -125,19 +126,19 @@ export default function CustomNavbar() {
 							</Box>
 
 							<Button component={Link} to='/quehacemos' sx={navBtnStyle}>
-								LO QUE HACEMOS
+								Lo Que Hacemos
 							</Button>
 							<Button component={Link} to='/tienda' sx={navBtnStyle}>
-								TIENDA
+								Tienda
 							</Button>
 
 							{/* DONAR Submenu */}
-							<Box
+							<Box 
 								onMouseEnter={handleDonarEnter}
 								onMouseLeave={handleDonarLeave}
 								sx={{ position: 'relative' }}
 							>
-								<Button sx={navBtnStyle}>DONAR</Button>
+								<Button sx={navBtnStyle}>Donar</Button>
 								{donarOpen && (
 									<Box
 										sx={{ ...submenuBoxStyle, right: 'auto', left: 0 }}
@@ -166,18 +167,26 @@ export default function CustomNavbar() {
 
 					<IconButton
 						onClick={toggleDrawer}
-						color='inherit'
-						sx={{ '&:hover': { color: '#c62828' } }}
+						color="inherit"
+						disableRipple
+						disableFocusRipple
+						sx={{
+							'&:hover': { color: '#e06c14' },
+							outline: 'none',
+							'&:focus': { outline: 'none' },
+							'&:focus-visible': { outline: 'none' },
+						}}
 					>
 						{drawerOpen ? <CloseIcon /> : <MenuIcon />}
 						<Typography
 							sx={{
 								ml: 1,
 								fontWeight: 'bold',
-								fontFamily: '"Bebas Neue", sans-serif',
+								fontFamily: '"GroteskBold", sans-serif',
+								fontSize: '1.2rem',
 							}}
 						>
-							MENÚ
+							Menú
 						</Typography>
 					</IconButton>
 				</Toolbar>
@@ -216,7 +225,7 @@ export default function CustomNavbar() {
 								sx={{
 									textDecoration: 'none',
 									color: 'inherit',
-									'&:hover .MuiListItemText-primary': { color: '#c62828' },
+									'&:hover .MuiListItemText-primary': { color: '#e06c14' },
 								}}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
@@ -225,7 +234,7 @@ export default function CustomNavbar() {
 								<ListItemText
 									primary={item.text}
 									primaryTypographyProps={{
-										fontFamily: '"Bebas Neue", sans-serif',
+										fontFamily: '"Franklin Gothic Medium", sans-serif',
 										fontWeight: 'bold',
 										fontSize: '0.95rem',
 										color: 'inherit',
@@ -241,7 +250,7 @@ export default function CustomNavbar() {
 								sx={{
 									textDecoration: 'none',
 									color: 'inherit',
-									'&:hover .MuiListItemText-primary': { color: '#c62828' },
+									'&:hover .MuiListItemText-primary': { color: '#e06c14' },
 								}}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
@@ -269,14 +278,14 @@ export default function CustomNavbar() {
 									color: 'white',
 									fontWeight: 'bold',
 									fontSize: '0.95rem',
-									fontFamily: '"Bebas Neue", sans-serif',
+									fontFamily: '"GroteskBold", sans-serif',
 									borderRadius: 1,
 									maxWidth: { xs: '250px', sm: '300px' },
 									mx: 'auto',
 									'&:hover': { backgroundColor: '#b71c1c' },
 								}}
 							>
-								DONAR
+								Donar
 							</Button>
 						</ListItem>
 					</List>
@@ -290,22 +299,23 @@ export default function CustomNavbar() {
 const navBtnStyle = {
 	color: 'white',
 	fontWeight: 'bold',
-	fontSize: '0.9rem',
-	fontFamily: '"Bebas Neue", sans-serif',
-	'&:hover': { color: '#c62828' },
+	fontSize: '1.2rem',
+	fontFamily: 'GroteskBold, sans-serif',
+	'&:hover': { color: '#e06c14' },
+	textTransform: 'none',
 };
 
 const subMenuStyle = {
-	fontFamily: '"Bebas Neue", sans-serif',
+	fontFamily: '"GroteskBold", sans-serif',
 	fontWeight: 'bold',
 	fontSize: '1.05rem',
 	px: 3,
 	py: 1.5,
 	color: 'white',
 	textDecoration: 'none',
-	backgroundColor: '#e30613',
+	backgroundColor: '#e06c14',
 	'&:hover': {
-		backgroundColor: '#c62828',
+		backgroundColor: '#e06c14',
 	},
 	borderBottom: '1px solid rgba(255,255,255,0.3)',
 	'&:last-of-type': { borderBottom: 'none' },
@@ -315,7 +325,7 @@ const submenuBoxStyle = {
 	position: 'absolute',
 	top: '100%',
 	left: 0,
-	backgroundColor: '#e30613',
+	backgroundColor: '#e06c14',
 	color: 'white',
 	borderRadius: '8px',
 	mt: 2,
@@ -329,6 +339,6 @@ const submenuBoxStyle = {
 		left: '30px',
 		borderLeft: '10px solid transparent',
 		borderRight: '10px solid transparent',
-		borderBottom: '10px solid #e30613',
+		borderBottom: '10px solid #e06c14',
 	},
 };

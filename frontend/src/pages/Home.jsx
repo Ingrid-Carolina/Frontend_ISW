@@ -159,21 +159,21 @@ date=" 30 de Mayo de 2025"/>
 
 function Home() {
   return (
-    <>
-    <header className="header">
-      <h1>Asociación de Beisbol Menor Pilotos de Honduras</h1>
-    </header>
-    <AboutUs></AboutUs>
-    <Vision></Vision>
-    <Mision></Mision>
-    <Valores></Valores>
-    <Acordeon></Acordeon>
-    <Noticias_Eventos></Noticias_Eventos>
-    <Cards></Cards>
-    <div className="news-button">
-      <button>Mas Noticias</button>
+    <div style={{ paddingTop: '90px' }}> {/* Ajusta el valor según la altura real de tu navbar */}
+      <header className="header">
+        <h1>Asociación de Beisbol Menor Pilotos de Honduras</h1>
+      </header>
+      <AboutUs />
+      <Vision />
+      <Mision />
+      <Valores />
+      <Acordeon />
+      <Noticias_Eventos />
+      <Cards />
+      <div className="news-button">
+        <button>Mas Noticias</button>
+      </div>
     </div>
-    </>
   );
 }
 

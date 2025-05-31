@@ -81,3 +81,10 @@ footer {
     height: 60px; /* Ligeramente más pequeño en móvil */
   }
 }
+
+@font-face {
+  font-family: 'GroteskBold';
+  src: url('/fonts/Grotesk Bold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
