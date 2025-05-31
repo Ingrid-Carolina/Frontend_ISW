@@ -1,0 +1,262 @@
+
+
+.header {
+  background-color: #052f5a;
+  color: white;
+  padding: 50px;
+  margin-left: -350px;
+  border-width: 50;
+  font-size: larger;
+  word-wrap: break-word; 
+  text-overflow: ellipsis;
+  width:150%;
+  
+}
+
+.contact-button {
+    display: block;
+    margin: 10px auto 0; 
+    padding: 10px 20px;
+    background-color: brown;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 35px;
+    cursor: pointer;
+    margin-left: 350px;
+}
+
+.contact-button:hover {
+    background-color: #e6b800;
+}
+
+.about-us{
+    background-color: white;
+  padding: 20px;
+  margin: 50px;
+  border-radius: 10px;
+  border-color: blue;
+   margin-left: 67px;
+   width: auto;
+   height: 100%;
+   font-family: Arial, Helvetica, sans-serif;
+   color: black;
+   font-size: larger;
+   
+  
+}
+.about-us h2, .about-us h3 {
+  color: black; 
+  text-align: center;
+  font-weight: bold;
+}
+
+.about-us p{
+ 
+  text-align: center; 
+  line-height: 1.6; 
+}
+
+.about-us:hover {
+  transform: scale(1.02); 
+  transition: 0.3s ease-in-out;
+}
+
+.noticias{
+  padding: 20px;
+  margin-left: -300px;
+  border-radius: 30px;
+  margin-top: 100px;
+  font-size: larger;
+  font-weight: bold;
+   width: 100vw; /* Covers full width of the viewport */
+  height: auto; /* Maintains the container's height */
+  background-color: rgb(51, 107, 204);
+  
+}
+
+.noticias h2{
+
+  color: azure;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: xx-large;
+  font-weight: bold;
+}
+
+.noticias p{
+  color: azure;
+  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: x-large;
+  font-weight: bold;
+}
+
+.vision{
+
+  background-color: bisque;
+   font-size: larger;
+   /*width: 100%;*/
+   font-weight: bold;
+   font-family:Arial, Helvetica, sans-serif;
+   width: auto;
+     margin-left: 0px;
+     margin-bottom: 100px;
+     margin-top: 100px;
+}
+
+.vision:hover {
+  transform: scale(1.02); 
+  transition: 0.3s ease-in-out;
+}
+
+.mision{
+
+  background-color: white;
+   font-size: larger;
+   font-weight: bold;
+   font-family:Arial, Helvetica, sans-serif;
+   max-width: 100%;
+   margin:0;
+   
+}
+
+.mision-image{
+
+  border-radius: 3px;
+
+}
+
+.mision:hover {
+  transform: scale(1.02); 
+  transition: 0.3s ease-in-out;
+}
+
+.Valores{
+
+  background-color:bisque;
+   font-size: larger;
+   /*width: 100%;*/
+   font-weight: bold;
+   font-family:Arial, Helvetica, sans-serif;
+   width: auto;
+     margin-left: 0px;
+     margin-bottom: 100px;
+     margin-top: 100px;
+}
+
+.Valores:hover {
+  transform: scale(1.02); 
+  transition: 0.3s ease-in-out;
+}
+
+.container {
+    display: flex;
+    align-items: center;
+    background-color: #f8f8d8; 
+    padding: 20px;
+    border-radius: 5px;
+    width:fit-content;
+}
+
+.container img {
+    width: 120px; 
+    height: auto;
+    margin-right: 20px;
+}
+
+.text {
+    max-width: 600px;
+    font-size: larger;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.text h2 {
+    background-color: red;
+    color: white;
+    padding: 5px 10px;
+    border-radius: 5px;
+    display: inline-block;
+}
+
+.text p {
+    font-size: 16px;
+    color: #333;
+}
+
+.acordeon {
+ width: 100vw; 
+  height: auto; 
+  margin-left:-370px;
+  margin-top: 50px;
+}
+
+.acordeon span:hover{
+  color: aqua;
+  transform: scale(1.02); 
+  transition: 0.3s ease-in-out;
+}
+
+.acordeon span{
+  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+  font-size: x-large;
+}
+
+.cards{
+
+  margin-left: 350px;
+}
+
+        .news-button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #1E90FF; 
+            color: white;
+            font-family: 'Arial', sans-serif;
+            font-size: 18px;
+            font-weight: bold;
+            text-transform: uppercase;
+            text-decoration: none;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .news-button:hover {
+            background-color: #DAA520;  /* Goldenrod */
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+        }
+        
+        .news-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        /* Optional: Add a subtle shine effect */
+        .news-button::after {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -60%;
+            width: 50%;
+            height: 200%;
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(30deg);
+            transition: all 0.3s;
+        }
+        
+        .news-button:hover::after {
+            left: 120%;
+        }
+ 
+
+
+
+
+
+
+
+
