@@ -1,8 +1,15 @@
 import React from 'react';
 import { useState } from 'react';
-import { Box, Typography, TextField, Button, Grid, Paper, Divider } from '@mui/material';
-import SearchIcon from '@mui/icons-material/Search'
-
+import {
+	Box,
+	Typography,
+	TextField,
+	Button,
+	Grid,
+	Paper,
+	Divider,
+} from '@mui/material';
+import SearchIcon from '@mui/icons-material/Search';
 
 //array de events, aqui se haran store desde el backend en el futuro
 
@@ -19,15 +26,16 @@ const eventos = [
 		lugar: 'Tegucigalpa, Honduras',
 		hora: 'June 15 @ 10:00 am - 4:00 pm',
 	},
-]
+];
 
 const Eventos = () => {
-
 	//para filtrar
 	const [query, setQuery] = useState('');
 
 	// filtra por lo que se busq
-	const filteredEvents = eventos.filter(e => e.titulo.toLowerCase().includes(query.toLowerCase()));
+	const filteredEvents = eventos.filter(e =>
+		e.titulo.toLowerCase().includes(query.toLowerCase()),
+	);
 
 	return (
 		<div style={{ padding: '2rem', color: 'black' }}>
@@ -36,25 +44,29 @@ const Eventos = () => {
 					CALENDARIO DE EVENTOS
 				</Typography>
 
-				<Box sx={{
-					display: 'flex',
-					gap: 2,
-					flexDirection: { xs: 'column', sm: 'row' },
-					justifyContent: 'center',
-					mb: 4,
-				}}>
-					<TextField variant='outlined'
+				<Box
+					sx={{
+						display: 'flex',
+						gap: 2,
+						flexDirection: { xs: 'column', sm: 'row' },
+						justifyContent: 'center',
+						mb: 4,
+					}}
+				>
+					<TextField
+						variant='outlined'
 						placeholder='Buscar eventos'
 						value={query}
 						onChange={e => setQuery(e.target.value)}
 						InputProps={{
 							startAdornment: <SearchIcon sx={{ mr: 1 }} />,
 						}}
-						sx={{ flex: 1, minWidth: 300 }} />
+						sx={{ flex: 1, minWidth: 300 }}
+					/>
 					<Button
 						variant='contained'
 						color='error'
-						onClick={() => { }}
+						onClick={() => {}}
 						sx={{ fontWeight: 'bold' }}
 					>
 						Buscar
@@ -90,13 +102,8 @@ const Eventos = () => {
 						</Grid>
 					))}
 				</Grid>
-
 			</Box>
-
 		</div>
-
-
-
 	);
 };
 

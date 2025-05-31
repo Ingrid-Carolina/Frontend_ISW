@@ -38,22 +38,35 @@ const baseMenuItems = [
 	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
 ];
 
-const navLinks = [
-	{ text: 'NUESTRA HISTORIA', path: '/historia' },
-	{ text: 'LO QUE HACEMOS', path: '/quehacemos' },
-	{ text: 'TIENDA', path: '/tienda' },
-];
-
 export default function CustomNavbar() {
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
-	const [donarAnchorEl, setDonarAnchorEl] = React.useState(null);
+	const [submenuOpen, setSubmenuOpen] = React.useState(false);
+	const [donarOpen, setDonarOpen] = React.useState(false);
+	const submenuTimer = React.useRef(null);
+	const donarTimer = React.useRef(null);
 
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
 	const toggleDrawer = () => setDrawerOpen(prev => !prev);
-	const handleDonarClick = event => setDonarAnchorEl(event.currentTarget);
-	const handleDonarClose = () => setDonarAnchorEl(null);
+
+	const handleSubmenuEnter = () => {
+		clearTimeout(submenuTimer.current);
+		setSubmenuOpen(true);
+	};
+
+	const handleSubmenuLeave = () => {
+		submenuTimer.current = setTimeout(() => setSubmenuOpen(false), 200);
+	};
+
+	const handleDonarEnter = () => {
+		clearTimeout(donarTimer.current);
+		setDonarOpen(true);
+	};
+
+	const handleDonarLeave = () => {
+		donarTimer.current = setTimeout(() => setDonarOpen(false), 200);
+	};
 
 	return (
 		<>
@@ -78,81 +91,79 @@ export default function CustomNavbar() {
 							/>
 						</Link>
 
-						<Box sx={{ display: { xs: 'none', md: 'flex' }, gap: 3 }}>
-							{navLinks.map(link => (
-								<Button
-									key={link.text}
-									component={Link}
-									to={link.path}
-									sx={{
-										color: 'white',
-										fontWeight: 'bold',
-										fontSize: '0.9rem',
-										fontFamily: '"Bebas Neue", sans-serif',
-										'&:hover': { color: '#c62828' },
-									}}
-								>
-									{link.text}
-								</Button>
-							))}
-
-							<Button
-								onClick={handleDonarClick}
-								sx={{
-									color: 'white',
-									fontWeight: 'bold',
-									fontSize: '0.9rem',
-									fontFamily: '"Bebas Neue", sans-serif',
-									'&:hover': { color: '#c62828' },
-								}}
+						<Box
+							sx={{
+								display: { xs: 'none', md: 'flex' },
+								gap: 3,
+								position: 'relative',
+							}}
+						>
+							{/* Nuestra Historia Submenu */}
+							<Box
+								onMouseEnter={handleSubmenuEnter}
+								onMouseLeave={handleSubmenuLeave}
+								sx={{ position: 'relative' }}
 							>
-								DONAR
+								<Button sx={navBtnStyle}>NUESTRA HISTORIA</Button>
+								{submenuOpen && (
+									<Box
+										sx={submenuBoxStyle}
+										onMouseEnter={() => setSubmenuOpen(true)}
+										onMouseLeave={() => setSubmenuOpen(false)}
+									>
+										<MenuItem component={Link} to='/historia' sx={subMenuStyle}>
+											Historia
+										</MenuItem>
+										<MenuItem component={Link} to='/acercade' sx={subMenuStyle}>
+											Acerca de
+										</MenuItem>
+										<MenuItem component={Link} to='/aliados' sx={subMenuStyle}>
+											Aliados
+										</MenuItem>
+									</Box>
+								)}
+							</Box>
+
+							<Button component={Link} to='/quehacemos' sx={navBtnStyle}>
+								LO QUE HACEMOS
+							</Button>
+							<Button component={Link} to='/tienda' sx={navBtnStyle}>
+								TIENDA
 							</Button>
 
-							<Menu
-								anchorEl={donarAnchorEl}
-								open={Boolean(donarAnchorEl)}
-								onClose={handleDonarClose}
-								anchorOrigin={{ vertical: 'bottom', horizontal: 'left' }}
-								transformOrigin={{ vertical: 'top', horizontal: 'left' }}
-								sx={{ zIndex: 1400 }}
-								PaperProps={{
-									sx: {
-										backgroundColor: '#0c005a',
-										color: 'white',
-										borderRadius: 1,
-										mt: 1,
-									},
-								}}
-								MenuListProps={{ disablePadding: true }}
+							{/* DONAR Submenu */}
+							<Box
+								onMouseEnter={handleDonarEnter}
+								onMouseLeave={handleDonarLeave}
+								sx={{ position: 'relative' }}
 							>
-								<MenuItem
-									onClick={handleDonarClose}
-									sx={{
-										fontFamily: '"Bebas Neue", sans-serif',
-										fontWeight: 'bold',
-										fontSize: '0.95rem',
-										'&:hover': { backgroundColor: '#0c005a', color: '#c62828' },
-									}}
-								>
-									Donar Indumentaria/Equipo
-								</MenuItem>
-								<MenuItem
-									onClick={handleDonarClose}
-									sx={{
-										fontFamily: '"Bebas Neue", sans-serif',
-										fontWeight: 'bold',
-										fontSize: '0.95rem',
-										'&:hover': { backgroundColor: '#0c005a', color: '#c62828' },
-									}}
-								>
-									Donar Dinero
-								</MenuItem>
-							</Menu>
+								<Button sx={navBtnStyle}>DONAR</Button>
+								{donarOpen && (
+									<Box
+										sx={{ ...submenuBoxStyle, right: 'auto', left: 0 }}
+										onMouseEnter={() => setDonarOpen(true)}
+										onMouseLeave={() => setDonarOpen(false)}
+									>
+										<MenuItem
+											component={Link}
+											to='/donar-indumentaria'
+											sx={subMenuStyle}
+										>
+											Donar Indumentaria/Equipo
+										</MenuItem>
+										<MenuItem
+											component={Link}
+											to='/donar-dinero'
+											sx={subMenuStyle}
+										>
+											Donar Dinero
+										</MenuItem>
+									</Box>
+								)}
+							</Box>
 						</Box>
 					</Box>
 
-					{/* Drawer Button */}
 					<IconButton
 						onClick={toggleDrawer}
 						color='inherit'
@@ -172,7 +183,7 @@ export default function CustomNavbar() {
 				</Toolbar>
 			</AppBar>
 
-			{/* Drawer */}
+			{/* Drawer móvil */}
 			<Drawer
 				anchor='top'
 				open={drawerOpen}
@@ -196,7 +207,6 @@ export default function CustomNavbar() {
 					onKeyDown={toggleDrawer}
 				>
 					<List>
-						{/* Menu items comunes */}
 						{baseMenuItems.map(item => (
 							<ListItem
 								key={item.text}
@@ -206,9 +216,7 @@ export default function CustomNavbar() {
 								sx={{
 									textDecoration: 'none',
 									color: 'inherit',
-									'&:hover .MuiListItemText-primary': {
-										color: '#c62828',
-									},
+									'&:hover .MuiListItemText-primary': { color: '#c62828' },
 								}}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
@@ -225,7 +233,6 @@ export default function CustomNavbar() {
 								/>
 							</ListItem>
 						))}
-
 						{isMobile && (
 							<ListItem
 								button
@@ -234,9 +241,7 @@ export default function CustomNavbar() {
 								sx={{
 									textDecoration: 'none',
 									color: 'inherit',
-									'&:hover .MuiListItemText-primary': {
-										color: '#c62828',
-									},
+									'&:hover .MuiListItemText-primary': { color: '#c62828' },
 								}}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
@@ -252,7 +257,6 @@ export default function CustomNavbar() {
 								/>
 							</ListItem>
 						)}
-
 						<ListItem
 							sx={{ justifyContent: 'center', mt: 3, display: { md: 'none' } }}
 						>
@@ -281,3 +285,50 @@ export default function CustomNavbar() {
 		</>
 	);
 }
+
+// 🎨 Estilos Reutilizables
+const navBtnStyle = {
+	color: 'white',
+	fontWeight: 'bold',
+	fontSize: '0.9rem',
+	fontFamily: '"Bebas Neue", sans-serif',
+	'&:hover': { color: '#c62828' },
+};
+
+const subMenuStyle = {
+	fontFamily: '"Bebas Neue", sans-serif',
+	fontWeight: 'bold',
+	fontSize: '1.05rem',
+	px: 3,
+	py: 1.5,
+	color: 'white',
+	textDecoration: 'none',
+	backgroundColor: '#e30613',
+	'&:hover': {
+		backgroundColor: '#c62828',
+	},
+	borderBottom: '1px solid rgba(255,255,255,0.3)',
+	'&:last-of-type': { borderBottom: 'none' },
+};
+
+const submenuBoxStyle = {
+	position: 'absolute',
+	top: '100%',
+	left: 0,
+	backgroundColor: '#e30613',
+	color: 'white',
+	borderRadius: '8px',
+	mt: 2,
+	zIndex: 1500,
+	minWidth: 200,
+	paddingY: 1,
+	'&::before': {
+		content: '""',
+		position: 'absolute',
+		top: -10,
+		left: '30px',
+		borderLeft: '10px solid transparent',
+		borderRight: '10px solid transparent',
+		borderBottom: '10px solid #e30613',
+	},
+};

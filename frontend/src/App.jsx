@@ -15,6 +15,9 @@ import Calendario from './pages/Calendario.jsx';
 import Eventos from './pages/Eventos.jsx';
 import Contacto from './pages/Contacto.jsx';
 import Tienda from './pages/Tienda.jsx';
+import Aliados from './pages/Aliados.jsx';
+import Acercade from './pages/Acercade.jsx';
+
 function App() {
 	return (
 		<>
@@ -33,6 +36,8 @@ function App() {
 							<Route path='/eventos' element={<Eventos />} />
 							<Route path='/Contacto' element={<Contacto />} />
 							<Route path='/tienda' element={<Tienda />} />
+							<Route path='/aliados' element={<Aliados />} />
+							<Route path='/acercade' element={<Acercade />} />
 						</Routes>
 					</main>
 
