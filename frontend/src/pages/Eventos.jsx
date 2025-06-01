@@ -41,8 +41,8 @@ const Eventos = () => {
 	return (
 		<div style={{ padding: '2rem', color: 'black' }}>
 			<Box sx={{ p: '2rem', color: 'black' }}>
-				<Typography variant='h3' fontWeight='bold' textAlign='center' mb={4} className='header-title'>
-					CALENDARIO DE EVENTOS
+				<Typography className='header-title'>
+					NOTICIAS Y EVENTOS
 				</Typography>
 
 				<Box
