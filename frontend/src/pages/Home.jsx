@@ -1,6 +1,7 @@
 import './Home.css';
 import Container_izquierda from '../components/Container-izquierda';
 import Container_derecha from '../components/Container-derecha';
+import SeccionInfo from '../components/SeccionInfo';
 import * as React from 'react';
 import MediaCard from '../components/Card';
 import Accordion from '@mui/material/Accordion';
@@ -106,18 +107,29 @@ const Acordeon = () => (
 const AboutUs = () => (
   <section className="about-us">
     <h2>Sobre Nosotros</h2>
-    <p>Somos una organizacion que fomenta la recreacion del beisbol. Formamos Vidas a a traves del Beisbol en Honduras!</p>
+    <h3>Somos una organizacion que fomenta la recreacion del beisbol. Formamos Vidas a a traves del Beisbol en Honduras!</h3>
   </section>
 );
 
-const Vision=()=>(
-
-  <Container_izquierda titulo="Vision" descripcion="Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida." imagen="https://d-cuba.com/wp-content/uploads/Pitcher-Cubano-Firma-con-Equipo-de-la-Liga-Mexicana-de-Beisbol.jpg"/>
-
+const Mision=()=>(
+  <SeccionInfo
+    titulo="Nuestra Mision"
+    descripcion="Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego."
+    imagen="/src/Ima/Mision1.jpg"
+    bgColor="#e06c14"
+    textAlign="left"
+  />
 );
 
-const Mision=()=>(
-    <Container_derecha titulo="Mision" descripcion="Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego." imagen="https://th.bing.com/th/id/R.e9f353d1020ed636f21d63061870df2a?rik=2sQFV0SUcGV%2fIA&riu=http%3a%2f%2fquieninvento.co%2fwp-content%2fuploads%2f2018%2f09%2fB%c3%a9isbol.jpg&ehk=eL6Dx60%2fdQepvmDbo8eHNYeYm7NnrSFwCsqaGqk1gjQ%3d&risl=&pid=ImgRaw&r=0"/>
+const Vision=()=>(
+  <SeccionInfo
+    titulo="Nuestra Vision"
+    descripcion="Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida."
+    imagen="/src/Ima/Vision1.jpg"
+    invertir
+    bgColor="#10045c"
+    textAlign="right"
+  />
 );
 
 const Valores=()=>(
@@ -160,12 +172,16 @@ date=" 30 de Mayo de 2025"/>
 function Home() {
   return (
     <div style={{ paddingTop: '90px' }}> {/* Ajusta el valor según la altura real de tu navbar */}
-      <header className="header">
-        <h1>Asociación de Beisbol Menor Pilotos de Honduras</h1>
-      </header>
+      <div className="header">
+        <div className="header-title">
+          <p>ASOCIACION DE</p>
+          <p>BEISBOL MENOR</p>
+          <p>PILOTOS DE HONDURAS</p>
+        </div>
+      </div>
       <AboutUs />
-      <Vision />
       <Mision />
+      <Vision />
       <Valores />
       <Acordeon />
       <Noticias_Eventos />

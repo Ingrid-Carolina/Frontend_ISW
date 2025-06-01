@@ -1,16 +1,35 @@
-
-
 .header {
-  background-color: #052f5a;
+  background-image: url('/src/Ima/HeaderBeisbol.png');
+  background-size: cover;
+  background-position: center;
+  height: 450px;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end; /* Sigue alineado a la derecha */
+  padding-right: 120px;
+  box-sizing: border-box;
+}
+
+.header-title {
   color: white;
-  padding: 50px;
-  margin-left: -350px;
-  border-width: 50;
-  font-size: larger;
-  word-wrap: break-word; 
-  text-overflow: ellipsis;
-  width:150%;
-  
+  font-size: 4.5vw; /* Escala según el ancho de pantalla */
+  font-weight: bold;
+  text-align: left;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  font-family: 'Jersey', sans-serif;
+  line-height: 0.3;
+  margin-right: 5%;
+}
+
+@media (max-width: 768px) {
+  .header-title {
+    font-size: 6vw;  /* Más grande pero aún proporcional */
+    line-height: 0.3;
+    text-align: left;
+    margin-right: 0;
+    padding: 0 10px;
+  }
 }
 
 .contact-button {
@@ -30,31 +49,31 @@
     background-color: #e6b800;
 }
 
-.about-us{
-    background-color: white;
-  padding: 20px;
-  margin: 50px;
-  border-radius: 10px;
-  border-color: blue;
-   margin-left: 67px;
-   width: auto;
-   height: 100%;
-   font-family: Arial, Helvetica, sans-serif;
-   color: black;
-   font-size: larger;
-   
-  
-}
-.about-us h2, .about-us h3 {
-  color: black; 
-  text-align: center;
-  font-weight: bold;
+.about-us {
+  background-color: #10045c; /* Azul oscuro */
+  color: white; /* Para que el texto contraste */
+  padding: 20px 60px 40px 60px;
+  margin: 0; /* Sin margenes laterales */
+  width: 100vw; /* Ancho total de la ventana */
+  box-sizing: border-box; /* Para que el padding no haga overflow */
+  font-family: 'Jersey', sans-serif;
+  font-size: larger;
+  text-align: left; /* Texto alineado a la izquierda */
 }
 
-.about-us p{
- 
-  text-align: center; 
-  line-height: 1.6; 
+.about-us h2 {
+  font-size: 4.5vw; /* Escala según el ancho de pantalla */
+  color: white;
+  text-align: left;
+  font-family: 'Jersey', sans-serif;
+  margin-top: 0px;
+  margin-bottom: 10px;
+}
+
+.about-us h3 {
+  font-family: 'GroteskBold', sans-serif;
+  line-height: 1;
+  margin: 0;
 }
 
 .about-us:hover {

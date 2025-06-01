@@ -1,0 +1,71 @@
+.seccion-info {
+  display: flex;
+  flex-direction: row;
+  align-items: flex-start;
+  text-align: left;
+  justify-content: space-between;
+  padding: 40px 60px;
+  width: 100vw;
+  min-height: 70vh;
+  color: white;
+  box-sizing: border-box;
+  gap: 40px;
+}
+
+.seccion-info.invertir {
+  flex-direction: row-reverse;
+}
+
+.seccion-texto {
+  flex: 1;
+  font-family: GroteskBold, sans-serif;
+
+  /* 🔧 Alinea el contenido al tope */
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+.seccion-texto h2 {
+  font-family: Jersey, sans-serif;
+  font-size: 6vw;
+  font-weight: bold;
+  color: white;
+
+  /* 🔧 Reduce el espacio debajo del título */
+  margin-bottom: 5px;
+  margin-top: 0; /* Por si algún navegador añade espacio arriba */
+}
+
+.seccion-texto p {
+  font-size: 1.7vw;
+  line-height: 1.8;
+  color: white;
+}
+
+.seccion-imagen {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.seccion-imagen img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  object-fit: cover;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+@media (max-width: 768px) {
+  .seccion-info {
+    flex-direction: column;
+    padding: 40px 20px;
+    text-align: center;
+  }
+
+  .seccion-info.invertir {
+    flex-direction: column;
+  }
+}
