@@ -1,0 +1,10 @@
+.header-title {
+  color: white;
+  font-size: 4.5vw; /* Escala según el ancho de pantalla */
+  font-weight: bold;
+  text-align: left;
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  font-family: 'Jersey', sans-serif;
+  line-height: 0.3;
+  margin-right: 5%;
+}
