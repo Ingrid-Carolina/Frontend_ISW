@@ -2,8 +2,11 @@
 
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
+import EmailIcon from '@mui/icons-material/Email';
 import logo from '../Ima/Logo-pilotos.png';
 import Box from '@mui/material/Box';
+import { Link } from 'react-router-dom';
+
 import '../components/styles.css';
 
 export default function Footer() {
@@ -13,7 +16,7 @@ export default function Footer() {
 				{/* IZQUIERDA */}
 				<Box className='footer-left'>
 					<nav>
-						<a href='#Contacto'>Contacto</a>
+						<Link to='/Contacto'>Contacto</Link>
 						<span> | </span>
 						<a href='#privacidad'>Política de Privacidad</a>
 					</nav>
@@ -38,6 +41,9 @@ export default function Footer() {
 						>
 							<InstagramIcon className='social-icon' />
 						</a>
+						<Link to='/Contacto'>
+							<EmailIcon className='social-icon' />
+						</Link>
 					</div>
 				</Box>
 
