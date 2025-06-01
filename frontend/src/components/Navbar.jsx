@@ -183,7 +183,7 @@ export default function CustomNavbar() {
 								ml: 1,
 								fontWeight: 'bold',
 								fontFamily: '"GroteskBold", sans-serif',
-								fontSize: '1.2rem',
+								fontSize: '1.4rem',
 							}}
 						>
 							Menú
@@ -299,7 +299,7 @@ export default function CustomNavbar() {
 const navBtnStyle = {
 	color: 'white',
 	fontWeight: 'bold',
-	fontSize: '1.2rem',
+	fontSize: '1.4rem',
 	fontFamily: 'GroteskBold, sans-serif',
 	'&:hover': { color: '#e06c14' },
 	textTransform: 'none',

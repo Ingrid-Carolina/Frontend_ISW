@@ -1,0 +1,45 @@
+.values-section {
+  background-color: #10045c;
+  color: white;
+  padding: 20px 60px 40px 60px;
+  width: 100vw;
+  box-sizing: border-box;
+  font-family: 'Jersey', sans-serif;
+}
+
+.values-section h2 {
+  font-size: 4.5vw;
+  margin-top: 0;
+  margin-bottom: 20px;
+}
+
+.values-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.value-item {
+  display: flex;
+  justify-content: space-between; /* uno a la izquierda, otro a la derecha */
+  align-items: center; /* centrar verticalmente si es multilinea */
+  font-family: 'GroteskBold', sans-serif;
+  font-size: larger;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  padding-bottom: 10px;
+}
+
+.value-title {
+  font-weight: bold;
+  margin: 0;
+  flex-shrink: 0; /* para que el nombre no se achique */
+}
+
+.value-description {
+  margin: 0;
+  max-width: 60%; /* limita que la descripción ocupe mucho */
+  text-align: right;
+  font-weight: normal;
+  line-height: 1.3;
+  overflow-wrap: break-word; /* para que el texto largo no salga fuera */
+}

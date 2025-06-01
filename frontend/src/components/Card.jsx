@@ -10,7 +10,7 @@ export default function MediaCard({ title, content, image, date }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
-    <Card sx={{ maxWidth: 345}} style={{margin:100, height:'auto'}}>
+    <Card sx={{ maxWidth: 400, height: 'auto', margin: '15px', backgroundColor: '#10045c'}}>
       <CardMedia
         component="img"
         alt="card image"
@@ -24,9 +24,10 @@ export default function MediaCard({ title, content, image, date }) {
           variant="h4" 
           component="div"
           sx={{ 
-            textAlign: 'center', 
+            textAlign: 'left', 
             fontWeight: 'bold',
-            color: isHovered ? '#ADD8E6' : 'inherit', 
+            fontFamily: 'GroteskBold, sans-serif',
+            color: isHovered ? '#e06c14' : 'white', 
             transition: 'color 0.3s ease',
             cursor: 'pointer' 
           }}
@@ -38,19 +39,20 @@ export default function MediaCard({ title, content, image, date }) {
         <Typography 
           variant="body1" 
           sx={{ 
-            color: 'text.secondary', 
-            textAlign: 'center',  
+            color: 'white', 
+            fontFamily: 'PeterMedium, sans-serif',
+            textAlign: 'left',  
             lineHeight: 1.6  
           }}
         >
           {content}
         </Typography>
       </CardContent>
-      <CardActions>
+      <CardActions sx={{ justifyContent: 'center' }}>
         <Typography  
           variant="subtitle1"  
-          color="text.secondary" 
-          sx={{ textAlign: 'center', mb: 2 }}
+          color="white" 
+          sx={{ textAlign: 'center', fontFamily: 'PeterMedium, sans-serif', mb: 2 }}
         >
           {date}
         </Typography>

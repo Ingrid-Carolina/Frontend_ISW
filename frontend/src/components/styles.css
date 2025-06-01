@@ -95,3 +95,24 @@ footer {
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'PeterMedium';
+  src: url('/fonts/Peter-Test-Medium-BF641a641eb64fa.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PeterBold';
+  src: url('/fonts/Peter-Test-Bold-BF641a641f2f668.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+
+@font-face {
+  font-family: 'PeterHeavy';
+  src: url('/fonts/Peter-Test-Heavy-BF641a641ee1ad8.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

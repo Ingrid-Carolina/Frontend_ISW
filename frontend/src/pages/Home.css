@@ -81,195 +81,105 @@
   transition: 0.3s ease-in-out;
 }
 
-.noticias{
-  padding: 20px;
-  margin-left: -300px;
-  border-radius: 30px;
-  margin-top: 100px;
+.values {
+  background-color: white; /* Azul oscuro */
+  color:#e06c14; /* Para que el texto contraste */
+  padding: 20px 60px 40px 60px;
+  margin: 0; /* Sin margenes laterales */
+  width: 100vw; /* Ancho total de la ventana */
+  box-sizing: border-box; /* Para que el padding no haga overflow */
+  font-family: 'Jersey', sans-serif;
   font-size: larger;
-  font-weight: bold;
-   width: 100vw; /* Covers full width of the viewport */
-  height: auto; /* Maintains the container's height */
-  background-color: rgb(51, 107, 204);
-  
+  text-align: center; /* Texto alineado a la izquierda */
 }
 
-.noticias h2{
-
-  color: azure;
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  font-size: xx-large;
-  font-weight: bold;
+.values h2, .noteve h2{
+  font-size: 4.5vw; /* Escala según el ancho de pantalla */
+  font-family: 'Jersey', sans-serif;
+  margin-top: 0px;
+  margin-bottom: 10px;
 }
 
-.noticias p{
-  color: azure;
-  font-family:'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  font-size: x-large;
-  font-weight: bold;
+.values h3, .noteve h3 {
+  font-family: 'GroteskBold', sans-serif;
+  line-height: 1;
+  margin: 0;
 }
 
-.vision{
-
-  background-color: bisque;
-   font-size: larger;
-   /*width: 100%;*/
-   font-weight: bold;
-   font-family:Arial, Helvetica, sans-serif;
-   width: auto;
-     margin-left: 0px;
-     margin-bottom: 100px;
-     margin-top: 100px;
-}
-
-.vision:hover {
+.values:hover, .noteve:hover{
   transform: scale(1.02); 
   transition: 0.3s ease-in-out;
 }
 
-.mision{
+.noteve {
+  background-color: white; /* Azul oscuro */
+  color: #10045c; /* Para que el texto contraste */
+  padding: 20px 60px 40px 60px;
+  margin: 0; /* Sin margenes laterales */
+  width: 100vw; /* Ancho total de la ventana */
+  box-sizing: border-box; /* Para que el padding no haga overflow */
+  font-family: 'Jersey', sans-serif;
+  font-size: larger;
+  text-align: center; /* Texto alineado a la izquierda */
+}
 
+
+.cards {
   background-color: white;
-   font-size: larger;
-   font-weight: bold;
-   font-family:Arial, Helvetica, sans-serif;
-   max-width: 100%;
-   margin:0;
-   
+  display: flex;
+  justify-content: center; /* centra horizontalmente */
+  gap: 40px;               /* espacio entre tarjetas */
+  flex-wrap: wrap;         /* permite que se ajusten en pantallas pequeñas */
+  padding: 40px;
+  box-sizing: border-box;
 }
 
-.mision-image{
-
-  border-radius: 3px;
-
-}
-
-.mision:hover {
-  transform: scale(1.02); 
-  transition: 0.3s ease-in-out;
-}
-
-.Valores{
-
-  background-color:bisque;
-   font-size: larger;
-   /*width: 100%;*/
-   font-weight: bold;
-   font-family:Arial, Helvetica, sans-serif;
-   width: auto;
-     margin-left: 0px;
-     margin-bottom: 100px;
-     margin-top: 100px;
-}
-
-.Valores:hover {
-  transform: scale(1.02); 
-  transition: 0.3s ease-in-out;
-}
-
-.container {
-    display: flex;
-    align-items: center;
-    background-color: #f8f8d8; 
-    padding: 20px;
-    border-radius: 5px;
-    width:fit-content;
-}
-
-.container img {
-    width: 120px; 
-    height: auto;
-    margin-right: 20px;
-}
-
-.text {
-    max-width: 600px;
-    font-size: larger;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-.text h2 {
-    background-color: red;
-    color: white;
-    padding: 5px 10px;
-    border-radius: 5px;
+.news-button {
     display: inline-block;
+    padding: 12px 24px;
+    background-color: #10045c; 
+    color: white;
+    font-family: 'GroteskBold', sans-serif;
+    font-size: 25px;
+    font-weight: bold;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 30px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: all 0.3s ease;
+    position: relative;
+    overflow: hidden;
 }
 
-.text p {
-    font-size: 16px;
-    color: #333;
+.news-button:hover {
+    background-color: #e06c14;  /* Goldenrod */
+    transform: translateY(-2px);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
-.acordeon {
- width: 100vw; 
-  height: auto; 
-  margin-left:-370px;
-  margin-top: 50px;
+.news-button:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-.acordeon span:hover{
-  color: aqua;
-  transform: scale(1.02); 
-  transition: 0.3s ease-in-out;
+/* Optional: Add a subtle shine effect */
+.news-button::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -60%;
+    width: 50%;
+    height: 200%;
+    background: rgba(255, 255, 255, 0.2);
+    transform: rotate(30deg);
+    transition: all 0.3s;
 }
 
-.acordeon span{
-  font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
-  font-size: x-large;
+.news-button:hover::after {
+    left: 120%;
 }
-
-.cards{
-
-  margin-left: 350px;
-}
-
-        .news-button {
-            display: inline-block;
-            padding: 12px 24px;
-            background-color: #1E90FF; 
-            color: white;
-            font-family: 'Arial', sans-serif;
-            font-size: 18px;
-            font-weight: bold;
-            text-transform: uppercase;
-            text-decoration: none;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .news-button:hover {
-            background-color: #DAA520;  /* Goldenrod */
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .news-button:active {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        /* Optional: Add a subtle shine effect */
-        .news-button::after {
-            content: '';
-            position: absolute;
-            top: -50%;
-            left: -60%;
-            width: 50%;
-            height: 200%;
-            background: rgba(255, 255, 255, 0.2);
-            transform: rotate(30deg);
-            transition: all 0.3s;
-        }
-        
-        .news-button:hover::after {
-            left: 120%;
-        }
  
 
 
