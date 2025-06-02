@@ -5,8 +5,9 @@ import CardContent from '@mui/material/CardContent';
 import CardActions from '@mui/material/CardActions';
 import Typography from '@mui/material/Typography';
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 
-export default function MediaCard({ title, content, image, date }) {
+export default function MediaCard({title,to, content, image, date }) {
   const [isHovered, setIsHovered] = useState(false);
 
   return (
@@ -34,7 +35,10 @@ export default function MediaCard({ title, content, image, date }) {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          {title}
+      <Link to={to} style={{ textDecoration: 'none', color: 'inherit' }} onClick={() => window.scrollTo(0, 0)}>
+        {title}
+      </Link>
+
         </Typography>
         <Typography 
           variant="body1" 
