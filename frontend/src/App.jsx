@@ -10,7 +10,7 @@ import NuestraHistoria from './pages/NuestraHistoria';
 import Logros from './pages/Logros';
 import Voluntariado from './pages/Voluntariado';
 import Categorias from './pages/Categorias';
-import Jugadores from './pages/Juagadores';
+import NuestroEquipo from './pages/NuestroEquipo.jsx';
 import Calendario from './pages/Calendario.jsx';
 import Eventos from './pages/Eventos.jsx';
 import Contacto from './pages/Contacto.jsx';
@@ -29,7 +29,7 @@ function App() {
 							<Route path='/' element={<Home />} />
 							<Route path='/historia' element={<NuestraHistoria />} />
 							<Route path='/Categoria' element={<Categorias />} />
-							<Route path='/Jugadores' element={<Jugadores />} />
+							<Route path='/NuestroEquipo' element={<NuestroEquipo />} />
 							<Route path='/logros' element={<Logros />} />
 							<Route path='/voluntariado' element={<Voluntariado />} />
 							<Route path='/calendario' element={<Calendario />} />

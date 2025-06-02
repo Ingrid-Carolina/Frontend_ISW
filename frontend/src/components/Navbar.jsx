@@ -21,7 +21,6 @@ import EventIcon from '@mui/icons-material/Event';
 import CallIcon from '@mui/icons-material/Call';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import EmojiPeopleRoundedIcon from '@mui/icons-material/EmojiPeopleRounded';
 import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 
@@ -30,7 +29,6 @@ import { Link } from 'react-router-dom';
 
 const baseMenuItems = [
 	{ text: 'Categoria', icon: <GroupsRoundedIcon />, path: '/categoria' },
-	{ text: 'Jugadores', icon: <EmojiPeopleRoundedIcon />, path: '/jugadores' },
 	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
 	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
 	{ text: 'Logros', icon: <EmojiEventsIcon />, path: '/logros' },
@@ -120,6 +118,9 @@ export default function CustomNavbar() {
 										</MenuItem>
 										<MenuItem component={Link} to='/aliados' sx={subMenuStyle}>
 											Aliados
+										</MenuItem>
+										<MenuItem component={Link} to='/NuestroEquipo' sx={subMenuStyle}>
+											Nuestro Equipo
 										</MenuItem>
 									</Box>
 								)}
