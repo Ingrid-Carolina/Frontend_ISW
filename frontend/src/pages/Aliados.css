@@ -1,0 +1,52 @@
+@font-face {
+  font-family: 'Jersey';
+  src: url('./fonts/Jersey.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Petermedium';
+  src: url('./fonts/Petermedium.woff2') format('woff2');
+}
+@font-face {
+  font-family: 'Groteskbold';
+  src: url('./fonts/Groteskbold.woff2') format('woff2');
+}
+
+.heading-title {
+  font-family: 'Jersey', sans-serif;
+  font-size: 3.5rem;
+  font-weight: 500;
+  color: #e06c14;
+  margin-bottom: 1.5rem;
+}
+
+.section-text {
+  font-family: 'Petermedium', sans-serif;
+  font-size: 1.3rem;
+  text-align: left;
+  margin-bottom: 1rem;
+  max-width: 50vw;
+}
+
+.partner-title {
+  font-family: 'Groteskbold', sans-serif;
+  font-size: 2.75rem;
+  font-weight: 800;
+  text-align: left;
+  color:  #10045c;
+  margin-bottom: 1rem;
+}
+
+.responsive-img {
+  width: 100%;
+  max-width: 400px;
+  aspect-ratio: 1/1;
+  object-fit: cover;
+  border-radius: 50%;
+  border: 6px solid #e06c14;
+}
+
+@media (max-width: 768px) {
+  .responsive-img {
+    max-width: 300px;
+  }
+}
