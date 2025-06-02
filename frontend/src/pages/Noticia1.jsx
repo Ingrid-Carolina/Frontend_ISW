@@ -1,6 +1,7 @@
 import React from "react";
 import './Noticia.css';
 import Divider from '@mui/material/Divider';
+import Angelitos2 from '/Images/Angelitos2.jpeg';
 
 
 const Noticia1=()=>(

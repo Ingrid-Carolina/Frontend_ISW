@@ -1,6 +1,7 @@
 import React from "react";
 import './Noticia.css';
 import Divider from '@mui/material/Divider';
+import CampeonatoBeisbol from '/Images/CampeonatoBeisbol.jpg';
 
 
 const Noticia2=()=>(
@@ -12,7 +13,7 @@ const Noticia2=()=>(
             <div className="date-noticia">5 de Abril de 2022</div>
             <Divider style={{ margin: '2rem 0' }} />
             <div className="container-image">
-                <img src="https://www.alamy.com/aggregator-api/download?url=https://c8.alamy.com/comp/P3F3HY/young-soccer-players-holding-trophy-boys-celebrating-soccer-football-championship-winning-team-of-sport-tournament-for-kids-children-P3F3HY.jpg" alt="Imagen" className="enhanced"></img>
+                <img src={CampeonatoBeisbol} alt="Imagen" className="enhanced" />
             </div>
             <div className="contenido-noticia">
                 Estamos increíblemente orgullosos de la participación de nuestro equipo menor en el torneo de la Liga de Béisbol Menor Metropolitana (LBMM) 2025. Desde el primer lanzamiento hasta el último out, nuestros jóvenes atletas demostraran un espíritu inquebrantable, una pasión contagiosa por el juego y, sobre todo, una deportividad ejemplar.

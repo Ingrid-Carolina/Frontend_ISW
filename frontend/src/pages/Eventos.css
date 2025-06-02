@@ -8,7 +8,6 @@
     align-items: center;
     justify-content: center;
     /* Sigue alineado a la derecha */
-    padding-right: 120px;
     box-sizing: border-box;
 }
 
@@ -21,5 +20,5 @@
     text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
     font-family: 'Jersey', sans-serif;
     line-height: 0.3;
-    margin-right: 5%;
+
 }
