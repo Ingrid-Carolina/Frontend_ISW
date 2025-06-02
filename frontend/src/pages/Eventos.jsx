@@ -71,8 +71,8 @@ const Eventos = () => {
 
 	return (
 		<div style={{ paddingTop: '90px' }}>
-			<div className='header'>
-				<div className='header-title'>
+			<div className='event-header'>
+				<div className='event-header-title'>
 					<p>NOTICIAS Y EVENTOS</p>
 				</div>
 			</div>

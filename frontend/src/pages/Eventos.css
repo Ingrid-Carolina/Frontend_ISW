@@ -1,4 +1,4 @@
-.header {
+.event-header {
     background-image: url('/src/Ima/equipo2.jpg');
     background-size: cover;
     background-position: center;
@@ -12,7 +12,7 @@
     box-sizing: border-box;
 }
 
-.header-title {
+.event-header-title {
     color: white;
     font-size: 7.5vw;
     /* Escala según el ancho de pantalla */
