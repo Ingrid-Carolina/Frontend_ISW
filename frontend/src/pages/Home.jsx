@@ -21,7 +21,7 @@ const Mision = () => (
 	<SeccionInfo
 		titulo='Nuestra Mision'
 		descripcion='Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego.'
-		imagen='/src/Ima/Mision1.jpg'
+		imagen='/Images/Mision1.jpg'
 		bgColor='#e06c14'
 		textAlign='left'
 	/>
