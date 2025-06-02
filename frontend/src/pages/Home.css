@@ -54,7 +54,7 @@
   color: white; /* Para que el texto contraste */
   padding: 20px 60px 40px 60px;
   margin: 0; /* Sin margenes laterales */
-  width: 100vw; /* Ancho total de la ventana */
+  width: 100%; /* Ancho total de la ventana */
   box-sizing: border-box; /* Para que el padding no haga overflow */
   font-family: 'Jersey', sans-serif;
   font-size: larger;
@@ -76,17 +76,14 @@
   margin: 0;
 }
 
-.about-us:hover {
-  transform: scale(1.02); 
-  transition: 0.3s ease-in-out;
-}
+
 
 .values {
   background-color: white; /* Azul oscuro */
   color:#e06c14; /* Para que el texto contraste */
   padding: 20px 60px 40px 60px;
   margin: 0; /* Sin margenes laterales */
-  width: 100vw; /* Ancho total de la ventana */
+  width: 100%; /* Ancho total de la ventana */
   box-sizing: border-box; /* Para que el padding no haga overflow */
   font-family: 'Jersey', sans-serif;
   font-size: larger;
@@ -106,17 +103,12 @@
   margin: 0;
 }
 
-.values:hover, .noteve:hover{
-  transform: scale(1.02); 
-  transition: 0.3s ease-in-out;
-}
-
 .noteve {
   background-color: white; /* Azul oscuro */
   color: #10045c; /* Para que el texto contraste */
   padding: 20px 60px 40px 60px;
   margin: 0; /* Sin margenes laterales */
-  width: 100vw; /* Ancho total de la ventana */
+  width: 100%; /* Ancho total de la ventana */
   box-sizing: border-box; /* Para que el padding no haga overflow */
   font-family: 'Jersey', sans-serif;
   font-size: larger;

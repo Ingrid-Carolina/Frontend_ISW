@@ -1,7 +1,30 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
 import Imgjud from '/Images/Fondojugadores.png';
+import TarjetaTecnico from '../components/TarjetaTecnico.jsx';
 
+
+const cuerpoTecnico = [
+	{
+		nombre: 'Elon Musk',
+		rol: 'Manager General',
+		descripcion: 'Responsable de la estrategia general y toma de decisiones del equipo.',
+		imagen: '/Images/ElonMusk.jpg',
+		
+	},
+	{
+		nombre: 'Luis Enrique',
+		rol: 'Entrenador Físico',
+		descripcion: 'Encargado del acondicionamiento físico y prevención de lesiones.',
+		imagen: '/Images/LuisEnrique2.jpg',
+	},
+	{
+		nombre: 'Chayanne',
+		rol: 'Coach de Lanzadores',
+		descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
+		imagen: '/Images/Chayanne.jpg',
+	},
+];
 
 const Jugadores = () => {
 	return (
@@ -56,7 +79,7 @@ const Jugadores = () => {
 							textAlign: 'center',
 						}}
 					>
-						JUGADORES
+						NUESTRO EQUIPO
 					</Typography>
 				</Box>
 			</Box>
@@ -72,16 +95,6 @@ const Jugadores = () => {
 					bgcolor: '#e6691d',
 				}}
 			>
-				<Box
-					/*component='img'
-					src={equipoImg2}
-					alt='Equipo de béisbol'
-					sx={{
-						width: { xs: '100%', md: '45%' },
-						borderRadius: 2,
-						boxShadow: 4,
-					}}*/
-				/>
 
 				<Box sx={{ flex: 1, color: 'white' }}>
 					<Typography
@@ -107,6 +120,41 @@ const Jugadores = () => {
 					</Typography>
 				</Box>
 			</Box>
+			<Box sx={{ px: { xs: 3, md: 10 }, py: 6, bgcolor: '#f1f1f1' }}>
+				<Typography
+					variant="h3"
+					sx={{
+						fontFamily: '"Jersey", cursive',
+						fontWeight: 'bold',
+						textAlign: 'center',
+						mb: 4,
+						fontSize: { xs: '3rem', md: '4rem' },
+						color: '#10045c'
+					}}
+				>
+					CUERPO TECNICO
+				</Typography>
+
+				<Box
+					sx={{
+						display: 'flex',
+						flexWrap: 'wrap',
+						gap: 4,
+						justifyContent: 'center',
+					}}
+				>
+					{cuerpoTecnico.map((persona, index) => (
+						<TarjetaTecnico
+							key={index}
+							nombre={persona.nombre}
+							rol={persona.rol}
+							descripcion={persona.descripcion}
+							imagen={persona.imagen}
+						/>
+					))}
+				</Box>
+			</Box>
+
 		</>
 	);
 };
