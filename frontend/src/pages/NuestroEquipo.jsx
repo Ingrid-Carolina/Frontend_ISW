@@ -6,10 +6,10 @@ import TarjetaTecnico from '../components/TarjetaTecnico.jsx';
 
 const cuerpoTecnico = [
 	{
-		nombre: 'Elon Musk',
+		nombre: 'Enzo Maresca',
 		rol: 'Manager General',
 		descripcion: 'Responsable de la estrategia general y toma de decisiones del equipo.',
-		imagen: '/Images/ElonMusk.jpg',
+		imagen: '/Images/EnzoMaresca.jpeg',
 		
 	},
 	{
@@ -19,10 +19,10 @@ const cuerpoTecnico = [
 		imagen: '/Images/LuisEnrique2.jpg',
 	},
 	{
-		nombre: 'Chayanne',
+		nombre: 'Pep Guardiola',
 		rol: 'Coach de Lanzadores',
 		descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
-		imagen: '/Images/Chayanne.jpg',
+		imagen: '/Images/PepGuardiola.jpg',
 	},
 ];
 
