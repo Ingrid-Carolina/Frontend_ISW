@@ -31,7 +31,7 @@ const Vision = () => (
 	<SeccionInfo
 		titulo='Nuestra Vision'
 		descripcion='Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida.'
-		imagen='/src/Ima/Vision1.jpg'
+		imagen='/Images/Vision1.jpg'
 		invertir
 		bgColor='#10045c'
 		textAlign='right'

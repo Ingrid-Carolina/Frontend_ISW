@@ -3,7 +3,7 @@
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
 import EmailIcon from '@mui/icons-material/Email';
-import logo from '../Ima/Logo-pilotos.png';
+import logo from '/Images/Logo-pilotos.png';
 import Box from '@mui/material/Box';
 import { Link } from 'react-router-dom';
 

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import fond from '../Ima/fondo1.jpg';
+import fond from '/Images/fondo1.jpg';
 
 
 const Acercade = () => {

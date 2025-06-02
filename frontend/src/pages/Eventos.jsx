@@ -23,28 +23,28 @@ const eventos = [
 		titulo: 'Clínica de Béisbol Infantil en San Pedro Sula',
 		lugar: 'Estadio Chochi Sosa, San Pedro Sula, Honduras',
 		hora: 'Julio 10 @ 9:00 am - 1:00 pm',
-		image: '/src/Ima/clinicaSps.jpg',
+		image: '/Images/clinicaSps.jpg',
 	},
 	{
 		fecha: '2025-05-30',
 		titulo: '2025 Central Region Tournament Preparation Umpire Clinic',
 		lugar: '7185 S. Indianapolis Road, Whitestown, IN',
 		hora: 'May 30 @ 1:00 pm - June 1 @ 12:00 pm',
-		image: '/src/Ima/equipo.jpg'
+		image: '/Images/equipo.jpg'
 	},
 	{
 		fecha: '2025-08-05',
 		titulo: 'Capacitación para Entrenadores y Voluntarios de Little League®',
 		lugar: 'Centro Deportivo FAH, Tegucigalpa, Honduras',
 		hora: 'Agosto 5 @ 2:00 pm - 6:00 pm',
-		image: '/src/Ima/capcitacion.jpg',
+		image: '/Images/capcitacion.jpg',
 	},
 	{
 		fecha: '2025-06-15',
 		titulo: 'Entrenamiento Regional de Verano',
 		lugar: 'Tegucigalpa, Honduras',
 		hora: 'June 15 @ 10:00 am - 4:00 pm',
-		image: '/src/Ima/equipo2.jpg'
+		image: '/Images/equipo2.jpg'
 	},
 ];
 

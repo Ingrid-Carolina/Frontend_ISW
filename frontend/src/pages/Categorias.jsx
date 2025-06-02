@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import Img from '../Ima/Categoria.png';
+import Img from '/Images/Categoria.png';
 //import equipoImg2 from '../Ima/equipo2.jpg';
 
 const Categorias = () => {

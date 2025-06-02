@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import fond from '../Ima/fondoC.png';
+import fond from '/Images/fondoC.png';
 
 
 const Contacto = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Typography } from '@mui/material';
-import Imgjud from '../Ima/Fondojugadores.png';
+import Imgjud from '/Images/Fondojugadores.png';
 
 
 const Jugadores = () => {
