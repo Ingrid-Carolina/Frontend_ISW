@@ -1,0 +1,56 @@
+.post {
+    padding: 1.5rem 0;
+    max-width: 800px;
+    margin: 0 auto;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.post-categories {
+    color: #D7063C;
+    font-size: 0.75rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+}
+
+.post-title {
+    font-size: 1.5rem;
+    font-weight: 800;
+    color: #00013A;
+    margin: 0 0 0.5rem 0;
+}
+
+.post-title:hover{
+    color: #D7063C;
+    cursor: pointer;
+}
+
+.post-date {
+    font-style: italic;
+    font-size: 0.9rem;
+    color: #676475;
+    margin-bottom: 1rem;
+}
+
+.post-image {
+    width: 100%;
+    height: auto;
+    margin-bottom: 1rem;
+    border-radius: 5px;
+}
+
+.post-image:hover{
+    cursor: pointer;
+}
+
+.post-excerpt {
+    font-size: 0.95rem;
+    color: #222;
+    line-height: 1.5;
+}
+
+.post-location,
+.post-time {
+    font-size: 0.9rem;
+    color: #444;
+    margin: 0.2rem 0;
+}

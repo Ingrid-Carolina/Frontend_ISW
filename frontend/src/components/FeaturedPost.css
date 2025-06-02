@@ -1,0 +1,38 @@
+.featured-post {
+    padding: 1rem;
+    font-family: GroteskBold, sans-serif;
+}
+
+.featured-label {
+    color: #D7063C;
+    /* Bright red */
+    font-weight: bold;
+    font-size: 1.5rem;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 0.5rem;
+}
+
+.featured-title {
+    color: #00013A;
+    /* Navy blue */
+    font-weight: 800;
+    font-size: 3rem;
+    line-height: 1.2;
+    margin: 0 0 0.75rem 0;
+}
+
+.featured-title:hover{
+    color: #D7063C;
+    cursor: pointer;
+}
+
+.highlight-year {
+    font-weight: 900;
+}
+
+.featured-date {
+    font-style: italic;
+    color: #676475;
+    font-size: 1.3rem;
+}
