@@ -1,3 +1,4 @@
+
 footer {
 	background-color: #000757;
 	color: rgb(246, 244, 248);
@@ -13,30 +14,29 @@ footer {
 	margin: 0 auto;
 	padding: 0 20px;
 	flex-wrap: wrap;
-	gap: 150px;
-}
-.footer-left,
-.footer-right {
-	display: flex;
-	justify-content: center;
-	flex-wrap: wrap;
+	min-height: 100px; /* Altura mínima para mejor distribución */
 }
 
-.footer-right {
-	font-size: 14px;
+/* IZQUIERDA - Contacto y Política */
+.footer-left {
+	flex: 1;
+	display: flex;
+	justify-content: flex-start;
+	align-items: center;
 }
 
 .footer-left nav {
 	display: flex;
 	gap: 10px;
 	align-items: center;
+	flex-wrap: wrap;
 }
 
 .footer-left a {
 	color: #276fb3;
 	text-decoration: none;
-	transition: all 0.3s ease; /* Animación suave */
-
+	transition: all 0.3s ease;
+	white-space: nowrap; /* Evita que se rompan las palabras */
 }
 
 .footer-left a:hover {
@@ -44,55 +44,219 @@ footer {
 	text-decoration: underline;
 }
 
+/* CENTRO - Logo y redes sociales */
 .footer-center {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
 	text-align: center;
 }
 
 .footer-logo {
 	height: 80px;
 	margin-bottom: 10px;
+	object-fit: contain; /* Mantiene proporciones */
 }
 
 .social-icons {
 	display: flex;
 	justify-content: center;
 	gap: 20px;
+	flex-wrap: wrap;
 }
 
 .social-icon {
 	height: 40px;
+	width: 40px;
 	cursor: pointer;
 	color: white;
-	transition: color 0.3s ease;
+	transition: color 0.3s ease, transform 0.3s ease;
 }
 
-.social-icon :hover {
+.social-icon:hover {
 	color: red;
+	transform: scale(1.1); /* Efecto de hover mejorado */
 }
+
+/* DERECHA - Copyright */
 .footer-right {
+	flex: 1;
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
 	text-align: right;
 	font-size: 14px;
 }
 
-/* RESPONSIVE (para móvil) */
-@media screen and (max-width: 768px) {
+.footer-right p {
+	margin: 0;
+	white-space: nowrap; /* Evita saltos de línea innecesarios */
+}
+
+/* RESPONSIVE - Tablets (768px - 1024px) */
+@media screen and (max-width: 1024px) and (min-width: 769px) {
+	.footer-container {
+		padding: 0 15px;
+		gap: 20px;
+	}
+	
+	.footer-left,
+	.footer-right {
+		flex: 0.8;
+	}
+	
+	.footer-center {
+		flex: 1.2;
+	}
+	
+	.footer-right p {
+		font-size: 13px;
+		white-space: normal; /* Permite salto de línea si es necesario */
+	}
+}
+
+/* RESPONSIVE - Móviles grandes (481px - 768px) */
+@media screen and (max-width: 768px) and (min-width: 481px) {
+	.footer-container {
+		flex-direction: column;
+		align-items: center;
+		text-align: center;
+		gap: 25px;
+		padding: 0 15px;
+	}
+
+	.footer-left,
+	.footer-center,
+	.footer-right {
+		flex: none;
+		width: 100%;
+		justify-content: center;
+		text-align: center;
+	}
+	
+	.footer-logo {
+		height: 70px;
+	}
+	
+	.social-icons {
+		gap: 25px;
+	}
+	
+	.footer-right p {
+		white-space: normal;
+		line-height: 1.4;
+	}
+}
+
+/* RESPONSIVE - Móviles pequeños (hasta 480px) */
+@media screen and (max-width: 480px) {
 	.footer-container {
 		flex-direction: column;
 		align-items: center;
 		text-align: center;
 		gap: 20px;
+		padding: 0 10px;
 	}
 
 	.footer-left,
+	.footer-center,
 	.footer-right {
+		flex: none;
+		width: 100%;
 		justify-content: center;
 		text-align: center;
 	}
+	
+	.footer-left nav {
+		flex-direction: column;
+		gap: 8px;
+	}
+	
+	.footer-left nav span {
+		display: none; /* Oculta el separador "|" en móviles pequeños */
+	}
+	
 	.footer-logo {
-    height: 60px; /* Ligeramente más pequeño en móvil */
-  }
+		height: 60px;
+		margin-bottom: 15px;
+	}
+	
+	.social-icons {
+		gap: 20px;
+		margin-bottom: 10px;
+	}
+	
+	.social-icon {
+		height: 35px;
+		width: 35px;
+	}
+	
+	.footer-right p {
+		font-size: 12px;
+		white-space: normal;
+		line-height: 1.5;
+		max-width: 250px; /* Limita el ancho para mejor legibilidad */
+		margin: 0 auto;
+	}
 }
 
+/* RESPONSIVE - Móviles extra pequeños (hasta 320px) */
+@media screen and (max-width: 320px) {
+	footer {
+		padding: 15px 0;
+	}
+	
+	.footer-container {
+		gap: 15px;
+		padding: 0 8px;
+	}
+	
+	.footer-logo {
+		height: 50px;
+	}
+	
+	.social-icons {
+		gap: 15px;
+	}
+	
+	.social-icon {
+		height: 30px;
+		width: 30px;
+	}
+	
+	.footer-right p {
+		font-size: 11px;
+		max-width: 200px;
+	}
+	
+	.footer-left a {
+		font-size: 14px;
+	}
+}
+
+/* Mejoras adicionales para accesibilidad y UX */
+@media (prefers-reduced-motion: reduce) {
+	.social-icon,
+	.footer-left a {
+		transition: none;
+	}
+}
+
+/* Asegurar que los enlaces sean tocables en dispositivos móviles */
+@media (hover: none) and (pointer: coarse) {
+	.footer-left a,
+	.social-icon {
+		min-height: 44px;
+		min-width: 44px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+}
+
+/* Mantener las fuentes personalizadas */
 @font-face {
   font-family: 'GroteskBold';
   src: url('/fonts/Grotesk Bold.ttf') format('truetype');
