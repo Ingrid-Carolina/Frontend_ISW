@@ -1,4 +1,3 @@
-
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -22,25 +21,30 @@ import EventIcon from '@mui/icons-material/Event';
 import CallIcon from '@mui/icons-material/Call';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
-import GroupsRoundedIcon from '@mui/icons-material/GroupsRounded';
 import StorefrontIcon from '@mui/icons-material/Storefront';
+import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
+import LiveTvOutlinedIcon from '@mui/icons-material/LiveTvOutlined';
 
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
+{
+	/* Items de la navbarbar*/
+}
 const baseMenuItems = [
-	{ text: 'Categoria', icon: <GroupsRoundedIcon />, path: '/categoria' },
 	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
 	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
 	{ text: 'Logros', icon: <EmojiEventsIcon />, path: '/logros' },
-	{ text: 'Contactanos', icon: <CallIcon />, path: '/contacto' },
 	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
+	{ text: 'Contacto', icon: <CallIcon />, path: '/Contacto' },
 ];
 
+//exports funciones navbar
 export default function CustomNavbar() {
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 	const [submenuOpen, setSubmenuOpen] = React.useState(false);
 	const [donarOpen, setDonarOpen] = React.useState(false);
+	const [mobileSubmenuOpen, setMobileSubmenuOpen] = React.useState(false);
 	const submenuTimer = React.useRef(null);
 	const donarTimer = React.useRef(null);
 
@@ -71,7 +75,13 @@ export default function CustomNavbar() {
 		<>
 			<AppBar
 				position='fixed'
-				sx={{ backgroundColor: '#0c005a', zIndex: 1301, height: '90px'}}
+				elevation={0}
+				sx={{
+					backgroundColor: drawerOpen ? '#ffffff' : 'rgba(12, 0, 90, 0.9)',
+					zIndex: 1301,
+					height: '90px',
+					transition: 'background-color 0.3s ease',
+				}}
 			>
 				<Toolbar
 					sx={{
@@ -104,49 +114,71 @@ export default function CustomNavbar() {
 								onMouseLeave={handleSubmenuLeave}
 								sx={{ position: 'relative' }}
 							>
-								<Button sx={navBtnStyle}>Nuestra Historia</Button>
+								<Button sx={navBtnStyle(drawerOpen)}>Nuestra Historia</Button>
 								{submenuOpen && (
-									<Box
-										sx={submenuBoxStyle}
-										onMouseEnter={() => setSubmenuOpen(true)}
-										onMouseLeave={() => setSubmenuOpen(false)}
-									>
-										<MenuItem component={Link} to='/historia' sx={subMenuStyle}>
+									<Box sx={submenuBoxStyle}>
+										<MenuItem
+											component={Link}
+											to='/historia'
+											onClick={() => setDrawerOpen(false)}
+											sx={subMenuStyle}
+										>
 											Historia
 										</MenuItem>
-										<MenuItem component={Link} to='/acercade' sx={subMenuStyle}>
+										<MenuItem
+											component={Link}
+											to='/acercade'
+											onClick={() => setDrawerOpen(false)}
+											sx={subMenuStyle}
+										>
 											Acerca de
 										</MenuItem>
-										<MenuItem component={Link} to='/aliados' sx={subMenuStyle}>
+										<MenuItem
+											component={Link}
+											to='/aliados'
+											onClick={() => setDrawerOpen(false)}
+											sx={subMenuStyle}
+										>
 											Aliados
 										</MenuItem>
-										<MenuItem component={Link} to='/NuestroEquipo' sx={subMenuStyle}>
+										<MenuItem
+											component={Link}
+											to='/NuestroEquipo'
+											onClick={() => setDrawerOpen(false)}
+											sx={subMenuStyle}
+										>
 											Nuestro Equipo
+										</MenuItem>
+										<MenuItem
+											component={Link}
+											to='/categoria'
+											onClick={() => setDrawerOpen(false)}
+											sx={subMenuStyle}
+										>
+											Categorías
 										</MenuItem>
 									</Box>
 								)}
 							</Box>
 
-							<Button component={Link} to='/quehacemos' sx={navBtnStyle}>
-								Lo Que Hacemos
-							</Button>
-							<Button component={Link} to='/tienda' sx={navBtnStyle}>
+							<Button
+								component={Link}
+								to='/tienda'
+								onClick={() => setDrawerOpen(false)}
+								sx={navBtnStyle(drawerOpen)}
+							>
 								Tienda
 							</Button>
 
-							{/* DONAR Submenu */}
-							<Box 
+							{/* Donar Submenu */}
+							<Box
 								onMouseEnter={handleDonarEnter}
 								onMouseLeave={handleDonarLeave}
 								sx={{ position: 'relative' }}
 							>
-								<Button sx={navBtnStyle}>Donar</Button>
+								<Button sx={navBtnStyle(drawerOpen)}>Donar</Button>
 								{donarOpen && (
-									<Box
-										sx={{ ...submenuBoxStyle, right: 'auto', left: 0 }}
-										onMouseEnter={() => setDonarOpen(true)}
-										onMouseLeave={() => setDonarOpen(false)}
-									>
+									<Box sx={{ ...submenuBoxStyle }}>
 										<MenuItem
 											component={Link}
 											to='/donar-indumentaria'
@@ -164,37 +196,86 @@ export default function CustomNavbar() {
 									</Box>
 								)}
 							</Box>
+							<Button
+								component={Link}
+								to='/envivo'
+								onClick={() => setDrawerOpen(false)}
+								sx={navBtnStyle(drawerOpen)}
+							>
+								En Vivo
+							</Button>
 						</Box>
 					</Box>
 
-					<IconButton
-						onClick={toggleDrawer}
-						color="inherit"
-						disableRipple
-						disableFocusRipple
-						sx={{
-							'&:hover': { color: '#e06c14' },
-							outline: 'none',
-							'&:focus': { outline: 'none' },
-							'&:focus-visible': { outline: 'none' },
-						}}
-					>
-						{drawerOpen ? <CloseIcon /> : <MenuIcon />}
-						<Typography
+					<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+						<Button
+							component={Link}
+							to='/login'
+							variant='text'
+							onClick={() => setDrawerOpen(false)}
 							sx={{
-								ml: 1,
+								color: drawerOpen ? '#0c005a' : 'white',
+								borderColor: drawerOpen ? '#0c005a' : 'white',
 								fontWeight: 'bold',
-								fontFamily: '"GroteskBold", sans-serif',
 								fontSize: '1.4rem',
+								fontFamily: '"GroteskBold", sans-serif',
+								textTransform: 'none',
+								height: '40px',
+								px: 2.5,
+								borderWidth: '2px',
+								'&:hover': {
+									color: '#e06c14',
+									borderColor: '#e06c14',
+									backgroundColor: 'transparent',
+								},
 							}}
 						>
-							Menú
-						</Typography>
-					</IconButton>
+							Iniciar Sesión
+						</Button>
+
+						<IconButton
+							onClick={toggleDrawer}
+							sx={{
+								display: 'flex',
+								alignItems: 'center',
+								color: drawerOpen ? '#0c005a' : 'white',
+								outline: 'none',
+								'&:hover': {
+									color: drawerOpen ? '#0c005a' : '#e06c14',
+								},
+								'&:hover .menu-text': {
+									color: drawerOpen ? '#0c005a' : '#e06c14',
+								},
+								'&:hover .menu-icon': {
+									color: drawerOpen ? '#0c005a' : '#e06c14',
+								},
+								'&:focus': { outline: 'none' },
+								'&:focus-visible': { outline: 'none' },
+							}}
+						>
+							{drawerOpen ? (
+								<CloseIcon sx={{ color: '#0c005a' }} />
+							) : (
+								<MenuIcon sx={{ color: 'inherit' }} />
+							)}
+							<Typography
+								className='menu-text'
+								sx={{
+									ml: 1,
+									fontWeight: 'bold',
+									fontFamily: '"GroteskBold", sans-serif',
+									fontSize: '1.4rem',
+									color: drawerOpen ? '#0c005a' : 'white',
+								}}
+							>
+								Menú
+							</Typography>
+						</IconButton>
+					</Box>
 				</Toolbar>
 			</AppBar>
 
-			{/* Drawer móvil */}
+			{/* Drawer*/}
 			<Drawer
 				anchor='top'
 				open={drawerOpen}
@@ -211,23 +292,109 @@ export default function CustomNavbar() {
 					},
 				}}
 			>
-				<Box
-					sx={{ width: '100%', p: 3 }}
-					role='presentation'
-					onClick={toggleDrawer}
-					onKeyDown={toggleDrawer}
-				>
+				<Box sx={{ width: '100%', p: 3 }}>
 					<List>
+						{/* SubMenú nuestra historia móvil*/}
+						{isMobile && (
+							<>
+								<ListItem
+									button
+									onClick={() => setMobileSubmenuOpen(prev => !prev)}
+									sx={{
+										textDecoration: 'none',
+										color: 'inherit',
+										'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+										'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
+									}}
+								>
+									<ListItemIcon sx={{ color: 'inherit' }}>
+										<HistoryEduOutlinedIcon />
+									</ListItemIcon>
+									<ListItemText
+										primary='Nuestra Historia'
+										primaryTypographyProps={{
+											fontFamily: '"Franklin Gothic Medium", sans-serif',
+											fontWeight: 'bold',
+											fontSize: '0.95rem',
+											color: 'inherit',
+										}}
+									/>
+								</ListItem>
+
+								{mobileSubmenuOpen && (
+									<>
+										<ListItem
+											button
+											component={Link}
+											to='/historia'
+											sx={mobileSubItem}
+										>
+											<ListItemText
+												primary='Historia'
+												primaryTypographyProps={mobileTypography}
+											/>
+										</ListItem>
+										<ListItem
+											button
+											component={Link}
+											to='/acercade'
+											sx={mobileSubItem}
+										>
+											<ListItemText
+												primary='Acerca de'
+												primaryTypographyProps={mobileTypography}
+											/>
+										</ListItem>
+										<ListItem
+											button
+											component={Link}
+											to='/aliados'
+											sx={mobileSubItem}
+										>
+											<ListItemText
+												primary='Aliados'
+												primaryTypographyProps={mobileTypography}
+											/>
+										</ListItem>
+										<ListItem
+											button
+											component={Link}
+											to='/NuestroEquipo'
+											sx={mobileSubItem}
+										>
+											<ListItemText
+												primary='Nuestro Equipo'
+												primaryTypographyProps={mobileTypography}
+											/>
+										</ListItem>
+										<ListItem
+											button
+											component={Link}
+											to='/categoria'
+											sx={mobileSubItem}
+										>
+											<ListItemText
+												primary='Categorías'
+												primaryTypographyProps={mobileTypography}
+											/>
+										</ListItem>
+									</>
+								)}
+							</>
+						)}
+						{/*items del drawr estilos o acciones*/}
 						{baseMenuItems.map(item => (
 							<ListItem
 								key={item.text}
 								button
 								component={Link}
 								to={item.path}
+								onClick={() => setDrawerOpen(false)}
 								sx={{
 									textDecoration: 'none',
-									color: 'inherit',
+									color: '#0c005a',
 									'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+									'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
 								}}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
@@ -244,6 +411,64 @@ export default function CustomNavbar() {
 								/>
 							</ListItem>
 						))}
+
+						{isMobile && (
+							<>
+								{/* Contáctanos solo en móvil */}
+								<ListItem
+									button
+									component={Link}
+									to='/contacto'
+									sx={{
+										textDecoration: 'none',
+										color: 'inherit',
+										'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+										'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
+									}}
+								>
+									<ListItemIcon sx={{ color: 'inherit' }}>
+										<CallIcon />
+									</ListItemIcon>
+									<ListItemText
+										primary='Contáctanos'
+										primaryTypographyProps={{
+											fontFamily: '"Franklin Gothic Medium", sans-serif',
+											fontWeight: 'bold',
+											fontSize: '0.95rem',
+											color: 'inherit',
+										}}
+									/>
+								</ListItem>
+
+								{/* En Vivo solo en móvil*/}
+								<ListItem
+									button
+									component={Link}
+									to='/envivo'
+									sx={{
+										textDecoration: 'none',
+										color: 'inherit',
+										'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+										'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
+									}}
+								>
+									<ListItemIcon sx={{ color: 'inherit' }}>
+										<LiveTvOutlinedIcon />{' '}
+									</ListItemIcon>
+									<ListItemText
+										primary='En Vivo'
+										primaryTypographyProps={{
+											fontFamily: '"Franklin Gothic Medium", sans-serif',
+											fontWeight: 'bold',
+											fontSize: '0.95rem',
+											color: 'inherit',
+										}}
+									/>
+								</ListItem>
+							</>
+						)}
+
+						{/* Tienda solo en móvil */}
 						{isMobile && (
 							<ListItem
 								button
@@ -253,6 +478,7 @@ export default function CustomNavbar() {
 									textDecoration: 'none',
 									color: 'inherit',
 									'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+									'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
 								}}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
@@ -261,13 +487,16 @@ export default function CustomNavbar() {
 								<ListItemText
 									primary='Tienda'
 									primaryTypographyProps={{
-										fontFamily: '"Bebas Neue", sans-serif',
+										fontFamily: '"Franklin Gothic Medium", sans-serif',
 										fontWeight: 'bold',
 										fontSize: '0.95rem',
+										color: 'inherit',
 									}}
 								/>
 							</ListItem>
 						)}
+
+						{/* Donar button móvil */}
 						<ListItem
 							sx={{ justifyContent: 'center', mt: 3, display: { md: 'none' } }}
 						>
@@ -297,15 +526,22 @@ export default function CustomNavbar() {
 	);
 }
 
-// 🎨 Estilos Reutilizables
-const navBtnStyle = {
-	color: 'white',
+// Estilos reutilizables
+const navBtnStyle = drawerOpen => ({
+	color: drawerOpen ? '#0c005a' : 'white',
 	fontWeight: 'bold',
 	fontSize: '1.4rem',
 	fontFamily: 'GroteskBold, sans-serif',
-	'&:hover': { color: '#e06c14' },
 	textTransform: 'none',
-};
+	transition: 'color 0.3s ease',
+	'&:hover': {
+		color: '#e06c14',
+	},
+	'& .MuiListItemIcon-root': {
+		color: drawerOpen ? '#0c005a' : 'inherit',
+		transition: 'color 0.3s ease',
+	},
+});
 
 const subMenuStyle = {
 	fontFamily: '"GroteskBold", sans-serif',
@@ -345,3 +581,18 @@ const submenuBoxStyle = {
 	},
 };
 
+const mobileSubItem = {
+	pl: 7,
+	py: 0.5,
+	width: '100%',
+	'&:hover .MuiListItemText-primary': {
+		color: '#e06c14',
+	},
+};
+
+const mobileTypography = {
+	fontFamily: '"Franklin Gothic Medium", sans-serif',
+	fontWeight: 'bold',
+	fontSize: '0.85rem',
+	color: '#0c005a',
+};
