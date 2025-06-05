@@ -1,6 +1,9 @@
 import React, { useState } from 'react';
+import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
   Typography,
+  IconButton,
+  InputAdornment,
   Stack,
   Box,
   Alert,
@@ -15,6 +18,9 @@ const Login = ({ onRegistroClick }) => {
     email: '',
     password: ''
   });
+
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -157,16 +163,29 @@ const Login = ({ onRegistroClick }) => {
 
         {/* Campo Contraseña */}
         <TextField
-          name="password"
-          type="password"
-          label="Contraseña"
-          value={formData.password}
-          onChange={handleInputChange}
-          error={!!errors.password}
-          helperText={errors.password}
-          fullWidth
-          margin="normal"
-        />
+  name="password"
+  type={showPassword ? 'text' : 'password'}
+  label="Contraseña"
+  value={formData.password}
+  onChange={handleInputChange}
+  error={!!errors.password}
+  helperText={errors.password}
+  fullWidth
+  margin="normal"
+  InputProps={{
+    endAdornment: (
+      <InputAdornment position="end">
+        <IconButton
+          onClick={() => setShowPassword((prev) => !prev)}
+          edge="end"
+        >
+          {showPassword ? <VisibilityOff /> : <Visibility />}
+        </IconButton>
+      </InputAdornment>
+    )
+  }}
+/>
+
 
         {/* Enlace recuperar */}
         <Box sx={{ textAlign: 'right', mt: 1 }}>

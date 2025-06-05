@@ -16,6 +16,9 @@ const Registro = ({ onLoginClick }) => {
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(formData.nombre.startsWith(' ')){
+      newErrors.nombre='Formato de nombre Invalido';
+    }
 
     if (!formData.nombre.trim()) {
       newErrors.nombre = 'El nombre es obligatorio';
@@ -27,11 +30,44 @@ const Registro = ({ onLoginClick }) => {
       newErrors.email = 'Correo electrónico inválido';
     }
 
-    if (!formData.password) {
-      newErrors.password = 'La contraseña es obligatoria';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'Debe tener al menos 8 caracteres';
+
+    let num=false;
+    let May=false;
+    let Min=false;
+
+    for (let i = 0; i < formData.password.length; i++) {
+      let carac=formData.password.charCodeAt(i);
+      if(carac>=97&&carac<=122){
+        Min=true;
+      }
+      else if(carac>=65&&carac<=90){
+        May=true;
+      }
+      else if(carac>=48&&carac<=57){
+        num=true;
+      }
     }
+
+    if (!formData.password) {
+  newErrors.password = 'La contraseña es obligatoria';
+} else if (formData.password.length < 8) {
+  newErrors.password = 'Debe tener al menos 8 caracteres';
+} else if (!Min && !May && !num) {
+  newErrors.password = 'Debe tener al menos 1 número\nDebe tener al menos 1 letra mayúscula\nDebe tener al menos 1 minúscula';
+} else if (!num && !May) {
+  newErrors.password = 'Debe tener al menos 1 número\nDebe tener al menos 1 letra mayúscula';
+} else if (!num && !Min) {
+  newErrors.password = 'Debe tener al menos 1 número\nDebe tener al menos 1 letra minúscula';
+} else if (!Min && !May) {
+  newErrors.password = 'Debe tener al menos 1 letra mayúscula\nDebe tener al menos 1 letra minúscula';
+} else if (!Min) {
+  newErrors.password = 'Debe tener al menos 1 letra minúscula';
+} else if (!May) {
+  newErrors.password = 'Debe tener al menos 1 letra mayúscula';
+} else if (!num) {
+  newErrors.password = 'Debe tener al menos 1 número';
+}
+
 
     if (!formData.confirmarPassword) {
       newErrors.confirmarPassword = 'Confirma tu contraseña';
@@ -143,7 +179,13 @@ const Registro = ({ onLoginClick }) => {
           value={formData.password}
           onChange={handleChange}
           error={!!errors.password}
-          helperText={errors.password}
+          helperText={
+    errors.password
+      ? errors.password.split('\n').map((line, i) => (
+          <span key={i} style={{ display: 'block' }}>{line}</span>
+        ))
+      : ''
+  }
         />
 
         <TextField
