@@ -17,10 +17,10 @@ import Contacto from './pages/Contacto.jsx';
 import Tienda from './pages/Tienda.jsx';
 import Aliados from './pages/Aliados.jsx';
 import Acercade from './pages/Acercade.jsx';
+import MostrarLoginyRegistro from './pages/MostrarLoginyRegistro';
 import Noticia1 from './pages/Noticia1.jsx';
 import Noticia2 from './pages/Noticia2.jsx';
 import Noticia3 from './pages/Noticia3.jsx';
-import Login from './pages/Login.jsx';
 
 function App() {
 	return (
@@ -42,7 +42,7 @@ function App() {
 							<Route path='/tienda' element={<Tienda />} />
 							<Route path='/aliados' element={<Aliados />} />
 							<Route path='/acercade' element={<Acercade />} />
-							<Route path='/login' element={<Login />} />
+							<Route path='/login' element={<MostrarLoginyRegistro />} />
 							<Route path='/Noticia1' element={<Noticia1 />}/>
                             <Route path='/Noticia2' element={<Noticia2 />}/>
                             <Route path='/Noticia3' element={<Noticia3 />}/>
