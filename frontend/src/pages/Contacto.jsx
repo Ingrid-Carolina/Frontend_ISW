@@ -51,7 +51,7 @@ const Contacto = () => {
 						sx={{
 							fontWeight: 'bold',
 							fontSize: { xs: '4rem', md: '7rem' },
-							fontFamily: '"Jersey", cursive',
+							fontFamily: '"Varsity", cursive',
 							color: 'white',
 							textAlign: 'center',
 						}}

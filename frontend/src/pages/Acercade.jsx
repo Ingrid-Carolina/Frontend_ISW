@@ -51,7 +51,7 @@ const Acercade = () => {
 						sx={{
 							fontWeight: 'bold',
 							fontSize: { xs: '4rem', md: '7rem' },
-							fontFamily: '"Jersey", cursive',
+							fontFamily: '"Varsity", cursive',
 							color: 'white',
 							textAlign: 'center',
 						}}
@@ -87,7 +87,7 @@ const Acercade = () => {
 					<Typography
 						variant='h3'
 						sx={{
-							fontFamily: '"Jersey", cursive',
+							fontFamily: '"Varsity", cursive',
 							fontWeight: 'bold',
 							mb: 2,
 							fontSize: { xs: '3rem', md: '4rem' },

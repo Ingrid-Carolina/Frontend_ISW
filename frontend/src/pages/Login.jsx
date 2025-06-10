@@ -118,7 +118,7 @@ const Login = ({ onRegistroClick }) => {
         <Typography
           variant="h5"
           sx={{
-            fontFamily: '"Jersey", cursive',
+            fontFamily: '"Varsity", cursive',
             fontWeight: 'bold',
             textAlign: 'center',
             mb: { xs: 3, md: 4 },
