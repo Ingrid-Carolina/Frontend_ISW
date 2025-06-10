@@ -211,22 +211,25 @@ export default function CustomNavbar() {
 						<Button
 							component={Link}
 							to='/login'
-							variant='text'
 							onClick={() => setDrawerOpen(false)}
 							sx={{
-								color: drawerOpen ? '#0c005a' : 'white',
-								borderColor: drawerOpen ? '#0c005a' : 'white',
+								backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
+								color: drawerOpen ? '#ffffff' : '#0c005a',
+								border: '2px solid #0c005a',
 								fontWeight: 'bold',
-								fontSize: '1.4rem',
+								fontSize: '0.9rem',
 								fontFamily: '"GroteskBold", sans-serif',
 								textTransform: 'none',
 								height: '40px',
 								px: 2.5,
-								borderWidth: '2px',
+								borderRadius: '6px',
+								transition: 'all 0.3s ease',
 								'&:hover': {
-									color: '#e06c14',
-									borderColor: '#e06c14',
-									backgroundColor: 'transparent',
+									color: '#e06c14', // 🔸 Letra naranja
+									borderColor: '#e06c14', // 🔸 Borde naranja
+									backgroundColor: drawerOpen // Fondo dinámico según drawer
+										? '#0c005a'
+										: '#ffffff',
 								},
 							}}
 						>
