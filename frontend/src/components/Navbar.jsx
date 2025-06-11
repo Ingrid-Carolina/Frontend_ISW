@@ -225,9 +225,9 @@ export default function CustomNavbar() {
 								borderRadius: '6px',
 								transition: 'all 0.3s ease',
 								'&:hover': {
-									color: '#e06c14', // 🔸 Letra naranja
-									borderColor: '#e06c14', // 🔸 Borde naranja
-									backgroundColor: drawerOpen // Fondo dinámico según drawer
+									color: '#e06c14',
+									borderColor: '#e06c14', 
+									backgroundColor: drawerOpen
 										? '#0c005a'
 										: '#ffffff',
 								},

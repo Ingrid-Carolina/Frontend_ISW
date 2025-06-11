@@ -11,8 +11,21 @@ import {
 } from '@mui/material';
 import fond from '/Images/pilotos.c.jpg';
 import { Link } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
 
 const Contacto = () => {
+	const {
+		register,
+		handleSubmit,
+		formState: { errors },
+		reset,
+	} = useForm();
+
+	const onSubmit = data => {
+		console.log('Formulario enviado:', data);
+		reset();
+	};
+
 	return (
 		<>
 			{/* ENCABEZADO */}
@@ -30,7 +43,6 @@ const Contacto = () => {
 					py: { xs: 6, md: 8 },
 				}}
 			>
-				{/* Capa oscura encima del fondo */}
 				<Box
 					sx={{
 						position: 'absolute',
@@ -42,8 +54,7 @@ const Contacto = () => {
 						zIndex: 1,
 					}}
 				/>
-
-				{/* Texto sobre el overlay */}
+				
 				<Box
 					sx={{
 						position: 'relative',
@@ -63,6 +74,7 @@ const Contacto = () => {
 							fontFamily: 'Varsity, sans-serif',
 							color: 'white',
 							textAlign: 'center',
+							textShadow: '2px 2px 6px rgba(0,0,0,0.7)',
 						}}
 					>
 						Ponte en Contacto
@@ -82,6 +94,7 @@ const Contacto = () => {
 						gap: 4,
 					}}
 				>
+					{/* INFO DE CONTACTO */}
 					<Box
 						sx={{
 							width: 280,
@@ -134,7 +147,7 @@ const Contacto = () => {
 								Comparta su experiencia con nosotros.
 							</Typography>
 							<Link
-								to='/testimonios'
+								to= '/Testimonio'
 								style={{
 									fontWeight: 'bold',
 									color: '#002c6c',
@@ -151,6 +164,8 @@ const Contacto = () => {
 
 					{/* FORMULARIO */}
 					<Box
+						component='form'
+						onSubmit={handleSubmit(onSubmit)}
 						sx={{
 							backgroundColor: '#fff',
 							flex: 1,
@@ -159,71 +174,85 @@ const Contacto = () => {
 						}}
 					>
 						<Grid container spacing={2}>
-							<Grid item xs={12} md={6}>
-								<TextField
-									label='Nombre'
-									fullWidth
-									required
-									InputLabelProps={{
-										sx: {
-											color: '#002c6c',
-											'& .MuiFormLabel-asterisk': {
-												color: 'red',
+							{[
+								{
+									label: 'Nombre',
+									name: 'nombre',
+									pattern: /^[A-Za-zÀ-ÿ\s]{2,}$/,
+									message: 'Solo letras y mínimo 2 caracteres',
+								},
+								{
+									label: 'Apellido',
+									name: 'apellido',
+									pattern: /^[A-Za-zÀ-ÿ\s]{2,}$/,
+									message: 'Solo letras y mínimo 2 caracteres',
+								},
+								{
+									label: 'Teléfono',
+									name: 'telefono',
+									pattern: /^[0-9]{8,15}$/,
+									message: 'Solo números de 8 a 15 dígitos',
+								},
+								{
+									label: 'Correo Electrónico',
+									name: 'correo',
+									pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+									message: 'Formato de correo no válido',
+									customValidate: value =>
+										/@(gmail\.com|outlook\.com|hotmail\.com)$/i.test(value) ||
+										'Solo se permiten correos de Gmail, Outlook o Hotmail',
+								},
+							].map((field, index) => (
+								<Grid item xs={12} md={index < 2 ? 6 : 6} key={field.name}>
+									<TextField
+										type={field.name === 'telefono' ? 'tel' : 'text'}
+										label={field.label}
+										fullWidth
+										required
+										{...register(field.name, {
+											required: `El campo ${field.label} es obligatorio`,
+											pattern: field.pattern
+												? {
+														value: field.pattern,
+														message: field.message,
+													}
+												: undefined,
+											validate: field.customValidate || undefined,
+										})}
+										error={!!errors[field.name]}
+										helperText={errors[field.name]?.message}
+										InputLabelProps={{
+											sx: {
+												color: '#002c6c',
+												'& .MuiFormLabel-asterisk': {
+													color: 'red',
+												},
 											},
-										},
-									}}
-								/>
-							</Grid>
-							<Grid item xs={12} md={6}>
-								<TextField
-									label='Apellido'
-									fullWidth
-									required
-									InputLabelProps={{
-										sx: {
-											color: '#002c6c',
-											'& .MuiFormLabel-asterisk': {
-												color: 'red',
-											},
-										},
-									}}
-								/>
-							</Grid>
-							<Grid item xs={12} md={6}>
-								<TextField
-									label='Teléfono'
-									fullWidth
-									required
-									InputLabelProps={{
-										sx: {
-											color: '#002c6c',
-											'& .MuiFormLabel-asterisk': {
-												color: 'red',
-											},
-										},
-									}}
-								/>
-							</Grid>
-							<Grid item xs={12} md={6}>
-								<TextField
-									label='Correo Electrónico'
-									fullWidth
-									required
-									InputLabelProps={{
-										sx: {
-											color: '#002c6c',
-											'& .MuiFormLabel-asterisk': {
-												color: 'red',
-											},
-										},
-									}}
-								/>
-							</Grid>
+										}}
+										onKeyPress={
+											field.name === 'telefono'
+												? e => {
+														if (!/[0-9]/.test(e.key)) {
+															e.preventDefault();
+														}
+													}
+												: undefined
+										}
+									/>
+								</Grid>
+							))}
+
 							<Grid item xs={12}>
 								<TextField
 									label='Dirección'
 									fullWidth
 									required
+									{...register('direccion', {
+										required: 'La dirección es obligatoria',
+										minLength: { value: 5, message: 'Mínimo 5 caracteres' },
+									})}
+									error={!!errors.direccion}
+									helperText={errors.direccion?.message}
 									InputLabelProps={{
 										sx: {
 											color: '#002c6c',
@@ -244,7 +273,7 @@ const Contacto = () => {
 										mb: 1,
 									}}
 								>
-									¿Sobre qué pregunta?
+									 ¿Sobre qué pregunta? <span style={{ color: 'red' }}>*</span>
 								</Typography>
 								<FormGroup row>
 									{[
@@ -259,6 +288,10 @@ const Contacto = () => {
 											key={label}
 											control={<Checkbox />}
 											label={label}
+											{...register('intereses', {
+												validate: value =>
+													value.length > 0 || 'Selecciona al menos una opción',
+											})}
 											sx={{
 												'& .MuiFormControlLabel-label': {
 													color: '#002c6c',
@@ -278,6 +311,15 @@ const Contacto = () => {
 								minRows={8}
 								fullWidth
 								required
+								{...register('mensaje', {
+									required: 'El mensaje es obligatorio',
+									minLength: {
+										value: 10,
+										message: 'Escribe al menos 10 caracteres',
+									},
+								})}
+								error={!!errors.mensaje}
+								helperText={errors.mensaje?.message}
 								InputLabelProps={{
 									sx: {
 										color: '#002c6c',
@@ -287,7 +329,6 @@ const Contacto = () => {
 									},
 								}}
 								sx={{
-									width: '100%',
 									'& .MuiInputBase-root': {
 										padding: '12px',
 										alignItems: 'flex-start',

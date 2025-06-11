@@ -52,4 +52,12 @@
 	color: #888;
 }
 
-
+/* Corrige el fondo gris en inputs con autofill de Chrome NO BORRAR*/
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+input:-webkit-autofill:active {
+	box-shadow: 0 0 0 1000px white inset !important;
+	-webkit-text-fill-color: #002c6c !important;
+	transition: background-color 9999s ease-in-out 0s;
+}

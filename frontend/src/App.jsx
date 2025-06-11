@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import './App.css';
 import CustomNavbar from './components/Navbar.jsx';
+import ScrollToTop from './components/ScrollToTop';
 import Footer from './components/Footer.jsx';
 import Home from './pages/Home';
 import NuestraHistoria from './pages/NuestraHistoria';
@@ -27,6 +28,7 @@ function App() {
 	return (
 		<>
 			<Router>
+				<ScrollToTop /> 
 				<div className='app-container'>
 					<CustomNavbar />
 					<main className='main-content'>
