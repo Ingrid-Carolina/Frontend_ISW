@@ -1,0 +1,15 @@
+// src/firebaseConfig.js
+import { initializeApp } from 'firebase/app';
+import { getAuth } from 'firebase/auth';
+
+const firebaseConfig = {
+  apiKey: "TU_API_KEY",
+  authDomain: "TU_DOMINIO.firebaseapp.com",
+  projectId: "TU_PROJECT_ID",
+  // ...otros valores
+};
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+
+export { auth };

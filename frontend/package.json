@@ -16,11 +16,12 @@
 		"@mui/icons-material": "^7.1.0",
 		"@mui/material": "^7.1.0",
 		"@mui/styles": "^6.4.11",
-		"axios": "^1.9.0",
+		"firebase": "^11.9.1",
 		"framer-motion": "^12.15.0",
 		"path": "^0.12.7",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
+		"react-hook-form": "^7.57.0",
 		"react-router-dom": "^7.6.1"
 	},
 	"devDependencies": {

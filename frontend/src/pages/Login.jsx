@@ -12,6 +12,8 @@ import {
   Link
 } from '@mui/material';
 import logo from '/Images/Logo-pilotos.png';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './firebaseConfig';
 
 const Login = ({ onRegistroClick }) => {
   const [formData, setFormData] = useState({
@@ -66,18 +68,46 @@ const Login = ({ onRegistroClick }) => {
   };
 
   const handleLogin = async () => {
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    setIsSubmitting(true);
-    try {
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      console.log('Login exitoso');
-    } catch (error) {
-      setSubmitError('Credenciales incorrectas.');
-    } finally {
-      setIsSubmitting(false);
+  setIsSubmitting(true);
+  try {
+    const userCredential = await signInWithEmailAndPassword(
+      auth,
+      formData.email,
+      formData.password
+    );
+
+    const idToken = await userCredential.user.getIdToken();
+
+    // Aquí se envía el token al backend
+    const response = await fetch('http://localhost:3000/api/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${idToken}`
+      },
+      body: JSON.stringify({ otroDato: 'si necesitas' })
+    });
+
+    const result = await response.json();
+    console.log('Respuesta del backend:', result);
+
+    if (!response.ok) {
+      setSubmitError(result.message || 'Error al iniciar sesión');
+    } else {
+      // Aquí puedes redirigir o actualizar estado global
+      console.log('Inicio de sesión correcto');
     }
-  };
+
+  } catch (error) {
+    console.error('Error al iniciar sesión:', error);
+    setSubmitError('Credenciales incorrectas o usuario no registrado.');
+  } finally {
+    setIsSubmitting(false);
+  }
+};
+
 
   const handleForgotPassword = () => {
     if (!formData.email.trim()) {
@@ -118,7 +148,7 @@ const Login = ({ onRegistroClick }) => {
         <Typography
           variant="h5"
           sx={{
-            fontFamily: '"Jersey", cursive',
+            fontFamily: '"Varsity", cursive',
             fontWeight: 'bold',
             textAlign: 'center',
             mb: { xs: 3, md: 4 },

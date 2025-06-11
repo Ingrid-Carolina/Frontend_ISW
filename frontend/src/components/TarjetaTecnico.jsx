@@ -18,7 +18,7 @@ const TarjetaTecnico = ({ nombre, rol, descripcion, imagen }) => {
             fontWeight="bold"
             color="#10045c"
             gutterBottom
-            sx={{ fontFamily: '"Jersey", cursive' }} // Nombre
+            sx={{ fontFamily: '"Varsity", cursive' }} // Nombre
           >
             {nombre}
           </Typography>
