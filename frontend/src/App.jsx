@@ -21,6 +21,7 @@ import MostrarLoginyRegistro from './pages/MostrarLoginyRegistro';
 import Noticia1 from './pages/Noticia1.jsx';
 import Noticia2 from './pages/Noticia2.jsx';
 import Noticia3 from './pages/Noticia3.jsx';
+import TestimonioBeisbol from './pages/Testimonio.jsx';
 
 function App() {
 	return (
@@ -46,7 +47,7 @@ function App() {
 							<Route path='/Noticia1' element={<Noticia1 />}/>
                             <Route path='/Noticia2' element={<Noticia2 />}/>
                             <Route path='/Noticia3' element={<Noticia3 />}/>
-
+							<Route path='/Testimonio' element={<TestimonioBeisbol/>}/>
 						</Routes>
 					</main>
 
