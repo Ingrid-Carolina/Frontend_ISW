@@ -14,6 +14,7 @@ import {
 import logo from '/Images/Logo-pilotos.png';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebaseConfig';
+import axios from 'axios';
 
 const Login = ({ onRegistroClick }) => {
   const [formData, setFormData] = useState({

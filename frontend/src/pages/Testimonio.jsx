@@ -105,7 +105,7 @@ const TestimonioBeisbol = () => {
                       color: theme.palette.text.primary
                     }}
                   >
-                    "{testimonio.contenido}"
+                    {testimonio.contenido}
                   </Typography>
                   <Typography
                     variant="subtitle2"

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Box, Typography, TextField, Button, Alert, Link } from '@mui/material';
 import logo from '/Images/Logo-pilotos.png';
+import axios from 'axios';
 
 const Registro = ({ onLoginClick }) => {
   const [formData, setFormData] = useState({
@@ -28,7 +29,10 @@ const Registro = ({ onLoginClick }) => {
       newErrors.email = 'El correo electrónico es obligatorio';
     } else if (!emailRegex.test(formData.email)) {
       newErrors.email = 'Correo electrónico inválido';
-    }
+    }else if (!/@(gmail\.com|outlook\.com|hotmail\.com|yahoo\.com)$/i.test(formData.email)) {
+		newErrors.email =
+			'Solo se permiten correos de Gmail, Outlook o Hotmail';
+	}
 
 
     let num=false;
@@ -91,10 +95,43 @@ const Registro = ({ onLoginClick }) => {
     }));
   };
 
+  
+ const realizarPeticion = async () => {
+    const url = "http://localhost:3000/auth/signup"; 
+
+    const body = {
+        nombre: formData.nombre,
+        email: formData.email,
+        password: formData.password,
+    };
+
+    try {
+        const res = await axios.post(url, body, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        console.log("response data: ", res.data.mensaje);
+        return res.data;
+    } catch (error) {
+        console.log("Error:", error);
+
+        if (error.response) {
+            console.log("Error data:", error.response.data.mensaje);
+            console.log("Error status:", error.response.status);
+
+            window.alert((error.response.data.mensaje));
+        } else if (error.request) {
+            window.alert("Ninguna respuesta del servidor.Por favor verifique su red.");
+        } else {
+            window.alert("Error en la red.");
+        }
+    }
+};
+
   const handleSubmit = () => {
     if (!validateForm()) return;
 
-    // Simulación de envío
+    realizarPeticion();
     console.log('Registrado:', formData);
     setSubmitMessage({ success: '¡Registro exitoso!', error: '' });
 
