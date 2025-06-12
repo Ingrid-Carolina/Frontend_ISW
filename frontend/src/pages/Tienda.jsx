@@ -2,9 +2,7 @@ import React from 'react';
 import {
   Box,
   Container,
-  useTheme,
-  useMediaQuery,
-  Fade,
+
   AppBar,
   Toolbar,
   TextField,
@@ -21,28 +19,26 @@ import {
   Avatar,
   Divider,
   ListItemSecondaryAction,
-  Menu,
-  MenuItem
+
 } from '@mui/material';
 import {
   Search as SearchIcon,
   ShoppingCart as ShoppingCartIcon,
   Close as CloseIcon,
-  FlightTakeoff as FlightIcon,
   Add as AddIcon,
   Remove as RemoveIcon,
   Delete as DeleteIcon,
-  Person as PersonIcon,
-  AccountCircle as AccountCircleIcon,
-  Headset as HeadsetIcon,
-  LocalAirport as AirportIcon,
-  Speed as SpeedIcon,
-  Visibility as VisibilityIcon,
-  Navigation as NavigationIcon,
-  Security as SecurityIcon
+  AccountCircle as AccountCircleIcon, // Usado en la barra superior, no en productos
+  
 } from '@mui/icons-material';
 
-import logo from '/Images/Logo-pilotos.png';
+// --- Importa imágenes  ---
+
+import camisaLocalImg from '/Images/camisa_local.jpg';
+import camisaVisita from '/Images/camisa_visita.jpg';
+import camisaAngelito from '/Images/camiseta_ange.jpg';
+
+
 // Importar las clases Login y Registro
 import Login from './Login';
 import Registro from './Registro';
@@ -56,7 +52,6 @@ class Tienda extends React.Component {
       totalItems: 0,
       cartModalOpen: false,
       userMenuAnchor: null,
-      // Agregar estados para controlar qué componente mostrar
       currentView: 'tienda', // 'tienda', 'login', 'registro'
       isLoggedIn: false,
       userData: null
@@ -68,87 +63,87 @@ class Tienda extends React.Component {
   productos = [
     {
       id: 1,
-      nombre: "Auriculares de Aviación David Clark H10-13.4",
-      descripcion: "Auriculares profesionales con cancelación de ruido activa para pilotos comerciales",
-      precio: 2499.99,
-      icono: HeadsetIcon
+      nombre: "Camisa Local",
+      descripcion: "Camisa oficial de local, diseño exclusivo para esta temporada.",
+      precio: 299.99,
+      imagen: camisaLocalImg 
     },
     {
       id: 2,
-      nombre: "GPS Garmin G1000 NXi",
-      descripcion: "Sistema de navegación GPS avanzado con pantalla táctil y mapas actualizados",
-      precio: 15999.99,
-      icono: NavigationIcon
+      nombre: "Camiseta Visita",
+      descripcion: "Camiseta de visitante con colores vibrantes y tejido transpirable.",
+      precio: 199.99,
+      imagen: camisaVisita
     },
     {
       id: 3,
-      nombre: "Altímetro Kollsman Sensitive",
-      descripcion: "Altímetro de precisión certificado para uso en aeronaves comerciales",
+      nombre: "Camiseta Conmemorativa Fundación Angelitos",
+      descripcion: "Edición especial para apoyar a la Fundación Angelitos, con diseño único.",
       precio: 899.50,
-      icono: SpeedIcon
+      imagen: camisaAngelito
     },
     {
       id: 4,
-      nombre: "Chaleco Salvavidas Automático",
-      descripcion: "Chaleco de seguridad con inflado automático certificado por FAA",
+      nombre: "Banderas",
+      descripcion: "Banderas de alta calidad, ideales para eventos y soporte a tu equipo.",
       precio: 345.75,
-      icono: SecurityIcon
+      imagen: camisaLocalImg
     },
     {
       id: 5,
-      nombre: "Kit de Vuelo Nocturno LED",
-      descripcion: "Luces LED rojas para preservar la visión nocturna durante vuelos",
+      nombre: "Banderines",
+      descripcion: "Pequeños banderines decorativos, perfectos para coleccionar o regalar.",
       precio: 125.00,
-      icono: VisibilityIcon
+      imagen:camisaLocalImg
     },
     {
       id: 6,
-      nombre: "Manual de Operaciones Boeing 737",
-      descripcion: "Manual completo de procedimientos y operaciones para Boeing 737-800",
+      nombre: "Gorra",
+      descripcion: "Gorra de diseño clásico, cómoda y con protección solar.",
       precio: 450.00,
-      icono: AirportIcon
+      imagen: camisaLocalImg
     },
     {
       id: 7,
-      nombre: "Cronómetro de Vuelo Breitling",
-      descripcion: "Cronómetro de precisión suiza diseñado específicamente para aviación",
+      nombre: "Gorras 2",
+      descripcion: "Nueva colección de gorras con bordados premium y ajuste perfecto.",
       precio: 3200.00,
-      icono: SpeedIcon
+      imagen: camisaLocalImg
     },
     {
       id: 8,
-      nombre: "Maletin de Vuelo Pilot Gear",
-      descripcion: "Maletín profesional de cuero con compartimentos para documentos y equipos",
+      nombre: "Gorras 3",
+      descripcion: "Gorras de edición limitada con materiales reciclados y un estilo moderno.",
       precio: 280.50,
-      icono: FlightIcon
+      imagen: camisaLocalImg
     },
     {
       id: 9,
-      nombre: "Transceptor de Radio Icom IC-A25N",
-      descripcion: "Radio portátil con GPS integrado y función de emergencia",
+      nombre: "Gorras 4",
+      descripcion: "Diseño urbano para las gorras 4, con visera plana y logotipos discretos.",
       precio: 1150.00,
-      icono: HeadsetIcon
+      imagen: camisaLocalImg
     },
     {
       id: 10,
-      nombre: "Gafas de Sol Aviador Ray-Ban",
-      descripcion: "Gafas polarizadas con protección UV400 diseñadas para pilotos",
+      nombre: "Gorras 5",
+      descripcion: "Gorras 5: Máximo confort y estilo deportivo, ideales para el día a día.",
       precio: 195.00,
-      icono: VisibilityIcon
+      imagen: camisaLocalImg
     },
     {
       id: 11,
-      nombre: "Sistema EFB iPad Pro Aviation",
-      descripcion: "iPad Pro configurado con software de vuelo ForeFlight y Jeppesen",
+      nombre: "Gorras 6",
+      descripcion: "La gorra 6 combina funcionalidad y moda, perfecta para cualquier ocasión.",
       precio: 2800.00,
-      icono: NavigationIcon
+      imagen: camisaLocalImg
     },
     {
       id: 12,
       nombre: "Uniforme de Piloto Premium",
-      descripcion: "Uniforme completo de 4 piezas con galones dorados y insignias bordadas",
+      descripcion: "Uniforme completo de 4 piezas con galones dorados y insignias bordadas.",
       precio: 650.00,
-      icono: SecurityIcon
+      imagen: camisaLocalImg
     }
   ];
 
@@ -255,7 +250,7 @@ class Tienda extends React.Component {
             : item
         );
       } else {
-        // Si es un producto nuevo, agregarlo
+        // Si es un producto nuevo, agregarlo (aseguramos que la 'imagen' esté presente)
         newCartItems = [...prevState.cartItems, { ...producto, cantidad: 1 }];
       }
 
@@ -335,7 +330,7 @@ class Tienda extends React.Component {
     );
   }
 
-  // Renderizar la Navbar sin icono de usuario ni logo
+  // Renderizar la Navbar
   renderSecondaryNavbar = () => {
     return (
       <AppBar
@@ -468,7 +463,6 @@ class Tienda extends React.Component {
 
         <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 3, mt: 3 }}>
           {filteredProducts.map((producto) => {
-            const IconComponent = producto.icono;
             return (
               <Paper
                 key={producto.id}
@@ -493,10 +487,20 @@ class Tienda extends React.Component {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    border: '2px solid #e9ecef'
+                    border: '2px solid #e9ecef',
+                    overflow: 'hidden' // Asegura que la imagen no se desborde
                   }}
                 >
-                  <IconComponent sx={{ fontSize: 50, color: '#2c1a99' }} />
+                  {/* MODIFICACIÓN CLAVE AQUÍ: Usamos <img> en lugar de un componente */}
+                  <img
+                    src={producto.imagen} // La propiedad 'imagen' del producto
+                    alt={producto.nombre} // Texto alternativo para accesibilidad
+                    style={{
+                      maxWidth: '100%',
+                      maxHeight: '100%',
+                      objectFit: 'contain' // Para que la imagen se ajuste sin distorsionarse
+                    }}
+                  />
                 </Box>
 
                 <Typography variant="h6" gutterBottom sx={{
@@ -595,15 +599,14 @@ class Tienda extends React.Component {
           left: '50%',
           transform: 'translate(-50%, -50%)',
           width: { xs: '90%', sm: 650 },
-          // Se eliminó maxHeight y overflow del Box principal
           bgcolor: 'background.paper',
           border: '2px solid #000',
           boxShadow: 24,
           p: 4,
           borderRadius: 2,
-          display: 'flex', // Añadido para facilitar el layout interno
-          flexDirection: 'column', // Añadido para que el contenido fluya verticalmente
-          maxHeight: '90vh' // Limita la altura total del modal en pantallas grandes
+          display: 'flex',
+          flexDirection: 'column',
+          maxHeight: '90vh'
         }}>
           {/* Header del carrito */}
           <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -627,23 +630,25 @@ class Tienda extends React.Component {
             <>
               {/* Lista de productos con scroll propio */}
               <List sx={{
-                flexGrow: 1, // Permite que la lista ocupe el espacio disponible
-                overflowY: 'auto', // Habilita el scroll vertical si el contenido excede la altura
-                scrollbarWidth: 'none', // Para Firefox
-                '&::-webkit-scrollbar': { // Para Webkit (Chrome, Safari)
+                flexGrow: 1,
+                overflowY: 'auto',
+                scrollbarWidth: 'none',
+                '&::-webkit-scrollbar': {
                   display: 'none'
                 },
-                '-ms-overflow-style': 'none' // Para IE/Edge
+                '-ms-overflow-style': 'none'
               }}>
                 {this.state.cartItems.map((item, index) => {
-                  const IconComponent = item.icono || FlightIcon;
                   return (
                     <React.Fragment key={item.id}>
                       <ListItem sx={{ py: 2 }}>
                         <ListItemAvatar>
-                          <Avatar sx={{ bgcolor: '#2c1a99', width: 50, height: 50 }}>
-                            <IconComponent />
-                          </Avatar>
+                          {/* MODIFICACIÓN CLAVE AQUÍ: Avatar con la imagen del producto */}
+                          <Avatar
+                            src={item.imagen} // La propiedad 'imagen' del item del carrito
+                            alt={item.nombre}
+                            sx={{ width: 50, height: 50, borderRadius: 1 }} // Puedes ajustar el borderRadius si quieres que sean cuadrados
+                          />
                         </ListItemAvatar>
                         <ListItemText
                           primary={
