@@ -2,7 +2,7 @@ import React from 'react';
 import {
   Box,
   Container,
-
+  Drawer,
   AppBar,
   Toolbar,
   TextField,
@@ -586,177 +586,117 @@ class Tienda extends React.Component {
   }
 
   // Renderizar modal del carrito
-  renderCarritoModal = () => {
-    return (
-      <Modal
-        open={this.state.cartModalOpen}
-        onClose={this.cerrarCarritoModal}
-        aria-labelledby="carrito-modal"
-      >
-        <Box sx={{
-          position: 'absolute',
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
-          width: { xs: '90%', sm: 650 },
-          bgcolor: 'background.paper',
-          border: '2px solid #000',
-          boxShadow: 24,
-          p: 4,
-          borderRadius: 2,
-          display: 'flex',
-          flexDirection: 'column',
-          maxHeight: '90vh'
-        }}>
-          {/* Header del carrito */}
-          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-            <Typography variant="h5" component="h2">
-              Carrito de Compras
-            </Typography>
-            <IconButton onClick={this.cerrarCarritoModal}>
-              <CloseIcon />
-            </IconButton>
-          </Box>
-
-          {/* Contenido del carrito */}
-          {this.state.cartItems.length === 0 ? (
-            <Box sx={{ textAlign: 'center', py: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <ShoppingCartIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
-              <Typography variant="h6" color="text.secondary">
-                Tu carrito está vacío
-              </Typography>
-            </Box>
-          ) : (
-            <>
-              {/* Lista de productos con scroll propio */}
-              <List sx={{
-                flexGrow: 1,
-                overflowY: 'auto',
-                scrollbarWidth: 'none',
-                '&::-webkit-scrollbar': {
-                  display: 'none'
-                },
-                '-ms-overflow-style': 'none'
-              }}>
-                {this.state.cartItems.map((item, index) => {
-                  return (
-                    <React.Fragment key={item.id}>
-                      <ListItem sx={{ py: 2 }}>
-                        <ListItemAvatar>
-                          {/* MODIFICACIÓN CLAVE AQUÍ: Avatar con la imagen del producto */}
-                          <Avatar
-                            src={item.imagen} // La propiedad 'imagen' del item del carrito
-                            alt={item.nombre}
-                            sx={{ width: 50, height: 50, borderRadius: 1 }} // Puedes ajustar el borderRadius si quieres que sean cuadrados
-                          />
-                        </ListItemAvatar>
-                        <ListItemText
-                          primary={
-                            <Typography variant="h6" sx={{ fontSize: '1rem', fontWeight: 'bold' }}>
-                              {item.nombre}
-                            </Typography>
-                          }
-                          secondary={
-                            <Typography variant="body2" color="text.secondary">
-                              L{item.precio.toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
-                            </Typography>
-                          }
-                        />
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 2 }}>
-                          <IconButton
-                            size="small"
-                            onClick={() => this.disminuirCantidad(item.id)}
-                            disabled={item.cantidad <= 1}
-                            sx={{
-                              bgcolor: '#f5f5f5',
-                              '&:hover': { bgcolor: '#e0e0e0' }
-                            }}
-                          >
-                            <RemoveIcon />
-                          </IconButton>
-                          <Typography variant="body1" sx={{
-                            minWidth: 40,
-                            textAlign: 'center',
-                            fontWeight: 'bold',
-                            fontSize: '1.1rem'
-                          }}>
-                            {item.cantidad}
-                          </Typography>
-                          <IconButton
-                            size="small"
-                            onClick={() => this.aumentarCantidad(item.id)}
-                            sx={{
-                              bgcolor: '#f5f5f5',
-                              '&:hover': { bgcolor: '#e0e0e0' }
-                            }}
-                          >
-                            <AddIcon />
-                          </IconButton>
-                        </Box>
-                        <Box sx={{ textAlign: 'right', mr: 2 }}>
-                          <Typography variant="body1" sx={{ fontWeight: 'bold' }}>
-                            L{(item.precio * item.cantidad).toLocaleString('es-HN', { minimumFractionDigits: 2 })}
-                          </Typography>
-                        </Box>
-                        <ListItemSecondaryAction>
-                          <IconButton
-                            edge="end"
-                            aria-label="delete"
-                            onClick={() => this.eliminarDelCarrito(item.id)}
-                            sx={{
-                              color: '#d32f2f',
-                              '&:hover': { bgcolor: 'rgba(211, 47, 47, 0.1)' }
-                            }}
-                          >
-                            <DeleteIcon />
-                          </IconButton>
-                        </ListItemSecondaryAction>
-                      </ListItem>
-                      {index < this.state.cartItems.length - 1 && <Divider />}
-                    </React.Fragment>
-                  );
-                })}
-              </List>
-
-              {/* Total y botón de pago */}
-              <Divider sx={{ my: 2 }} />
-              <Box sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                bgcolor: '#f8f9fa',
-                p: 2,
-                borderRadius: 1
-              }}>
-                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                  Total: L{parseFloat(this.calcularTotal()).toLocaleString('es-HN', { minimumFractionDigits: 2 })}
-                </Typography>
-                <Button
-                  variant="contained"
-                  color="primary"
-                  size="large"
-                  sx={{
-                    bgcolor: '#E06C14',// fondo del boton de proceder a pagar
-                    px: 3,
-                    py: 1.5,
-                    fontSize: '1.1rem',
-                    fontWeight: 'bold',
-                    '&:hover': { bgcolor: '#28a428' } // cambio de fondo del boton de proceder a pagar
-                  }}
-                  onClick={() => {
-                    alert('¡Gracias por tu compra!');
-                    this.setState({ cartItems: [], totalItems: 0, cartModalOpen: false });
-                  }}
-                >
-                  Proceder al Pago
-                </Button>
-              </Box>
-            </>
-          )}
+  renderCarritoDrawer = () => {
+  return (
+    <Drawer
+      anchor="right"
+      open={this.state.cartModalOpen}
+      onClose={this.cerrarCarritoModal}
+      PaperProps={{
+        sx: { width: { xs: '100%', sm: 400, md: 500 } }
+      }}
+    >
+      <Box sx={{ p: 3, pt: { xs: '130px', sm: '130px' }, display: 'flex', flexDirection: 'column', height: '100%' }}>
+        {/* Header */}
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+          <Typography variant="h5" sx={{ color: '#2c1a99', fontWeight: 'bold' }}>Carrito de Compras</Typography>
+          <IconButton onClick={this.cerrarCarritoModal}>
+            <CloseIcon />
+          </IconButton>
         </Box>
-      </Modal>
-    );
-  }
+
+        {/* Contenido */}
+        {this.state.cartItems.length === 0 ? (
+          <Box sx={{ textAlign: 'center', py: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+            <ShoppingCartIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
+            <Typography variant="h6" color="text.secondary">Tu carrito está vacío</Typography>
+          </Box>
+        ) : (
+          <>
+            <List sx={{ flexGrow: 1, overflowY: 'auto' }}>
+              {this.state.cartItems.map((item, index) => (
+                <React.Fragment key={item.id}>
+                  <ListItem key={item.id} disableGutters sx={{ px: 1 }}>
+  <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+    {/* Imagen */}
+    <Avatar
+      src={item.imagen}
+      alt={item.nombre}
+      variant="square"
+      sx={{ width: 70, height: 70, borderRadius: 1, mr: 2 }}
+    />
+
+    {/* Nombre y precio unitario */}
+    <Box sx={{ flexGrow: 1 }}>
+      <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.05rem' }}>
+        {item.nombre}
+      </Typography>
+      <Typography variant="body1" sx={{ fontSize: '0.95rem', color: 'text.secondary' }}>
+        L{item.precio.toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
+      </Typography>
+    </Box>
+
+    {/* Cantidad: más alejado del texto, más cerca del precio */}
+    <Box sx={{ display: 'flex', alignItems: 'center', ml: 3, mr: 1 }}>
+      <IconButton size="small" onClick={() => this.disminuirCantidad(item.id)} disabled={item.cantidad <= 1}>
+        <RemoveIcon />
+      </IconButton>
+      <Typography sx={{ mx: 1, minWidth: 30, textAlign: 'center', fontWeight: 'bold' }}>
+        {item.cantidad}
+      </Typography>
+      <IconButton size="small" onClick={() => this.aumentarCantidad(item.id)}>
+        <AddIcon />
+      </IconButton>
+    </Box>
+
+    {/* Total */}
+    <Box sx={{ minWidth: 90, textAlign: 'right', mr: 1 }}>
+      <Typography fontWeight="bold" noWrap>
+        L{(item.precio * item.cantidad).toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+      </Typography>
+    </Box>
+
+    {/* Eliminar */}
+    <IconButton onClick={() => this.eliminarDelCarrito(item.id)} sx={{ color: 'error.main' }}>
+      <DeleteIcon />
+    </IconButton>
+  </Box>
+</ListItem>
+
+                  {index < this.state.cartItems.length - 1 && <Divider />}
+                </React.Fragment>
+              ))}
+            </List>
+
+            {/* Total y botón */}
+            <Divider sx={{ my: 2 }} />
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+              <Typography variant="h6" fontWeight="bold">
+                Total: L{this.calcularTotal()}
+              </Typography>
+              <Button
+                variant="contained"
+                sx={{
+                  bgcolor: '#E06C14',
+                  fontWeight: 'bold',
+                  '&:hover': { bgcolor: '#28a428' }
+                }}
+                onClick={() => {
+                  alert('¡Gracias por tu compra!');
+                  this.setState({ cartItems: [], totalItems: 0, cartModalOpen: false });
+                }}
+              >
+                Proceder al Pago
+              </Button>
+            </Box>
+          </>
+        )}
+      </Box>
+    </Drawer>
+  );
+}
+
+
 
   render() {
     console.log('Renderizando Tienda - Vista actual:', this.state.currentView);
@@ -813,7 +753,7 @@ class Tienda extends React.Component {
             </Box>
 
             {/* Modal para el carrito de compras */}
-            {this.renderCarritoModal()}
+            {this.renderCarritoDrawer()}
           </>
         );
     }

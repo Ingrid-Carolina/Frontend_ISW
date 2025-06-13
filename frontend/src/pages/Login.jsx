@@ -4,7 +4,6 @@ import {
   Typography,
   IconButton,
   InputAdornment,
-  Stack,
   Box,
   Alert,
   TextField,
@@ -23,12 +22,13 @@ const Login = ({ onRegistroClick }) => {
   });
 
   const [showPassword, setShowPassword] = useState(false);
-
-
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState('');
   const [recoveryMessage, setRecoveryMessage] = useState('');
+
+  const [failedAttempts, setFailedAttempts] = useState(0);
+  const MAX_ATTEMPTS = 6;
 
   const validateForm = () => {
     const newErrors = {};
@@ -41,9 +41,7 @@ const Login = ({ onRegistroClick }) => {
 
     if (!formData.password) {
       newErrors.password = 'La contraseña es obligatoria';
-    } else if (formData.password.length < 8) {
-      newErrors.password = 'La contraseña debe tener al menos 8 caracteres';
-    }
+    } 
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -69,46 +67,56 @@ const Login = ({ onRegistroClick }) => {
   };
 
   const handleLogin = async () => {
-  if (!validateForm()) return;
+    if (!validateForm()) return;
 
-  setIsSubmitting(true);
-  try {
-    const userCredential = await signInWithEmailAndPassword(
-      auth,
-      formData.email,
-      formData.password
-    );
-
-    const idToken = await userCredential.user.getIdToken();
-
-    // Aquí se envía el token al backend
-    const response = await fetch('http://localhost:3000/api/login', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${idToken}`
-      },
-      body: JSON.stringify({ otroDato: 'si necesitas' })
-    });
-
-    const result = await response.json();
-    console.log('Respuesta del backend:', result);
-
-    if (!response.ok) {
-      setSubmitError(result.message || 'Error al iniciar sesión');
-    } else {
-      // Aquí puedes redirigir o actualizar estado global
-      console.log('Inicio de sesión correcto');
+    if (failedAttempts >= MAX_ATTEMPTS) {
+      setSubmitError('Has excedido el número máximo de intentos. Intenta más tarde.');
+      return;
     }
 
-  } catch (error) {
-    console.error('Error al iniciar sesión:', error);
-    setSubmitError('Credenciales incorrectas o usuario no registrado.');
-  } finally {
-    setIsSubmitting(false);
-  }
-};
+    setIsSubmitting(true);
+    try {
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        formData.email,
+        formData.password
+      );
 
+      const idToken = await userCredential.user.getIdToken();
+
+      const response = await fetch('http://localhost:3000/api/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${idToken}`
+        },
+        body: JSON.stringify({ otroDato: 'si necesitas' })
+      });
+
+      const result = await response.json();
+      console.log('Respuesta del backend:', result);
+
+      if (!response.ok) {
+        setSubmitError(result.message || 'Error al iniciar sesión');
+      } else {
+        console.log('Inicio de sesión correcto');
+        setFailedAttempts(0); // Reiniciar contador si fue exitoso
+      }
+
+    } catch (error) {
+      const nuevoIntento = failedAttempts + 1;
+      setFailedAttempts(nuevoIntento);
+
+      const restante = MAX_ATTEMPTS - nuevoIntento;
+      setSubmitError(
+        restante ==0
+          ? `Has excedido el número máximo de intentos. Intenta más tarde.`
+          : 'Correo o contraseña incorrecta'
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   const handleForgotPassword = () => {
     if (!formData.email.trim()) {
@@ -138,14 +146,12 @@ const Login = ({ onRegistroClick }) => {
       }}
     >
       <Box sx={{ width: '100%', maxWidth: 400, textAlign: 'center' }}>
-        {/* Logo */}
         <img
           src={logo}
           alt="Logo"
           style={{ width: '300px', marginBottom: '1rem' }}
         />
 
-        {/* Título */}
         <Typography
           variant="h5"
           sx={{
@@ -160,7 +166,6 @@ const Login = ({ onRegistroClick }) => {
           INICIAR SESIÓN
         </Typography>
 
-        {/* Mensajes */}
         {submitError && (
           <Alert
             severity="error"
@@ -180,7 +185,6 @@ const Login = ({ onRegistroClick }) => {
           </Alert>
         )}
 
-        {/* Campo Email */}
         <TextField
           name="email"
           label="Correo electrónico"
@@ -192,33 +196,30 @@ const Login = ({ onRegistroClick }) => {
           margin="normal"
         />
 
-        {/* Campo Contraseña */}
         <TextField
-  name="password"
-  type={showPassword ? 'text' : 'password'}
-  label="Contraseña"
-  value={formData.password}
-  onChange={handleInputChange}
-  error={!!errors.password}
-  helperText={errors.password}
-  fullWidth
-  margin="normal"
-  InputProps={{
-    endAdornment: (
-      <InputAdornment position="end">
-        <IconButton
-          onClick={() => setShowPassword((prev) => !prev)}
-          edge="end"
-        >
-          {showPassword ? <VisibilityOff /> : <Visibility />}
-        </IconButton>
-      </InputAdornment>
-    )
-  }}
-/>
+          name="password"
+          type={showPassword ? 'text' : 'password'}
+          label="Contraseña"
+          value={formData.password}
+          onChange={handleInputChange}
+          error={!!errors.password}
+          helperText={errors.password}
+          fullWidth
+          margin="normal"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  onClick={() => setShowPassword((prev) => !prev)}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            )
+          }}
+        />
 
-
-        {/* Enlace recuperar */}
         <Box sx={{ textAlign: 'right', mt: 1 }}>
           <Link
             component="button"
@@ -233,12 +234,11 @@ const Login = ({ onRegistroClick }) => {
           </Link>
         </Box>
 
-        {/* Botón */}
         <Button
           variant="contained"
           fullWidth
           onClick={handleLogin}
-          disabled={isSubmitting}
+          disabled={isSubmitting || failedAttempts >= MAX_ATTEMPTS}
           sx={{
             mt: 2,
             backgroundColor: '#fa7600',
@@ -250,7 +250,6 @@ const Login = ({ onRegistroClick }) => {
           {isSubmitting ? 'Iniciando...' : 'Iniciar sesión'}
         </Button>
 
-        {/* Registro */}
         <Typography sx={{ mt: 2, fontSize: '0.9rem' }}>
           ¿No tienes una cuenta?{' '}
           <Link
