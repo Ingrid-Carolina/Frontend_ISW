@@ -1,0 +1,38 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+}
+
+.map-container {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+#map {
+  width: 100%;
+  max-width: 1200px;
+  height: 60vh;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+}
+
+@media (min-width: 768px) {
+  .map-container {
+    height: 70vh;
+    padding: 2rem;
+  }
+
+  #map {
+    max-width: 95%;
+    margin: 0 auto;
+  }
+}

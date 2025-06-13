@@ -1,4 +1,6 @@
 import React from 'react';
+import MapComponent from '../components/MapComponent'; // adjust path if needed
+
 import {
 	Box,
 	Typography,
@@ -54,7 +56,7 @@ const Contacto = () => {
 						zIndex: 1,
 					}}
 				/>
-				
+
 				<Box
 					sx={{
 						position: 'relative',
@@ -147,7 +149,7 @@ const Contacto = () => {
 								Comparta su experiencia con nosotros.
 							</Typography>
 							<Link
-								to= '/Testimonio'
+								to='/Testimonio'
 								style={{
 									fontWeight: 'bold',
 									color: '#002c6c',
@@ -273,7 +275,7 @@ const Contacto = () => {
 										mb: 1,
 									}}
 								>
-									 ¿Sobre qué pregunta? <span style={{ color: 'red' }}>*</span>
+									¿Sobre qué pregunta? <span style={{ color: 'red' }}>*</span>
 								</Typography>
 								<FormGroup row>
 									{[
@@ -367,6 +369,30 @@ const Contacto = () => {
 							</Button>
 						</Box>
 					</Box>
+				</Box>
+			</Box>
+			{/* MAPA DE UBICACIÓN */}
+			<Box sx={{ py: 6, backgroundColor: '#f1f5fb' }}>
+				<Box
+					sx={{
+						maxWidth: '1200px',
+						margin: '0 auto',
+						px: 2,
+					}}
+				>
+					<Typography
+						variant='h4'
+						sx={{
+							fontWeight: 'bold',
+							color: '#002c6c',
+							textAlign: 'center',
+							mb: 0.5,
+							fontFamily: 'Varsity, sans-serif',
+						}}
+					>
+						Nuestra Ubicación
+					</Typography>
+					<MapComponent isInteractive={false} />
 				</Box>
 			</Box>
 		</>
