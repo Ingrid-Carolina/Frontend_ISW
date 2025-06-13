@@ -204,6 +204,14 @@ export default function CustomNavbar() {
 							>
 								En Vivo
 							</Button>
+							<Button
+								component={Link}
+								to='/admin'
+								onClick={() => setDrawerOpen(false)}
+								sx={navBtnStyle(drawerOpen)}
+							>
+								Admin
+							</Button>
 						</Box>
 					</Box>
 

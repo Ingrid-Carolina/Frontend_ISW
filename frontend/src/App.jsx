@@ -27,35 +27,33 @@ import TestimonioBeisbol from './pages/Testimonio.jsx';
 function App() {
 	return (
 		<>
-			<Router>
-				<ScrollToTop /> 
-				<div className='app-container'>
-					<CustomNavbar />
-					<main className='main-content'>
-						<Routes>
-							<Route path='/' element={<Home />} />
-							<Route path='/historia' element={<NuestraHistoria />} />
-							<Route path='/Categoria' element={<Categorias />} />
-							<Route path='/NuestroEquipo' element={<NuestroEquipo />} />
-							<Route path='/logros' element={<Logros />} />
-							<Route path='/voluntariado' element={<Voluntariado />} />
-							<Route path='/calendario' element={<Calendario />} />
-							<Route path='/eventos' element={<Eventos />} />
-							<Route path='/Contacto' element={<Contacto />} />
-							<Route path='/tienda' element={<Tienda />} />
-							<Route path='/aliados' element={<Aliados />} />
-							<Route path='/acercade' element={<Acercade />} />
-							<Route path='/login' element={<MostrarLoginyRegistro />} />
-							<Route path='/Noticia1' element={<Noticia1 />}/>
-                            <Route path='/Noticia2' element={<Noticia2 />}/>
-                            <Route path='/Noticia3' element={<Noticia3 />}/>
-							<Route path='/Testimonio' element={<TestimonioBeisbol/>}/>
-						</Routes>
-					</main>
+			<ScrollToTop /> 
+			<div className='app-container'>
+				<CustomNavbar />
+				<main className='main-content'>
+					<Routes>
+						<Route path='/' element={<Home />} />
+						<Route path='/historia' element={<NuestraHistoria />} />
+						<Route path='/Categoria' element={<Categorias />} />
+						<Route path='/NuestroEquipo' element={<NuestroEquipo />} />
+						<Route path='/logros' element={<Logros />} />
+						<Route path='/voluntariado' element={<Voluntariado />} />
+						<Route path='/calendario' element={<Calendario />} />
+						<Route path='/eventos' element={<Eventos />} />
+						<Route path='/Contacto' element={<Contacto />} />
+						<Route path='/tienda' element={<Tienda />} />
+						<Route path='/aliados' element={<Aliados />} />
+						<Route path='/acercade' element={<Acercade />} />
+						<Route path='/login' element={<MostrarLoginyRegistro />} />
+						<Route path='/Noticia1' element={<Noticia1 />}/>
+						<Route path='/Noticia2' element={<Noticia2 />}/>
+						<Route path='/Noticia3' element={<Noticia3 />}/>
+						<Route path='/Testimonio' element={<TestimonioBeisbol/>}/>
+					</Routes>
+				</main>
 
-					<Footer />
-				</div>
-			</Router>
+				<Footer />
+			</div>
 		</>
 	);
 }
