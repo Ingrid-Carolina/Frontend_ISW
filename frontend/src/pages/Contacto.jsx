@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import MapComponent from '../components/MapComponent'; // adjust path if needed
 
 import {
@@ -14,6 +14,8 @@ import {
 import fond from '/Images/pilotos.c.jpg';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
+import { Snackbar, Alert } from '@mui/material';
 import axios from 'axios';
 
 const Contacto = () => {
@@ -22,7 +24,20 @@ const Contacto = () => {
 		handleSubmit,
 		formState: { errors },
 		reset,
+		control,
 	} = useForm();
+
+	const [openSnackbar, setOpenSnackbar] = useState(false);
+	const [snackbarType, setSnackbarType] = useState('success'); // 'success' | 'error'
+	const [snackbarMsg, setSnackbarMsg] = useState('');
+
+	const contieneScript = value =>
+		!/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi.test(value) ||
+		'Contenido inválido';
+
+	const noEspaciosEnBlanco = value =>
+		// Valida que el input no esté vacío ni contenga solo espacios. Se aplica a varios campos del formulario.
+		value.trim() !== '' || 'No puede contener solo espacios';
 
 	const onSubmit = async data => {
 		const url = 'http://localhost:3000/auth/registrarformulario';
@@ -42,24 +57,35 @@ const Contacto = () => {
 				headers: { 'Content-Type': 'application/json' },
 			});
 
-			await reset();
+			reset({
+				nombre: '',
+				apellido: '',
+				telefono: '',
+				correo: '',
+				direccion: '',
+				proposito: [],
+				mensaje: '',
+			});
+
+			// Mensaje de éxito
+			setSnackbarMsg('Formulario enviado exitosamente.');
+			setSnackbarType('success');
+			setOpenSnackbar(true);
+
 			console.log('response data: ', res.data.mensaje);
 			return res.data;
 		} catch (error) {
-			console.log('Error:', error);
-
+			let mensaje = 'Error en la red.';
 			if (error.response) {
-				console.log('Error data:', error.response.data.mensaje);
-				console.log('Error status:', error.response.status);
-
-				window.alert(error.response.data.mensaje);
+				mensaje = error.response.data.mensaje || 'Error en el servidor';
 			} else if (error.request) {
-				window.alert(
-					'Ninguna respuesta del servidor.Por favor verifique su red.',
-				);
-			} else {
-				window.alert('Error en la red.');
+				mensaje = 'Ninguna respuesta del servidor. Por favor verifique su red.';
 			}
+
+			// Mensaje de error
+			setSnackbarMsg(mensaje);
+			setSnackbarType('error');
+			setOpenSnackbar(true);
 		}
 
 		/*window.alert((data.proposito));
@@ -263,7 +289,10 @@ const Contacto = () => {
 														message: field.message,
 													}
 												: undefined,
-											validate: field.customValidate || undefined,
+											validate: value =>
+												(field.customValidate
+													? field.customValidate(value)
+													: true) && noEspaciosEnBlanco(value),
 										})}
 										error={!!errors[field.name]}
 										helperText={errors[field.name]?.message}
@@ -296,6 +325,15 @@ const Contacto = () => {
 									{...register('direccion', {
 										required: 'La dirección es obligatoria',
 										minLength: { value: 5, message: 'Mínimo 5 caracteres' },
+										validate: value => {
+											const espacio = noEspaciosEnBlanco(value);
+											if (espacio !== true) return espacio;
+
+											const script = contieneScript(value);
+											if (script !== true) return script;
+
+											return true;
+										},
 									})}
 									error={!!errors.direccion}
 									helperText={errors.direccion?.message}
@@ -321,72 +359,108 @@ const Contacto = () => {
 								>
 									¿Sobre qué pregunta? <span style={{ color: 'red' }}>*</span>
 								</Typography>
-								<FormGroup row>
-									{[
-										'Donación',
-										'Donación de Indumentaria/Equipo',
-										'Patrocinio',
-										'Asociación',
-										'Voluntariado',
-										'Otros',
-									].map(label => (
-										<FormControlLabel
-											key={label}
-											control={
-												<Checkbox
-													value={label}
-													{...register('proposito', {
-														required: 'Selecciona al menos una opción',
-													})}
+								<Controller
+									name='proposito'
+									control={control}
+									defaultValue={[]}
+									rules={{
+										validate: value =>
+											value.length > 0 || 'Selecciona al menos una opción',
+									}}
+									render={({ field }) => (
+										<FormGroup row>
+											{[
+												'Donación',
+												'Donación de Indumentaria/Equipo',
+												'Patrocinio',
+												'Asociación',
+												'Voluntariado',
+												'Otros',
+											].map(label => (
+												<FormControlLabel
+													key={label}
+													label={label}
+													control={
+														<Checkbox
+															checked={field.value.includes(label)}
+															onChange={e => {
+																const newValue = e.target.checked
+																	? [...field.value, label]
+																	: field.value.filter(item => item !== label);
+																field.onChange(newValue);
+															}}
+														/>
+													}
+													sx={{
+														'& .MuiFormControlLabel-label': {
+															color: '#002c6c',
+														},
+													}}
 												/>
-											}
-											label={label}
-											sx={{
-												'& .MuiFormControlLabel-label': {
-													color: '#002c6c',
-												},
-											}}
-										/>
-									))}
-								</FormGroup>
+											))}
+										</FormGroup>
+									)}
+								/>
 							</Grid>
 						</Grid>
 
 						{/* CAMPO MENSAJE*/}
 						<Box sx={{ mt: 3 }}>
-							<TextField
-								label='Mensaje'
-								multiline
-								minRows={8}
-								fullWidth
-								required
-								{...register('mensaje', {
+							<Controller
+								name='mensaje'
+								control={control}
+								defaultValue=''
+								rules={{
 									required: 'El mensaje es obligatorio',
 									minLength: {
 										value: 10,
 										message: 'Escribe al menos 10 caracteres',
 									},
-								})}
-								error={!!errors.mensaje}
-								helperText={errors.mensaje?.message}
-								InputLabelProps={{
-									sx: {
-										color: '#002c6c',
-										'& .MuiFormLabel-asterisk': {
-											color: 'red',
-										},
+									maxLength: { value: 500, message: 'Máximo 500 caracteres' },
+									validate: value => {
+										const espacio = noEspaciosEnBlanco(value);
+										if (espacio !== true) return espacio;
+
+										const script = contieneScript(value);
+										if (script !== true) return script;
+
+										return true;
 									},
 								}}
-								sx={{
-									'& .MuiInputBase-root': {
-										padding: '12px',
-										alignItems: 'flex-start',
-									},
-									'& .MuiInputBase-input': {
-										fontSize: '1rem',
-										fontFamily: 'Arial, sans-serif',
-									},
-								}}
+								render={({ field }) => (
+									<TextField
+										{...field}
+										label='Mensaje'
+										multiline
+										minRows={8}
+										fullWidth
+										error={!!errors.mensaje}
+										helperText={
+											errors.mensaje?.message ||
+											`${field.value.length}/500 caracteres`
+										}
+										inputProps={{
+											maxLength: 500, // Limita la escritura a 500 caracteres
+										}}
+										InputLabelProps={{
+											required: true,
+											sx: {
+												color: '#002c6c',
+												'& .MuiFormLabel-asterisk': { color: 'red' },
+											},
+										}}
+										sx={{
+											'& .MuiInputBase-root': {
+												padding: '12px',
+												alignItems: 'flex-start',
+											},
+											'& .MuiInputBase-input': {
+												fontSize: '1rem',
+												fontFamily: 'Arial, sans-serif',
+											},
+										}}
+									/>
+								)}
 							/>
 						</Box>
 
@@ -440,6 +514,23 @@ const Contacto = () => {
 						Nuestra Ubicación
 					</Typography>
 					<MapComponent isInteractive={false} />
+
+					{/* FEEDBACK flotante sobre Formulario Exitoso o Algun Error */}
+					<Snackbar
+						open={openSnackbar}
+						autoHideDuration={4000}
+						onClose={() => setOpenSnackbar(false)}
+						anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+					>
+						<Alert
+							onClose={() => setOpenSnackbar(false)}
+							severity={snackbarType}
+							variant='filled'
+							sx={{ width: '100%' }}
+						>
+							{snackbarMsg}
+						</Alert>
+					</Snackbar>
 				</Box>
 			</Box>
 		</>
