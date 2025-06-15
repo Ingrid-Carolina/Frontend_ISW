@@ -14,6 +14,7 @@ import {
 import fond from '/Images/pilotos.c.jpg';
 import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
+import axios from 'axios';
 
 const Contacto = () => {
 	const {
@@ -23,9 +24,52 @@ const Contacto = () => {
 		reset,
 	} = useForm();
 
-	const onSubmit = data => {
+	const onSubmit = async data => {
+		const url = 'http://localhost:3000/auth/registrarformulario';
+
+		const body = {
+			email: data.correo,
+			nombre: data.nombre,
+			apellido: data.apellido,
+			telefono: data.telefono,
+			direccion: data.direccion,
+			proposito: data.proposito,
+			mensaje: data.mensaje,
+		};
+
+		try {
+			const res = await axios.post(url, body, {
+				headers: { 'Content-Type': 'application/json' },
+			});
+
+			await reset();
+			console.log('response data: ', res.data.mensaje);
+			return res.data;
+		} catch (error) {
+			console.log('Error:', error);
+
+			if (error.response) {
+				console.log('Error data:', error.response.data.mensaje);
+				console.log('Error status:', error.response.status);
+
+				window.alert(error.response.data.mensaje);
+			} else if (error.request) {
+				window.alert(
+					'Ninguna respuesta del servidor.Por favor verifique su red.',
+				);
+			} else {
+				window.alert('Error en la red.');
+			}
+		}
+
+		/*window.alert((data.proposito));
+        window.alert((data.mensaje));
+        window.alert((data.nombre));
+        window.alert((data.apellido));
+        window.alert((data.telefono));
+        window.alert((data.correo));
+        window.alert((data.direccion));*/
 		console.log('Formulario enviado:', data);
-		reset();
 	};
 
 	return (
@@ -288,12 +332,15 @@ const Contacto = () => {
 									].map(label => (
 										<FormControlLabel
 											key={label}
-											control={<Checkbox />}
+											control={
+												<Checkbox
+													value={label}
+													{...register('proposito', {
+														required: 'Selecciona al menos una opción',
+													})}
+												/>
+											}
 											label={label}
-											{...register('intereses', {
-												validate: value =>
-													value.length > 0 || 'Selecciona al menos una opción',
-											})}
 											sx={{
 												'& .MuiFormControlLabel-label': {
 													color: '#002c6c',
