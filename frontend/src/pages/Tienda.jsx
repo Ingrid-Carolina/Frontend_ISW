@@ -663,7 +663,9 @@ class Tienda extends React.Component {
       open={this.state.cartModalOpen}
       onClose={this.cerrarCarritoModal}
       PaperProps={{
-        sx: { width: { xs: '100%', sm: 400, md: 500 } }
+        sx: { width: { xs: '100%', sm: 400, md: 550 },
+          overflowX: 'hidden',
+        overflowY: 'hidden'  }
       }}
     >
       <Box sx={{ p: 3, pt: { xs: '130px', sm: '130px' }, display: 'flex', flexDirection: 'column', height: '100%' }}>
