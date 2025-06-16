@@ -31,6 +31,8 @@ const Contacto = () => {
 	const [snackbarType, setSnackbarType] = useState('success'); // 'success' | 'error'
 	const [snackbarMsg, setSnackbarMsg] = useState('');
 
+	const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+
 	const contieneScript = value =>
 		!/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi.test(value) ||
 		'Contenido inválido';
@@ -250,14 +252,14 @@ const Contacto = () => {
 								{
 									label: 'Nombre',
 									name: 'nombre',
-									pattern: /^[A-Za-zÀ-ÿ\s]{2,}$/,
-									message: 'Solo letras y mínimo 2 caracteres',
+									pattern: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,}$/,
+									message: 'Solo letras (mínimo 2 caracteres, sin números)',
 								},
 								{
 									label: 'Apellido',
 									name: 'apellido',
-									pattern: /^[A-Za-zÀ-ÿ\s]{2,}$/,
-									message: 'Solo letras y mínimo 2 caracteres',
+									pattern: /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]{2,}$/,
+									message: 'Solo letras (mínimo 2 caracteres, sin números)',
 								},
 								{
 									label: 'Teléfono',
