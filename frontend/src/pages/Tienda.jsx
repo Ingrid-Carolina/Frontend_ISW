@@ -154,6 +154,13 @@ class Tienda extends React.Component {
       precio: 2800.00,
       imagen: camisaLocal
     },
+    {
+      id: 11,
+      nombre: "CamisadeNiño",
+      descripcion: "La gorra 6 combina funcionalidad y moda, perfecta para cualquier ocasión.",
+      precio: 2800.00,
+      imagen: camisaLocal
+    },
    
   ];
 
@@ -246,14 +253,65 @@ class Tienda extends React.Component {
     // Aquí puedes agregar la lógica para ir al perfil
   }
 
+cambiarTallaEnCarrito = (itemId, tallaActual, nuevaTalla) => {
+  if (!nuevaTalla || tallaActual === nuevaTalla) return;
+
+  this.setState(prevState => {
+    const newCartItems = prevState.cartItems.map(item => {
+      // Encontrar el item específico por ID y talla actual
+      if (item.id === itemId && item.talla === tallaActual) {
+        // Buscar el producto original para obtener el precio base
+        const productoOriginal = prevState.productos ? 
+          prevState.productos.find(p => p.id === itemId) : 
+          { precio: item.precioOriginal || item.precio, precioNino: item.precioNino };
+
+        if (productoOriginal) {
+          // Calcular el nuevo precio según la nueva talla
+          const nuevoPrecio = this.getPrecioByTalla(productoOriginal, nuevaTalla);
+          
+          console.log(`Cambiando talla de ${tallaActual} a ${nuevaTalla}. Precio: ${item.precio} -> ${nuevoPrecio}`);
+          
+          return {
+            ...item,
+            talla: nuevaTalla,
+            precio: nuevoPrecio
+          };
+        }
+      }
+      return item;
+    });
+
+    return {
+      cartItems: newCartItems
+    };
+  });
+}
+
+
+// Función para obtener el precio según la talla
+getPrecioByTalla = (producto, talla) => {
+  const tallasNino = ['6', '8', '10', '12'];
+  
+  if (tallasNino.includes(talla)) {
+    // Si el producto tiene un precio específico para niños, úsalo, sino usa un precio por defecto
+    return producto.precioNino || (producto.precio - 50); // 20% descuento como ejemplo
+  }
+  
+  return producto.precio; // Precio normal para tallas S, M, L, XL
+};
+
+ productoRequiereTalla = (producto) => {
+    const nombre = producto.nombre.toLowerCase();
+    return nombre.includes("camisa") || 
+           nombre.includes("camiseta") 
+  };
+
   // Agregar item al carrito
  addToCart = (producto) => {
   const tallaSeleccionada = this.state.selectedSizes?.[producto.id] || null;
   
   // Verificar si el producto requiere talla y si está seleccionada
-  const requiereTalla = producto.nombre.toLowerCase().includes("camisa") || 
-                       producto.nombre.toLowerCase().includes("camiseta");
-  
+  const requiereTalla = this.productoRequiereTalla(producto);
   if (requiereTalla && !tallaSeleccionada) {
     alert("Por favor selecciona una talla antes de agregar al carrito.");
   
@@ -279,9 +337,15 @@ class Tienda extends React.Component {
           : item
       );
     } else {
+      const precioFinal = requiereTalla ? 
+        this.getPrecioByTalla(producto, tallaSeleccionada) : 
+        producto.precio;
       // Si es un producto nuevo, agregarlo al carrito
       const nuevoItem = { 
         ...producto, 
+        precio: precioFinal,
+        precioOriginal: producto.precio, // ⭐ Guardar precio original
+        precioNino: producto.precioNino, // ⭐ Guardar precio de niño si existe
         cantidad: 1,
         ...(requiereTalla && { talla: tallaSeleccionada })
       };
@@ -294,6 +358,36 @@ class Tienda extends React.Component {
     return {
       cartItems: newCartItems,
       totalItems: totalItems
+    };
+  });
+}
+
+// VERSIÓN ALTERNATIVA de cambiarTallaEnCarrito si usas precioOriginal:
+cambiarTallaEnCarritoAlternativa = (itemId, tallaActual, nuevaTalla) => {
+  if (!nuevaTalla || tallaActual === nuevaTalla) return;
+
+  this.setState(prevState => {
+    const newCartItems = prevState.cartItems.map(item => {
+      if (item.id === itemId && item.talla === tallaActual) {
+        // Usar la información guardada en el item
+        const productoBase = {
+          precio: item.precioOriginal || item.precio,
+          precioNino: item.precioNino
+        };
+        
+        const nuevoPrecio = this.getPrecioByTalla(productoBase, nuevaTalla);
+        
+        return {
+          ...item,
+          talla: nuevaTalla,
+          precio: nuevoPrecio
+        };
+      }
+      return item;
+    });
+
+    return {
+      cartItems: newCartItems
     };
   });
 }
@@ -347,10 +441,76 @@ class Tienda extends React.Component {
     });
   }
 
+  actualizarPreciosCarrito = () => {
+  this.setState(prevState => {
+    const newCartItems = prevState.cartItems.map(item => {
+      // Si el producto requiere talla, recalcular precio
+      const requiereTalla = this.productoRequiereTalla(item);
+      
+      if (requiereTalla && item.talla) {
+        const productoBase = {
+          precio: item.precioOriginal || item.precio,
+          precioNino: item.precioNino
+        };
+        
+        const nuevoPrecio = this.getPrecioByTalla(productoBase, item.talla);
+        
+        return {
+          ...item,
+          precio: nuevoPrecio
+        };
+      }
+      
+      return item;
+    });
+
+    return {
+      cartItems: newCartItems
+    };
+  });
+}
+
   // Calcular total del carrito
   calcularTotal = () => {
   return this.state.cartItems.reduce((total, item) => {
     return total + (item.precio * item.cantidad);
+  }, 0).toFixed(2);
+}
+
+calcularTotalConActualizacion = () => {
+  // Primero actualizar precios si es necesario
+  this.actualizarPreciosCarrito();
+  
+  // Luego calcular con un pequeño delay para asegurar que el state se actualice
+  setTimeout(() => {
+    const total = this.calcularTotal();
+    console.log('Total calculado:', total);
+    return total;
+  }, 0);
+}
+
+// Versión síncrona que calcula directamente sin depender del state
+calcularTotalSincrono = (cartItems = null) => {
+  const items = cartItems || this.state.cartItems;
+  
+  return items.reduce((total, item) => {
+    // Recalcular precio en tiempo real si es necesario
+    let precioFinal = item.precio;
+    
+    // Si el producto requiere talla, verificar que el precio sea correcto
+    const requiereTalla = this.productoRequiereTalla(item);
+    if (requiereTalla && item.talla) {
+      const productoBase = {
+        precio: item.precioOriginal || item.precio,
+        precioNino: item.precioNino
+      };
+      precioFinal = this.getPrecioByTalla(productoBase, item.talla);
+    }
+    
+    const precio = parseFloat(precioFinal) || 0;
+    const cantidad = parseInt(item.cantidad) || 0;
+    
+    return total + (precio * cantidad);
   }, 0).toFixed(2);
 }
 
@@ -592,9 +752,13 @@ class Tienda extends React.Component {
                   }))}
                   sx={{ mb: 2 }}
                 >
-                  {['14','15','16','S', 'M', 'L', 'XL'].map((size) => (
+                  {['6','8','10','12','14','15','16','S', 'M', 'L', 'XL'].map((size) => (
                     <MenuItem key={size} value={size}>
                       {size}
+                        
+
+
+
                     </MenuItem>
                   ))}
                 </TextField>
@@ -610,7 +774,8 @@ class Tienda extends React.Component {
                   fontSize: '1.3rem'
                 }}
               >
-                L{producto.precio.toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+                
+                 L.{this.getPrecioByTalla(producto, this.state.selectedSizes[producto.id]).toFixed(2)}
               </Typography>
 
               {/* Botón agregar al carrito */}
@@ -657,6 +822,8 @@ class Tienda extends React.Component {
 
   // Renderizar modal del carrito
   renderCarritoModal = () => {
+  const totalActualizado = this.calcularTotalSincrono();
+  
   return (
     <Drawer
       anchor="right"
@@ -705,7 +872,7 @@ class Tienda extends React.Component {
                             {item.nombre}
                           </Typography>
                           <Typography variant="body1" sx={{ fontSize: '0.95rem', color: 'text.secondary' }}>
-                            L{item.precio.toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
+                            L{(totalActualizado).toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
                           </Typography>
                           {/* Mostrar talla si existe */}
                             {item.talla && (
