@@ -1,64 +1,76 @@
-import React from 'react';
-import { Box, Grid, Paper, Typography } from '@mui/material';
-import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, ResponsiveContainer } from 'recharts';
+import { Box, Grid, Paper, Typography } from "@mui/material";
+import {
+  BarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  ResponsiveContainer
+} from "recharts";
 
-// Datos de ejemplo para la gráfica de barras
 const visitData = [
-  { month: 'Ene', visits: 120 },
-  { month: 'Feb', visits: 200 },
-  { month: 'Mar', visits: 150 },
-  { month: 'Abr', visits: 180 },
-  { month: 'May', visits: 250 },
+  { month: "Ene", visits: 120 },
+  { month: "Feb", visits: 195 },
+  { month: "Mar", visits: 140 },
+  { month: "Abr", visits: 175 },
+  { month: "May", visits: 250 }
 ];
-
-// Componente de tarjeta de estadística
-const StatCard = ({ title, value }) => (
-  <Paper elevation={3} sx={{ padding: 2, textAlign: 'center', fontFamily: 'PeterMedium' }}>
-    <Typography variant="h6" gutterBottom>
-      {title}
-    </Typography>
-    <Typography variant="h4" color="primary">
-      {value}
-    </Typography>
-  </Paper>
-);
 
 export default function Dashboard() {
   return (
-    <Box sx={{ padding: 2 }}>
-      <Typography variant="h5" gutterBottom sx={{ fontFamily: 'PeterMedium' }}>
-        Estadisticas del Sitio
+    <Box sx={{ width: '100%', pt: 2 }}>
+      <Typography
+        variant="h2"
+        gutterBottom
+        fontFamily="Varsity"
+        sx={{ textAlign: "center" }}
+      >
+        Estadísticas del Sitio
       </Typography>
 
-      {/* Tarjetas de resumen */}
-      <Grid container spacing={2}>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Visitantes Totales" value="2,340" />
+      {/* Contenedor centrado y controlado */}
+      <Box sx={{ maxWidth: 1200, mx: "auto", width: "100%" }}>
+        {/* Tarjetas de resumen */}
+        <Grid container spacing={2} justifyContent="center">
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper sx={{ p: 2, textAlign: "center"  }}>
+              <Typography variant="h6" fontFamily="PeterMedium">Visitas</Typography>
+              <Typography variant="h4" fontFamily="PeterMedium">1000</Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper sx={{ p: 2, textAlign: "center", fontFamily: "PeterMedium" }}>
+              <Typography variant="h6" fontFamily="PeterMedium">Usuarios Registrados</Typography>
+              <Typography variant="h4" fontFamily="PeterMedium">25</Typography>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} sm={6} md={4}>
+            <Paper sx={{ p: 2, textAlign: "center", fontFamily: "PeterMedium" }}>
+              <Typography variant="h6" fontFamily="PeterMedium">Noticias Publicadas</Typography>
+              <Typography variant="h4" fontFamily="PeterMedium">5</Typography>
+            </Paper>
+          </Grid>
         </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Comentarios Recibidos" value="128" />
-        </Grid>
-        <Grid item xs={12} md={4}>
-          <StatCard title="Eventos Publicados" value="15" />
-        </Grid>
-      </Grid>
 
-      {/* Gráfica de visitas */}
-      <Box sx={{ marginTop: 4 }}>
-        <Typography variant="h6" gutterBottom sx={{ fontFamily: 'PeterMedium' }}>
-          Visitas por Mes
-        </Typography>
-        <ResponsiveContainer width="100%" height={300}>
-          <BarChart data={visitData}>
-            <CartesianGrid strokeDasharray="3 3" />
-            <XAxis dataKey="month" />
-            <YAxis />
-            <Tooltip />
-            <Bar dataKey="visits" fill="#3f51b5" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
+        {/* Gráfico */}
+        <Box mt={5}>
+          <Typography variant="h4" gutterBottom fontFamily="Varsity">
+            Visitas por mes
+          </Typography>
+          <Paper sx={{ p: 2 }}>
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={visitData}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="month" />
+                <YAxis />
+                <Tooltip />
+                <Bar dataKey="visits" fill="#1976d2" />
+              </BarChart>
+            </ResponsiveContainer>
+          </Paper>
+        </Box>
       </Box>
     </Box>
   );
 }
-// Este componente muestra un dashboard simple con estadísticas del sitio y una gráfica de visitas por mes.

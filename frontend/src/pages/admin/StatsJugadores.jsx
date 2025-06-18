@@ -1,3 +1,17 @@
+import React from "react";
+import { Box, Typography } from "@mui/material";
+
 export default function StatsJugadores() {
-  return <h2>Estadísticas de Jugadores</h2>;
+  return (
+    <Box sx={{ width: '100%', pt: 2 }}>
+      <Typography
+        variant="h2"
+        gutterBottom
+        fontFamily="Varsity"
+        sx={{ textAlign: "center" }}
+      >
+        Estadísticas de Jugadores
+      </Typography>
+    </Box>
+  );
 }
