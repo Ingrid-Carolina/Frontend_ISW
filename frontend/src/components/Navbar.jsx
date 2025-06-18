@@ -24,7 +24,8 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
 import LiveTvOutlinedIcon from '@mui/icons-material/LiveTvOutlined';
-
+import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
@@ -69,6 +70,24 @@ export default function CustomNavbar() {
 
 	const handleDonarLeave = () => {
 		donarTimer.current = setTimeout(() => setDonarOpen(false), 200);
+	};
+
+
+
+	const isLoggedIn = !!localStorage.getItem('token');
+	const navigate = useNavigate();
+
+	const handleLogout = async () => {
+		try {
+			await axios.post('http://localhost:3000/auth/signout');
+			localStorage.removeItem('token');
+			localStorage.removeItem('userRole');
+			alert('Sesion cerrada correctamente.');
+			navigate('/login'); // O redirige a la home si prefieres
+		} catch (error) {
+			console.error('Error al cerrar sesión:', error);
+			alert('Error al cerrar sesión. Inténtalo de nuevo.');
+		}
 	};
 
 	return (
@@ -204,45 +223,75 @@ export default function CustomNavbar() {
 							>
 								En Vivo
 							</Button>
-							<Button
-								component={Link}
-								to='/admin'
-								onClick={() => setDrawerOpen(false)}
-								sx={navBtnStyle(drawerOpen)}
-							>
-								Admin
-							</Button>
+							{localStorage.getItem('userRole') === 'admin' && (
+								<Button
+									component={Link}
+									to='/admin'
+									onClick={() => setDrawerOpen(false)}
+									sx={navBtnStyle(drawerOpen)}
+								>
+									Admin
+								</Button>
+							)}
 						</Box>
 					</Box>
 
 					<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-						<Button
-							component={Link}
-							to='/login'
-							onClick={() => setDrawerOpen(false)}
-							sx={{
-								backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
-								color: drawerOpen ? '#ffffff' : '#0c005a',
-								border: '2px solid #0c005a',
-								fontWeight: 'bold',
-								fontSize: '0.9rem',
-								fontFamily: '"GroteskBold", sans-serif',
-								textTransform: 'none',
-								height: '40px',
-								px: 2.5,
-								borderRadius: '6px',
-								transition: 'all 0.3s ease',
-								'&:hover': {
-									color: '#e06c14',
-									borderColor: '#e06c14', 
-									backgroundColor: drawerOpen
-										? '#0c005a'
-										: '#ffffff',
-								},
-							}}
-						>
-							Iniciar Sesión
-						</Button>
+						{isLoggedIn ? (
+							<Button
+								onClick={() => {
+									setDrawerOpen(false);
+									handleLogout();
+								}}
+								sx={{
+									backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
+									color: drawerOpen ? '#ffffff' : '#0c005a',
+									border: '2px solid #0c005a',
+									fontWeight: 'bold',
+									fontSize: '0.9rem',
+									fontFamily: '"GroteskBold", sans-serif',
+									textTransform: 'none',
+									height: '40px',
+									px: 2.5,
+									borderRadius: '6px',
+									transition: 'all 0.3s ease',
+									'&:hover': {
+										color: '#e06c14',
+										borderColor: '#e06c14',
+										backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
+									},
+								}}
+							>
+								Cerrar Sesión
+							</Button>
+						) : (
+							<Button
+								component={Link}
+								to='/login'
+								onClick={() => setDrawerOpen(false)}
+								sx={{
+									backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
+									color: drawerOpen ? '#ffffff' : '#0c005a',
+									border: '2px solid #0c005a',
+									fontWeight: 'bold',
+									fontSize: '0.9rem',
+									fontFamily: '"GroteskBold", sans-serif',
+									textTransform: 'none',
+									height: '40px',
+									px: 2.5,
+									borderRadius: '6px',
+									transition: 'all 0.3s ease',
+									'&:hover': {
+										color: '#e06c14',
+										borderColor: '#e06c14',
+										backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
+									},
+								}}
+							>
+								Iniciar Sesión
+							</Button>
+						)}
+
 
 						<IconButton
 							onClick={toggleDrawer}

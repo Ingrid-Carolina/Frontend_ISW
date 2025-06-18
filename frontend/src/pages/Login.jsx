@@ -11,6 +11,8 @@ import {
   Link
 } from '@mui/material';
 import logo from '/Images/Logo-pilotos.png';
+import { signInWithEmailAndPassword } from 'firebase/auth';
+import { auth } from './firebaseConfig';
 import axios from 'axios';
 
 const Login = ({ onRegistroClick }) => {
@@ -64,6 +66,47 @@ const Login = ({ onRegistroClick }) => {
     setRecoveryMessage('');
   };
 
+  const handleLogin = async () => {
+    if (!validateForm()) return;
+
+    setIsSubmitting(true);
+
+    try {
+      const data = await realizarPeticion();
+
+      if (data?.token) {
+        localStorage.setItem('token', data.token);
+
+        if (data.usuario && data.usuario.rol) {
+          localStorage.setItem('userRole', data.usuario.rol);
+        }
+
+        window.dispatchEvent(new Event('storage')); // Forzar renderizado de Navbar
+
+        setSubmitError('');
+        setFailedAttempts(0);
+      }else {
+        setSubmitError('Respuesta inesperada del servidor.');
+      }
+    } catch (error) {
+      const nuevoIntento = failedAttempts + 1;
+      setFailedAttempts(nuevoIntento);
+
+      const restante = MAX_ATTEMPTS - nuevoIntento;
+      setSubmitError(
+        restante === 0
+          ? 'Has excedido el número máximo de intentos. Intenta más tarde.'
+          : 'Correo o contraseña incorrecta'
+      );
+    } finally {
+      setIsSubmitting(false);
+
+      setFormData({
+        email: '',
+        password: '',
+      });
+    }
+  };
 
   const realizarPeticion = async () => {
     const url = "http://localhost:3000/auth/signin"; 
@@ -93,67 +136,10 @@ const Login = ({ onRegistroClick }) => {
             window.alert("Ninguna respuesta del servidor.Por favor verifique su red.");
         } else {
             window.alert("Error en la red.");
-        }
-    }
+        }
+    }
 };
 
-
-
-  const handleLogin = async () => {
-    if (!validateForm()) return;
-
-    realizarPeticion();
-
-
-    /*if (failedAttempts >= MAX_ATTEMPTS) {
-      setSubmitError('Has excedido el número máximo de intentos. Intenta más tarde.');
-      return;
-    }*/
-
-    setIsSubmitting(true);
-    /*try {
-
-      const idToken = await userCredential.user.getIdToken();
-
-      const response = await fetch('http://localhost:3000/api/logi', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${idToken}`
-        },
-        body: JSON.stringify({ otroDato: 'si necesitas' })
-      });
-
-      const result = await response.json();
-      console.log('Respuesta del backend:', result);
-
-      if (!response.ok) {
-        setSubmitError(result.message || 'Error al iniciar sesión');
-      } else {
-        console.log('Inicio de sesión correcto');
-        setFailedAttempts(0); // Reiniciar contador si fue exitoso
-      }
-
-    } catch (error) {
-      const nuevoIntento = failedAttempts + 1;
-      setFailedAttempts(nuevoIntento);
-
-      const restante = MAX_ATTEMPTS - nuevoIntento;
-      setSubmitError(
-        restante ==0
-          ? `Has excedido el número máximo de intentos. Intenta más tarde.`
-          : 'Correo o contraseña incorrecta'
-      );
-    } finally {
-      setIsSubmitting(false);
-    }
-  };*/
-
-   setFormData({
-      email: '',
-      password: '',
-    });
-  }
 
   const handleForgotPassword = () => {
     if (!formData.email.trim()) {
@@ -301,6 +287,5 @@ const Login = ({ onRegistroClick }) => {
     </Box>
   );
 };
-
 
 export default Login;
