@@ -1,4 +1,5 @@
 import React from 'react';
+import axios from 'axios';
 import {
   Box,
   Container,
@@ -37,8 +38,6 @@ import camisaAngelito from '/Images/camiseta_ange.jpg';
 import camisetaLocal from '/Images/Camiseta_Local.jpg';
 import camisetaVisita from '/Images/Camiseta_visita.jpg';
 
-
-
 // Importar las clases Login y Registro
 import Login from './Login';
 import Registro from './Registro';
@@ -59,7 +58,7 @@ class Tienda extends React.Component {
     };
     console.log('Tienda inicializada');
   }
-  
+
 
   // Datos de productos con diferentes descripciones y precios
   productos = [
@@ -163,6 +162,8 @@ class Tienda extends React.Component {
     },
    
   ];
+
+   
 
   // Manejar búsqueda
   handleSearchChange = (event) => {
@@ -529,6 +530,39 @@ calcularTotalSincrono = (cartItems = null) => {
     return nombreMatch || descripcionMatch;
   });
 }
+
+
+ realizarPeticion = async () => {
+    const url = "http://localhost:3000/auth/comprar"; 
+
+    const body = {
+    nombreproducto: this.state.cartItems.map(item => item.nombre),
+    cantidad: this.state.cartItems.map(item => item.cantidad)
+};
+
+    try {
+        const res = await axios.post(url, body, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        console.log("response data: ", res.data.mensaje);
+        return res.data;
+    } catch (error) {
+        console.log("Error:", error);
+
+        if (error.response) {
+            console.log("Error data:", error.response.data.mensaje);
+            console.log("Error status:", error.response.status);
+
+            window.alert((error.response.data.mensaje));
+        } else if (error.request) {
+            window.alert("Ninguna respuesta del servidor.Por favor verifique su red.");
+        } else {
+            window.alert("Error en la red.");
+        }
+    }
+};
+
 
   // Renderizar la Navbar
   renderSecondaryNavbar = () => {
@@ -946,6 +980,7 @@ calcularTotalSincrono = (cartItems = null) => {
                   '&:hover': { bgcolor: '#28a428' }
                 }}
                 onClick={() => {
+                  this.realizarPeticion();
                   alert('¡Gracias por tu compra!');
                   this.setState({ 
                     cartItems: [], 

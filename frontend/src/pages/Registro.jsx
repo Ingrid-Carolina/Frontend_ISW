@@ -97,7 +97,7 @@ const Registro = ({ onLoginClick }) => {
 
   
  const realizarPeticion = async () => {
-    const url = "http://localhost:3000/auth/signup"; 
+    const url = "http://167.99.158.234:3000/auth/signup"; 
 
     const body = {
         nombre: formData.nombre,
@@ -133,7 +133,7 @@ const Registro = ({ onLoginClick }) => {
 
     realizarPeticion();
     console.log('Registrado:', formData);
-    setSubmitMessage({ success: '¡Registro exitoso!', error: '' });
+    setSubmitMessage({ success: '¡Registro exitoso!', error: 'Registro Fallido. Vuelvalo a Intentar'});
 
     setFormData({
       nombre: '',

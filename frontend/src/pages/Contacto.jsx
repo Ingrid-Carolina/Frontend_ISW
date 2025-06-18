@@ -31,7 +31,7 @@ const Contacto = () => {
 	const [snackbarType, setSnackbarType] = useState('success'); // 'success' | 'error'
 	const [snackbarMsg, setSnackbarMsg] = useState('');
 
-	const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
+	//const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
 
 	const contieneScript = value =>
 		!/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi.test(value) ||
@@ -41,7 +41,7 @@ const Contacto = () => {
 		// Valida que el input no esté vacío ni contenga solo espacios. Se aplica a varios campos del formulario.
 		value.trim() !== '' || 'No puede contener solo espacios';
 
-	const onSubmit = async data => {
+	const onSubmit = async (data) => {
 		const url = 'http://localhost:3000/auth/registrarformulario';
 
 		const body = {
@@ -53,11 +53,14 @@ const Contacto = () => {
 			proposito: data.proposito,
 			mensaje: data.mensaje,
 		};
+		
 
 		try {
 			const res = await axios.post(url, body, {
 				headers: { 'Content-Type': 'application/json' },
 			});
+
+			console.error(body);
 
 			reset({
 				nombre: '',
@@ -77,15 +80,17 @@ const Contacto = () => {
 			console.log('response data: ', res.data.mensaje);
 			return res.data;
 		} catch (error) {
-			let mensaje = 'Error en la red.';
+			let mensaje = '';
 			if (error.response) {
-				mensaje = error.response.data.mensaje || 'Error en el servidor';
+				mensaje = error.response.data.mensaje|| "ERRORR EN EL SERIVDORRR";
 			} else if (error.request) {
 				mensaje = 'Ninguna respuesta del servidor. Por favor verifique su red.';
 			}
 
 			// Mensaje de error
 			setSnackbarMsg(mensaje);
+			console.error(mensaje)
+			window.alert("hola");
 			setSnackbarType('error');
 			setOpenSnackbar(true);
 		}

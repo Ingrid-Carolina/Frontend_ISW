@@ -11,8 +11,6 @@ import {
   Link
 } from '@mui/material';
 import logo from '/Images/Logo-pilotos.png';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebaseConfig';
 import axios from 'axios';
 
 const Login = ({ onRegistroClick }) => {
@@ -66,25 +64,58 @@ const Login = ({ onRegistroClick }) => {
     setRecoveryMessage('');
   };
 
+
+  const realizarPeticion = async () => {
+    const url = "http://localhost:3000/auth/signin"; 
+
+    const body = {
+        email: formData.email,
+        password: formData.password,
+    };
+
+    try {
+        const res = await axios.post(url, body, {
+            headers: { "Content-Type": "application/json" }
+        });
+
+        console.log("response data: ", res.data.mensaje);
+          window.alert((res.data.mensaje));
+        return res.data;
+    } catch (error) {
+        console.log("Error:", error);
+
+        if (error.response) {
+            console.log("Error data:", error.response.data.mensaje);
+            console.log("Error status:", error.response.status);
+
+            window.alert((error.response.data.mensaje));
+        } else if (error.request) {
+            window.alert("Ninguna respuesta del servidor.Por favor verifique su red.");
+        } else {
+            window.alert("Error en la red.");
+        }
+    }
+};
+
+
+
   const handleLogin = async () => {
     if (!validateForm()) return;
 
-    if (failedAttempts >= MAX_ATTEMPTS) {
+    realizarPeticion();
+
+
+    /*if (failedAttempts >= MAX_ATTEMPTS) {
       setSubmitError('Has excedido el número máximo de intentos. Intenta más tarde.');
       return;
-    }
+    }*/
 
     setIsSubmitting(true);
-    try {
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        formData.email,
-        formData.password
-      );
+    /*try {
 
       const idToken = await userCredential.user.getIdToken();
 
-      const response = await fetch('http://localhost:3000/api/login', {
+      const response = await fetch('http://localhost:3000/api/logi', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -116,7 +147,13 @@ const Login = ({ onRegistroClick }) => {
     } finally {
       setIsSubmitting(false);
     }
-  };
+  };*/
+
+   setFormData({
+      email: '',
+      password: '',
+    });
+  }
 
   const handleForgotPassword = () => {
     if (!formData.email.trim()) {
@@ -264,5 +301,6 @@ const Login = ({ onRegistroClick }) => {
     </Box>
   );
 };
+
 
 export default Login;
