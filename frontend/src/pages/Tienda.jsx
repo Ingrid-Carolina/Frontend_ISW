@@ -84,77 +84,77 @@ class Tienda extends React.Component {
       imagen: camisaVisita
     },
     {
-      id: 2,
+      id: 4,
       nombre: "Camiseta Visita Moteada",
       descripcion: "Camiseta de visitante con colores vibrantes y tejido transpirable.",
       precio: 350.00,
       imagen: camisetaVisita
     },
     {
-      id: 3,
+      id: 5,
       nombre: "Camiseta Conmemorativa Fundación Angelitos",
       descripcion: "Edición especial para apoyar a la Fundación Angelitos, con diseño único.",
       precio: 350.50,
       imagen: camisaAngelito
     },
     {
-      id: 4,
+      id: 6,
       nombre: "Banderas",
       descripcion: "Banderas de alta calidad, ideales para eventos y soporte a tu equipo.",
       precio: 345.75,
       imagen: camisaLocal
     },
     {
-      id: 5,
+      id: 7,
       nombre: "Banderines",
       descripcion: "Pequeños banderines decorativos, perfectos para coleccionar o regalar.",
       precio: 125.00,
       imagen:camisaLocal
     },
     {
-      id: 6,
+      id: 8,
       nombre: "Gorra",
       descripcion: "Gorra de diseño clásico, cómoda y con protección solar.",
       precio: 450.00,
       imagen: camisaLocal
     },
     {
-      id: 7,
+      id: 9,
       nombre: "Gorras 2",
       descripcion: "Nueva colección de gorras con bordados premium y ajuste perfecto.",
       precio: 3200.00,
       imagen: camisaLocal
     },
     {
-      id: 8,
+      id: 10,
       nombre: "Gorras 3",
       descripcion: "Gorras de edición limitada con materiales reciclados y un estilo moderno.",
       precio: 280.50,
       imagen: camisaLocal
     },
     {
-      id: 9,
+      id: 11,
       nombre: "Gorras 4",
       descripcion: "Diseño urbano para las gorras 4, con visera plana y logotipos discretos.",
       precio: 1150.00,
       imagen: camisaLocal
     },
     {
-      id: 10,
+      id: 12,
       nombre: "Gorras 5",
       descripcion: "Gorras 5: Máximo confort y estilo deportivo, ideales para el día a día.",
       precio: 195.00,
       imagen: camisaLocal
     },
     {
-      id: 11,
+      id: 13,
       nombre: "Gorras 6",
       descripcion: "La gorra 6 combina funcionalidad y moda, perfecta para cualquier ocasión.",
       precio: 2800.00,
       imagen: camisaLocal
     },
     {
-      id: 11,
+      id: 14,
       nombre: "CamisadeNiño",
       descripcion: "La gorra 6 combina funcionalidad y moda, perfecta para cualquier ocasión.",
       precio: 2800.00,
@@ -167,7 +167,16 @@ class Tienda extends React.Component {
 
   // Manejar búsqueda
   handleSearchChange = (event) => {
-    this.setState({ searchQuery: event.target.value });
+   const query = event.target.value;
+  this.setState({ searchQuery: query });
+  
+  // Debug: mostrar cuántos productos se encontraron
+  if (query.trim()) {
+    setTimeout(() => {
+      const filtered = this.getFilteredProducts();
+      console.log(`Búsqueda "${query}" encontró ${filtered.length} productos`);
+    }, 100);
+  }
   }
 
   handleSearchSubmit = (event) => {
@@ -516,19 +525,68 @@ calcularTotalSincrono = (cartItems = null) => {
 }
 
   // Filtrar productos basado en la búsqueda
-  getFilteredProducts = () => {
-  if (!this.state.searchQuery) {
+  //2. FUNCIÓN DE FILTRADO MEJORADA:
+getFilteredProducts = () => {
+  if (!this.state.searchQuery || this.state.searchQuery.trim() === '') {
     return this.productos;
   }
 
-  const searchTerm = this.state.searchQuery.toLowerCase();
+  const searchTerm = this.state.searchQuery.toLowerCase().trim();
+  console.log('Buscando:', searchTerm); // Para debug
 
   return this.productos.filter(producto => {
+    // Búsqueda en nombre
     const nombreMatch = producto.nombre.toLowerCase().includes(searchTerm);
+    
+    // Búsqueda en descripción
     const descripcionMatch = producto.descripcion.toLowerCase().includes(searchTerm);
     
-    return nombreMatch || descripcionMatch;
+    // Búsqueda por palabras individuales (más flexible)
+    const palabrasBusqueda = searchTerm.split(' ').filter(palabra => palabra.length > 0);
+    const palabrasMatch = palabrasBusqueda.some(palabra => 
+      producto.nombre.toLowerCase().includes(palabra) || 
+      producto.descripcion.toLowerCase().includes(palabra)
+    );
+    
+    // Búsqueda por categorías comunes
+    const categoriaMatch = this.buscarPorCategoria(producto, searchTerm);
+    
+    const match = nombreMatch || descripcionMatch || palabrasMatch || categoriaMatch;
+    
+    if (match) {
+      console.log('Producto encontrado:', producto.nombre); // Para debug
+    }
+    
+    return match;
   });
+}
+
+// 3. FUNCIÓN AUXILIAR PARA BÚSQUEDA POR CATEGORÍAS:
+buscarPorCategoria = (producto, searchTerm) => {
+  const nombre = producto.nombre.toLowerCase();
+  
+  // Mapeo de términos de búsqueda a categorías
+  const categorias = {
+    'camisa': ['camisa', 'camiseta'],
+    'camiseta': ['camisa', 'camiseta'],
+    'gorra': ['gorra', 'gorras'],
+    'gorras': ['gorra', 'gorras'],
+    'bandera': ['bandera', 'banderas', 'banderin', 'banderines'],
+    'niño': ['niño', 'niña', 'infantil', 'kid'],
+    'local': ['local', 'casa', 'home'],
+    'visita': ['visita', 'visitante', 'away'],
+    'angelito': ['angelito', 'angelitos', 'fundacion'],
+    'conmemorativa': ['conmemorativa', 'especial', 'edicion']
+  };
+  
+  // Verificar si el término de búsqueda coincide con alguna categoría
+  for (const [termino, sinonimos] of Object.entries(categorias)) {
+    if (searchTerm.includes(termino)) {
+      return sinonimos.some(sinonimo => nombre.includes(sinonimo));
+    }
+  }
+  
+  return false;
 }
 
 
@@ -667,7 +725,7 @@ calcularTotalSincrono = (cartItems = null) => {
   // Renderizar contenido de la tienda
  renderTiendaContent = () => {
   const filteredProducts = this.getFilteredProducts();
-
+  const hasSearchQuery = this.state.searchQuery && this.state.searchQuery.trim() !== '';
   return (
     <Container
       maxWidth="lg"
@@ -689,11 +747,28 @@ calcularTotalSincrono = (cartItems = null) => {
         }
       </Typography>
 
-      {this.state.searchQuery && (
-        <Typography variant="h6" sx={{ mb: 2, color: '#666' }}>
-          Resultados para: "{this.state.searchQuery}" ({filteredProducts.length} productos)
-        </Typography>
+      
+         {/* Mostrar información de búsqueda mejorada */}
+      {hasSearchQuery && (
+        <Box sx={{ mb: 3, p: 2, bgcolor: '#f8f9fa', borderRadius: 1 }}>
+          <Typography variant="h6" sx={{ color: '#2c1a99', fontWeight: 'bold' }}>
+            Resultados para: "{this.state.searchQuery}"
+          </Typography>
+          <Typography variant="body1" sx={{ color: '#666' }}>
+            {filteredProducts.length > 0 
+              ? `Se encontraron ${filteredProducts.length} producto${filteredProducts.length !== 1 ? 's' : ''}`
+              : 'No se encontraron productos'
+            }
+          </Typography>
+          {filteredProducts.length === 0 && (
+            <Typography variant="body2" sx={{ color: '#999', mt: 1 }}>
+              Sugerencias: Intenta con "camisa", "gorra", "bandera", "niño", etc.
+            </Typography>
+          )}
+        </Box>
       )}
+
+
 
       <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 3, mt: 3 }}>
         {filteredProducts.map((producto) => {
@@ -736,6 +811,7 @@ calcularTotalSincrono = (cartItems = null) => {
                   }}
                 />
               </Box>
+
 
               {/* Título del producto */}
               <Typography 
@@ -843,11 +919,16 @@ calcularTotalSincrono = (cartItems = null) => {
         <Box sx={{ textAlign: 'center', py: 8 }}>
           <SearchIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
           <Typography variant="h6" color="text.secondary">
-            No se encontraron productos que coincidan con tu búsqueda
+            No se encontraron productos  No hay productos que coincidan con "{this.state.searchQuery}"
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            Intenta con términos diferentes o explora nuestros productos
+            Intenta buscar por: camisa, camiseta, gorra, bandera, niño, local, visita
           </Typography>
+          <Button 
+          variant = "outlined"
+          onClick={()=> this.setState.apply({searchQuery: ''})}>
+            sx={{mt:2}}
+          </Button>
         </Box>
       )}
     </Container>
