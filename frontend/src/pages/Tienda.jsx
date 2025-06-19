@@ -731,7 +731,7 @@ buscarPorCategoria = (producto, searchTerm) => {
       maxWidth="lg"
       sx={{
         py: 4,
-        maxHeight: 'calc(100vh + 290px)',
+        maxHeight: 'calc(100vh + 250px)',
         overflow: 'auto',
         /*scrollbarWidth: 'none',
         '&::-webkit-scrollbar': {
