@@ -731,13 +731,35 @@ buscarPorCategoria = (producto, searchTerm) => {
       maxWidth="lg"
       sx={{
         py: 4,
-        maxHeight: 'calc(100vh - 150px)',
+        maxHeight: 'calc(100vh + 290px)',
         overflow: 'auto',
-        scrollbarWidth: 'none',
+        /*scrollbarWidth: 'none',
         '&::-webkit-scrollbar': {
-          display: 'none'
-        },
-        '-ms-overflow-style': 'none'
+         display: 'none'
+      },
+        '-ms-overflow-style': 'none',*/
+        // SCROLL PERSONALIZADO TEMA PILOTOS
+         '&::-webkit-scrollbar': {
+    width: '12px',
+  },
+  '&::-webkit-scrollbar-track': {
+    background: '#f8f9fa',
+    borderRadius: '20px',
+    boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1)',
+  },
+  '&::-webkit-scrollbar-thumb': {
+    background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
+    borderRadius: '20px',
+    boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
+    border: '2px solid #f8f9fa',
+    '&:hover': {
+      background: 'linear-gradient(45deg, #764ba2 0%, #667eea 100%)',
+      boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
+    },
+  },
+  scrollbarWidth: 'auto',
+  scrollbarColor: '#667eea #f8f9fa',
+        paddingBottom: '80px'
       }}
     >
       <Typography variant="h4" gutterBottom sx={{ color: '#2c1a99', fontWeight: 'bold' }}>
@@ -926,8 +948,10 @@ buscarPorCategoria = (producto, searchTerm) => {
           </Typography>
           <Button 
           variant = "outlined"
-          onClick={()=> this.setState.apply({searchQuery: ''})}>
-            sx={{mt:2}}
+          onClick={()=> this.setState.apply({searchQuery: ''})}
+          sx={{mt:2}}
+          >Limpiar Busqueda
+            
           </Button>
         </Box>
       )}

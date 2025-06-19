@@ -142,7 +142,7 @@ const Registro = ({ onLoginClick }) => {
     });
   } else {
     setSubmitMessage({ success: '', error: 'Registro fallido. Vuelva a intentarlo' });
-  }
+}
 };
 
   return (
