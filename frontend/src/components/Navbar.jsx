@@ -177,6 +177,7 @@ UserAvatarMenu.propTypes = {
 	}).isRequired,
 	onEditProfile: PropTypes.func.isRequired,
 	onLogout: PropTypes.func.isRequired,
+	drawerOpen: PropTypes.bool.isRequired,
 };
 
 //exports funciones navbar
