@@ -55,7 +55,7 @@ const generateColorFromName = name => {
 
 const userColor = generateColorFromName(avatarLetter);
 
-const UserAvatarMenu = ({ user, onEditProfile, onLogout }) => {
+const UserAvatarMenu = ({ user, onEditProfile, onLogout, drawerOpen }) => {
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const open = Boolean(anchorEl);
 
@@ -77,12 +77,13 @@ const UserAvatarMenu = ({ user, onEditProfile, onLogout }) => {
 				<Avatar
 					sx={{
 						bgcolor: user.color || '#3f51b5',
-						color: 'white',
+						color: drawerOpen ? '#0c005a' : 'white',
 						width: 40,
 						height: 40,
 						fontWeight: 'bold',
 						fontSize: '1rem',
-						border: '2px solid white',
+						border: drawerOpen ? '2.3px solid #0c005a' : '2.3px solid white',
+						transition: 'all 0.3s ease',
 					}}
 				>
 					{user.name?.charAt(0).toUpperCase()}
@@ -131,6 +132,7 @@ const UserAvatarMenu = ({ user, onEditProfile, onLogout }) => {
 						gap: 1,
 						py: 1,
 						color: 'white',
+						fontFamily: '"GroteskBold", sans-serif',
 						'&:hover': {
 							color: '#e06c14',
 						},
@@ -151,6 +153,7 @@ const UserAvatarMenu = ({ user, onEditProfile, onLogout }) => {
 						gap: 1,
 						py: 1,
 						color: 'white',
+						fontFamily: '"GroteskBold", sans-serif',
 						'&:hover': {
 							color: '#e06c14',
 						},
@@ -382,6 +385,7 @@ export default function CustomNavbar() {
 								user={{ name: avatarLetter, color: userColor }}
 								onEditProfile={() => navigate('/perfil')}
 								onLogout={handleLogout}
+								drawerOpen={drawerOpen}
 							/>
 						) : (
 							<Button
