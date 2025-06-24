@@ -106,7 +106,7 @@ class Tienda extends React.Component {
     },
     {
       id: 7,
-      nombre: "Banderines",
+      nombre: "Banderines", 
       descripcion: "Pequeños banderines decorativos, perfectos para coleccionar o regalar.",
       precio: 125.00,
       imagen:camisaLocal

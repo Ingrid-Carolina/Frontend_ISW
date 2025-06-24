@@ -1,14 +1,18 @@
 import React, { useState } from 'react';
+import './stylesCalendario.css';
+import { Padding } from '@mui/icons-material';
+
+
 
 // Componentes de iconos SVG simples
 const ChevronLeft = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2">
     <polyline points="15,18 9,12 15,6"></polyline>
   </svg>
 );
 
 const ChevronRight = () => (
-  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#000000" strokeWidth="2">
     <polyline points="9,18 15,12 9,6"></polyline>
   </svg>
 );
@@ -69,6 +73,13 @@ const LogOut = () => (
   </svg>
 );
 
+const Plus = () => (
+  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="12" y1="5" x2="12" y2="19"></line>
+    <line x1="5" y1="12" x2="19" y2="12"></line>
+  </svg>
+);
+
 const Calendario = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [events, setEvents] = useState({});
@@ -80,6 +91,8 @@ const Calendario = () => {
     description: '',
     type: 'event'
   });
+  const [view, setView] = useState('month'); // 'week' o 'month'
+  const [showMonthEvents, setShowMonthEvents] = useState(false);
 
   // Estados de autenticación
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -147,12 +160,40 @@ const Calendario = () => {
     return days;
   };
 
-  const navigateMonth = (direction) => {
+  const getWeekDays = (date) => {
+    const startOfWeek = new Date(date);
+    const day = startOfWeek.getDay();
+    const diff = startOfWeek.getDate() - day;
+    startOfWeek.setDate(diff);
+
+    const weekDays = [];
+    for (let i = 0; i < 7; i++) {
+      const dayDate = new Date(startOfWeek);
+      dayDate.setDate(startOfWeek.getDate() + i);
+      weekDays.push({
+        date: dayDate.getDate(),
+        isCurrentMonth: true,
+        fullDate: dayDate
+      });
+    }
+    return weekDays;
+  };
+
+  // Función de navegación unificada que funciona para ambas vistas
+  const navigate = (direction) => {
     setCurrentDate(prev => {
       const newDate = new Date(prev);
-      newDate.setMonth(prev.getMonth() + direction);
+      if (view === 'month') {
+        newDate.setMonth(prev.getMonth() + direction);
+      } else {
+        newDate.setDate(prev.getDate() + (direction * 7));
+      }
       return newDate;
     });
+  };
+
+  const goToToday = () => {
+    setCurrentDate(new Date());
   };
 
   const formatDateKey = (date) => {
@@ -221,6 +262,44 @@ const Calendario = () => {
     return events[dateKey] || [];
   };
 
+// 2. AGREGAR FUNCIÓN PARA OBTENER EVENTOS DEL MES 
+  const getEventsForMonth = (date) => {
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const monthEvents = [];
+
+  // Recorrer todos los días del mes actual
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  
+  for (let day = 1; day <= daysInMonth; day++) {
+    const currentDate = new Date(year, month, day);
+    const dateKey = formatDateKey(currentDate);
+    const dayEvents = events[dateKey] || [];
+    
+    dayEvents.forEach(event => {
+      monthEvents.push({
+        ...event,
+        date: currentDate,
+        dateKey
+      });
+    });
+  }
+
+   // Ordenar eventos por fecha y hora
+  return monthEvents.sort((a, b) => {
+    const dateCompare = a.date.getTime() - b.date.getTime();
+    if (dateCompare !== 0) return dateCompare;
+    
+    if (a.time && b.time) {
+      return a.time.localeCompare(b.time);
+    }
+    return 0;
+  });
+};
+
+
+
+
   const isToday = (date) => {
     const today = new Date();
     return date.toDateString() === today.toDateString();
@@ -256,829 +335,531 @@ const Calendario = () => {
     setLoginError('');
   };
 
-  const days = getDaysInMonth(currentDate);
-
-  const styles = {
-    // Navbar styles
-    navbar: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      height: '85px',
-      backgroundColor: '#4c1d95',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      padding: '0 24px',
-      zIndex: 1000,
-      boxShadow: '0 2px 10px rgba(0, 0, 0, 0.1)'
-    },
+  const getWeekDateRange = () => {
+    const weekDays = getWeekDays(currentDate);
+    const firstDay = weekDays[0].fullDate;
+    const lastDay = weekDays[6].fullDate;
     
-    navbarLeft: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px'
-    },
-
-    navbarTitle: {
-      color: 'white',
-      fontSize: '20px',
-      fontWeight: 'bold',
-      margin: 0
-    },
-
-    navbarRight: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '12px'
-    },
-
-    adminStatus: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      color: 'white',
-      fontSize: '14px'
-    },
-
-    loginButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '8px 16px',
-      backgroundColor: '#059669',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      transition: 'background-color 0.2s'
-    },
-
-    logoutButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      padding: '8px 16px',
-      backgroundColor: '#dc2626',
-      color: 'white',
-      border: 'none',
-      borderRadius: '6px',
-      cursor: 'pointer',
-      fontSize: '14px',
-      fontWeight: '500',
-      transition: 'background-color 0.2s'
-    },
-    
-    // Contenedor principal ajustado
-    container: {
-      marginTop: '70px',
-      maxWidth: '1000px',
-      margin: '70px auto 0 auto',
-      padding: '24px',
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1)',
-      fontFamily: 'system-ui, -apple-system, sans-serif',
-      minHeight: 'calc(100vh - 70px)'
-    },
-    header: {
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: '24px'
-    },
-    headerLeft: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '16px'
-    },
-    navButton: {
-      padding: '8px',
-      border: 'none',
-      borderRadius: '50%',
-      backgroundColor: 'transparent',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s'
-    },
-    title: {
-      fontSize: '24px',
-      fontWeight: 'bold',
-      color: '#374151',
-      margin: 0
-    },
-    todayButton: {
-      padding: '8px 16px',
-      backgroundColor: '#3b82f6',
-      color: 'white',
-      border: 'none',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s'
-    },
-    daysHeader: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(7, 1fr)',
-      gap: '4px',
-      marginBottom: '8px'
-    },
-    dayHeader: {
-      padding: '12px',
-      textAlign: 'center',
-      fontWeight: '600',
-      color: '#6b7280',
-      backgroundColor: '#f9fafb',
-      borderRadius: '8px'
-    },
-    calendar: {
-      display: 'grid',
-      gridTemplateColumns: 'repeat(7, 1fr)',
-      gap: '4px',
-      marginBottom: '24px'
-    },
-    dayCell: {
-      minHeight: '120px',
-      padding: '8px',
-      border: '1px solid #e5e7eb',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.2s',
-      backgroundColor: 'white'
-    },
-    dayCellInactive: {
-      backgroundColor: '#f9fafb',
-      color: '#9ca3af'
-    },
-    dayCellToday: {
-      border: '2px solid #3b82f6',
-      backgroundColor: '#eff6ff'
-    },
-    dayNumber: {
-      fontSize: '14px',
-      fontWeight: '600',
-      marginBottom: '8px',
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start'
-    },
-    dayNumberToday: {
-      color: '#2563eb'
-    },
-    eventIndicator: {
-      width: '8px',
-      height: '8px',
-      backgroundColor: '#3b82f6',
-      borderRadius: '50%'
-    },
-    eventsContainer: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '4px'
-    },
-    eventItem: {
-      fontSize: '12px',
-      padding: '4px',
-      borderRadius: '4px',
-      overflow: 'hidden',
-      textOverflow: 'ellipsis',
-      whiteSpace: 'nowrap'
-    },
-    eventTypeEvent: {
-      backgroundColor: '#dbeafe',
-      color: '#1e40af'
-    },
-    eventTypeNote: {
-      backgroundColor: '#dcfce7',
-      color: '#166534'
-    },
-    moreEvents: {
-      fontSize: '12px',
-      color: '#6b7280',
-      fontWeight: '600'
-    },
-    modal: {
-      position: 'fixed',
-      top: 0,
-      left: 0,
-      right: 0,
-      bottom: 0,
-      backgroundColor: 'rgba(0, 0, 0, 0.5)',
-      display: 'flex',
-      alignItems: 'center',
-      justifyContent: 'center',
-      zIndex: 1001
-    },
-    modalContent: {
-      backgroundColor: 'white',
-      borderRadius: '8px',
-      padding: '24px',
-      width: '100%',
-      maxWidth: '500px',
-      margin: '16px',
-      maxHeight: '90vh',
-      overflowY: 'auto'
-    },
-    modalHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'center',
-      marginBottom: '16px'
-    },
-    modalTitle: {
-      fontSize: '18px',
-      fontWeight: '600',
-      color: '#374151',
-      margin: 0
-    },
-    closeButton: {
-      padding: '4px',
-      border: 'none',
-      borderRadius: '4px',
-      backgroundColor: 'transparent',
-      cursor: 'pointer'
-    },
-    form: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px',
-      marginBottom: '24px'
-    },
-    label: {
-      fontSize: '14px',
-      fontWeight: '500',
-      color: '#374151',
-      marginBottom: '4px'
-    },
-    typeButtons: {
-      display: 'flex',
-      gap: '8px'
-    },
-    typeButton: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
-      padding: '8px 12px',
-      border: 'none',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'all 0.2s'
-    },
-    typeButtonActive: {
-      backgroundColor: '#3b82f6',
-      color: 'white'
-    },
-    typeButtonInactive: {
-      backgroundColor: '#f3f4f6',
-      color: '#374151'
-    },
-    typeButtonDisabled: {
-      backgroundColor: '#f3f4f6',
-      color: '#9ca3af',
-      cursor: 'not-allowed'
-    },
-    input: {
-      width: '100%',
-      padding: '8px 12px',
-      border: '1px solid #d1d5db',
-      borderRadius: '8px',
-      fontSize: '14px',
-      outline: 'none',
-      transition: 'border-color 0.2s'
-    },
-    inputDisabled: {
-      backgroundColor: '#f9fafb',
-      color: '#6b7280',
-      cursor: 'not-allowed'
-    },
-    textarea: {
-      width: '100%',
-      padding: '8px 12px',
-      border: '1px solid #d1d5db',
-      borderRadius: '8px',
-      fontSize: '14px',
-      outline: 'none',
-      resize: 'vertical',
-      minHeight: '80px'
-    },
-    buttonGroup: {
-      display: 'flex',
-      justifyContent: 'flex-end',
-      gap: '8px',
-      marginBottom: '16px'
-    },
-    cancelButton: {
-      padding: '8px 16px',
-      color: '#6b7280',
-      border: 'none',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      backgroundColor: 'transparent',
-      transition: 'background-color 0.2s'
-    },
-    addButton: {
-      padding: '8px 16px',
-      backgroundColor: '#3b82f6',
-      color: 'white',
-      border: 'none',
-      borderRadius: '8px',
-      cursor: 'pointer',
-      transition: 'background-color 0.2s'
-    },
-    addButtonDisabled: {
-      backgroundColor: '#9ca3af',
-      cursor: 'not-allowed'
-    },
-    eventsList: {
-      borderTop: '1px solid #e5e7eb',
-      paddingTop: '16px'
-    },
-    eventsListTitle: {
-      fontWeight: '600',
-      color: '#374151',
-      marginBottom: '8px'
-    },
-    eventCard: {
-      padding: '12px',
-      borderRadius: '8px',
-      border: '1px solid',
-      marginBottom: '8px'
-    },
-    eventCardEvent: {
-      backgroundColor: '#eff6ff',
-      borderColor: '#bfdbfe'
-    },
-    eventCardNote: {
-      backgroundColor: '#f0fdf4',
-      borderColor: '#bbf7d0'
-    },
-    eventCardHeader: {
-      display: 'flex',
-      justifyContent: 'space-between',
-      alignItems: 'flex-start'
-    },
-    eventCardContent: {
-      flex: 1
-    },
-    eventCardTitle: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      fontWeight: '600',
-      marginBottom: '4px'
-    },
-    eventTime: {
-      display: 'flex',
-      alignItems: 'center',
-      gap: '4px',
-      fontSize: '14px',
-      color: '#6b7280',
-      marginBottom: '4px'
-    },
-    eventDescription: {
-      fontSize: '14px',
-      color: '#6b7280'
-    },
-    deleteButton: {
-      padding: '4px',
-      color: '#ef4444',
-      border: 'none',
-      borderRadius: '4px',
-      backgroundColor: 'transparent',
-      cursor: 'pointer',
-      marginLeft: '8px'
-    },
-    deleteButtonDisabled: {
-      color: '#9ca3af',
-      cursor: 'not-allowed'
-    },
-    notAdminMessage: {
-      backgroundColor: '#fef3c7',
-      border: '1px solid #f59e0b',
-      borderRadius: '8px',
-      padding: '12px',
-      marginBottom: '16px',
-      display: 'flex',
-      alignItems: 'center',
-      gap: '8px',
-      color: '#92400e'
-    },
-    loginForm: {
-      display: 'flex',
-      flexDirection: 'column',
-      gap: '16px'
-    },
-    errorMessage: {
-      color: '#dc2626',
-      fontSize: '14px',
-      marginTop: '8px'
+    if (firstDay.getMonth() === lastDay.getMonth()) {
+      return `${firstDay.getDate()} - ${lastDay.getDate()} ${months[firstDay.getMonth()]} ${firstDay.getFullYear()}`;
+    } else {
+      return `${firstDay.getDate()} ${months[firstDay.getMonth()]} - ${lastDay.getDate()} ${months[lastDay.getMonth()]} ${firstDay.getFullYear()}`;
     }
   };
 
-  return (
-    <div>
-      {/* Navbar Principal */}
-      <nav style={styles.navbar}>
-        
-      </nav>
+  // Función para abrir modal de agregar evento
+  const handleAddButtonClick = () => {
+    if (!isLoggedIn) {
+      alert('Solo el administrador puede agregar eventos');
+      return;
+    }
+    const today = new Date();
+  let targetDate;
+  
+  if (view === 'month') {
+    // Para vista mensual, usa una fecha de la tercera semana del mes actual
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    targetDate = new Date(year, month, 15); // Día 15 del mes
+    
+    // Si el día 15 ya pasó, usa el día 15 del siguiente mes
+    if (targetDate < today) {
+      targetDate = new Date(year, month + 1, 15);
+    }
+  } else {
+    // Para vista semanal, usa el día actual o el siguiente día disponible
+    targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + 1);
+  }
+  
+  openModal(targetDate);
+  };
 
-      {/* Calendario */}
-      <div style={styles.container}>
-        {/* Header del calendario */}
-        <div style={styles.header}>
-          <div style={styles.headerLeft}>
-            <button
-              style={styles.navButton}
-              onClick={() => navigateMonth(-1)}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-            >
-              <ChevronLeft />
-            </button>
-            <h2 style={styles.title}>
-              {months[currentDate.getMonth()]} {currentDate.getFullYear()}
+  const days = view === 'month' ? getDaysInMonth(currentDate) : getWeekDays(currentDate);
+
+  return (
+    <div className="calendar-container">
+      {/* Header del calendario */}
+      <div className="calendar-header">
+        {/* Lado izquierdo: Navegación y título */}
+        <div className="header-left">
+          <button className="today-button" onClick={goToToday}>
+            Hoy
+          </button>
+          
+          <button className="nav-button" onClick={() => navigate(-1)}>
+            <ChevronLeft />
+          </button>
+          
+          <h2 className="month-title">
+            {view === 'month' 
+                ? `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`
+                : getWeekDateRange()
+              }
             </h2>
-            <button
-              style={styles.navButton}
-              onClick={() => navigateMonth(1)}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
+          
+          <button className="nav-button" onClick={() => navigate(1)}>
+            <ChevronRight />
+          </button>
+        </div>
+
+        {/* Lado derecho: Login/Logout y botones de vista */}
+        <div className="header-right">
+          {/* Botones de vista */}
+          <div className="view-buttons">
+            <button 
+              className={`view-button${view === 'week' ? ' active' : ''}`}
+              onClick={() => setView('week')}
             >
-              <ChevronRight />
+              Semana
             </button>
+            <button 
+              className={`view-button${view === 'month' ? ' active' : ''}`}
+              onClick={() => setView('month')}
+            >
+              Mes
+            </button>
+              <button 
+                className="view-button"
+                onClick={() => setShowMonthEvents(true)}
+                style={{ backgroundColor: '#8b5cf6', color: 'white', border: '1px solid #8b5cf6' }}
+              >
+                📅 Eventos del Mes
+              </button>
           </div>
 
-			<div style={styles.navbarRight}>
+          {/* Botón de agregar */}
+          <button className="add-button"
+          onClick={handleAddButtonClick}>
+            <Plus />
+          </button>
+
+          {/* Login/Logout */}
           {isLoggedIn ? (
             <>
-              <div style={styles.adminStatus}>
+              <div className="admin-status">
                 <User />
                 <span>Admin</span>
               </div>
-              <button
-                style={styles.logoutButton}
-                onClick={handleLogout}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#b91c1c'}
-                onMouseLeave={(e) => e.target.style.backgroundColor = '#dc2626'}
-              >
+              <button className="logout-button" onClick={handleLogout}>
                 <LogOut />
                 Cerrar Sesión
               </button>
             </>
           ) : (
-            <button
-              style={styles.loginButton}
-              onClick={openLoginModal}
-              onMouseEnter={(e) => e.target.style.backgroundColor = '#047857'}
-              onMouseLeave={(e) => e.target.style.backgroundColor = '#059669'}
-            >
+            <button className="login-button" onClick={openLoginModal}>
               <Lock />
               Iniciar Sesión
             </button>
           )}
         </div>
+      </div>
 
-
-
-
-
-          <button
-            style={styles.todayButton}
-            onClick={() => setCurrentDate(new Date())}
-            onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-            onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-          >
-            Hoy
-          </button>
-        </div>
-
-        {/* Días de la semana */}
-        <div style={styles.daysHeader}>
-          {daysOfWeek.map(day => (
-            <div key={day} style={styles.dayHeader}>
-              {day}
-            </div>
-          ))}
-        </div>
-
-        {/* Grid del calendario */}
-        <div style={styles.calendar}>
-          {days.map((day, index) => {
-            const dayEvents = getEventsForDate(day.fullDate);
-            const hasEvents = dayEvents.length > 0;
-            const todayStyle = isToday(day.fullDate) ? styles.dayCellToday : {};
-            const inactiveStyle = !day.isCurrentMonth ? styles.dayCellInactive : {};
-            
-            return (
-              <div
-                key={index}
-                style={{...styles.dayCell, ...todayStyle, ...inactiveStyle}}
-                onClick={() => openModal(day.fullDate)}
-                onMouseEnter={(e) => e.target.style.backgroundColor = '#f9fafb'}
-                onMouseLeave={(e) => {
-                  if (isToday(day.fullDate)) {
-                    e.target.style.backgroundColor = '#eff6ff';
-                  } else if (!day.isCurrentMonth) {
-                    e.target.style.backgroundColor = '#f9fafb';
-                  } else {
-                    e.target.style.backgroundColor = 'white';
-                  }
-                }}
-              >
-                <div style={styles.dayNumber}>
-                  <span style={isToday(day.fullDate) ? styles.dayNumberToday : {}}>
-                    {day.date}
-                  </span>
-                  {hasEvents && <div style={styles.eventIndicator}></div>}
-                </div>
-                
-                <div style={styles.eventsContainer}>
-                  {dayEvents.slice(0, 2).map(event => (
-                    <div
-                      key={event.id}
-                      style={{
-                        ...styles.eventItem,
-                        ...(event.type === 'event' ? styles.eventTypeEvent : styles.eventTypeNote)
-                      }}
-                    >
-                      {event.time && <span style={{fontWeight: '600'}}>{event.time}</span>}
-                      <span style={event.time ? {marginLeft: '4px'} : {}}>{event.title}</span>
-                    </div>
-                  ))}
-                  {dayEvents.length > 2 && (
-                    <div style={styles.moreEvents}>
-                      +{dayEvents.length - 2} más
-                    </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Modal de Login */}
-        {showLoginModal && (
-          <div style={styles.modal}>
-            <div style={styles.modalContent}>
-              <div style={styles.modalHeader}>
-                <h3 style={styles.modalTitle}>Iniciar Sesión como Admin</h3>
-                <button
-                  style={styles.closeButton}
-                  onClick={closeLoginModal}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                >
-                  <X />
-                </button>
-              </div>
-
-              <div style={styles.loginForm}>
-                <div>
-                  <label style={styles.label}>Usuario</label>
-                  <input
-                    type="text"
-                    value={loginForm.username}
-                    onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
-                    style={styles.input}
-                    placeholder="**********"
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                  />
-                </div>
-
-                <div>
-                  <label style={styles.label}>Contraseña</label>
-                  <input
-                    type="password"
-                    value={loginForm.password}
-                    onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
-                    style={styles.input}
-                    placeholder="**********"
-                    onFocus={(e) => e.target.style.borderColor = '#3b82f6'}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                    onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
-                  />
-                </div>
-
-                {loginError && (
-                  <div style={styles.errorMessage}>{loginError}</div>
-                )}
-
-                <div style={styles.buttonGroup}>
-                  <button
-                    style={styles.cancelButton}
-                    onClick={closeLoginModal}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    style={styles.addButton}
-                    onClick={handleLogin}
-                    onMouseEnter={(e) => e.target.style.backgroundColor = '#2563eb'}
-                    onMouseLeave={(e) => e.target.style.backgroundColor = '#3b82f6'}
-                  >
-                    Iniciar Sesión
-                  </button>
-                </div>
-              </div>
-            </div>
+      {/* Headers de los días */}
+      <div className="days-header">
+        {daysOfWeek.map(day => (
+          <div key={day} className="day-header">
+            {day}
           </div>
-        )}
+        ))}
+      </div>
 
-        {/* Modal de Eventos */}
-        {showModal && (
-          <div style={styles.modal}>
-            <div style={styles.modalContent}>
-              <div style={styles.modalHeader}>
-                <h3 style={styles.modalTitle}>
-                  {selectedDate?.toLocaleDateString('es-ES', { 
-                    weekday: 'long', 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}
-                </h3>
-                <button
-                  style={styles.closeButton}
-                  onClick={closeModal}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                >
-                  <X />
-                </button>
+      {/* Grid del calendario */}
+      <div className="calendar-grid">
+        {days.map((day, index) => {
+          const dayEvents = getEventsForDate(day.fullDate);
+          const hasEvents = dayEvents.length > 0;
+          
+          let cellClasses = 'day-cell';
+          if (isToday(day.fullDate)) cellClasses += ' today';
+          if (!day.isCurrentMonth) cellClasses += ' inactive';
+          
+          let numberClasses = 'day-number';
+          if (isToday(day.fullDate)) numberClasses += ' today';
+          if (!day.isCurrentMonth) numberClasses += ' inactive';
+          
+          return (
+            <div
+              key={index}
+              className={cellClasses}
+              onClick={() => openModal(day.fullDate)}
+            >
+              <div className={numberClasses}>
+                <span>{day.date}</span>
+                {hasEvents && <div className="event-indicator"></div>}
+              </div>
+              
+              <div className="events-container">
+                {dayEvents.slice(0, 2).map(event => (
+                  <div
+                    key={event.id}
+                    className={`event-item ${event.type === 'event' ? 'event-type' : 'note-type'}`}
+                  >
+                    {event.time && <span style={{fontWeight: '600'}}>{event.time}</span>}
+                    <span style={event.time ? {marginLeft: '4px'} : {}}>{event.title}</span>
+                  </div>
+                ))}
+                {dayEvents.length > 2 && (
+                  <div className="more-events">
+                    +{dayEvents.length - 2} más
+                  </div>
+                )}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Modal de Login */}
+      {showLoginModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3 className="modal-title">Iniciar Sesión como Admin</h3>
+              <button className="close-button" onClick={closeLoginModal}>
+                <X />
+              </button>
+            </div>
+
+            <div className="event-form">
+              <div>
+                <label className="form-label">Usuario</label>
+                <input
+                  type="text"
+                  value={loginForm.username}
+                  onChange={(e) => setLoginForm({...loginForm, username: e.target.value})}
+                  className="form-input"
+                  placeholder="Admin"
+                />
               </div>
 
-              {/* Mensaje de advertencia si no es admin */}
-              {!isLoggedIn && (
-                <div style={styles.notAdminMessage}>
-                  <Lock />
-                  <span>Solo el administrador puede agregar o eliminar eventos</span>
-                </div>
+              <div>
+                <label className="form-label">Contraseña</label>
+                <input
+                  type="password"
+                  value={loginForm.password}
+                  onChange={(e) => setLoginForm({...loginForm, password: e.target.value})}
+                  className="form-input"
+                  placeholder="**********"
+                  onKeyPress={(e) => e.key === 'Enter' && handleLogin()}
+                />
+              </div>
+
+              {loginError && (
+                <div className="error-message">{loginError}</div>
               )}
 
-              {/* Formulario */}
-              <div style={styles.form}>
-                <div>
-                  <div style={styles.label}>Tipo</div>
-                  <div style={styles.typeButtons}>
-                    <button
-                      onClick={() => isLoggedIn && setEventForm({...eventForm, type: 'event'})}
-                      disabled={!isLoggedIn}
-                      style={{
-                        ...styles.typeButton,
-                        ...(eventForm.type === 'event' ? styles.typeButtonActive : 
-                            !isLoggedIn ? styles.typeButtonDisabled : styles.typeButtonInactive)
-                      }}
-                    >
-                      <Calendar />
-                      <span>Evento</span>
-                    </button>
-                    <button
-                      onClick={() => isLoggedIn && setEventForm({...eventForm, type: 'note'})}
-                      disabled={!isLoggedIn}
-                      style={{
-                        ...styles.typeButton,
-                        ...(eventForm.type === 'note' ? 
-                          {...styles.typeButtonActive, backgroundColor: '#10b981'} : 
-                          !isLoggedIn ? styles.typeButtonDisabled : styles.typeButtonInactive)
-                      }}
-                    >
-                      <FileText />
-                      <span>Nota</span>
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <label style={styles.label}>Título *</label>
-                  <input
-                    type="text"
-                    value={eventForm.title}
-                    onChange={(e) => isLoggedIn && setEventForm({...eventForm, title: e.target.value})}
-                    style={{
-                      ...styles.input,
-                      ...(isLoggedIn ? {} : styles.inputDisabled)
-                    }}
-                    placeholder="Título del evento o nota"
-                    disabled={!isLoggedIn}
-                    onFocus={(e) => isLoggedIn && (e.target.style.borderColor = '#3b82f6')}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                  />
-                </div>
-
-                {eventForm.type === 'event' && (
-                  <div>
-                    <label style={styles.label}>Hora</label>
-                    <input
-                      type="time"
-                      value={eventForm.time}
-                      onChange={(e) => isLoggedIn && setEventForm({...eventForm, time: e.target.value})}
-                      style={{
-                        ...styles.input,
-                        ...(isLoggedIn ? {} : styles.inputDisabled)
-                      }}
-                      disabled={!isLoggedIn}
-                      onFocus={(e) => isLoggedIn && (e.target.style.borderColor = '#3b82f6')}
-                      onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                    />
-                  </div>
-                )}
-
-                <div>
-                  <label style={styles.label}>Descripción</label>
-                  <textarea
-                    value={eventForm.description}
-                    onChange={(e) => isLoggedIn && setEventForm({...eventForm, description: e.target.value})}
-                    style={{
-                      ...styles.textarea,
-                      ...(isLoggedIn ? {} : styles.inputDisabled)
-                    }}
-                    placeholder="Descripción opcional"
-                    disabled={!isLoggedIn}
-                    onFocus={(e) => isLoggedIn && (e.target.style.borderColor = '#3b82f6')}
-                    onBlur={(e) => e.target.style.borderColor = '#d1d5db'}
-                  />
-                </div>
-              </div>
-
-              {/* Botones */}
-              <div style={styles.buttonGroup}>
-                <button
-                  style={styles.cancelButton}
-                  onClick={closeModal}
-                  onMouseEnter={(e) => e.target.style.backgroundColor = '#f3f4f6'}
-                  onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                >
+              <div className="button-group">
+                <button className="cancel-button" onClick={closeLoginModal}>
                   Cancelar
                 </button>
-                <button
-                  style={{
-                    ...styles.addButton,
-                    ...(isLoggedIn ? {} : styles.addButtonDisabled)
-                  }}
-                  onClick={addEvent}
-                  disabled={!isLoggedIn}
-                  onMouseEnter={(e) => isLoggedIn && (e.target.style.backgroundColor = '#2563eb')}
-                  onMouseLeave={(e) => isLoggedIn && (e.target.style.backgroundColor = '#3b82f6')}
-                >
-                  Agregar
+                <button className="submit-button" onClick={handleLogin}>
+                  Iniciar Sesión
                 </button>
               </div>
-
-              {/* Lista de eventos existentes */}
-              {selectedDate && getEventsForDate(selectedDate).length > 0 && (
-                <div style={styles.eventsList}>
-                  <h4 style={styles.eventsListTitle}>Eventos del día:</h4>
-                  <div>
-                    {getEventsForDate(selectedDate).map(event => (
-                      <div
-                        key={event.id}
-                        style={{
-                          ...styles.eventCard,
-                          ...(event.type === 'event' ? styles.eventCardEvent : styles.eventCardNote)
-                        }}
-                      >
-                        <div style={styles.eventCardHeader}>
-                          <div style={styles.eventCardContent}>
-                            <div style={styles.eventCardTitle}>
-                              {event.type === 'event' ? <Calendar /> : <FileText />}
-                              <span>{event.title}</span>
-                            </div>
-                            {event.time && (
-                              <div style={styles.eventTime}>
-                                <Clock />
-                                <span>{event.time}</span>
-                              </div>
-                            )}
-                            {event.description && (
-                              <p style={styles.eventDescription}>{event.description}</p>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => deleteEvent(formatDateKey(selectedDate), event.id)}
-                            style={{
-                              ...styles.deleteButton,
-                              ...(isLoggedIn ? {} : styles.deleteButtonDisabled)
-                            }}
-                            disabled={!isLoggedIn}
-                            onMouseEnter={(e) => isLoggedIn && (e.target.style.backgroundColor = '#fee2e2')}
-                            onMouseLeave={(e) => e.target.style.backgroundColor = 'transparent'}
-                          >
-                            <X />
-                          </button>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
             </div>
           </div>
-        )}
-      </div>
+        </div>
+      )}
+
+      {/* Modal de Eventos */}
+      {showModal && (
+        <div className="modal">
+          <div className="modal-content">
+            <div className="modal-header">
+              <h3 className="modal-title">
+                {selectedDate?.toLocaleDateString('es-ES', { 
+                  weekday: 'long', 
+                  year: 'numeric', 
+                  month: 'long', 
+                  day: 'numeric' 
+                })}
+              </h3>
+              <button className="close-button" onClick={closeModal}>
+                <X />
+              </button>
+            </div>
+
+            {/* Mensaje de advertencia si no es admin */}
+            {!isLoggedIn && (
+              <div className="warning-message">
+                <Lock />
+                <span>Solo el administrador puede agregar o eliminar eventos</span>
+              </div>
+            )}
+
+            {/* Formulario */}
+            <div className="event-form">
+              <div>
+                <div className="form-label">Tipo</div>
+                <div className="type-buttons">
+                  <button
+                    onClick={() => isLoggedIn && setEventForm({...eventForm, type: 'event'})}
+                    disabled={!isLoggedIn}
+                    className={`type-button ${eventForm.type === 'event' ? 'active' : ''} ${!isLoggedIn ? 'disabled' : ''}`}
+                  >
+                    <Calendar />
+                    <span>Evento</span>
+                  </button>
+                  <button
+                    onClick={() => isLoggedIn && setEventForm({...eventForm, type: 'note'})}
+                    disabled={!isLoggedIn}
+                    className={`type-button ${eventForm.type === 'note' ? 'note-active' : ''} ${!isLoggedIn ? 'disabled' : ''}`}
+                  >
+                    <FileText />
+                    <span>Nota</span>
+                  </button>
+                </div>
+              </div>
+
+              <div>
+                <label className="form-label">Título *</label>
+                <input
+                  type="text"
+                  value={eventForm.title}
+                  onChange={(e) => isLoggedIn && setEventForm({...eventForm, title: e.target.value})}
+                  className="form-input"
+                  placeholder="Título del evento o nota"
+                  disabled={!isLoggedIn}
+                />
+              </div>
+
+              {eventForm.type === 'event' && (
+                <div>
+                  <label className="form-label">Hora</label>
+                  <input
+                    type="time"
+                    value={eventForm.time}
+                    onChange={(e) => isLoggedIn && setEventForm({...eventForm, time: e.target.value})}
+                    className="form-input"
+                    disabled={!isLoggedIn}
+                  />
+                </div>
+              )}
+
+              <div>
+                <label className="form-label">Descripción</label>
+                <textarea
+                  value={eventForm.description}
+                  onChange={(e) => isLoggedIn && setEventForm({...eventForm, description: e.target.value})}
+                  className="form-textarea"
+                  placeholder="Descripción opcional"
+                  disabled={!isLoggedIn}
+                />
+              </div>
+            </div>
+
+            {/* Botones */}
+            <div className="button-group">
+              <button className="cancel-button" onClick={closeModal}>
+                Cancelar
+              </button>
+              <button
+                className="submit-button"
+                onClick={addEvent}
+                disabled={!isLoggedIn}
+              >
+                Agregar
+              </button>
+            </div>
+
+            {/* Lista de eventos existentes */}
+            {selectedDate && getEventsForDate(selectedDate).length > 0 && (
+              <div className="events-list">
+                <h4 className="events-list-title">Eventos del día:</h4>
+                <div>
+                  {getEventsForDate(selectedDate).map(event => (
+                    <div
+                      key={event.id}
+                      className={`event-card ${event.type === 'event' ? 'event-type' : 'note-type'}`}
+                    >
+                      <div className="event-card-header">
+                        <div className="event-card-content">
+                          <div className="event-card-title">
+                            {event.type === 'event' ? <Calendar /> : <FileText />}
+                            <span>{event.title}</span>
+                          </div>
+                          {event.time && (
+                            <div className="event-time">
+                              <Clock />
+                              <span>{event.time}</span>
+                            </div>
+                          )}
+                          {event.description && (
+                            <p className="event-description">{event.description}</p>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => deleteEvent(formatDateKey(selectedDate), event.id)}
+                          className="delete-button"
+                          disabled={!isLoggedIn}
+                        >
+                          <X />
+                        </button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+
+          </div>
+        </div>
+      )}
+      
+            {/* Modal de Eventos del Mes */}
+                {showMonthEvents && (
+                  <div className="modal">
+                    <div className="modal-content" style={{ maxWidth: '700px' }}>
+                      <div className="modal-header">
+                        <h3 className="modal-title">
+                          Eventos de {months[currentDate.getMonth()]} {currentDate.getFullYear()}
+                        </h3>
+                        <button className="close-button" onClick={() => setShowMonthEvents(false)}>
+                          <X />
+                        </button>
+                      </div>
+
+                      <div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+                        {(() => {
+                          const monthEvents = getEventsForMonth(currentDate);
+                          
+                          if (monthEvents.length === 0) {
+                            return (
+                              <div style={{ 
+                                textAlign: 'center', 
+                                padding: '40px 20px',
+                                color: '#6b7280',
+                                fontSize: '16px'
+                              }}>
+                                No hay eventos programados para este mes
+                              </div>
+                            );
+                          }
+
+                          // Agrupar eventos por fecha
+                          const eventsByDate = {};
+                          monthEvents.forEach(event => {
+                            const dateStr = event.date.toLocaleDateString('es-ES', { 
+                              weekday: 'long',
+                              day: 'numeric',
+                              month: 'long'
+                            });
+                            if (!eventsByDate[dateStr]) {
+                              eventsByDate[dateStr] = [];
+                            }
+                            eventsByDate[dateStr].push(event);
+                          });
+
+                          return Object.entries(eventsByDate).map(([dateStr, dateEvents]) => (
+                            <div key={dateStr} style={{ marginBottom: '24px' }}>
+                              <h4 style={{ 
+                                margin: '0 0 12px 0',
+                                fontSize: '16px',
+                                fontWeight: '600',
+                                color: '#374151',
+                                borderBottom: '2px solid #e5e7eb',
+                                paddingBottom: '8px',
+                                textTransform: 'capitalize'
+                              }}>
+                                {dateStr}
+                              </h4>
+                              
+                              <div style={{ paddingLeft: '16px' }}>
+                                {dateEvents.map(event => (
+                                  <div
+                                    key={event.id}
+                                    className={`event-card ${event.type === 'event' ? 'event-type' : 'note-type'}`}
+                                    style={{ marginBottom: '12px' }}
+                                  >
+                                    <div className="event-card-header">
+                                      <div className="event-card-content">
+                                        <div className="event-card-title">
+                                          {event.type === 'event' ? <Calendar /> : <FileText />}
+                                          <span>{event.title}</span>
+                                        </div>
+                                        {event.time && (
+                                          <div className="event-time">
+                                            <Clock />
+                                            <span>{event.time}</span>
+                                          </div>
+                                        )}
+                                        {event.description && (
+                                          <p className="event-description">{event.description}</p>
+                                        )}
+                                      </div>
+                                      {isLoggedIn && (
+                                        <button
+                                          onClick={() => {
+                                            deleteEvent(event.dateKey, event.id);
+                                            // Actualizar la vista si es necesario
+                                          }}
+                                          className="delete-button"
+                                        >
+                                          <X />
+                                        </button>
+                                      )}
+                                    </div>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          ));
+                        })()}
+                      </div>
+
+                      {/* Estadísticas del mes */}
+                      <div style={{ 
+                        borderTop: '1px solid #e5e7eb',
+                        paddingTop: '16px',
+                        marginTop: '16px',
+                        display: 'flex',
+                        justifyContent: 'space-around',
+                        backgroundColor: '#f9fafb',
+                        padding: '16px',
+                        borderRadius: '8px'
+                      }}>
+                        {(() => {
+                          const monthEvents = getEventsForMonth(currentDate);
+                          const totalEvents = monthEvents.length;
+                          const eventCount = monthEvents.filter(e => e.type === 'event').length;
+                          const noteCount = monthEvents.filter(e => e.type === 'note').length;
+                          
+                          return (
+                            <>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#3b82f6' }}>
+                                  {totalEvents}
+                                </div>
+                                <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                                  Total
+                                </div>
+                              </div>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#1e40af' }}>
+                                  {eventCount}
+                                </div>
+                                <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                                  Eventos
+                                </div>
+                              </div>
+                              <div style={{ textAlign: 'center' }}>
+                                <div style={{ fontSize: '24px', fontWeight: 'bold', color: '#166534' }}>
+                                  {noteCount}
+                                </div>
+                                <div style={{ fontSize: '14px', color: '#6b7280' }}>
+                                  Notas
+                                </div>
+                              </div>
+                            </>
+                          );
+                        })()}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
     </div>
   );
 };

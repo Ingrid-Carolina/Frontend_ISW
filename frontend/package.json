@@ -20,6 +20,7 @@
 		"firebase": "^11.9.1",
 		"framer-motion": "^12.15.0",
 		"leaflet": "^1.9.4",
+		"lucide-react": "^0.522.0",
 		"path": "^0.12.7",
 		"react": "^19.1.0",
 		"react-dom": "^19.1.0",
@@ -40,6 +41,7 @@
 		"eslint-plugin-react-refresh": "^0.4.19",
 		"globals": "^16.1.0",
 		"prettier": "^3.5.3",
+		"tailwindcss": "^4.1.10",
 		"typescript-eslint": "^8.32.1",
 		"vite": "^6.3.5"
 	}
