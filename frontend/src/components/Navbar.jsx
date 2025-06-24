@@ -25,6 +25,10 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
 import LiveTvOutlinedIcon from '@mui/icons-material/LiveTvOutlined';
 import { useNavigate } from 'react-router-dom';
+import EditIcon from '@mui/icons-material/Edit';
+import LogoutIcon from '@mui/icons-material/Logout';
+import PropTypes from 'prop-types';
+import Avatar from '@mui/material/Avatar';
 import axios from 'axios';
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
@@ -39,6 +43,138 @@ const baseMenuItems = [
 	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
 	{ text: 'Contacto', icon: <CallIcon />, path: '/Contacto' },
 ];
+
+const userName = localStorage.getItem('userName') ?? '';
+const avatarLetter = userName ? userName.charAt(0).toUpperCase() : 'U';
+
+const generateColorFromName = name => {
+	const colors = ['#3f51b5', '#f44336', '#4caf50', '#ff9800', '#009688'];
+	const index = name.charCodeAt(0) % colors.length;
+	return colors[index];
+};
+
+const userColor = generateColorFromName(avatarLetter);
+
+const UserAvatarMenu = ({ user, onEditProfile, onLogout }) => {
+	const [anchorEl, setAnchorEl] = React.useState(null);
+	const open = Boolean(anchorEl);
+
+	const handleClick = event => {
+		if (anchorEl) {
+			setAnchorEl(null);
+		} else {
+			setAnchorEl(event.currentTarget);
+		}
+	};
+
+	const handleClose = () => {
+		setAnchorEl(null);
+	};
+
+	return (
+		<>
+			<IconButton onClick={handleClick} sx={{ ml: 1 }}>
+				<Avatar
+					sx={{
+						bgcolor: user.color || '#3f51b5',
+						color: 'white',
+						width: 40,
+						height: 40,
+						fontWeight: 'bold',
+						fontSize: '1rem',
+						border: '2px solid white',
+					}}
+				>
+					{user.name?.charAt(0).toUpperCase()}
+				</Avatar>
+			</IconButton>
+
+			<Menu
+				anchorEl={anchorEl}
+				open={open}
+				onClose={handleClose}
+				disableScrollLock
+				anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+				transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+				PaperProps={{
+					elevation: 3,
+					sx: {
+						mt: 1.0,
+						borderRadius: 2,
+						bgcolor: 'rgb(16, 4, 92)',
+						color: 'white',
+						minWidth: 200,
+						border: '1px solid #333',
+						overflow: 'visible',
+						zIndex: 1400,
+						'&::before': {
+							content: '""',
+							position: 'absolute',
+							top: -8,
+							right: 16,
+							width: 0,
+							height: 0,
+							borderLeft: '8px solid transparent',
+							borderRight: '8px solid transparent',
+							borderBottom: '8px solid #121212',
+							zIndex: 1400,
+						},
+					},
+				}}
+			>
+				<MenuItem
+					onClick={() => {
+						handleClose();
+						onEditProfile();
+					}}
+					sx={{
+						gap: 1,
+						py: 1,
+						color: 'white',
+						'&:hover': {
+							color: '#e06c14',
+						},
+						'& svg': {
+							color: 'inherit',
+						},
+					}}
+				>
+					<EditIcon fontSize='small' />
+					Editar perfil
+				</MenuItem>
+				<MenuItem
+					onClick={() => {
+						handleClose();
+						onLogout();
+					}}
+					sx={{
+						gap: 1,
+						py: 1,
+						color: 'white',
+						'&:hover': {
+							color: '#e06c14',
+						},
+						'& svg': {
+							color: 'inherit',
+						},
+					}}
+				>
+					<LogoutIcon fontSize='small' />
+					Cerrar sesión
+				</MenuItem>
+			</Menu>
+		</>
+	);
+};
+
+UserAvatarMenu.propTypes = {
+	user: PropTypes.shape({
+		name: PropTypes.string.isRequired,
+		color: PropTypes.string,
+	}).isRequired,
+	onEditProfile: PropTypes.func.isRequired,
+	onLogout: PropTypes.func.isRequired,
+};
 
 //exports funciones navbar
 export default function CustomNavbar() {
@@ -72,8 +208,6 @@ export default function CustomNavbar() {
 		donarTimer.current = setTimeout(() => setDonarOpen(false), 200);
 	};
 
-
-
 	const isLoggedIn = !!localStorage.getItem('token');
 	const navigate = useNavigate();
 
@@ -82,8 +216,14 @@ export default function CustomNavbar() {
 			await axios.post('http://localhost:3000/auth/signout');
 			localStorage.removeItem('token');
 			localStorage.removeItem('userRole');
+			localStorage.removeItem('userName');
+			localStorage.removeItem('userEmail');
 			alert('Sesion cerrada correctamente.');
 			navigate('/login'); // O redirige a la home si prefieres
+			//Refrescar la página para limpiar el estado visual y memoria React
+			setTimeout(() => {
+				window.location.reload();
+			}, 100);
 		} catch (error) {
 			console.error('Error al cerrar sesión:', error);
 			alert('Error al cerrar sesión. Inténtalo de nuevo.');
@@ -238,32 +378,11 @@ export default function CustomNavbar() {
 
 					<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
 						{isLoggedIn ? (
-							<Button
-								onClick={() => {
-									setDrawerOpen(false);
-									handleLogout();
-								}}
-								sx={{
-									backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
-									color: drawerOpen ? '#ffffff' : '#0c005a',
-									border: '2px solid #0c005a',
-									fontWeight: 'bold',
-									fontSize: '0.9rem',
-									fontFamily: '"GroteskBold", sans-serif',
-									textTransform: 'none',
-									height: '40px',
-									px: 2.5,
-									borderRadius: '6px',
-									transition: 'all 0.3s ease',
-									'&:hover': {
-										color: '#e06c14',
-										borderColor: '#e06c14',
-										backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
-									},
-								}}
-							>
-								Cerrar Sesión
-							</Button>
+							<UserAvatarMenu
+								user={{ name: avatarLetter, color: userColor }}
+								onEditProfile={() => navigate('/perfil')}
+								onLogout={handleLogout}
+							/>
 						) : (
 							<Button
 								component={Link}
@@ -291,7 +410,6 @@ export default function CustomNavbar() {
 								Iniciar Sesión
 							</Button>
 						)}
-
 
 						<IconButton
 							onClick={toggleDrawer}
