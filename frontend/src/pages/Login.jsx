@@ -143,6 +143,12 @@ const Login = ({ onRegistroClick }) => {
 				// Navigate to home
 				navigate('/');
 
+				setTimeout(() => {
+					if (window.location.pathname === '/') {
+						window.location.reload(); // solo recarga si ya estás en home
+					}
+				}, 100);
+
 				setSubmitError('');
 				setFailedAttempts(0);
 				setFailedBlock(0);
