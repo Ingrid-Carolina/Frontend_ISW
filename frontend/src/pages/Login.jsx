@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Visibility, VisibilityOff } from '@mui/icons-material';
 import {
 	Typography,
@@ -14,7 +15,6 @@ import logo from '/Images/Logo-pilotos.png';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import axios from 'axios';
-import { useNavigate } from 'react-router-dom';
 
 const Login = ({ onRegistroClick }) => {
 	const [formData, setFormData] = useState({
@@ -28,8 +28,58 @@ const Login = ({ onRegistroClick }) => {
 	const [submitError, setSubmitError] = useState('');
 	const [recoveryMessage, setRecoveryMessage] = useState('');
 	const navigate = useNavigate();
+
+	const [isDisabled, setIsDisabled] = useState(false);
 	const [failedAttempts, setFailedAttempts] = useState(0);
-	const MAX_ATTEMPTS = 6;
+	const [failedBlock, setFailedBlock] = useState(0);
+	const [countdown, setCountdown] = useState(null);
+
+	const MAX_ATTEMPTS = 3;
+
+	const resetDisable = time => {
+		setTimeout(() => {
+			setIsDisabled(false);
+			setCountdown(null);
+			setSubmitError('');
+		}, time);
+	};
+
+	const countFailBlocks = () => {
+		const durations = {
+			1: 30000, // 30 seconds
+			2: 60000, // 1 minute
+			3: 180000, // 3 minutes
+			4: 300000, // 5 minutes
+		};
+
+		let fb = failedBlock + 1;
+		setFailedAttempts(0);
+		setFailedBlock(fb);
+
+		const timeToWait = durations[fb] || 300000; // Default to 5 minutes
+		setCountdown(timeToWait / 1000); // Convert to seconds
+		setIsDisabled(true);
+
+		resetDisable(timeToWait);
+	};
+
+	const handleFailedAttempt = error => {
+		const nuevoIntento = failedAttempts + 1;
+		setFailedAttempts(nuevoIntento);
+
+		const restante = MAX_ATTEMPTS - nuevoIntento;
+
+		if (nuevoIntento === MAX_ATTEMPTS) {
+			// User has reached max attempts, trigger lockout
+			countFailBlocks();
+			setSubmitError(
+				'Has excedido el número máximo de intentos. Tienes que esperar un momento.',
+			);
+		} else {
+			// Still have attempts left
+			setSubmitError(`Correo o contraseña incorrecta.`);
+		}
+	};
 
 	const validateForm = () => {
 		const newErrors = {};
@@ -87,29 +137,20 @@ const Login = ({ onRegistroClick }) => {
 					localStorage.setItem('userName', data.usuario.nombre);
 				}
 
-				navigate('/');
+				// Trigger navbar re-render
+				window.dispatchEvent(new Event('storage'));
 
-				setTimeout(() => {
-					if (window.location.pathname === '/') {
-						window.location.reload(); // solo recarga si ya estás en home
-					}
-				}, 100);
+				// Navigate to home
+				navigate('/');
 
 				setSubmitError('');
 				setFailedAttempts(0);
+				setFailedBlock(0);
 			} else {
 				setSubmitError('Respuesta inesperada del servidor.');
 			}
 		} catch (error) {
-			const nuevoIntento = failedAttempts + 1;
-			setFailedAttempts(nuevoIntento);
-
-			const restante = MAX_ATTEMPTS - nuevoIntento;
-			setSubmitError(
-				restante === 0
-					? 'Has excedido el número máximo de intentos. Intenta más tarde.'
-					: 'Correo o contraseña incorrecta',
-			);
+			handleFailedAttempt(error);
 		} finally {
 			setIsSubmitting(false);
 
@@ -137,20 +178,18 @@ const Login = ({ onRegistroClick }) => {
 			window.alert(res.data.mensaje);
 			return res.data;
 		} catch (error) {
-			console.log('Error:', error);
-
 			if (error.response) {
 				console.log('Error data:', error.response.data.mensaje);
 				console.log('Error status:', error.response.status);
-
 				window.alert(error.response.data.mensaje);
 			} else if (error.request) {
 				window.alert(
-					'Ninguna respuesta del servidor.Por favor verifique su red.',
+					'Ninguna respuesta del servidor. Por favor verifique su red.',
 				);
 			} else {
 				window.alert('Error en la red.');
 			}
+			throw error; // Re-throw to trigger handleFailedAttempt
 		}
 	};
 
@@ -169,6 +208,33 @@ const Login = ({ onRegistroClick }) => {
 			'Se ha enviado un enlace para restablecer la contraseña a tu correo.',
 		);
 	};
+
+	// Format countdown time
+	const formatCountdown = seconds => {
+		const minutes = Math.floor(seconds / 60);
+		const remainingSeconds = seconds % 60;
+
+		if (minutes > 0) {
+			return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+		}
+		return `${remainingSeconds}`;
+	};
+
+	// Countdown effect
+	useEffect(() => {
+		let interval;
+		if (countdown > 0) {
+			interval = setInterval(() => {
+				setCountdown(prev => prev - 1);
+			}, 1000);
+		} else if (countdown === 0) {
+			setCountdown(null);
+			setIsDisabled(false);
+			setSubmitError('');
+			setRecoveryMessage('Puedes intentar nuevamente.');
+		}
+		return () => clearInterval(interval);
+	}, [countdown]);
 
 	return (
 		<Box
@@ -209,8 +275,14 @@ const Login = ({ onRegistroClick }) => {
 						sx={{ mb: 2 }}
 					>
 						{submitError}
+						{countdown && (
+							<Typography variant='body2' sx={{ mt: 1, fontWeight: 'bold' }}>
+								Tiempo restante: {formatCountdown(countdown)}
+							</Typography>
+						)}
 					</Alert>
 				)}
+
 				{recoveryMessage && (
 					<Alert
 						severity='info'
@@ -230,6 +302,7 @@ const Login = ({ onRegistroClick }) => {
 					helperText={errors.email}
 					fullWidth
 					margin='normal'
+					disabled={isDisabled}
 				/>
 
 				<TextField
@@ -248,22 +321,26 @@ const Login = ({ onRegistroClick }) => {
 								<IconButton
 									onClick={() => setShowPassword(prev => !prev)}
 									edge='end'
+									disabled={isDisabled}
 								>
 									{showPassword ? <VisibilityOff /> : <Visibility />}
 								</IconButton>
 							</InputAdornment>
 						),
 					}}
+					disabled={isDisabled}
 				/>
 
 				<Box sx={{ textAlign: 'right', mt: 1 }}>
 					<Link
 						component='button'
 						onClick={handleForgotPassword}
+						disabled={isDisabled}
 						sx={{
 							fontSize: '0.85rem',
-							color: '#f06414',
+							color: isDisabled ? '#ccc' : '#f06414',
 							'&:hover': { textDecoration: 'underline' },
+							cursor: isDisabled ? 'not-allowed' : 'pointer',
 						}}
 					>
 						¿Olvidaste tu contraseña?
@@ -274,16 +351,23 @@ const Login = ({ onRegistroClick }) => {
 					variant='contained'
 					fullWidth
 					onClick={handleLogin}
-					disabled={isSubmitting || failedAttempts >= MAX_ATTEMPTS}
+					disabled={isSubmitting || isDisabled}
 					sx={{
 						mt: 2,
 						backgroundColor: '#fa7600',
 						'&:hover': {
 							backgroundColor: '#e56700',
 						},
+						'&:disabled': {
+							backgroundColor: '#ccc',
+						},
 					}}
 				>
-					{isSubmitting ? 'Iniciando...' : 'Iniciar sesión'}
+					{isSubmitting
+						? 'Iniciando...'
+						: isDisabled
+							? `Bloqueado ${countdown ? `(${formatCountdown(countdown)})` : ''}`
+							: 'Iniciar sesión'}
 				</Button>
 
 				<Typography sx={{ mt: 2, fontSize: '0.9rem' }}>
@@ -291,7 +375,12 @@ const Login = ({ onRegistroClick }) => {
 					<Link
 						component='button'
 						onClick={onRegistroClick}
-						sx={{ fontWeight: 'bold' }}
+						disabled={isDisabled}
+						sx={{
+							fontWeight: 'bold',
+							color: isDisabled ? '#ccc' : 'inherit',
+							cursor: isDisabled ? 'not-allowed' : 'pointer',
+						}}
 					>
 						Regístrate
 					</Link>
