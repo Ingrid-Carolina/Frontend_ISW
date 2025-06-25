@@ -89,7 +89,8 @@ const Calendario = () => {
     title: '',
     time: '',
     description: '',
-    type: 'event'
+    type: 'event',
+    date:''
   });
   const [view, setView] = useState('month'); // 'week' o 'month'
   const [showMonthEvents, setShowMonthEvents] = useState(false);
@@ -203,11 +204,20 @@ const Calendario = () => {
   const openModal = (date) => {
     setSelectedDate(date);
     setShowModal(true);
+
+
+    const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  const localDateString = `${year}-${month}-${day}`;
+
+
     setEventForm({
       title: '',
       time: '',
       description: '',
-      type: 'event'
+      type: 'event',
+    date: localDateString
     });
   };
 
@@ -218,7 +228,8 @@ const Calendario = () => {
       title: '',
       time: '',
       description: '',
-      type: 'event'
+      type: 'event',
+      date:''
     });
   };
 
@@ -230,12 +241,15 @@ const Calendario = () => {
 
     if (!eventForm.title.trim()) return;
 
-    const dateKey = formatDateKey(selectedDate);
-    const newEvent = {
-      id: Date.now(),
-      ...eventForm,
-      date: selectedDate
-    };
+        const [year, month, day] = eventForm.date.split('-');
+        const eventDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+        
+        const dateKey = formatDateKey(eventDate);
+        const newEvent = {
+          id: Date.now(),
+          ...eventForm,
+          date: eventDate
+        };
 
     setEvents(prev => ({
       ...prev,
@@ -611,6 +625,41 @@ const Calendario = () => {
                   </button>
                 </div>
               </div>
+
+
+              {/* AGREGAR ESTE BLOQUE COMPLETO: */}
+              <div>
+                <label className="form-label">Fecha *</label>
+                <input
+                  type="date"
+                  value={eventForm.date}
+                  onChange={(e) => {
+                    if (isLoggedIn) {
+                      setEventForm({...eventForm, date: e.target.value});
+                      // Actualizar también selectedDate para mostrar en el título del modal
+                      //setSelectedDate(new Date(e.target.value));
+
+
+                       const [year, month, day] = e.target.value.split('-');
+                      const newSelectedDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
+                      setSelectedDate(newSelectedDate);
+                      
+                    }
+                  }}
+                  className="form-input"
+                  disabled={!isLoggedIn}
+                />
+              </div>
+
+
+
+
+
+
+
+
+
+
 
               <div>
                 <label className="form-label">Título *</label>
