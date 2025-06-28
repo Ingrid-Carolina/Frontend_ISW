@@ -140,6 +140,10 @@ const Registro = ({ onLoginClick }) => {
       password: '',
       confirmarPassword: ''
     });
+    setTimeout(() => {
+        onLoginClick();
+      }, 2000);
+
   } else {
     setSubmitMessage({ success: '', error: 'Registro fallido. Vuelva a intentarlo' });
 }
