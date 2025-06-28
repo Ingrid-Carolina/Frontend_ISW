@@ -724,236 +724,63 @@ buscarPorCategoria = (producto, searchTerm) => {
 
   // Renderizar contenido de la tienda
  renderTiendaContent = () => {
-  const filteredProducts = this.getFilteredProducts();
-  const hasSearchQuery = this.state.searchQuery && this.state.searchQuery.trim() !== '';
-  return (
-    <Container
-      maxWidth="lg"
-      sx={{
-        py: 4,
-        maxHeight: 'calc(100vh + 250px)',
-        overflow: 'auto',
-        
-        // SCROLL Prdocuto de  PILOTOS
-            '&::-webkit-scrollbar': {
-            width: '12px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: '#f8f9fa',
-            borderRadius: '20px',
-            boxShadow: 'inset 0 0 5px rgba(0,0,0,0.1)',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: 'linear-gradient(45deg, #667eea 0%, #764ba2 100%)',
-            borderRadius: '20px',
-            boxShadow: '0 2px 10px rgba(0,0,0,0.3)',
-            border: '2px solid #f8f9fa',
-            '&:hover': {
-              background: 'linear-gradient(45deg, #764ba2 0%, #667eea 100%)',
-              boxShadow: '0 4px 15px rgba(0,0,0,0.4)',
-            },
-          },
-          scrollbarWidth: 'auto',
-          scrollbarColor: '#667eea #f8f9fa',
-        paddingBottom: '80px'
-      }}
-    >
-      <Typography variant="h4" gutterBottom sx={{ color: '#2c1a99', fontWeight: 'bold' }}>
-        {this.state.isLoggedIn
-          ? `Bienvenido ${this.state.userData?.nombre || 'Usuario'} a la Tienda de Pilotos`
-          : 'Bienvenido a la Tienda de Pilotos'
-        }
-      </Typography>
-
-      
-         {/* Mostrar información de búsqueda mejorada */}
-      {hasSearchQuery && (
-        <Box sx={{ mb: 3, p: 2, bgcolor: '#f8f9fa', borderRadius: 1 }}>
-          <Typography variant="h6" sx={{ color: '#2c1a99', fontWeight: 'bold' }}>
-            Resultados para: "{this.state.searchQuery}"
-          </Typography>
-          <Typography variant="body1" sx={{ color: '#666' }}>
-            {filteredProducts.length > 0 
-              ? `Se encontraron ${filteredProducts.length} producto${filteredProducts.length !== 1 ? 's' : ''}`
-              : 'No se encontraron productos'
-            }
-          </Typography>
-          {filteredProducts.length === 0 && (
-            <Typography variant="body2" sx={{ color: '#999', mt: 1 }}>
-              Sugerencias: Intenta con "camisa", "gorra", "bandera", "niño", etc.
-            </Typography>
-          )}
-        </Box>
-      )}
-
-
-
-      <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 3, mt: 3 }}>
-        {filteredProducts.map((producto) => {
-          return (
-            <Paper
-              key={producto.id}
-              elevation={2}
-              sx={{
-                p: 2,
-                borderRadius: 2,
-                transition: 'transform 0.2s, box-shadow 0.2s',
-                '&:hover': {
-                  transform: 'translateY(-4px)',
-                  boxShadow: '0 8px 25px rgba(0,0,0,0.15)'
-                },
-                height: 'fit-content'
-              }}
-            >
-              {/* Imagen del producto */}
-              <Box
-                sx={{
-                  height: 150,
-                  backgroundColor: '#f8f9fa', // fondo de los iconos de cada producto
-                  borderRadius: 1,
-                  mb: 2,
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  border: '2px solid #e9ecef',
-                  overflow: 'hidden' // Asegura que la imagen no se desborde
-                }}
-              >
-                <img
-                  src={producto.imagen}
-                  alt={producto.nombre}
-                  style={{
-                    maxWidth: '100%',
-                    maxHeight: '100%',
-                    objectFit: 'contain' // Para que la imagen se ajuste sin distorsionarse
-                  }}
-                />
+    const filteredProducts = this.getFilteredProducts();
+    return (
+      <Container maxWidth="lg" sx={{ py: 4 }}>
+        <Typography variant="h4" sx={{ color: '#2c1a99', fontWeight: 'bold', fontFamily: 'Varsity' }}>
+          Bienvenido a la Tienda de Pilotos
+        </Typography>
+        <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 3, mt: 3 }}>
+          {filteredProducts.map((producto) => (
+            <Paper key={producto.id} elevation={2} sx={{
+              p: 2,
+              borderRadius: 2,
+              transition: 'transform 0.2s, box-shadow 0.2s, border 0.2s',
+              border: '2px solid transparent',
+              '&:hover': {
+                transform: 'translateY(-4px)',
+                boxShadow: '0 8px 25px #2c1a99',
+                border: '2px solid #2c1a99'
+              },
+              height: 'fit-content'
+            }}>
+              <Box sx={{ height: 150, backgroundColor: '#f8f9fa', borderRadius: 1, mb: 2, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                <img src={producto.imagen} alt={producto.nombre} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
               </Box>
-
-
-              {/* Título del producto */}
-              <Typography 
-                variant="h6" 
-                gutterBottom 
-                sx={{
-                  fontWeight: 'bold',
-                  fontSize: '1.1rem',
-                  lineHeight: 1.3,
-                  minHeight: '2.6rem',
-                  display: '-webkit-box',
-                  WebkitLineClamp: 2,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}
-              >
-                {producto.nombre}
-              </Typography>
-
-              {/* Descripción del producto */}
-              <Typography
-                variant="body2"
-                color="text.secondary"
-                gutterBottom
-                sx={{
-                  minHeight: '3rem',
-                  fontSize: '0.9rem',
-                  lineHeight: 1.4,
-                  display: '-webkit-box',
-                  WebkitLineClamp: 3,
-                  WebkitBoxOrient: 'vertical',
-                  overflow: 'hidden'
-                }}
-              >
-                {producto.descripcion}
-              </Typography>
-
-              {/* Selector de tallas (solo para camisas/camisetas) */}
-              {(producto.nombre.toLowerCase().includes("camisa") || 
-                producto.nombre.toLowerCase().includes("camiseta")) && (
-                <TextField
-                  select
-                  fullWidth
-                  label="Talla"
-                  value={this.state.selectedSizes?.[producto.id] || ''}
-                  onChange={(e) => this.setState(prev => ({
-                    selectedSizes: { ...prev.selectedSizes, [producto.id]: e.target.value }
-                  }))}
-                  sx={{ mb: 2 }}
-                >
-                  {['6','8','10','12','14','15','16','S', 'M', 'L', 'XL'].map((size) => (
-                    <MenuItem key={size} value={size}>
-                      {size}
-                        
-
-
-
-                    </MenuItem>
+              <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'Varsity' }}>{producto.nombre}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{fontFamily: 'PeterMedium', fontWeight: 'bold' }}>{producto.descripcion}</Typography>
+              {this.productoRequiereTalla(producto) && (
+                <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 2 }}>
+                  {["6", "8", "10", "12", "14", "15", "16", "S", "M", "L", "XL"].map(size => (
+                    <Button key={size} onClick={() => this.setState(prev => ({ selectedSizes: { ...prev.selectedSizes, [producto.id]: size } }))} variant={this.state.selectedSizes?.[producto.id] === size ? 'contained' : 'outlined'} sx={{
+                      minWidth: 0,
+                      width: 36,
+                      height: 36,
+                      borderRadius: '50%',
+                      borderColor : '666666',
+                      p: 0,
+                      fontFamily: 'Varsity',
+                      fontWeight: 'bold',
+                      bgcolor: this.state.selectedSizes?.[producto.id] === size ? '#2c1a99' : '#fff',
+                      color: this.state.selectedSizes?.[producto.id] === size ? '#fff' : '#999',
+                      border: this.state.selectedSizes?.[producto.id] === size ? '2px solid #2c1a99' : '2px solid #999',
+                      '&:hover': { bgcolor: '#2c1a99', color: '#fff' }
+                    }}>{size}</Button>
                   ))}
-                </TextField>
+                </Box>
               )}
-
-              {/* Precio del producto */}
-              <Typography
-                variant="h5"
-                sx={{
-                  color: '#2c1a99',
-                  fontWeight: 'bold',
-                  mb: 2,
-                  fontSize: '1.3rem'
-                }}
-              >
-                
-                 L.{this.getPrecioByTalla(producto, this.state.selectedSizes[producto.id]).toFixed(2)}
+              <Typography variant="h5" sx={{ color: '#2c1a99', fontWeight: 'bold', fontFamily: 'Varsity' }}>
+                L.{this.getPrecioByTalla(producto, this.state.selectedSizes[producto.id]).toFixed(2)}
               </Typography>
-
-              {/* Botón agregar al carrito */}
-              <Button
-                fullWidth
-                variant="contained"
-                onClick={() => this.addToCart(producto)}
-                sx={{
-                  backgroundColor: '#E06C14', // color del botón agregar producto
-                  color: 'white',
-                  fontWeight: 'bold',
-                  py: 1.2,
-                  fontSize: '1rem',
-                  '&:hover': {
-                    backgroundColor: '#28a428', // cuando estoy encima del botón agregar producto
-                    transform: 'translateY(-1px)',
-                    boxShadow: '0 4px 12px rgba(50, 205, 50, 0.3)'
-                  },
-                  transition: 'all 0.2s ease'
-                }}
-              >
+              <Button variant="contained" fullWidth sx={{ bgcolor: '#E06C14', fontFamily: 'GroteskBold', color: 'white', fontWeight: 'bold', mt: 2, '&:hover': { bgcolor: '#28a428' } }} onClick={() => this.addToCart(producto)}>
                 Agregar al Carrito
               </Button>
             </Paper>
-          );
-        })}
-      </Box>
-
-      {/* Mensaje cuando no hay resultados */}
-      {filteredProducts.length === 0 && this.state.searchQuery && (
-        <Box sx={{ textAlign: 'center', py: 8 }}>
-          <SearchIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />
-          <Typography variant="h6" color="text.secondary">
-            No se encontraron productos  No hay productos que coincidan con "{this.state.searchQuery}"
-          </Typography>
-          <Typography variant="body2" color="text.secondary">
-            Intenta buscar por: camisa, camiseta, gorra, bandera, niño, local, visita
-          </Typography>
-          <Button 
-          variant = "outlined"
-          onClick={()=> this.setState.apply({searchQuery: ''})}
-          sx={{mt:2}}
-          >Limpiar Busqueda
-            
-          </Button>
+          ))}
         </Box>
-      )}
-    </Container>
-  );
-}
+      </Container>
+    );
+  }
 
   // Renderizar modal del carrito
   renderCarritoModal = () => {
@@ -973,7 +800,7 @@ buscarPorCategoria = (producto, searchTerm) => {
       <Box sx={{ p: 3, pt: { xs: '130px', sm: '130px' }, display: 'flex', flexDirection: 'column', height: '100%' }}>
         {/* Header */}
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" sx={{ color: '#2c1a99', fontWeight: 'bold' }}>Carrito de Compras</Typography>
+          <Typography variant="h5" sx={{ color: '#2c1a99',fontFamily: 'Varsity', fontWeight: 'bold' }}>Carrito de Compras</Typography>
           <IconButton onClick={this.cerrarCarritoModal}>
             <CloseIcon />
           </IconButton>
@@ -981,10 +808,23 @@ buscarPorCategoria = (producto, searchTerm) => {
 
         {/* Contenido del carrito */}
         {this.state.cartItems.length === 0 ? (
-          <Box sx={{ textAlign: 'center', py: 4, flexGrow: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
- <ShoppingCartIcon sx={{ fontSize: 64, color: 'grey.400', mb: 2 }} />           
-             <Typography variant="h6" color="text.secondary">Tu carrito está vacío</Typography>
-          </Box>
+          <Box
+  sx={{
+    flexGrow: 1,
+    display: 'flex',
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 2,
+    py: 4
+  }}
+>
+  <ShoppingCartIcon sx={{ fontSize: 48, color: 'grey.500' }} />
+  <Typography variant="h6" color="text.secondary" sx={{fontFamily: 'Varsity', fontWeight: 'bold' }}>
+    Tu carrito está vacío
+  </Typography>
+</Box>
+          
         ) : (
           
           <>
@@ -1003,11 +843,11 @@ buscarPorCategoria = (producto, searchTerm) => {
                       sx={{ width: 70, height: 70, borderRadius: 1, mr: 2 }}
                     />
                         <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.05rem' }}>
+                          <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.05rem', color: '#2c1a99', fontFamily: 'Varsity', fontWeight: 'bold' }}>
                             {item.nombre}
                           </Typography>
                           <Typography variant="body1" sx={{ fontSize: '0.95rem', color: 'text.secondary' }}>
-                            L{(totalActualizado).toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
+                            L{(item.precio).toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
                           </Typography>
                           {/* Mostrar talla si existe */}
                             {item.talla && (
