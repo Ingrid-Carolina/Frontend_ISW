@@ -15,12 +15,15 @@ import logo from '/Images/Logo-pilotos.png';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import axios from 'axios';
+import ResetPasswordModal from './ResetPasswordModal';
 
 const Login = ({ onRegistroClick }) => {
 	const [formData, setFormData] = useState({
 		email: '',
 		password: '',
 	});
+
+	const [openResetModal, setOpenResetModal] = useState(false);
 
 	const [showPassword, setShowPassword] = useState(false);
 	const [errors, setErrors] = useState({});
@@ -200,19 +203,7 @@ const Login = ({ onRegistroClick }) => {
 	};
 
 	const handleForgotPassword = () => {
-		if (!formData.email.trim()) {
-			setErrors({ email: 'Ingresa tu correo para recuperar la contraseña' });
-			return;
-		}
-
-		if (!/\S+@\S+\.\S+/.test(formData.email)) {
-			setErrors({ email: 'Correo electrónico inválido' });
-			return;
-		}
-
-		setRecoveryMessage(
-			'Se ha enviado un enlace para restablecer la contraseña a tu correo.',
-		);
+		setOpenResetModal(true);
 	};
 
 	// Format countdown time
@@ -392,6 +383,12 @@ const Login = ({ onRegistroClick }) => {
 					</Link>
 				</Typography>
 			</Box>
+
+			<ResetPasswordModal
+				open={openResetModal}
+				onClose={() => setOpenResetModal(false)}
+				emailValue={formData.email}
+			/>
 		</Box>
 	);
 };
