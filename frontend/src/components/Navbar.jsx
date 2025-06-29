@@ -277,7 +277,7 @@ export default function CustomNavbar() {
 								onMouseLeave={handleSubmenuLeave}
 								sx={{ position: 'relative' }}
 							>
-								<Button sx={navBtnStyle(drawerOpen)}>Nuestra Historia</Button>
+								<Button sx={navBtnStyle(drawerOpen)}>Sobre Nosotros</Button>
 								{submenuOpen && (
 									<Box sx={submenuBoxStyle}>
 										<MenuItem
@@ -319,6 +319,14 @@ export default function CustomNavbar() {
 											sx={subMenuStyle}
 										>
 											Categorías
+										</MenuItem>
+										<MenuItem
+											component={Link}
+											to='/Testimonio'
+											onClick={() => setDrawerOpen(false)}
+											sx={subMenuStyle}
+										>
+											Testimonios
 										</MenuItem>
 									</Box>
 								)}

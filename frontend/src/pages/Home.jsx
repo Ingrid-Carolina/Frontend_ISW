@@ -94,7 +94,7 @@ function Home() {
             {/* Ajusta el valor según la altura real de tu navbar */}
             <div className='header'>
                 <div className='header-title'>
-                    <p>ASOCIACION DE</p>
+                    <p>ASOCIACIóN DE</p>
                     <p>BEISBOL MENOR</p>
                     <p>PILOTOS DE HONDURAS</p>
                 </div>

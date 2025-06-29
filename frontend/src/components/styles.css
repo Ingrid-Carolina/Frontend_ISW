@@ -298,3 +298,16 @@ footer {
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'Rific';
+  src: url('/fonts/RifficFree-Bold.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'ManropeEB';
+  src: url('/fonts/Manrope-ExtraBold.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}

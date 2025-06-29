@@ -178,11 +178,11 @@ const Registro = ({ onLoginClick }) => {
         }}
       >
         <Typography variant="h5" sx={{
-            fontFamily: '"Jersey", cursive',
+            fontFamily: '"Varsity", cursive',
             fontWeight: 'bold',
             textAlign: 'center',
             mb: { xs: 3, md: 4 },
-            fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' },
+            fontSize: { xs: '2.3rem', sm: '2.8rem', md: '3.7rem' },
             color: '#e06c14'
           }}>
           Regístrate

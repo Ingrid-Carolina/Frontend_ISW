@@ -7,18 +7,18 @@
   display: flex;
   align-items: center;
   justify-content: flex-end; /* Sigue alineado a la derecha */
-  padding-right: 80px;
+  padding-right: 20px;
   box-sizing: border-box;
 }
 
 .header-title {
   color: white;
-  font-size: 4.3vw; /* Escala según el ancho de pantalla */
+  font-size: 4.8vw; /* Escala según el ancho de pantalla */
   font-weight: bold;
   text-align: left;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
   font-family: 'Varsity', sans-serif;
-  line-height: 1.5;
+  line-height: 1.3;
   margin-right: 5%;
 }
 
