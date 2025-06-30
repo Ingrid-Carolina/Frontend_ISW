@@ -412,53 +412,41 @@ cambiarTallaEnCarritoAlternativa = (itemId, tallaActual, nuevaTalla) => {
 }
 
   // Aumentar cantidad de un producto
-  aumentarCantidad = (productId) => {
-    this.setState(prevState => {
-      const newCartItems = prevState.cartItems.map(item =>
-        item.id === productId
-          ? { ...item, cantidad: item.cantidad + 1 }
-          : item
-      );
-
-      const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
-
-      return {
-        cartItems: newCartItems,
-        totalItems: totalItems
-      };
-    });
-  }
+  aumentarCantidad = (productId, talla) => {
+  this.setState(prevState => {
+    const newCartItems = prevState.cartItems.map(item =>
+      item.id === productId && item.talla === talla
+        ? { ...item, cantidad: item.cantidad + 1 }
+        : item
+    );
+    const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
+    return { cartItems: newCartItems, totalItems };
+  });
+};
 
   // Disminuir cantidad de un producto
-  disminuirCantidad = (productId) => {
-    this.setState(prevState => {
-      const newCartItems = prevState.cartItems.map(item =>
-        item.id === productId && item.cantidad > 1
-          ? { ...item, cantidad: item.cantidad - 1 }
-          : item
-      );
-
-      const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
-
-      return {
-        cartItems: newCartItems,
-        totalItems: totalItems
-      };
-    });
-  }
+  disminuirCantidad = (productId, talla) => {
+  this.setState(prevState => {
+    const newCartItems = prevState.cartItems.map(item =>
+      item.id === productId && item.talla === talla && item.cantidad > 1
+        ? { ...item, cantidad: item.cantidad - 1 }
+        : item
+    );
+    const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
+    return { cartItems: newCartItems, totalItems };
+  });
+};
 
   // Eliminar producto del carrito
-  eliminarDelCarrito = (productId) => {
-    this.setState(prevState => {
-      const newCartItems = prevState.cartItems.filter(item => item.id !== productId);
-      const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
-
-      return {
-        cartItems: newCartItems,
-        totalItems: totalItems
-      };
-    });
-  }
+  eliminarDelCarrito = (productId, talla) => {
+  this.setState(prevState => {
+    const newCartItems = prevState.cartItems.filter(item =>
+      !(item.id === productId && item.talla === talla)
+    );
+    const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
+    return { cartItems: newCartItems, totalItems };
+  });
+};
 
   actualizarPreciosCarrito = () => {
   this.setState(prevState => {
@@ -868,7 +856,7 @@ buscarPorCategoria = (producto, searchTerm) => {
                         </Box>
                         {/* Cantidad: más alejado del texto, más cerca del precio */}
                       <Box sx={{ display: 'flex', alignItems: 'center', ml: 3, mr: 1 }}>
-                        <IconButton size="small" onClick={() => this.disminuirCantidad(item.id)} disabled={item.cantidad <= 1}>
+                        <IconButton size="small" onClick={() => this.disminuirCantidad(item.id, item.talla)} disabled={item.cantidad <= 1}>
                           <RemoveIcon />
                         </IconButton>
                         <Typography sx={{ mx: 1, minWidth: 30, textAlign: 'center', fontWeight: 'bold' }}>
