@@ -119,6 +119,23 @@ const Plus = () => (
 	</svg>
 );
 
+const EditIcon = () => (
+	<svg
+		xmlns='http://www.w3.org/2000/svg'
+		width='18'
+		height='18'
+		viewBox='0 0 24 24'
+		fill='none'
+		stroke='#3b82f6'
+		strokeWidth='2'
+		strokeLinecap='round'
+		strokeLinejoin='round'
+	>
+		<path d='M12 20h9' />
+		<path d='M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' />
+	</svg>
+);
+
 const Calendario = () => {
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [events, setEvents] = useState({});
@@ -126,6 +143,8 @@ const Calendario = () => {
 	const [originalDateKey, setOriginalDateKey] = useState(null);
 	const [eventData, setEventData] = useState({ titulo: '', descripcion: '' });
 	const [showModal, setShowModal] = useState(false);
+	const [showConfirmModal, setShowConfirmModal] = useState(false);
+	const [eventToDelete, setEventToDelete] = useState(null); // { dateKey, id }
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [eventForm, setEventForm] = useState({
 		title: '',
@@ -294,6 +313,8 @@ const Calendario = () => {
 		setEventForm({
 			title: event.title,
 			time: event.time || '',
+			endTime: event.endTime || '',
+			endDate: event.endDate || formatDateKey(event.date),
 			description: event.description || '',
 			type: event.type || 'event',
 			date: formatDateKey(event.date || selectedDate),
@@ -305,11 +326,8 @@ const Calendario = () => {
 			alert('Solo el administrador puede eliminar eventos');
 			return;
 		}
-
-		setEvents(prev => ({
-			...prev,
-			[dateKey]: prev[dateKey].filter(event => event.id !== eventId),
-		}));
+		setEventToDelete({ dateKey, eventId });
+		setShowConfirmModal(true);
 	};
 
 	const getEventsForDate = date => {
@@ -371,11 +389,19 @@ const Calendario = () => {
 
 	const datesBetween = (start, end) => {
 		const result = [];
+
 		const current = new Date(start);
-		while (current <= end) {
-			result.push(formatDateKey(new Date(current))); // formato YYYY-MM-DD
+		const endCopy = new Date(end);
+
+		// Normalizar ambas fechas a medianoche para comparar solo día/mes/año
+		current.setHours(0, 0, 0, 0);
+		endCopy.setHours(0, 0, 0, 0);
+
+		while (current <= endCopy) {
+			result.push(formatDateKey(new Date(current)));
 			current.setDate(current.getDate() + 1);
 		}
+
 		return result;
 	};
 
@@ -559,7 +585,7 @@ const Calendario = () => {
 						{/* Formulario */}
 						<div className='event-form'>
 							<div>
-								<label className='form-label'>Fecha *</label>
+								<label className='form-label'>Fecha de Inicio*</label>
 								<input
 									type='date'
 									value={eventForm.date}
@@ -597,7 +623,7 @@ const Calendario = () => {
 
 							{eventForm.type === 'event' && (
 								<div>
-									<label className='form-label'>Hora</label>
+									<label className='form-label'>Hora de Inicio</label>
 									<input
 										type='time'
 										value={eventForm.time}
@@ -612,7 +638,7 @@ const Calendario = () => {
 							)}
 
 							<div>
-								<label className='form-label'>Fecha de fin</label>
+								<label className='form-label'>Fecha de finalización</label>
 								<input
 									type='date'
 									value={eventForm.endDate}
@@ -626,7 +652,7 @@ const Calendario = () => {
 							</div>
 
 							<div>
-								<label className='form-label'>Hora de fin</label>
+								<label className='form-label'>Hora de finalización</label>
 								<input
 									type='time'
 									value={eventForm.endTime}
@@ -669,6 +695,18 @@ const Calendario = () => {
 								className='submit-button'
 								onClick={() => {
 									if (!isLoggedIn || !eventForm.title.trim()) return;
+
+									if (
+										eventForm.date === eventForm.endDate &&
+										eventForm.time &&
+										eventForm.endTime &&
+										eventForm.endTime < eventForm.time
+									) {
+										alert(
+											'La hora de finalización no puede ser anterior a la hora de inicio',
+										);
+										return;
+									}
 
 									if (editingIndex !== null) {
 										// EDITAR
@@ -836,8 +874,9 @@ const Calendario = () => {
 															className='edit-button'
 															title='Editar'
 														>
-															✏️
+															<EditIcon />
 														</button>
+
 														<button
 															onClick={() =>
 																deleteEvent(
@@ -1057,6 +1096,43 @@ const Calendario = () => {
 									</>
 								);
 							})()}
+						</div>
+					</div>
+				</div>
+			)}
+			{showConfirmModal && (
+				<div className='modal modal-confirm'>
+					<div className='modal-content'>
+						<h3>¿Estás seguro?</h3>
+						<p>Esta acción eliminará el evento de forma permanente.</p>
+						<div className='modal-confirm-buttons'>
+							<button
+								className='cancel-button'
+								onClick={() => setShowConfirmModal(false)}
+							>
+								Cancelar
+							</button>
+							<button
+								className='submit-button'
+								onClick={() => {
+									if (eventToDelete) {
+										const idToRemove = eventToDelete.eventId;
+										setEvents(prev => {
+											const updated = {};
+											for (const [key, dayEvents] of Object.entries(prev)) {
+												updated[key] = dayEvents.filter(
+													event => event.id !== idToRemove,
+												);
+											}
+											return updated;
+										});
+									}
+									setShowConfirmModal(false);
+									setEventToDelete(null);
+								}}
+							>
+								Eliminar
+							</button>
 						</div>
 					</div>
 				</div>
