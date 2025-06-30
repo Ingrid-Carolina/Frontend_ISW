@@ -22,6 +22,7 @@ footer {
 	flex: 1;
 	display: flex;
 	justify-content: flex-start;
+	font-family: 'ManropeEB', sans-serif;
 	align-items: center;
 }
 
@@ -87,6 +88,7 @@ footer {
 	justify-content: flex-end;
 	align-items: center;
 	text-align: right;
+	font-family: 'ManropeEB', sans-serif;
 	font-size: 14px;
 }
 

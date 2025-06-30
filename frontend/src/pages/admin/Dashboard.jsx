@@ -10,11 +10,11 @@ import {
 } from "recharts";
 
 const visitData = [
-  { month: "Ene", visits: 120 },
-  { month: "Feb", visits: 195 },
-  { month: "Mar", visits: 140 },
-  { month: "Abr", visits: 175 },
-  { month: "May", visits: 250 }
+  { month: "Ene", Visitas: 120 },
+  { month: "Feb", Visitas: 195 },
+  { month: "Mar", Visitas: 140 },
+  { month: "Abr", Visitas: 175 },
+  { month: "May", Visitas: 250 }
 ];
 
 export default function Dashboard() {
@@ -38,27 +38,27 @@ export default function Dashboard() {
         <Grid container spacing={2} justifyContent="center">
           <Grid item xs={12} sm={6} md={4}>
             <Paper sx={{ p: 2, textAlign: "center"  }}>
-              <Typography variant="h6" fontFamily="PeterMedium">Visitas</Typography>
-              <Typography variant="h4" fontFamily="PeterMedium">1000</Typography>
+              <Typography variant="h6" fontFamily="ManropeEB">Visitas</Typography>
+              <Typography variant="h4" fontFamily="ManropeEB">1000</Typography>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <Paper sx={{ p: 2, textAlign: "center", fontFamily: "PeterMedium" }}>
-              <Typography variant="h6" fontFamily="PeterMedium">Usuarios Registrados</Typography>
-              <Typography variant="h4" fontFamily="PeterMedium">25</Typography>
+            <Paper sx={{ p: 2, textAlign: "center", fontFamily: "ManropeEB" }}>
+              <Typography variant="h6" fontFamily="ManropeEB">Usuarios Registrados</Typography>
+              <Typography variant="h4" fontFamily="ManropeEB">25</Typography>
             </Paper>
           </Grid>
           <Grid item xs={12} sm={6} md={4}>
-            <Paper sx={{ p: 2, textAlign: "center", fontFamily: "PeterMedium" }}>
-              <Typography variant="h6" fontFamily="PeterMedium">Noticias Publicadas</Typography>
-              <Typography variant="h4" fontFamily="PeterMedium">5</Typography>
+            <Paper sx={{ p: 2, textAlign: "center", fontFamily: "ManropeEB" }}>
+              <Typography variant="h6" fontFamily="ManropeEB">Noticias Publicadas</Typography>
+              <Typography variant="h4" fontFamily="ManropeEB">5</Typography>
             </Paper>
           </Grid>
         </Grid>
 
         {/* Gráfico */}
         <Box mt={5}>
-          <Typography variant="h4" gutterBottom fontFamily="Varsity">
+          <Typography variant="h4" gutterBottom fontFamily="Varsity" color="#10045c" textAlign="center">
             Visitas por mes
           </Typography>
           <Paper sx={{ p: 2 }}>
@@ -68,7 +68,7 @@ export default function Dashboard() {
                 <XAxis dataKey="month" />
                 <YAxis />
                 <Tooltip />
-                <Bar dataKey="visits" fill="#1976d2" />
+                <Bar dataKey="Visitas" fill="#10045c" />
               </BarChart>
             </ResponsiveContainer>
           </Paper>

@@ -20,7 +20,15 @@ export default function Comentarios() {
 
   return (
     <Box sx={{ mt: 4, px: 2 }}>
-      <Typography variant="h2" fontFamily="Varsity" gutterBottom textAlign="center">
+      <Typography
+        variant="h2"
+        sx={{
+          fontFamily: 'Varsity',
+          color: '#10045c',
+          mb: 4,
+          textAlign: 'center'
+        }}
+      >
         Comentarios de Visitantes
       </Typography>
 

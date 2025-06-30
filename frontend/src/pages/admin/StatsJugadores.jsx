@@ -6,11 +6,14 @@ export default function StatsJugadores() {
     <Box sx={{ width: '100%', pt: 2 }}>
       <Typography
         variant="h2"
-        gutterBottom
-        fontFamily="Varsity"
-        sx={{ textAlign: "center" }}
+        sx={{
+          fontFamily: 'Varsity',
+          color: '#10045c',
+          mb: 4,
+          textAlign: 'center'
+        }}
       >
-        Estadísticas de Jugadores
+        Estadisticas de Jugadores
       </Typography>
     </Box>
   );

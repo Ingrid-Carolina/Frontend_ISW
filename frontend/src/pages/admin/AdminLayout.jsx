@@ -45,7 +45,7 @@ export default function AdminLayout() {
             {/* Título agregado */}
             <Box sx={{ mb: 2 }}>
               <Typography
-                variant="h6"
+                variant="h5"
                 sx={{
                   fontFamily: 'GroteskBold',
                   color: '#ffffff',

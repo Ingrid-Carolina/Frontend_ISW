@@ -7,7 +7,7 @@ class MostrarLoginyRegistro extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      vistaActual: 'login', // 'login' o 'registro'
+      vistaActual: 'login', 
       isAnimating: false
     };
     console.log('MostrarLoginyRegistro  inicializada con vista:', this.state.vistaActual);
@@ -51,46 +51,15 @@ class MostrarLoginyRegistro extends React.Component {
         sx={{
           minHeight: '100vh',
           width: '100%',
-          // FONDO CAMBIADO: Fondo blanco en lugar del gradiente azul
           background: '#ffffff',
-          // O si prefieres un fondo transparente:
-          // background: 'transparent',
-          // O si quieres un color específico:
-          // background: '#f5f5f5',
           display: 'flex',
           flexDirection: 'column',
           position: 'relative',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          paddingTop: '80px' // Ajuste para el padding superior
         }}
       >
-        {/* Elementos decorativos de fondo - OPCIONALES, puedes comentarlos o eliminarlos */}
-        {/* 
-        <Box
-          sx={{
-            position: 'absolute',
-            top: { xs: '-50px', md: '-100px' },
-            right: { xs: '-50px', md: '-100px' },
-            width: { xs: '200px', md: '300px' },
-            height: { xs: '200px', md: '300px' },
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.1)',
-            zIndex: 0
-          }}
-        />
         
-        <Box
-          sx={{
-            position: 'absolute',
-            bottom: { xs: '-75px', md: '-150px' },
-            left: { xs: '-75px', md: '-150px' },
-            width: { xs: '250px', md: '400px' },
-            height: { xs: '250px', md: '400px' },
-            borderRadius: '50%',
-            background: 'rgba(255, 255, 255, 0.05)',
-            zIndex: 0
-          }}
-        />
-        */}
 
         {/* Contenedor principal */}
         <Container
