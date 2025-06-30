@@ -37,6 +37,15 @@ import camisaVisita from '/Images/camisa_visita.jpg';
 import camisaAngelito from '/Images/camiseta_ange.jpg';
 import camisetaLocal from '/Images/Camiseta_Local.jpg';
 import camisetaVisita from '/Images/Camiseta_visita.jpg';
+import gorra1 from '/Images/Gorra1.jpg';
+import gorra2 from '/Images/Gorra2.jpg';
+import gorra3 from '/Images/Gorra3.jpg';
+import gorra4 from '/Images/Gorra4.jpg';
+import gorra5 from '/Images/Gorra5.jpg';
+import gorra6 from '/Images/Gorra6.jpg';
+import bandera from '/Images/Bandera.jpg';
+import banderin from '/Images/Banderines.jpg';
+
 
 // Importar las clases Login y Registro
 import Login from './Login';
@@ -102,56 +111,56 @@ class Tienda extends React.Component {
       nombre: "Banderas",
       descripcion: "Banderas de alta calidad, ideales para eventos y soporte a tu equipo.",
       precio: 345.75,
-      imagen: camisaLocal
+      imagen: bandera
     },
     {
       id: 7,
       nombre: "Banderines", 
       descripcion: "Pequeños banderines decorativos, perfectos para coleccionar o regalar.",
       precio: 125.00,
-      imagen:camisaLocal
+      imagen:banderin
     },
     {
       id: 8,
       nombre: "Gorra",
       descripcion: "Gorra de diseño clásico, cómoda y con protección solar.",
       precio: 450.00,
-      imagen: camisaLocal
+      imagen: gorra1
     },
     {
       id: 9,
       nombre: "Gorras 2",
       descripcion: "Nueva colección de gorras con bordados premium y ajuste perfecto.",
       precio: 3200.00,
-      imagen: camisaLocal
+      imagen: gorra2
     },
     {
       id: 10,
       nombre: "Gorras 3",
       descripcion: "Gorras de edición limitada con materiales reciclados y un estilo moderno.",
       precio: 280.50,
-      imagen: camisaLocal
+      imagen: gorra3
     },
     {
       id: 11,
       nombre: "Gorras 4",
       descripcion: "Diseño urbano para las gorras 4, con visera plana y logotipos discretos.",
       precio: 1150.00,
-      imagen: camisaLocal
+      imagen: gorra4
     },
     {
       id: 12,
       nombre: "Gorras 5",
       descripcion: "Gorras 5: Máximo confort y estilo deportivo, ideales para el día a día.",
       precio: 195.00,
-      imagen: camisaLocal
+      imagen: gorra5
     },
     {
       id: 13,
       nombre: "Gorras 6",
       descripcion: "La gorra 6 combina funcionalidad y moda, perfecta para cualquier ocasión.",
       precio: 2800.00,
-      imagen: camisaLocal
+      imagen: gorra6
     },
     {
       id: 14,
