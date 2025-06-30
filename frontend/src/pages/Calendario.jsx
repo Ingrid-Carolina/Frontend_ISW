@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import './stylesCalendario.css';
 import { Padding } from '@mui/icons-material';
+import axios from 'axios';
 
 // Componentes de iconos SVG simples
 const ChevronLeft = () => (
@@ -404,6 +405,44 @@ const Calendario = () => {
 
 		return result;
 	};
+	 const realizarPeticion = async (date, endDate) => {
+          const url = 'http://localhost:3000/auth/registrarevento';
+    
+                            const body = {
+                            nombre: eventForm.title,
+                            fecha_inicio:date,
+                            fecha_final: endDate,
+                            descripcion: eventForm.description
+                            };
+    
+            try {
+                const res = await axios.post(url, body, {
+                    headers: { 'Content-Type': 'application/json' },
+                });
+
+                
+                
+                console.log('response data: ', res.data.mensaje);
+                window.alert(res.data.mensaje);
+
+                return res.data;
+            } catch (error) {
+                if (error.response) {
+                    console.log('Error data:', error.response.data.mensaje);
+                    console.log('Error status:', error.response.status);
+                    window.alert(error.response.data.mensaje);
+                } else if (error.request) {
+                    window.alert(
+                        'Ninguna respuesta del servidor. Por favor verifique su red.',
+                    );
+                } else {
+                    window.alert('Error en la red.');
+                }
+                
+            }
+
+    };
+
 
 	// Función para abrir modal de agregar evento
 	const handleAddButtonClick = () => {
@@ -693,7 +732,7 @@ const Calendario = () => {
 							</button>
 							<button
 								className='submit-button'
-								onClick={() => {
+								onClick={ async () => {
 									if (!isLoggedIn || !eventForm.title.trim()) return;
 
 									if (
@@ -787,13 +826,17 @@ const Calendario = () => {
 										);
 
 										const newEvent = {
-											id: Date.now(),
-											...eventForm,
-											time: timeToUse,
-											endTime: endTimeToUse,
-											endDate: endDateToUse,
-											date: eventDate,
-										};
+                                            id: Date.now(),
+                                            ...eventForm,
+                                            time: timeToUse,
+                                            endDate: endEventDate.toISOString(),
+                                            date: eventDate.toISOString(),
+                                        };
+
+
+										const data = await realizarPeticion(newEvent.date, newEvent.endDate);
+                                        console.log(data);
+
 
 										const allDates = datesBetween(eventDate, endEventDate);
 
