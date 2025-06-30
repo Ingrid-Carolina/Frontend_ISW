@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import MapComponent from '../components/MapComponent'; // adjust path if needed
 
 import {
@@ -17,6 +17,7 @@ import { useForm } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Snackbar, Alert } from '@mui/material';
 import axios from 'axios';
+import ReCAPTCHA from 'react-google-recaptcha';
 
 const Contacto = () => {
 	const {
@@ -30,6 +31,7 @@ const Contacto = () => {
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const [snackbarType, setSnackbarType] = useState('success'); // 'success' | 'error'
 	const [snackbarMsg, setSnackbarMsg] = useState('');
+	const captcha= useRef(null);
 
 	//const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
 
@@ -41,69 +43,66 @@ const Contacto = () => {
 		// Valida que el input no esté vacío ni contenga solo espacios. Se aplica a varios campos del formulario.
 		value.trim() !== '' || 'No puede contener solo espacios';
 
-	const onSubmit = async (data) => {
-		const url = 'http://localhost:3000/auth/registrarformulario';
+	    const onSubmit = async (data, e) => {
+    e.preventDefault();
 
-		const body = {
-			email: data.correo,
-			nombre: data.nombre,
-			apellido: data.apellido,
-			telefono: data.telefono,
-			direccion: data.direccion,
-			proposito: data.proposito,
-			mensaje: data.mensaje,
-		};
-		
+  const token = await captcha.current.executeAsync();
+  captcha.current.reset();
+  if (!token) {
+    window.alert("Por favor, valida el CAPTCHA.");
+    return;
+  }
 
-		try {
-			const res = await axios.post(url, body, {
-				headers: { 'Content-Type': 'application/json' },
-			});
+  // Verificar token con el backend
+  try {
+    const res = await axios.post('http://localhost:3000/auth/verificar', { token });
 
-			console.error(body);
+    if (!res.data.success) {
+      window.alert("Verificación del CAPTCHA fallida.");
+      return;
+    }
 
-			reset({
-				nombre: '',
-				apellido: '',
-				telefono: '',
-				correo: '',
-				direccion: '',
-				proposito: [],
-				mensaje: '',
-			});
+    window.alert("Verificación del CAPTCHA exitosa.");
 
-			// Mensaje de éxito
-			setSnackbarMsg('Formulario enviado exitosamente.');
-			setSnackbarType('success');
-			setOpenSnackbar(true);
+    // Procede con el envío del formulario
+    const body = {
+      email: data.correo,
+      nombre: data.nombre,
+      apellido: data.apellido,
+      telefono: data.telefono,
+      direccion: data.direccion,
+      proposito: data.proposito,
+      mensaje: data.mensaje,
+    };
 
-			console.log('response data: ', res.data.mensaje);
-			return res.data;
-		} catch (error) {
-			let mensaje = '';
-			if (error.response) {
-				mensaje = error.response.data.mensaje|| "ERRORR EN EL SERIVDORRR";
-			} else if (error.request) {
-				mensaje = 'Ninguna respuesta del servidor. Por favor verifique su red.';
-			}
+    const response = await axios.post('http://localhost:3000/auth/registrarformulario', body, {
+      headers: { 'Content-Type': 'application/json' },
+    });
 
-			// Mensaje de error
-			setSnackbarMsg(mensaje);
-			console.error(mensaje)
-			window.alert("hola");
-			setSnackbarType('error');
-			setOpenSnackbar(true);
-		}
+    reset({
+      nombre: '',
+      apellido: '',
+      telefono: '',
+      correo: '',
+      direccion: '',
+      proposito: [],
+      mensaje: '',
+    });
 
-		/*window.alert((data.proposito));
-        window.alert((data.mensaje));
-        window.alert((data.nombre));
-        window.alert((data.apellido));
-        window.alert((data.telefono));
-        window.alert((data.correo));
-        window.alert((data.direccion));*/
-		console.log('Formulario enviado:', data);
-	};
+    setSnackbarMsg('Formulario enviado exitosamente.');
+    setSnackbarType('success');
+    setOpenSnackbar(true);
+    console.log('response data:', response.data.mensaje);
+
+  } catch (error) {
+    const mensaje = error.response?.data?.mensaje || 'Hubo un error en el servidor.';
+    setSnackbarMsg(mensaje);
+    setSnackbarType('error');
+    setOpenSnackbar(true);
+    console.error('Error:', mensaje);
+  }
+};
+
 
 	return (
 		<>
@@ -472,6 +471,13 @@ const Contacto = () => {
 						</Box>
 
 						{/* BOTÓN ENVIAR MENSAJE*/}
+						 <ReCAPTCHA
+                         ref={captcha}
+             sitekey='6LeoJWErAAAAAL6RcLtqe59DOJyUGdkQO1gc3Nvm'
+                size='invisible'
+                             />
+
+
 						<Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-start' }}>
 							<Button
 								type='submit'
