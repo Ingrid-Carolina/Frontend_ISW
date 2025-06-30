@@ -10,6 +10,7 @@ const menuItems = [
   { text: 'Estadisticas del Sitio', path: 'dashboard' },
   { text: 'Comentarios de Visitantes', path: 'comments' },
   { text: 'Control de Jugadores', path: 'players' },
+  { text: 'Testimonios', path: 'mngtestimonios' },
 ];
 
 export default function AdminLayout() {

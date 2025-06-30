@@ -502,7 +502,7 @@ export default function CustomNavbar() {
 										<HistoryEduOutlinedIcon />
 									</ListItemIcon>
 									<ListItemText
-										primary='Nuestra Historia'
+										primary='Sobre Nosotros'
 										primaryTypographyProps={{
 											fontFamily: '"Franklin Gothic Medium", sans-serif',
 											fontWeight: 'bold',

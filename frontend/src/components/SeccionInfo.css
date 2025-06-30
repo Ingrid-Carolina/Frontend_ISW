@@ -18,7 +18,7 @@
 
 .seccion-texto {
   flex: 1;
-  font-family: GroteskBold, sans-serif;
+  font-family: 'GroteskBold', sans-serif;
 
   /* 🔧 Alinea el contenido al tope */
   display: flex;

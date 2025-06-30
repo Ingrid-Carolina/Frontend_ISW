@@ -46,7 +46,7 @@ const PaginaTestimonios = () => {
     <div style={{ paddingTop: '90px'}}>
       <div
         style={{
-          backgroundColor: '#FFFFFF',
+          backgroundColor: '#f5f5f5',
           paddingTop: '64px',
           paddingBottom: '32px',
         }}
@@ -61,7 +61,7 @@ const PaginaTestimonios = () => {
               marginBottom: '48px'
             }}
           >
-            Testimonios de Jugadores
+            Testimonios de Nuestros Jugadores
           </Typography>
 
           {testimonios.map((t, i) => (
