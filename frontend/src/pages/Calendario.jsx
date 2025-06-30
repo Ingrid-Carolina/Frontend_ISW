@@ -122,11 +122,16 @@ const Plus = () => (
 const Calendario = () => {
 	const [currentDate, setCurrentDate] = useState(new Date());
 	const [events, setEvents] = useState({});
+	const [editingIndex, setEditingIndex] = useState(null); // null si es nuevo
+	const [originalDateKey, setOriginalDateKey] = useState(null);
+	const [eventData, setEventData] = useState({ titulo: '', descripcion: '' });
 	const [showModal, setShowModal] = useState(false);
 	const [selectedDate, setSelectedDate] = useState(null);
 	const [eventForm, setEventForm] = useState({
 		title: '',
 		time: '',
+		endTime: '',
+		endDate: '',
 		description: '',
 		type: 'event',
 		date: '',
@@ -135,6 +140,12 @@ const Calendario = () => {
 	const [showMonthEvents, setShowMonthEvents] = useState(false);
 
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+	function createDateFromInput(dateStr, timeStr = '00:00') {
+		const [year, month, day] = dateStr.split('-').map(Number);
+		const [hours, minutes] = timeStr.split(':').map(Number);
+		return new Date(year, month - 1, day, hours, minutes);
+	}
 
 	useEffect(() => {
 		const userRole = localStorage.getItem('userRole');
@@ -262,7 +273,8 @@ const Calendario = () => {
 
 	const closeModal = () => {
 		setShowModal(false);
-		setSelectedDate(null);
+		setEditingIndex(null);
+		setOriginalDateKey(null);
 		setEventForm({
 			title: '',
 			time: '',
@@ -272,34 +284,20 @@ const Calendario = () => {
 		});
 	};
 
-	const addEvent = () => {
-		if (!isLoggedIn) {
-			alert('Solo el administrador puede agregar eventos');
-			return;
-		}
+	const editEvent = index => {
+		const dateKey = formatDateKey(selectedDate);
+		const event = events[dateKey][index];
 
-		if (!eventForm.title.trim()) return;
-
-		const [year, month, day] = eventForm.date.split('-');
-		const eventDate = new Date(
-			parseInt(year),
-			parseInt(month) - 1,
-			parseInt(day),
-		);
-
-		const dateKey = formatDateKey(eventDate);
-		const newEvent = {
-			id: Date.now(),
-			...eventForm,
-			date: eventDate,
-		};
-
-		setEvents(prev => ({
-			...prev,
-			[dateKey]: [...(prev[dateKey] || []), newEvent],
-		}));
-
-		closeModal();
+		setEditingIndex(index);
+		setOriginalDateKey(dateKey); // Guardar la fecha original del evento
+		setShowModal(true);
+		setEventForm({
+			title: event.title,
+			time: event.time || '',
+			description: event.description || '',
+			type: event.type || 'event',
+			date: formatDateKey(event.date || selectedDate),
+		});
 	};
 
 	const deleteEvent = (dateKey, eventId) => {
@@ -369,6 +367,16 @@ const Calendario = () => {
 		} else {
 			return `${firstDay.getDate()} ${months[firstDay.getMonth()]} - ${lastDay.getDate()} ${months[lastDay.getMonth()]} ${firstDay.getFullYear()}`;
 		}
+	};
+
+	const datesBetween = (start, end) => {
+		const result = [];
+		const current = new Date(start);
+		while (current <= end) {
+			result.push(formatDateKey(new Date(current))); // formato YYYY-MM-DD
+			current.setDate(current.getDate() + 1);
+		}
+		return result;
 	};
 
 	// Función para abrir modal de agregar evento
@@ -551,34 +559,6 @@ const Calendario = () => {
 						{/* Formulario */}
 						<div className='event-form'>
 							<div>
-								<div className='form-label'>Tipo</div>
-								<div className='type-buttons'>
-									<button
-										onClick={() =>
-											isLoggedIn &&
-											setEventForm({ ...eventForm, type: 'event' })
-										}
-										disabled={!isLoggedIn}
-										className={`type-button ${eventForm.type === 'event' ? 'active' : ''} ${!isLoggedIn ? 'disabled' : ''}`}
-									>
-										<Calendar />
-										<span>Evento</span>
-									</button>
-									<button
-										onClick={() =>
-											isLoggedIn && setEventForm({ ...eventForm, type: 'note' })
-										}
-										disabled={!isLoggedIn}
-										className={`type-button ${eventForm.type === 'note' ? 'note-active' : ''} ${!isLoggedIn ? 'disabled' : ''}`}
-									>
-										<FileText />
-										<span>Nota</span>
-									</button>
-								</div>
-							</div>
-
-							{/* AGREGAR ESTE BLOQUE COMPLETO: */}
-							<div>
 								<label className='form-label'>Fecha *</label>
 								<input
 									type='date'
@@ -586,9 +566,6 @@ const Calendario = () => {
 									onChange={e => {
 										if (isLoggedIn) {
 											setEventForm({ ...eventForm, date: e.target.value });
-											// Actualizar también selectedDate para mostrar en el título del modal
-											//setSelectedDate(new Date(e.target.value));
-
 											const [year, month, day] = e.target.value.split('-');
 											const newSelectedDate = new Date(
 												parseInt(year),
@@ -635,6 +612,34 @@ const Calendario = () => {
 							)}
 
 							<div>
+								<label className='form-label'>Fecha de fin</label>
+								<input
+									type='date'
+									value={eventForm.endDate}
+									onChange={e =>
+										isLoggedIn &&
+										setEventForm({ ...eventForm, endDate: e.target.value })
+									}
+									className='form-input'
+									disabled={!isLoggedIn}
+								/>
+							</div>
+
+							<div>
+								<label className='form-label'>Hora de fin</label>
+								<input
+									type='time'
+									value={eventForm.endTime}
+									onChange={e =>
+										isLoggedIn &&
+										setEventForm({ ...eventForm, endTime: e.target.value })
+									}
+									className='form-input'
+									disabled={!isLoggedIn}
+								/>
+							</div>
+
+							<div>
 								<label className='form-label'>Descripción</label>
 								<textarea
 									value={eventForm.description}
@@ -651,15 +656,122 @@ const Calendario = () => {
 
 						{/* Botones */}
 						<div className='button-group'>
-							<button className='cancel-button' onClick={closeModal}>
+							<button
+								className='cancel-button'
+								onClick={() => {
+									closeModal();
+									setEditingIndex(null);
+								}}
+							>
 								Cancelar
 							</button>
 							<button
 								className='submit-button'
-								onClick={addEvent}
-								disabled={!isLoggedIn}
+								onClick={() => {
+									if (!isLoggedIn || !eventForm.title.trim()) return;
+
+									if (editingIndex !== null) {
+										// EDITAR
+										const now = new Date();
+										const timeToUse =
+											eventForm.time || now.toTimeString().slice(0, 5);
+										const endTimeToUse = eventForm.endTime || '';
+										const endDateToUse = eventForm.endDate || eventForm.date;
+
+										const eventDate = createDateFromInput(
+											eventForm.date,
+											timeToUse,
+										);
+										const endEventDate = createDateFromInput(
+											endDateToUse,
+											endTimeToUse,
+										);
+
+										// Crear evento actualizado
+										const updatedEvent = {
+											...eventForm,
+											id: events[originalDateKey][editingIndex].id,
+											time: timeToUse,
+											endTime: endTimeToUse,
+											endDate: endDateToUse,
+											date: eventDate,
+										};
+
+										// Rango original y nuevo
+										const oldEvent = events[originalDateKey][editingIndex];
+										const oldStart = oldEvent.date;
+										const oldEnd = oldEvent.endDate
+											? new Date(oldEvent.endDate)
+											: oldEvent.date;
+										const oldKeys = datesBetween(oldStart, oldEnd);
+										const newKeys = datesBetween(eventDate, endEventDate);
+
+										// Actualizar eventos
+										setEvents(prev => {
+											const updated = { ...prev };
+
+											// Eliminar de fechas antiguas
+											oldKeys.forEach(key => {
+												updated[key] = (updated[key] || []).filter(
+													e => e.id !== oldEvent.id,
+												);
+											});
+
+											// Insertar en nuevas fechas
+											newKeys.forEach(key => {
+												const filtered = (updated[key] || []).filter(
+													e => e.id !== updatedEvent.id,
+												);
+												updated[key] = [...filtered, updatedEvent];
+											});
+
+											return updated;
+										});
+
+										setEditingIndex(null);
+										setOriginalDateKey(null);
+										setSelectedDate(new Date(eventForm.date)); // mantener vista actualizada
+									} else {
+										// AGREGAR
+										const now = new Date();
+										const timeToUse =
+											eventForm.time || now.toTimeString().slice(0, 5);
+										const endTimeToUse = eventForm.endTime || '';
+										const endDateToUse = eventForm.endDate || eventForm.date;
+
+										const eventDate = createDateFromInput(
+											eventForm.date,
+											timeToUse,
+										);
+										const endEventDate = createDateFromInput(
+											endDateToUse,
+											endTimeToUse,
+										);
+
+										const newEvent = {
+											id: Date.now(),
+											...eventForm,
+											time: timeToUse,
+											endTime: endTimeToUse,
+											endDate: endDateToUse,
+											date: eventDate,
+										};
+
+										const allDates = datesBetween(eventDate, endEventDate);
+
+										setEvents(prev => {
+											const updated = { ...prev };
+											allDates.forEach(key => {
+												updated[key] = [...(updated[key] || []), newEvent];
+											});
+											return updated;
+										});
+									}
+
+									closeModal();
+								}}
 							>
-								Agregar
+								{editingIndex !== null ? 'Guardar cambios' : 'Agregar'}
 							</button>
 						</div>
 
@@ -668,7 +780,7 @@ const Calendario = () => {
 							<div className='events-list'>
 								<h4 className='events-list-title'>Eventos del día:</h4>
 								<div>
-									{getEventsForDate(selectedDate).map(event => (
+									{getEventsForDate(selectedDate).map((event, index) => (
 										<div
 											key={event.id}
 											className={`event-card ${event.type === 'event' ? 'event-type' : 'note-type'}`}
@@ -683,27 +795,63 @@ const Calendario = () => {
 														)}
 														<span>{event.title}</span>
 													</div>
-													{event.time && (
+													{event.date &&
+													event.endDate &&
+													formatDateKey(event.date) !== event.endDate ? (
+														<div className='event-dates'>
+															<span>
+																🗓 {formatDateKey(event.date)} →{' '}
+																{formatDateKey(new Date(event.endDate))}
+															</span>
+														</div>
+													) : event.date ? (
+														<div className='event-dates'>
+															<span>🗓 {formatDateKey(event.date)}</span>
+														</div>
+													) : null}
+													{event.time && event.endTime ? (
+														<div className='event-time'>
+															<Clock />
+															<span>
+																{event.time} - {event.endTime}
+															</span>
+														</div>
+													) : event.time ? (
 														<div className='event-time'>
 															<Clock />
 															<span>{event.time}</span>
 														</div>
-													)}
+													) : null}
+
 													{event.description && (
 														<p className='event-description'>
 															{event.description}
 														</p>
 													)}
 												</div>
-												<button
-													onClick={() =>
-														deleteEvent(formatDateKey(selectedDate), event.id)
-													}
-													className='delete-button'
-													disabled={!isLoggedIn}
-												>
-													<X />
-												</button>
+												{isLoggedIn && (
+													<div style={{ display: 'flex', gap: '6px' }}>
+														<button
+															onClick={() => editEvent(index)}
+															className='edit-button'
+															title='Editar'
+														>
+															✏️
+														</button>
+														<button
+															onClick={() =>
+																deleteEvent(
+																	formatDateKey(selectedDate),
+																	event.id,
+																)
+															}
+															className='delete-button'
+															disabled={!isLoggedIn}
+														>
+															<X />
+														</button>
+													</div>
+												)}
 											</div>
 										</div>
 									))}
@@ -798,12 +946,20 @@ const Calendario = () => {
 																	)}
 																	<span>{event.title}</span>
 																</div>
-																{event.time && (
+																{event.time && event.endTime ? (
+																	<div className='event-time'>
+																		<Clock />
+																		<span>
+																			{event.time} - {event.endTime}
+																		</span>
+																	</div>
+																) : event.time ? (
 																	<div className='event-time'>
 																		<Clock />
 																		<span>{event.time}</span>
 																	</div>
-																)}
+																) : null}
+
 																{event.description && (
 																	<p className='event-description'>
 																		{event.description}
