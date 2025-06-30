@@ -405,44 +405,82 @@ const Calendario = () => {
 
 		return result;
 	};
-	 const realizarPeticion = async (date, endDate) => {
-          const url = 'http://localhost:3000/auth/registrarevento';
-    
-                            const body = {
-                            nombre: eventForm.title,
-                            fecha_inicio:date,
-                            fecha_final: endDate,
-                            descripcion: eventForm.description
-                            };
-    
-            try {
-                const res = await axios.post(url, body, {
-                    headers: { 'Content-Type': 'application/json' },
-                });
+	const realizarPeticion = async (date, endDate) => {
+		const url = 'http://localhost:3000/auth/registrarevento';
 
-                
-                
-                console.log('response data: ', res.data.mensaje);
-                window.alert(res.data.mensaje);
+		const body = {
+			nombre: eventForm.title,
+			fecha_inicio: date,
+			fecha_final: endDate,
+			descripcion: eventForm.description,
+		};
 
-                return res.data;
-            } catch (error) {
-                if (error.response) {
-                    console.log('Error data:', error.response.data.mensaje);
-                    console.log('Error status:', error.response.status);
-                    window.alert(error.response.data.mensaje);
-                } else if (error.request) {
-                    window.alert(
-                        'Ninguna respuesta del servidor. Por favor verifique su red.',
-                    );
-                } else {
-                    window.alert('Error en la red.');
-                }
-                
-            }
+		try {
+			const res = await axios.post(url, body, {
+				headers: { 'Content-Type': 'application/json' },
+			});
 
-    };
+			console.log('response data: ', res.data.mensaje);
+			window.alert(res.data.mensaje);
 
+			return res.data;
+		} catch (error) {
+			if (error.response) {
+				console.log('Error data:', error.response.data.mensaje);
+				console.log('Error status:', error.response.status);
+				window.alert(error.response.data.mensaje);
+			} else if (error.request) {
+				window.alert(
+					'Ninguna respuesta del servidor. Por favor verifique su red.',
+				);
+			} else {
+				window.alert('Error en la red.');
+			}
+		}
+	};
+
+	useEffect(() => {
+		const fetchEventos = async () => {
+			try {
+				const res = await axios.get(
+					'http://localhost:3000/auth/obtenereventos',
+				);
+				const eventos = res.data;
+
+				// Convertir y organizar eventos por fecha
+				const eventosMap = {};
+
+				eventos.forEach(ev => {
+					const fechaInicio = new Date(ev.fecha_inicio);
+					const fechaFinal = new Date(ev.fecha_final || ev.fecha_inicio);
+
+					const fechas = datesBetween(fechaInicio, fechaFinal);
+
+					const eventoObj = {
+						id: ev.id,
+						title: ev.nombre,
+						description: ev.descripcion,
+						date: fechaInicio,
+						endDate: fechaFinal.toISOString(),
+						time: '', // podrías agregar si guardás hora
+						endTime: '', // idem
+						type: 'event',
+					};
+
+					fechas.forEach(f => {
+						if (!eventosMap[f]) eventosMap[f] = [];
+						eventosMap[f].push(eventoObj);
+					});
+				});
+
+				setEvents(eventosMap);
+			} catch (err) {
+				console.error('Error al obtener eventos:', err);
+			}
+		};
+
+		fetchEventos();
+	}, []);
 
 	// Función para abrir modal de agregar evento
 	const handleAddButtonClick = () => {
@@ -732,7 +770,7 @@ const Calendario = () => {
 							</button>
 							<button
 								className='submit-button'
-								onClick={ async () => {
+								onClick={async () => {
 									if (!isLoggedIn || !eventForm.title.trim()) return;
 
 									if (
@@ -826,17 +864,18 @@ const Calendario = () => {
 										);
 
 										const newEvent = {
-                                            id: Date.now(),
-                                            ...eventForm,
-                                            time: timeToUse,
-                                            endDate: endEventDate.toISOString(),
-                                            date: eventDate.toISOString(),
-                                        };
+											id: Date.now(),
+											...eventForm,
+											time: timeToUse,
+											endDate: endEventDate.toISOString(),
+											date: eventDate.toISOString(),
+										};
 
-
-										const data = await realizarPeticion(newEvent.date, newEvent.endDate);
-                                        console.log(data);
-
+										const data = await realizarPeticion(
+											newEvent.date,
+											newEvent.endDate,
+										);
+										console.log(data);
 
 										const allDates = datesBetween(eventDate, endEventDate);
 
@@ -1157,18 +1196,28 @@ const Calendario = () => {
 							</button>
 							<button
 								className='submit-button'
-								onClick={() => {
+								onClick={async () => {
 									if (eventToDelete) {
-										const idToRemove = eventToDelete.eventId;
-										setEvents(prev => {
-											const updated = {};
-											for (const [key, dayEvents] of Object.entries(prev)) {
-												updated[key] = dayEvents.filter(
-													event => event.id !== idToRemove,
-												);
-											}
-											return updated;
-										});
+										const { eventId } = eventToDelete;
+										try {
+											await axios.delete(
+												`http://localhost:3000/auth/evento/${eventId}`,
+											);
+
+											// Eliminar del estado local
+											setEvents(prev => {
+												const updated = {};
+												for (const [key, dayEvents] of Object.entries(prev)) {
+													updated[key] = dayEvents.filter(
+														event => event.id !== eventId,
+													);
+												}
+												return updated;
+											});
+
+										} catch (error) {
+											console.error('Error al eliminar evento:', error);
+										}
 									}
 									setShowConfirmModal(false);
 									setEventToDelete(null);
