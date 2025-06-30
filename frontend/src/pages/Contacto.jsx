@@ -31,7 +31,7 @@ const Contacto = () => {
 	const [openSnackbar, setOpenSnackbar] = useState(false);
 	const [snackbarType, setSnackbarType] = useState('success'); // 'success' | 'error'
 	const [snackbarMsg, setSnackbarMsg] = useState('');
-	const captcha= useRef(null);
+	const captcha = useRef(null);
 
 	//const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
 
@@ -43,66 +43,71 @@ const Contacto = () => {
 		// Valida que el input no esté vacío ni contenga solo espacios. Se aplica a varios campos del formulario.
 		value.trim() !== '' || 'No puede contener solo espacios';
 
-	    const onSubmit = async (data, e) => {
-    e.preventDefault();
+	const onSubmit = async (data, e) => {
+		e.preventDefault();
 
-  const token = await captcha.current.executeAsync();
-  captcha.current.reset();
-  if (!token) {
-    window.alert("Por favor, valida el CAPTCHA.");
-    return;
-  }
+		const token = await captcha.current.executeAsync();
+		captcha.current.reset();
+		if (!token) {
+			window.alert('Por favor, valida el CAPTCHA.');
+			return;
+		}
 
-  // Verificar token con el backend
-  try {
-    const res = await axios.post('http://localhost:3000/auth/verificar', { token });
+		// Verificar token con el backend
+		try {
+			const res = await axios.post('http://localhost:3000/auth/verificar', {
+				token,
+			});
 
-    if (!res.data.success) {
-      window.alert("Verificación del CAPTCHA fallida.");
-      return;
-    }
+			if (!res.data.success) {
+				setSnackbarType('error');
+				setSnackbarMsg('Verificación del CAPTCHA fallida.');
+				setOpenSnackbar(true);
+				return;
+			}
 
-    window.alert("Verificación del CAPTCHA exitosa.");
+			// Procede con el envío del formulario
+			const body = {
+				email: data.correo,
+				nombre: data.nombre,
+				apellido: data.apellido,
+				telefono: data.telefono,
+				direccion: data.direccion,
+				proposito: data.proposito,
+				mensaje: data.mensaje,
+			};
 
-    // Procede con el envío del formulario
-    const body = {
-      email: data.correo,
-      nombre: data.nombre,
-      apellido: data.apellido,
-      telefono: data.telefono,
-      direccion: data.direccion,
-      proposito: data.proposito,
-      mensaje: data.mensaje,
-    };
+			const response = await axios.post(
+				'http://localhost:3000/auth/registrarformulario',
+				body,
+				{
+					headers: { 'Content-Type': 'application/json' },
+				},
+			);
 
-    const response = await axios.post('http://localhost:3000/auth/registrarformulario', body, {
-      headers: { 'Content-Type': 'application/json' },
-    });
+			reset({
+				nombre: '',
+				apellido: '',
+				telefono: '',
+				correo: '',
+				direccion: '',
+				proposito: [],
+				mensaje: '',
+			});
 
-    reset({
-      nombre: '',
-      apellido: '',
-      telefono: '',
-      correo: '',
-      direccion: '',
-      proposito: [],
-      mensaje: '',
-    });
-
-    setSnackbarMsg('Formulario enviado exitosamente.');
-    setSnackbarType('success');
-    setOpenSnackbar(true);
-    console.log('response data:', response.data.mensaje);
-
-  } catch (error) {
-    const mensaje = error.response?.data?.mensaje || 'Hubo un error en el servidor.';
-    setSnackbarMsg(mensaje);
-    setSnackbarType('error');
-    setOpenSnackbar(true);
-    console.error('Error:', mensaje);
-  }
-};
-
+			setSnackbarMsg('Formulario enviado exitosamente.');
+			setSnackbarType('success');
+			setOpenSnackbar(true);
+			console.log('response data:', response.data.mensaje);
+		} catch (error) {
+			const mensaje =
+				error.response?.data?.mensaje || 'Hubo un error en el servidor.';
+			setSnackbarMsg(mensaje);
+			setSnackbarType('error');
+			setOpenSnackbar(true);
+			console.error('Error:', mensaje);
+		}
+	};
 
 	return (
 		<>
@@ -471,12 +476,11 @@ const Contacto = () => {
 						</Box>
 
 						{/* BOTÓN ENVIAR MENSAJE*/}
-						 <ReCAPTCHA
-                         ref={captcha}
-             sitekey='6LeoJWErAAAAAL6RcLtqe59DOJyUGdkQO1gc3Nvm'
-                size='invisible'
-                             />
-
+						<ReCAPTCHA
+							ref={captcha}
+							sitekey='6LeoJWErAAAAAL6RcLtqe59DOJyUGdkQO1gc3Nvm'
+							size='invisible'
+						/>
 
 						<Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-start' }}>
 							<Button
