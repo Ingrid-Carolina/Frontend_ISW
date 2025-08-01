@@ -313,3 +313,11 @@ footer {
   font-weight: normal;
   font-style: normal;
 }
+
+@font-face {
+  font-family: 'Bulletto';
+  src: url('/fonts/Bulletto Killa.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+}
+

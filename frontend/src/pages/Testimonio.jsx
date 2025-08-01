@@ -1,79 +1,57 @@
 import React from 'react';
-import { Container, Typography } from '@mui/material';
-import TestimonioCapsula from '../components/TestimonioCapsula';
-
-const testimonios = [
-  {
-    nombre: "Carlos 'El Rápido' Gómez",
-    contenido:
-      "Me encanta jugar béisbol aquí en Honduras. Mis amigos y yo aprendemos mucho y nos divertimos. ¡Es mi deporte favorito!",
-    imagen: "/Images/AvatarBboy.jpeg"
-  },
-  {
-    nombre: "Sofía 'La Estrella' Rodríguez",
-    contenido:
-      "Desde que empecé a jugar, he mejorado mucho. Los entrenadores son geniales y me ayudan a ser mejor cada día. ¡Sueño con ser profesional!",
-    imagen:  "/Images/AvatarBgirl.jpg"
-  },
-  {
-    nombre: "Carlos 'El Rápido' Gómez",
-    contenido:
-      "Me encanta jugar béisbol aquí en Honduras. Mis amigos y yo aprendemos mucho y nos divertimos. ¡Es mi deporte favorito!",
-    imagen: "/Images/AvatarBboy.jpeg"
-  },
-  {
-    nombre: "Sofía 'La Estrella' Rodríguez",
-    contenido:
-      "Desde que empecé a jugar, he mejorado mucho. Los entrenadores son geniales y me ayudan a ser mejor cada día. ¡Sueño con ser profesional!",
-    imagen:  "/Images/AvatarBgirl.jpg"
-  },
-  {
-    nombre: "Carlos 'El Rápido' Gómez",
-    contenido:
-      "Me encanta jugar béisbol aquí en Honduras. Mis amigos y yo aprendemos mucho y nos divertimos. ¡Es mi deporte favorito!",
-    imagen: "/Images/AvatarBboy.jpeg"
-  },
-  {
-    nombre: "Sofía 'La Estrella' Rodríguez",
-    contenido:
-      "Desde que empecé a jugar, he mejorado mucho. Los entrenadores son geniales y me ayudan a ser mejor cada día. ¡Sueño con ser profesional!",
-    imagen:  "/Images/AvatarBgirl.jpg"
-  },
-];
+import TestimonioTrapezoide from '../components/TestimonioTrapezoide';
 
 const PaginaTestimonios = () => {
   return (
-    <div style={{ paddingTop: '90px'}}>
-      <div
-        style={{
-          backgroundColor: '#f5f5f5',
-          paddingTop: '64px',
-          paddingBottom: '32px',
-        }}
-      >
-        <Container maxWidth="md">
-          <Typography
-            variant="h2"
-            align="center"
-            sx={{
-              fontFamily: 'Varsity',
-              color: '#10045c',
-              marginBottom: '48px'
-            }}
-          >
-            Testimonios de Nuestros Jugadores
-          </Typography>
-
-          {testimonios.map((t, i) => (
-            <TestimonioCapsula
-              key={i}
-              nombre={t.nombre}
-              contenido={t.contenido}
-              imagen={t.imagen}
-            />
-          ))}
-        </Container>
-      </div>
+    <div style={{ paddingTop: '90px' }}>
+      <section className="testimonios-titulo">
+        <h1>Testimonios</h1>
+      </section>
+      <TestimonioTrapezoide
+        nombre="Diego Sánchez"
+        cita="Me gusta mucho venir a entrenar porque juego con mis amigos y aprendemos cosas nuevas todos los días. Cada práctica es divertida y me hace sentir parte de algo grande."
+        rol="Jugador Profesional – Categoría Infantil"
+        imagen="/Images/JugadorPrueba1.jpg"
+        colorFondo="#ea6304"
+        invertir={false}
+        superponer={false}
+        zIndex={4}
+        invertirDiagonal={true}
+      />
+      <TestimonioTrapezoide
+        nombre="Juan Carlos Rivera"
+        cita="Antes era muy tímido, pero gracias al equipo aprendí a confiar en mí y a trabajar con los demás. Ahora me esfuerzo más en todo lo que hago, tanto en el campo como en la escuela."
+        rol="Jugador Profesional – Categoría Intermedia"
+        imagen="/Images/JugadorPrueba2.jpg"
+        colorFondo="#044c94"
+        invertir={true}
+        superponer={true}
+        zIndex={3}
+        invertirDiagonal={false}
+      />
+      <TestimonioTrapezoide
+        nombre="Mateo López"
+        cita="Esta liga me ayudó a crecer como persona y jugador. Hoy tengo metas más claras, quiero seguir entrenando fuerte y llegar lejos en el béisbol."
+        rol="Madre de jugador – Categoría Juvenil"
+        imagen="/Images/JugadorPrueba3.jpg"
+        colorFondo="#ea6304"
+        invertir={false}
+        superponer={true}
+        zIndex={2}
+        invertirDiagonal={true}
+      />
+      <TestimonioTrapezoide
+        nombre="Miguel Hernández"
+        cita="Esta liga me ayudó a crecer como persona y jugador. Hoy tengo metas más claras, quiero seguir entrenando fuerte y llegar lejos en el béisbol."
+        rol="Jugador Profesional – Categoría Juvenil"
+        imagen="/Images/JugadorPrueba4.jpg"
+        colorFondo="#044c94"
+        invertir={true}
+        superponer={true}
+        zIndex={1}
+        invertirDiagonal={true}
+        finalTest={true}
+      /> 
     </div>
   );
 };
