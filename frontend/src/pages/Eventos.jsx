@@ -1,5 +1,6 @@
 import React from 'react';
-import { useState } from 'react';
+import { useState,useEffect } from 'react';
+import MediaCard from '../components/Card';
 import {
 	Box,
 	Typography,
@@ -14,6 +15,7 @@ import SearchIcon from '@mui/icons-material/Search';
 import './Eventos.css'
 import FeaturedPost from '../components/FeaturedPost';
 import Post from '../components/Post';
+import { obtenerEventosProximos } from '../pages/eventService';
 
 //array de events, aqui se haran store desde el backend en el futuro
 
@@ -58,7 +60,39 @@ const Featured = () => (
 
 );
 
+const Cards = () => {
+	const [eventos, setEventos] = useState([]);
 
+	useEffect(() => {
+		const cargarEventos = async () => {
+			const data = await obtenerEventosProximos(3);
+			setEventos(data);
+		};
+		cargarEventos();
+	}, []);
+
+	if (eventos.length === 0) {
+		return (
+			<div className='cards' style={{ color:'#e06c14', textAlign: 'center', fontFamily: 'GroteskBold', padding: '2rem', fontSize: '2rem' }}>
+				No hay eventos actuales
+			</div>
+		);
+	}
+
+	return (
+		<div className='cards'>
+			{eventos.map((evento, index) => (
+				<MediaCard
+					key={evento.id || index}
+					title={evento.titulo}
+					content={evento.lugar}
+					image={evento.image}
+					date={evento.hora}
+				/>
+			))}
+		</div>
+	);
+};
 
 const Eventos = () => {
 	//para filtrar
@@ -109,7 +143,7 @@ const Eventos = () => {
 				))}
 			</Container>
 
-
+			<Cards></Cards>
 		</div>
 
 

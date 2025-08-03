@@ -1,10 +1,23 @@
 import React from 'react';
 import TestimonioTrapezoide from '../components/TestimonioTrapezoide';
+import VidCarousel from '../components/VideoCarousel';
+import ReactPlayer from 'react-player';
+
+const videos = [
+	{ url: 'https://youtu.be/4VNYG77bQA4?si=mvj9fQJ2bgo5S_Lj' },
+	{ url: 'https://youtu.be/7AU0m2Du_VY?si=LTod5L0RJbvHzoPS' },
+	{ url: 'https://youtu.be/bx242zV3_ME?si=9_1EAN8m6DVhIagp' },
+];
+const freaky = [
+	{ url: 'https://youtu.be/CkMF9adhlkM?si=yfuo1aen3TCEcAjp' },
+	{ url: 'https://youtu.be/2gj9wficEdk?si=fTXQXqSKCMhKaXz6' },
+	{ url: 'https://youtu.be/u5NqO2v_xnY?si=oVtEUlkh4iDo_eEb' },
+];
 
 const PaginaTestimonios = () => {
   return (
     <div style={{ paddingTop: '90px' }}>
-      <section className="testimonios-titulo">
+      <section style={{ paddingTop: '90px' }} className="testimonios-titulo">
         <h1>Testimonios</h1>
       </section>
       <TestimonioTrapezoide
@@ -52,7 +65,15 @@ const PaginaTestimonios = () => {
         invertirDiagonal={true}
         finalTest={true}
       /> 
-    </div>
+      <section className="testimonios-titulo">
+        <h1>Testimonios en Video</h1>
+      </section>
+      <div style={{ marginTop: '50px', marginBottom:'50px' }}>
+			<VidCarousel videos={freaky} />
+      </div>
+      
+		</div>
+    
   );
 };
 

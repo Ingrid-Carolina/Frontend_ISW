@@ -75,10 +75,20 @@
 }
 
 .testimonios-titulo h1 {
+ /* background-image: url('/Images/Entrevista.jpg');
+    background-size: cover;
+    background-position: center;
+    height: 450px;
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;*/
   font-family: 'Bulletto', cursive;
-  font-size: 5vw;
+  font-size: 8vw;
   color: #044c94; /* o el color que prefieras */
   margin: 0;
+  
 }
 
 @media (max-width: 768px) {
