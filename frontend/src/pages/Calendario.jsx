@@ -169,7 +169,7 @@ const Calendario = () => {
 
 	useEffect(() => {
 		const userRole = localStorage.getItem('userRole');
-		setIsLoggedIn(userRole === 'admin-calendario');
+		setIsLoggedIn(userRole === 'admin-calendario' || userRole === 'admin');
 	}, []);
 
 	const months = [
@@ -322,9 +322,31 @@ const Calendario = () => {
 		});
 	};
 
+	const actualizarEvento = async (id, eventoActualizado) => {
+		try {
+			const url = `http://localhost:3000/auth/evento/${id}`;
+			const body = {
+				nombre: eventoActualizado.title,
+				fecha_inicio: eventoActualizado.date,
+				fecha_final: eventoActualizado.endDate,
+				descripcion: eventoActualizado.description,
+			};
+
+			const res = await axios.put(url, body, {
+				headers: { 'Content-Type': 'application/json' },
+			});
+
+			console.log('Evento actualizado:', res.data.mensaje);
+			window.alert(res.data.mensaje);
+		} catch (error) {
+			console.error('Error al actualizar evento:', error);
+			window.alert('No se pudo actualizar el evento.');
+		}
+	};
+
 	const deleteEvent = (dateKey, eventId) => {
 		if (!isLoggedIn) {
-			alert('Solo el administrador puede eliminar eventos');
+			alert('Solo el modificaristrador puede eliminar eventos');
 			return;
 		}
 		setEventToDelete({ dateKey, eventId });
@@ -567,10 +589,12 @@ const Calendario = () => {
 						</button>
 					</div>
 
-					{/* Botón de agregar */}
-					<button className='add-button' onClick={handleAddButtonClick}>
-						<Plus />
-					</button>
+					{/* Botón de agregar solo se muestra si es admin*/}
+					{isLoggedIn && (
+						<button className='add-button' onClick={handleAddButtonClick}>
+							<Plus />
+						</button>
+					)}
 				</div>
 			</div>
 
@@ -649,251 +673,258 @@ const Calendario = () => {
 							</button>
 						</div>
 
-						{/* Mensaje de advertencia si no es admin */}
-						{!isLoggedIn && (
-							<div className='warning-message'>
-								<Lock />
-								<span>
-									Solo el administrador puede agregar o eliminar eventos
-								</span>
-							</div>
+						{/* Formulario */}
+						{isLoggedIn && (
+							<>
+								<div className='event-form'>
+									<div>
+										<label className='form-label'>Fecha de Inicio*</label>
+										<input
+											type='date'
+											value={eventForm.date}
+											onChange={e => {
+												if (isLoggedIn) {
+													setEventForm({ ...eventForm, date: e.target.value });
+													const [year, month, day] = e.target.value.split('-');
+													const newSelectedDate = new Date(
+														parseInt(year),
+														parseInt(month) - 1,
+														parseInt(day),
+													);
+													setSelectedDate(newSelectedDate);
+												}
+											}}
+											className='form-input'
+											disabled={!isLoggedIn}
+										/>
+									</div>
+
+									<div>
+										<label className='form-label'>Título *</label>
+										<input
+											type='text'
+											value={eventForm.title}
+											onChange={e =>
+												isLoggedIn &&
+												setEventForm({ ...eventForm, title: e.target.value })
+											}
+											className='form-input'
+											placeholder='Título del evento o nota'
+											disabled={!isLoggedIn}
+										/>
+									</div>
+
+									{eventForm.type === 'event' && (
+										<div>
+											<label className='form-label'>Hora de Inicio</label>
+											<input
+												type='time'
+												value={eventForm.time}
+												onChange={e =>
+													isLoggedIn &&
+													setEventForm({ ...eventForm, time: e.target.value })
+												}
+												className='form-input'
+												disabled={!isLoggedIn}
+											/>
+										</div>
+									)}
+
+									<div>
+										<label className='form-label'>Fecha de finalización</label>
+										<input
+											type='date'
+											value={eventForm.endDate}
+											onChange={e =>
+												isLoggedIn &&
+												setEventForm({ ...eventForm, endDate: e.target.value })
+											}
+											className='form-input'
+											disabled={!isLoggedIn}
+										/>
+									</div>
+
+									<div>
+										<label className='form-label'>Hora de finalización</label>
+										<input
+											type='time'
+											value={eventForm.endTime}
+											onChange={e =>
+												isLoggedIn &&
+												setEventForm({ ...eventForm, endTime: e.target.value })
+											}
+											className='form-input'
+											disabled={!isLoggedIn}
+										/>
+									</div>
+
+									<div>
+										<label className='form-label'>Descripción</label>
+										<textarea
+											value={eventForm.description}
+											onChange={e =>
+												isLoggedIn &&
+												setEventForm({
+													...eventForm,
+													description: e.target.value,
+												})
+											}
+											className='form-textarea'
+											placeholder='Descripción opcional'
+											disabled={!isLoggedIn}
+										/>
+									</div>
+								</div>
+							</>
 						)}
 
-						{/* Formulario */}
-						<div className='event-form'>
-							<div>
-								<label className='form-label'>Fecha de Inicio*</label>
-								<input
-									type='date'
-									value={eventForm.date}
-									onChange={e => {
-										if (isLoggedIn) {
-											setEventForm({ ...eventForm, date: e.target.value });
-											const [year, month, day] = e.target.value.split('-');
-											const newSelectedDate = new Date(
-												parseInt(year),
-												parseInt(month) - 1,
-												parseInt(day),
-											);
-											setSelectedDate(newSelectedDate);
-										}
-									}}
-									className='form-input'
-									disabled={!isLoggedIn}
-								/>
-							</div>
+						{isLoggedIn && (
+							<>
+								{/* Botones */}
+								<div className='button-group'>
+									<button
+										className='cancel-button'
+										onClick={() => {
+											closeModal();
+											setEditingIndex(null);
+										}}
+									>
+										Cancelar
+									</button>
+									<button
+										className='submit-button'
+										onClick={async () => {
+											if (!isLoggedIn || !eventForm.title.trim()) return;
 
-							<div>
-								<label className='form-label'>Título *</label>
-								<input
-									type='text'
-									value={eventForm.title}
-									onChange={e =>
-										isLoggedIn &&
-										setEventForm({ ...eventForm, title: e.target.value })
-									}
-									className='form-input'
-									placeholder='Título del evento o nota'
-									disabled={!isLoggedIn}
-								/>
-							</div>
+											if (
+												eventForm.date === eventForm.endDate &&
+												eventForm.time &&
+												eventForm.endTime &&
+												eventForm.endTime < eventForm.time
+											) {
+												alert(
+													'La hora de finalización no puede ser anterior a la hora de inicio',
+												);
+												return;
+											}
 
-							{eventForm.type === 'event' && (
-								<div>
-									<label className='form-label'>Hora de Inicio</label>
-									<input
-										type='time'
-										value={eventForm.time}
-										onChange={e =>
-											isLoggedIn &&
-											setEventForm({ ...eventForm, time: e.target.value })
-										}
-										className='form-input'
-										disabled={!isLoggedIn}
-									/>
+											if (editingIndex !== null) {
+												// EDITAR
+												const now = new Date();
+												const timeToUse =
+													eventForm.time || now.toTimeString().slice(0, 5);
+												const endTimeToUse = eventForm.endTime || '';
+												const endDateToUse =
+													eventForm.endDate || eventForm.date;
+
+												const eventDate = createDateFromInput(
+													eventForm.date,
+													timeToUse,
+												);
+												const endEventDate = createDateFromInput(
+													endDateToUse,
+													endTimeToUse,
+												);
+
+												// Crear evento actualizado
+												const updatedEvent = {
+													...eventForm,
+													id: events[originalDateKey][editingIndex].id,
+													time: timeToUse,
+													endTime: endTimeToUse,
+													endDate: endEventDate.toISOString(), // ✅ ISO string
+													date: eventDate.toISOString(),
+												};
+
+												
+												// Guardar en backend
+												await actualizarEvento(updatedEvent.id, updatedEvent);
+
+												// Rango original y nuevo
+												const oldEvent = events[originalDateKey][editingIndex];
+												const oldStart = oldEvent.date;
+												const oldEnd = oldEvent.endDate
+													? new Date(oldEvent.endDate)
+													: oldEvent.date;
+												const oldKeys = datesBetween(oldStart, oldEnd);
+												const newKeys = datesBetween(eventDate, endEventDate);
+
+												// Actualizar eventos
+												setEvents(prev => {
+													const updated = { ...prev };
+
+													// Eliminar de fechas antiguas
+													oldKeys.forEach(key => {
+														updated[key] = (updated[key] || []).filter(
+															e => e.id !== oldEvent.id,
+														);
+													});
+
+													// Insertar en nuevas fechas
+													newKeys.forEach(key => {
+														const filtered = (updated[key] || []).filter(
+															e => e.id !== updatedEvent.id,
+														);
+														updated[key] = [...filtered, updatedEvent];
+													});
+
+													return updated;
+												});
+
+												setEditingIndex(null);
+												setOriginalDateKey(null);
+												setSelectedDate(new Date(eventForm.date)); // mantener vista actualizada
+											} else {
+												// AGREGAR
+												const now = new Date();
+												const timeToUse =
+													eventForm.time || now.toTimeString().slice(0, 5);
+												const endTimeToUse = eventForm.endTime || '';
+												const endDateToUse =
+													eventForm.endDate || eventForm.date;
+
+												const eventDate = createDateFromInput(
+													eventForm.date,
+													timeToUse,
+												);
+												const endEventDate = createDateFromInput(
+													endDateToUse,
+													endTimeToUse,
+												);
+
+												const newEvent = {
+													id: Date.now(),
+													...eventForm,
+													time: timeToUse,
+													endDate: endEventDate.toISOString(),
+													date: eventDate.toISOString(),
+												};
+
+												const data = await realizarPeticion(
+													newEvent.date,
+													newEvent.endDate,
+												);
+												console.log(data);
+
+												const allDates = datesBetween(eventDate, endEventDate);
+
+												setEvents(prev => {
+													const updated = { ...prev };
+													allDates.forEach(key => {
+														updated[key] = [...(updated[key] || []), newEvent];
+													});
+													return updated;
+												});
+											}
+
+											closeModal();
+										}}
+									>
+										{editingIndex !== null ? 'Guardar cambios' : 'Agregar'}
+									</button>
 								</div>
-							)}
-
-							<div>
-								<label className='form-label'>Fecha de finalización</label>
-								<input
-									type='date'
-									value={eventForm.endDate}
-									onChange={e =>
-										isLoggedIn &&
-										setEventForm({ ...eventForm, endDate: e.target.value })
-									}
-									className='form-input'
-									disabled={!isLoggedIn}
-								/>
-							</div>
-
-							<div>
-								<label className='form-label'>Hora de finalización</label>
-								<input
-									type='time'
-									value={eventForm.endTime}
-									onChange={e =>
-										isLoggedIn &&
-										setEventForm({ ...eventForm, endTime: e.target.value })
-									}
-									className='form-input'
-									disabled={!isLoggedIn}
-								/>
-							</div>
-
-							<div>
-								<label className='form-label'>Descripción</label>
-								<textarea
-									value={eventForm.description}
-									onChange={e =>
-										isLoggedIn &&
-										setEventForm({ ...eventForm, description: e.target.value })
-									}
-									className='form-textarea'
-									placeholder='Descripción opcional'
-									disabled={!isLoggedIn}
-								/>
-							</div>
-						</div>
-
-						{/* Botones */}
-						<div className='button-group'>
-							<button
-								className='cancel-button'
-								onClick={() => {
-									closeModal();
-									setEditingIndex(null);
-								}}
-							>
-								Cancelar
-							</button>
-							<button
-								className='submit-button'
-								onClick={async () => {
-									if (!isLoggedIn || !eventForm.title.trim()) return;
-
-									if (
-										eventForm.date === eventForm.endDate &&
-										eventForm.time &&
-										eventForm.endTime &&
-										eventForm.endTime < eventForm.time
-									) {
-										alert(
-											'La hora de finalización no puede ser anterior a la hora de inicio',
-										);
-										return;
-									}
-
-									if (editingIndex !== null) {
-										// EDITAR
-										const now = new Date();
-										const timeToUse =
-											eventForm.time || now.toTimeString().slice(0, 5);
-										const endTimeToUse = eventForm.endTime || '';
-										const endDateToUse = eventForm.endDate || eventForm.date;
-
-										const eventDate = createDateFromInput(
-											eventForm.date,
-											timeToUse,
-										);
-										const endEventDate = createDateFromInput(
-											endDateToUse,
-											endTimeToUse,
-										);
-
-										// Crear evento actualizado
-										const updatedEvent = {
-											...eventForm,
-											id: events[originalDateKey][editingIndex].id,
-											time: timeToUse,
-											endTime: endTimeToUse,
-											endDate: endDateToUse,
-											date: eventDate,
-										};
-
-										// Rango original y nuevo
-										const oldEvent = events[originalDateKey][editingIndex];
-										const oldStart = oldEvent.date;
-										const oldEnd = oldEvent.endDate
-											? new Date(oldEvent.endDate)
-											: oldEvent.date;
-										const oldKeys = datesBetween(oldStart, oldEnd);
-										const newKeys = datesBetween(eventDate, endEventDate);
-
-										// Actualizar eventos
-										setEvents(prev => {
-											const updated = { ...prev };
-
-											// Eliminar de fechas antiguas
-											oldKeys.forEach(key => {
-												updated[key] = (updated[key] || []).filter(
-													e => e.id !== oldEvent.id,
-												);
-											});
-
-											// Insertar en nuevas fechas
-											newKeys.forEach(key => {
-												const filtered = (updated[key] || []).filter(
-													e => e.id !== updatedEvent.id,
-												);
-												updated[key] = [...filtered, updatedEvent];
-											});
-
-											return updated;
-										});
-
-										setEditingIndex(null);
-										setOriginalDateKey(null);
-										setSelectedDate(new Date(eventForm.date)); // mantener vista actualizada
-									} else {
-										// AGREGAR
-										const now = new Date();
-										const timeToUse =
-											eventForm.time || now.toTimeString().slice(0, 5);
-										const endTimeToUse = eventForm.endTime || '';
-										const endDateToUse = eventForm.endDate || eventForm.date;
-
-										const eventDate = createDateFromInput(
-											eventForm.date,
-											timeToUse,
-										);
-										const endEventDate = createDateFromInput(
-											endDateToUse,
-											endTimeToUse,
-										);
-
-										const newEvent = {
-											id: Date.now(),
-											...eventForm,
-											time: timeToUse,
-											endDate: endEventDate.toISOString(),
-											date: eventDate.toISOString(),
-										};
-
-										const data = await realizarPeticion(
-											newEvent.date,
-											newEvent.endDate,
-										);
-										console.log(data);
-
-										const allDates = datesBetween(eventDate, endEventDate);
-
-										setEvents(prev => {
-											const updated = { ...prev };
-											allDates.forEach(key => {
-												updated[key] = [...(updated[key] || []), newEvent];
-											});
-											return updated;
-										});
-									}
-
-									closeModal();
-								}}
-							>
-								{editingIndex !== null ? 'Guardar cambios' : 'Agregar'}
-							</button>
-						</div>
+							</>
+						)}
 
 						{/* Lista de eventos existentes */}
 						{selectedDate && getEventsForDate(selectedDate).length > 0 && (
@@ -1214,7 +1245,6 @@ const Calendario = () => {
 												}
 												return updated;
 											});
-
 										} catch (error) {
 											console.error('Error al eliminar evento:', error);
 										}
