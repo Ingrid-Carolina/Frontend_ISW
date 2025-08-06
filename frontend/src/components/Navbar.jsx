@@ -340,32 +340,19 @@ export default function CustomNavbar() {
 							>
 								Tienda
 							</Button>
-
-							{/* Donar Submenu */}
+							{/* Boton donar*/}
 							<Box
 								onMouseEnter={handleDonarEnter}
 								onMouseLeave={handleDonarLeave}
 								sx={{ position: 'relative' }}
 							>
-								<Button sx={navBtnStyle(drawerOpen)}>Donar</Button>
-								{donarOpen && (
-									<Box sx={{ ...submenuBoxStyle }}>
-										<MenuItem
-											component={Link}
-											to='/donar-indumentaria'
-											sx={subMenuStyle}
-										>
-											Donar Indumentaria/Equipo
-										</MenuItem>
-										<MenuItem
-											component={Link}
-											to='/donar-dinero'
-											sx={subMenuStyle}
-										>
-											Donar Dinero
-										</MenuItem>
-									</Box>
-								)}
+								<Button
+									sx={navBtnStyle(drawerOpen)}
+									component={Link}
+									to='/Donaciones'
+								>
+									Donar
+								</Button>
 							</Box>
 							<Button
 								component={Link}
