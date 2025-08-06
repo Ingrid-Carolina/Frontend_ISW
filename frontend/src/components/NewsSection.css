@@ -1,0 +1,76 @@
+.noticia-container {
+  width: 100%;
+  margin: auto;
+  padding: 90px 90px 30px 90px; /* padding top grande, laterales más pequeños */
+  box-sizing: border-box;
+}
+
+.noticia-header {
+  text-align: center;
+}
+
+.noticia-titulo {
+  font-family: 'GroteskBold', sans-serif;
+  font-size: 4rem; /* más grande */
+  margin-bottom: 5px;
+  color: #10045c;
+}
+
+.noticia-fecha {
+  font-family: 'ManropeEB', sans-serif;
+  font-size: 1rem;
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.noticia-separador {
+  border: none;
+  height: 3px;
+  background-color: #c55906; /* naranja de tu paleta */
+  width: 100%;
+  margin: auto;
+  margin-bottom: 25px;
+}
+
+.noticia-cuerpo {
+  display: block;
+}
+
+.noticia-img {
+  float: right;
+  width: 480px;
+  height: auto;
+  margin: 0 0 8px 20px;
+  border-radius: 10px;
+}
+
+.noticia-texto {
+  font-family: 'ManropeEB', sans-serif;
+  font-size: 1.1rem;
+  text-align: justify;
+  line-height: 1.7;
+  white-space: pre-line; /* ← ESTO permite que \n se interprete como salto de línea */
+}
+
+@media screen and (max-width: 900px) {
+  .noticia-container {
+    padding: 90px 20px 40px 20px; /* Reduce padding lateral en móviles */
+  }
+
+  .noticia-img {
+    float: none;
+    width: 100%;
+    margin: 0 0 20px 0;
+    display: block;
+  }
+
+  .noticia-cuerpo {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .noticia-titulo {
+    font-size: 3rem; /* Reduce un poco para móviles */
+  }
+}
+

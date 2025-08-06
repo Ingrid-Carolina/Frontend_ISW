@@ -2,6 +2,7 @@ import React from 'react';
 import TestimonioTrapezoide from '../components/TestimonioTrapezoide';
 import VidCarousel from '../components/VideoCarousel';
 import ReactPlayer from 'react-player';
+import Hero from '../components/Hero';
 
 const videos = [
 	{ url: 'https://youtu.be/4VNYG77bQA4?si=mvj9fQJ2bgo5S_Lj' },
@@ -16,16 +17,14 @@ const freaky = [
 
 const PaginaTestimonios = () => {
   return (
-    <div style={{ paddingTop: '90px' }}>
-      <section style={{ paddingTop: '90px' }} className="testimonios-titulo">
-        <h1>Testimonios</h1>
-      </section>
+    <div>
+      <Hero /> 
       <TestimonioTrapezoide
         nombre="Diego Sánchez"
         cita="Me gusta mucho venir a entrenar porque juego con mis amigos y aprendemos cosas nuevas todos los días. Cada práctica es divertida y me hace sentir parte de algo grande."
         rol="Jugador Profesional – Categoría Infantil"
         imagen="/Images/JugadorPrueba1.jpg"
-        colorFondo="#ea6304"
+        colorFondo="#c65402"
         invertir={false}
         superponer={false}
         zIndex={4}
@@ -47,7 +46,7 @@ const PaginaTestimonios = () => {
         cita="Esta liga me ayudó a crecer como persona y jugador. Hoy tengo metas más claras, quiero seguir entrenando fuerte y llegar lejos en el béisbol."
         rol="Madre de jugador – Categoría Juvenil"
         imagen="/Images/JugadorPrueba3.jpg"
-        colorFondo="#ea6304"
+        colorFondo="#c65402"
         invertir={false}
         superponer={true}
         zIndex={2}
@@ -69,7 +68,7 @@ const PaginaTestimonios = () => {
         <h1>Testimonios en Video</h1>
       </section>
       <div style={{ marginTop: '50px', marginBottom:'50px' }}>
-			<VidCarousel videos={freaky} />
+			<VidCarousel videos={videos} />
       </div>
       
 		</div>

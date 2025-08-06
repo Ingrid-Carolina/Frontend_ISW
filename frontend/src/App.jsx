@@ -22,7 +22,9 @@ import MostrarLoginyRegistro from './pages/MostrarLoginyRegistro';
 import Noticia1 from './pages/Noticia1.jsx';
 import Noticia2 from './pages/Noticia2.jsx';
 import Noticia3 from './pages/Noticia3.jsx';
+import NewsTest from './pages/NewsTest.jsx';
 import PaginaTestimonios from './pages/Testimonio.jsx';
+import EditarPerfil from './pages/EditarPerfil.jsx';
 
 function App() {
 	return (
@@ -44,8 +46,9 @@ function App() {
 						<Route path='/tienda' element={<Tienda />} />
 						<Route path='/aliados' element={<Aliados />} />
 						<Route path='/acercade' element={<Acercade />} />
+						<Route path='/perfil' element={<EditarPerfil />} />
 						<Route path='/login' element={<MostrarLoginyRegistro />} />
-						<Route path='/Noticia1' element={<Noticia1 />}/>
+						<Route path='/Noticia1' element={<NewsTest />}/>
 						<Route path='/Noticia2' element={<Noticia2 />}/>
 						<Route path='/Noticia3' element={<Noticia3 />}/>
 						<Route path='/Testimonio' element={<PaginaTestimonios/>}/>

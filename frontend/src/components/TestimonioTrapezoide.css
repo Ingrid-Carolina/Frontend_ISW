@@ -71,7 +71,7 @@
 .testimonios-titulo {
   text-align: center;
   padding: 60px 20px 60px;
-  background-color: white;
+  background-color: #f0eeee; /* o el color que prefieras */
 }
 
 .testimonios-titulo h1 {
@@ -85,7 +85,7 @@
     justify-content: center;
     box-sizing: border-box;*/
   font-family: 'Bulletto', cursive;
-  font-size: 8vw;
+  font-size: 6vw;
   color: #044c94; /* o el color que prefieras */
   margin: 0;
   
