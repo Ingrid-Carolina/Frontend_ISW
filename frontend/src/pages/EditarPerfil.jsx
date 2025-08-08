@@ -4,7 +4,8 @@ import './EditarPerfil.css';
 function EditarPerfil() {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [avatar, setAvatar] = useState('/Images/AvatarBboy.jpeg'); // imagen por defecto
+  const [avatar, setAvatar] = useState('/Images/AvatarBboy.jpeg');
+  const [popup, setPopup] = useState({ visible: false, titulo: '', mensaje: '', tipo: '' });
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -14,13 +15,64 @@ function EditarPerfil() {
     }
   };
 
-  const handleGuardar = () => {
-    // Aquí iría la lógica para guardar los cambios (ej. API)
-    alert('Cambios guardados');
+  const mostrarPopup = (titulo, mensaje, tipo) => {
+    setPopup({ visible: true, titulo, mensaje, tipo });
+  };
+
+  const cerrarPopup = () => {
+    setPopup({ visible: false, titulo: '', mensaje: '', tipo: '' });
+  };
+
+  const handleGuardar = async () => {
+    const token = localStorage.getItem("token");
+
+    if (!nombre.trim()) {
+      mostrarPopup("Cambio fallido", "El nombre no puede estar vacío.", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/auth/editarperfil', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`
+        },
+        body: JSON.stringify({ nombre })
+      });
+
+      const data = await response.json();
+      console.log("Respuesta backend:", data);
+
+      if (response.ok) {
+        // Obtener datos actualizados
+        const userDataResponse = await fetch('http://localhost:3000/auth/datosusuario', {
+          method: 'GET',
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
+
+        const userData = await userDataResponse.json();
+        if (userDataResponse.ok) {
+          localStorage.setItem('userName', userData.nombre);
+        }
+
+        mostrarPopup("Cambio exitoso", "Nombre actualizado correctamente.", "success");
+      } else if (data.errors && Array.isArray(data.errors)) {
+        const mensajes = data.errors.map(err => err.msg).join('\n');
+        mostrarPopup("Cambio fallido", mensajes, "error");
+      } else {
+        mostrarPopup("Cambio fallido", data.mensaje || "Error desconocido.", "error");
+      }
+
+    } catch (err) {
+      console.error(err);
+      mostrarPopup("Cambio fallido", "Hubo un error al guardar los cambios.", "error");
+    }
   };
 
   const handleCancelar = () => {
-    // Reinicia campos (o navegar hacia atrás si prefieres)
     setNombre('');
     setDescripcion('');
     setAvatar('/images/avatar-default.png');
@@ -60,6 +112,17 @@ function EditarPerfil() {
           </div>
         </div>
       </div>
+
+      {/* POPUP */}
+      {popup.visible && (
+        <div className="popup">
+          <div className={`popup-content ${popup.tipo === 'success' ? 'popup-success' : 'popup-error'}`}>
+            <h2>{popup.titulo}</h2>
+            <p>{popup.mensaje}</p>
+            <button onClick={cerrarPopup}>OK</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
