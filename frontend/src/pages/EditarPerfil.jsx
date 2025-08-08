@@ -24,8 +24,6 @@ function EditarPerfil() {
   };
 
   const handleGuardar = async () => {
-    const token = localStorage.getItem("token");
-
     if (!nombre.trim()) {
       mostrarPopup("Cambio fallido", "El nombre no puede estar vacío.", "error");
       return;
@@ -35,9 +33,9 @@ function EditarPerfil() {
       const response = await fetch('http://localhost:3000/auth/editarperfil', {
         method: 'PUT',
         headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`
+          'Content-Type': 'application/json'
         },
+        credentials: 'include', // ✅ Necesario para enviar la cookie
         body: JSON.stringify({ nombre })
       });
 
@@ -45,17 +43,17 @@ function EditarPerfil() {
       console.log("Respuesta backend:", data);
 
       if (response.ok) {
-        // Obtener datos actualizados
+        // Obtener datos actualizados del usuario
         const userDataResponse = await fetch('http://localhost:3000/auth/datosusuario', {
           method: 'GET',
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+          credentials: 'include' // ✅ También aquí
         });
 
         const userData = await userDataResponse.json();
         if (userDataResponse.ok) {
-          localStorage.setItem('userName', userData.nombre);
+          // Podés actualizar el nombre en el estado si querés mostrarlo
+          // pero no guardarlo en localStorage
+          setNombre(userData.nombre);
         }
 
         mostrarPopup("Cambio exitoso", "Nombre actualizado correctamente.", "success");
