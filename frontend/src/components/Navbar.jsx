@@ -30,6 +30,7 @@ import LogoutIcon from '@mui/icons-material/Logout';
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
 import axios from 'axios';
+axios.defaults.withCredentials = true; // <-- importante para logout y rutas protegidas
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 
@@ -43,17 +44,6 @@ const baseMenuItems = [
 	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
 	{ text: 'Contacto', icon: <CallIcon />, path: '/Contacto' },
 ];
-
-const userName = localStorage.getItem('userName') ?? '';
-const avatarLetter = userName ? userName.charAt(0).toUpperCase() : 'U';
-
-const generateColorFromName = name => {
-	const colors = ['#3f51b5', '#f44336', '#4caf50', '#ff9800', '#009688'];
-	const index = name.charCodeAt(0) % colors.length;
-	return colors[index];
-};
-
-const userColor = generateColorFromName(avatarLetter);
 
 const UserAvatarMenu = ({ user, onEditProfile, onLogout, drawerOpen }) => {
 	const [anchorEl, setAnchorEl] = React.useState(null);
@@ -192,6 +182,37 @@ export default function CustomNavbar() {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+	const [userName, setUserName] = React.useState(
+		localStorage.getItem('userName') ?? '',
+	);
+	const [userRole, setUserRole] = React.useState(
+		localStorage.getItem('userRole') ?? '',
+	);
+
+	// Derivados
+	const isLoggedIn = !!userName;
+	const avatarLetter = (userName || 'U').charAt(0).toUpperCase();
+
+	// Helper de color
+	const generateColorFromName = React.useCallback(name => {
+		const colors = ['#3f51b5', '#f44336', '#4caf50', '#ff9800', '#009688'];
+		const ch = name?.charCodeAt(0) ?? 'U'.charCodeAt(0);
+		return colors[ch % colors.length];
+	}, []);
+
+	const userColor = generateColorFromName(avatarLetter);
+
+	// Mantener la navbar sincronizada con cambios en localStorage
+	React.useEffect(() => {
+		const sync = () => {
+			setUserName(localStorage.getItem('userName') ?? '');
+			setUserRole(localStorage.getItem('userRole') ?? '');
+		};
+		window.addEventListener('storage', sync);
+		sync(); // por si entras directo con sesión activa
+		return () => window.removeEventListener('storage', sync);
+	}, []);
+
 	const toggleDrawer = () => setDrawerOpen(prev => !prev);
 
 	const handleSubmenuEnter = () => {
@@ -212,7 +233,6 @@ export default function CustomNavbar() {
 		donarTimer.current = setTimeout(() => setDonarOpen(false), 200);
 	};
 
-	const isLoggedIn = !!localStorage.getItem('token');
 	const navigate = useNavigate();
 
 	const handleLogout = async () => {
@@ -362,7 +382,7 @@ export default function CustomNavbar() {
 							>
 								En Vivo
 							</Button>
-							{localStorage.getItem('userRole') === 'admin' && (
+							{userRole === 'admin' && (
 								<Button
 									component={Link}
 									to='/admin'

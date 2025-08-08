@@ -15,6 +15,7 @@ import logo from '/Images/Logo-pilotos.png';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebaseConfig';
 import axios from 'axios';
+axios.defaults.withCredentials = true;
 import ResetPasswordModal from './ResetPasswordModal';
 
 const Login = ({ onRegistroClick }) => {
@@ -128,22 +129,20 @@ const Login = ({ onRegistroClick }) => {
 		try {
 			const data = await realizarPeticion();
 
-			if (data?.token) {
-				localStorage.setItem('token', data.token);
-
-				if (data.usuario && data.usuario.rol) {
+			// Ahora NO esperamos data.token (el token va en cookie HttpOnly desde el backend)
+			if (data?.usuario) {
+				// Puedes guardar datos NO sensibles para la UI (opcional)
+				if (data.usuario.rol) {
 					localStorage.setItem('userRole', data.usuario.rol);
 				}
-
-				//Aquí guardamos el nombre del usuario
-				if (data.usuario && data.usuario.nombre) {
+				if (data.usuario.nombre) {
 					localStorage.setItem('userName', data.usuario.nombre);
 				}
 
-				// Trigger navbar re-render
+				// Forzar re-render de navbar si tu app lo usa
 				window.dispatchEvent(new Event('storage'));
 
-				// Navigate to home
+				// Navegar a home
 				navigate('/');
 
 				setTimeout(() => {
@@ -181,6 +180,7 @@ const Login = ({ onRegistroClick }) => {
 		try {
 			const res = await axios.post(url, body, {
 				headers: { 'Content-Type': 'application/json' },
+				withCredentials: true, // <-- importante para cookie HttpOnly
 			});
 
 			console.log('response data: ', res.data.mensaje);
@@ -198,7 +198,7 @@ const Login = ({ onRegistroClick }) => {
 			} else {
 				window.alert('Error en la red.');
 			}
-			throw error; // Re-throw to trigger handleFailedAttempt
+			throw error; // Re-lanzamos para que handleFailedAttempt se encargue
 		}
 	};
 

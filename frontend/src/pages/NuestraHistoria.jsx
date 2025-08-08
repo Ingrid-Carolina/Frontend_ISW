@@ -1,12 +1,38 @@
 import React from 'react';
-import { Box, Container, Typography } from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import { motion } from 'framer-motion';
+import Slider from 'react-slick';
 import equipoImg from '/Images/equipo.jpg';
 import equipoImg2 from '/Images/equipo2.jpg';
 
+// Variantes de animación
+const fadeUp = {
+	hidden: { opacity: 0, y: 30 },
+	visible: { opacity: 1, y: 0, transition: { duration: 1 } },
+};
+
+// Imágenes de la galería (reemplaza con tus rutas reales)
+const galeriaImgs = [
+	'/Images/foto2.jpg',
+	'/Images/foto4.jpg',
+	'/Images/foto3.jpg',
+	'/Images/foto4.jpg',
+];
+
 const NuestraHistoria = () => {
+	const sliderSettings = {
+		dots: true,
+		infinite: true,
+		speed: 500,
+		slidesToShow: 1,
+		slidesToScroll: 1,
+		arrows: true,
+		autoplay: true,
+		autoplaySpeed: 5000,
+	};
 	return (
 		<>
-			{/* HEADER SECTION */}
+			{/* ENCABEZADO CON IMAGEN */}
 			<Box
 				sx={{
 					position: 'relative',
@@ -21,7 +47,6 @@ const NuestraHistoria = () => {
 					py: { xs: 6, md: 8 },
 				}}
 			>
-				{/* Overlay */}
 				<Box
 					sx={{
 						position: 'absolute',
@@ -33,87 +58,344 @@ const NuestraHistoria = () => {
 						zIndex: 1,
 					}}
 				/>
-
-				{/* Texto centrado */}
 				<Box
 					sx={{
 						position: 'relative',
 						zIndex: 2,
 						textAlign: 'center',
-						height: '100%',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
 					}}
 				>
-					<Typography
-						variant='h2'
-						sx={{
-							fontWeight: 'bold',
-							fontSize: { xs: '4rem', md: '7rem' },
-							fontFamily: '"Varsity", cursive',
-							color: 'white',
-							textAlign: 'center',
-						}}
+					<motion.div
+						initial="hidden"
+						whileInView="visible"
+						viewport={{ once: true }}
+						variants={fadeUp}
 					>
-						NUESTRA HISTORIA
-					</Typography>
+						<Typography
+							variant="h2"
+							sx={{
+								fontWeight: 'bold',
+								fontSize: { xs: '4rem', md: '7rem' },
+								fontFamily: '"Varsity", cursive',
+								color: 'white',
+								textAlign: 'center',
+							}}
+						>
+							NUESTRA HISTORIA
+						</Typography>
+					</motion.div>
 				</Box>
 			</Box>
 
-			<Box
+			{/* SECCIÓN QUIÉNES SOMOS MEJORADA */}
+<Box
+	sx={{
+		display: 'flex',
+		flexDirection: { xs: 'column', md: 'row' },
+		alignItems: 'center',
+		gap: { xs: 4, md: 6 },
+		px: { xs: 3, md: 12 },
+		py: 8,
+		bgcolor: '#e6691d',
+	}}
+>
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1 }}
+	>
+		<Box
+			component="img"
+			src={equipoImg2}
+			alt="Equipo de béisbol"
+			sx={{
+				width: '100%',
+				borderRadius: 2,
+				boxShadow: 4,
+			}}
+		/>
+	</motion.div>
+
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1.3 }}
+	>
+		<Box sx={{ color: 'white' }}>
+			<Typography
+				variant="h3"
 				sx={{
-					display: 'flex',
-					flexDirection: { xs: 'column', md: 'row' },
-					alignItems: 'center',
-					gap: 4,
-					px: { xs: 3, md: 10 },
-					py: 6,
-					bgcolor: '#e6691d',
+					fontFamily: '"Varsity", cursive',
+					fontWeight: 'bold',
+					mb: 3,
+					fontSize: { xs: '3rem', md: '4rem' },
 				}}
 			>
-				<Box
-					component='img'
-					src={equipoImg2}
-					alt='Equipo de béisbol'
-					sx={{
-						width: { xs: '100%', md: '45%' },
-						borderRadius: 2,
-						boxShadow: 4,
-					}}
-				/>
+				¿Quiénes somos?
+			</Typography>
+			<Typography
+				variant="body1"
+				sx={{
+					fontFamily: '"PeterMedium", sans-serif',
+					fontSize: '1rem',
+					lineHeight: 1.9,
+				}}
+			>
+				La Asociación de Béisbol Menor Pilotos de Honduras (FAH) cuenta con más de 76 años de historia desde su formación en 1948. Nuestro principal objetivo es la formación integral de jóvenes atletas, no solo en el juego del béisbol, sino también en la generación de líderes y ciudadanos comprometidos con sus comunidades y su país.
+				Desde nuestros inicios hemos trabajado incansablemente para crear espacios seguros donde los jóvenes puedan desarrollar sus habilidades físicas, emocionales y sociales. A lo largo de los años, cientos de voluntarios, entrenadores y familias han hecho posible este sueño, formando generaciones de jugadores con valores sólidos, pasión por el deporte y sentido de pertenencia.
+				Nuestra historia está marcada por la solidaridad, el esfuerzo y los logros alcanzados gracias a la colaboración de donantes, instituciones aliadas y comunidades enteras. Más que un equipo, somos una familia que crece junta. ¡Gracias por ser parte de este viaje!
+			</Typography>
+		</Box>
+	</motion.div>
+</Box>
 
-				<Box sx={{ flex: 1, color: 'white' }}>
+			{/* SECCIÓN: NUESTROS INICIOS */}
+<Box
+	sx={{
+		display: 'flex',
+		flexDirection: { xs: 'column', md: 'row' },
+		alignItems: 'center',
+		px: { xs: 4, md: 12 },
+		py: 8,
+		bgcolor: '#f7d7c4',
+		gap: { xs: 4, md: 6 },
+	}}
+>
+	{/* Texto a la izquierda, imagen a la derecha */}
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1.3 }}
+	>
+		<Typography
+			variant="h4"
+			sx={{
+				fontFamily: '"Varsity", cursive',
+				fontWeight: 'bold',
+				color: '#e6691d',
+				fontSize: { xs: '2.5rem', md: '3rem' },
+				mb: 3,
+			}}
+		>
+			Nuestros Inicios
+		</Typography>
+		<Typography
+			variant="body1"
+			sx={{
+				fontSize: '1.3rem',
+				lineHeight: 1.9,
+				fontFamily: '"PeterMedium", sans-serif',
+				color: '#333',
+			}}
+		>
+			(Texto Placeholder) Desde nuestros humildes comienzos en 1948, nuestro enfoque ha sido brindar oportunidades para jóvenes atletas en comunidades rurales. A través del béisbol, construimos disciplina, valores y comunidad.
+		</Typography>
+	</motion.div>
+
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1 }}
+	>
+		<Box
+			component="img"
+			src='/Images/foto4.jpg' // <- Cambia por la imagen real
+			alt="Nuestros inicios"
+			sx={{
+				width: '100%',
+				borderRadius: 2,
+				boxShadow: 4,
+			}}
+		/>
+	</motion.div>
+</Box>
+
+{/* SECCIÓN: IMPACTO COMUNITARIO */}
+<Box
+	sx={{
+		display: 'flex',
+		flexDirection: { xs: 'column', md: 'row-reverse' },
+		alignItems: 'center',
+		px: { xs: 4, md: 12 },
+		py: 8,
+		bgcolor: '#ffe3dc',
+		gap: { xs: 4, md: 6 },
+	}}
+>
+	{/* Texto a la derecha, imagen a la izquierda */}
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1.3 }}
+	>
+		<Typography
+			variant="h4"
+			sx={{
+				fontFamily: '"Varsity", cursive',
+				fontWeight: 'bold',
+				color: '#e6691d',
+				fontSize: { xs: '2.5rem', md: '3rem' },
+				mb: 3,
+			}}
+		>
+			Impacto Comunitario
+		</Typography>
+		<Typography
+			variant="body1"
+			sx={{
+				fontSize: '1.3rem',
+				lineHeight: 1.9,
+				fontFamily: '"PeterMedium", sans-serif',
+				color: '#333',
+			}}
+		>
+			(Texto Placeholder) A lo largo de las décadas, hemos trabajado con más de 10,000 niños, formando no solo jugadores sino líderes. Nuestras iniciativas incluyen clínicas deportivas, programas de mentoría y eventos familiares.
+		</Typography>
+	</motion.div>
+
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1 }}
+	>
+		<Box
+			component="img"
+			src='/Images/foto4.jpg' // <- Cambia por la imagen real
+			alt="Impacto comunitario"
+			sx={{
+				width: '100%',
+				borderRadius: 2,
+				boxShadow: 4,
+			}}
+		/>
+	</motion.div>
+</Box>
+
+{/* SECCIÓN: NUESTROS VALORES */}
+<Box
+	sx={{
+		display: 'flex',
+		flexDirection: { xs: 'column', md: 'row' },
+		alignItems: 'center',
+		px: { xs: 4, md: 12 },
+		py: 8,
+		bgcolor: '#e3f2fd',
+		gap: { xs: 4, md: 6 },
+	}}
+>
+	{/* Texto a la izquierda, imagen a la derecha */}
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1.3 }}
+	>
+		<Typography
+			variant="h4"
+			sx={{
+				fontFamily: '"Varsity", cursive',
+				fontWeight: 'bold',
+				color: '#e6691d',
+				fontSize: { xs: '2.5rem', md: '3rem' },
+				mb: 3,
+			}}
+		>
+			Nuestros Valores
+		</Typography>
+		<Typography
+			variant="body1"
+			sx={{
+				fontSize: '1.3rem',
+				lineHeight: 1.9,
+				fontFamily: '"PeterMedium", sans-serif',
+				color: '#333',
+			}}
+		>
+			(Texto Placeholder) Solidaridad, compromiso, respeto y pasión por el deporte. Estos valores son la base de cada entrenamiento, partido y actividad que realizamos como asociación.
+		</Typography>
+	</motion.div>
+
+	<motion.div
+		initial="hidden"
+		whileInView="visible"
+		viewport={{ once: true }}
+		variants={fadeUp}
+		style={{ flex: 1 }}
+	>
+		<Box
+			component="img"
+			src='/Images/foto4.jpg' // <- Cambia por la imagen real
+			alt="Nuestros valores"
+			sx={{
+				width: '100%',
+				borderRadius: 2,
+				boxShadow: 4,
+			}}
+		/>
+	</motion.div>
+</Box>
+
+
+			{/* SECCIÓN DE GALERÍA HISTÓRICA CON CARRUSEL */}
+			<Box
+				sx={{
+					py: 8,
+					px: { xs: 4, md: 12 },
+					bgcolor: '#fef6f2',
+					textAlign: 'center',
+				}}
+			>
+				<motion.div
+					initial="hidden"
+					whileInView="visible"
+					viewport={{ once: true }}
+					variants={fadeUp}
+				>
 					<Typography
-						variant='h3'
+						variant="h4"
 						sx={{
 							fontFamily: '"Varsity", cursive',
 							fontWeight: 'bold',
-							mb: 2,
-							fontSize: { xs: '3rem', md: '4rem' },
+							color: '#e6691d',
+							fontSize: { xs: '2.5rem', md: '3rem' },
+							mb: 4,
 						}}
 					>
-						Quienes somos?
+						Galería Histórica
 					</Typography>
 
-					<Typography
-						variant='body1'
-						sx={{
-							fontFamily: '"PeterMedium", sans-serif',
-							fontSize: '1.5rem',
-							lineHeight: 1.8,
-						}}
-					>
-						La Asociación de Béisbol Menor Pilotos de Honduras (FAH) cuenta con
-						más de 76 años de historia desde su formación en 1948. Nuestro
-						principal objetivo es la formación integral de jóvenes atletas, no
-						solo en el juego del béisbol, sino también en la generación de
-						líderes y ciudadanos de sus comunidades y país. Nuestra historia
-						está marcada por la solidaridad, el esfuerzo y los logros alcanzados
-						gracias a voluntarios, donantes y aliados estratégicos. ¡Gracias por
-						ser parte de este viaje!
-					</Typography>
-				</Box>
+					<Slider {...sliderSettings}>
+						{galeriaImgs.map((src, index) => (
+							<Box key={index} sx={{ px: 2 }}>
+								<Box
+									component="img"
+									src={src}
+									alt={`Galería ${index + 1}`}
+									sx={{
+										maxWidth: '100%',
+										width: { xs: '100%', md: '70%' },
+										borderRadius: 3,
+										boxShadow: 5,
+										margin: '0 auto',
+									}}
+								/>
+							</Box>
+						))}
+					</Slider>
+				</motion.div>
 			</Box>
 		</>
 	);
