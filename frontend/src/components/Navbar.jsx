@@ -209,7 +209,7 @@ export default function CustomNavbar() {
 			setUserRole(localStorage.getItem('userRole') ?? '');
 		};
 		window.addEventListener('storage', sync);
-		sync(); // por si entras directo con sesión activa
+		sync(); 
 		return () => window.removeEventListener('storage', sync);
 	}, []);
 
@@ -238,12 +238,11 @@ export default function CustomNavbar() {
 	const handleLogout = async () => {
 		try {
 			await axios.post('http://localhost:3000/auth/signout');
-			localStorage.removeItem('token');
 			localStorage.removeItem('userRole');
 			localStorage.removeItem('userName');
 			localStorage.removeItem('userEmail');
 			alert('Sesion cerrada correctamente.');
-			navigate('/'); // O redirige a la home si prefieres
+			navigate('/'); 
 			//Refrescar la página para limpiar el estado visual y memoria React
 			setTimeout(() => {
 				window.location.reload();
