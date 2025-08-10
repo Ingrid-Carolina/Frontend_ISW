@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import TestimonioTrapezoide from '../components/TestimonioTrapezoide';
 import VidCarousel from '../components/VideoCarousel';
 import ReactPlayer from 'react-player';
 import Hero from '../components/Hero';
+import axios from 'axios';
 
 const videos = [
 	{ url: 'https://youtu.be/4VNYG77bQA4?si=mvj9fQJ2bgo5S_Lj' },
@@ -15,65 +16,80 @@ const freaky = [
 	{ url: 'https://youtu.be/u5NqO2v_xnY?si=oVtEUlkh4iDo_eEb' },
 ];
 
+
 const PaginaTestimonios = () => {
-  return (
+
+  const [testimonios, setTestimonios] = useState([]);
+  const roles = [
+  "Jugador Profesional – Categoría Infantil",
+  "Jugador Profesional – Categoría Intermedia",
+  "Jugador Profesional – Categoría Juvenil",
+  "Madre de jugador – Categoría Juvenil",
+];
+
+
+   useEffect(() => {
+    const fetchTestimonios = async () => {
+      try {
+        const res = await axios.get(
+          'http://localhost:3000/auth/obtenertestimonios',
+        );
+        const testimonios = res.data; //estoy trasladando a testimonios el fetch de la tabla del formato JSON sended del res en Authcontroller
+ 
+       
+ 
+        const testimoniosLista = testimonios.map(testimonio => ({ //transformo my res.data en un array que el frontend pueda leer
+            id: testimonio.id_testimonio,
+            nombre: testimonio.nombre,
+            cita: testimonio.contenido,
+            imagen: testimonio.imagen,
+        }));
+
+        setTestimonios(testimoniosLista);
+        console.log(testimonios);
+
+ 
+      } catch (err) {
+        console.error('Error al obtener testimonios:', err);
+      }
+    };
+ 
+    fetchTestimonios();
+  }, []);
+
+return (
     <div>
-      <Hero /> 
-      <TestimonioTrapezoide
-        nombre="Diego Sánchez"
-        cita="Me gusta mucho venir a entrenar porque juego con mis amigos y aprendemos cosas nuevas todos los días. Cada práctica es divertida y me hace sentir parte de algo grande."
-        rol="Jugador Profesional – Categoría Infantil"
-        imagen="/Images/JugadorPrueba1.jpg"
-        colorFondo="#c65402"
-        invertir={false}
-        superponer={false}
-        zIndex={4}
-        invertirDiagonal={true}
-      />
-      <TestimonioTrapezoide
-        nombre="Juan Carlos Rivera"
-        cita="Antes era muy tímido, pero gracias al equipo aprendí a confiar en mí y a trabajar con los demás. Ahora me esfuerzo más en todo lo que hago, tanto en el campo como en la escuela."
-        rol="Jugador Profesional – Categoría Intermedia"
-        imagen="/Images/JugadorPrueba2.jpg"
-        colorFondo="#044c94"
-        invertir={true}
-        superponer={true}
-        zIndex={3}
-        invertirDiagonal={false}
-      />
-      <TestimonioTrapezoide
-        nombre="Mateo López"
-        cita="Esta liga me ayudó a crecer como persona y jugador. Hoy tengo metas más claras, quiero seguir entrenando fuerte y llegar lejos en el béisbol."
-        rol="Madre de jugador – Categoría Juvenil"
-        imagen="/Images/JugadorPrueba3.jpg"
-        colorFondo="#c65402"
-        invertir={false}
-        superponer={true}
-        zIndex={2}
-        invertirDiagonal={true}
-      />
-      <TestimonioTrapezoide
-        nombre="Miguel Hernández"
-        cita="Esta liga me ayudó a crecer como persona y jugador. Hoy tengo metas más claras, quiero seguir entrenando fuerte y llegar lejos en el béisbol."
-        rol="Jugador Profesional – Categoría Juvenil"
-        imagen="/Images/JugadorPrueba4.jpg"
-        colorFondo="#044c94"
-        invertir={true}
-        superponer={true}
-        zIndex={1}
-        invertirDiagonal={true}
-        finalTest={true}
-      /> 
+      <Hero/>
+      {testimonios.map((testimonio, index) => {
+        const invertir = index % 2 === 1;
+        const superponer = index !== 0;
+        const invertirDiagonal = index % 2 === 0;
+        const zIndex = 4 - (index % 4);
+        const rol = roles[Math.floor(Math.random() * roles.length)];
+
+        return (
+          <TestimonioTrapezoide
+            key={index}
+            {...testimonio}
+            rol={rol}
+            invertir={invertir}
+            superponer={superponer}
+            invertirDiagonal={invertirDiagonal}
+            colorFondo={index % 2 === 0 ? '#c65402' : '#044c94'}
+            zIndex={zIndex}
+            finalTest={index === testimonios.length - 1}
+          />
+        );
+      })}
       <section className="testimonios-titulo">
         <h1>Testimonios en Video</h1>
       </section>
       <div style={{ marginTop: '50px', marginBottom:'50px' }}>
-			<VidCarousel videos={videos} />
+      <VidCarousel videos={videos} />
       </div>
-      
-		</div>
-    
+    </div>
   );
+
 };
 
 export default PaginaTestimonios;

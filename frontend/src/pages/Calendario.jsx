@@ -504,6 +504,7 @@ const Calendario = () => {
 
 					const fechas = datesBetween(fechaInicio, fechaFinal);
 
+					if(ev.ishabilitado){
 					const eventoObj = {
 						id: ev.id,
 						title: ev.nombre,
@@ -519,6 +520,7 @@ const Calendario = () => {
 						if (!eventosMap[f]) eventosMap[f] = [];
 						eventosMap[f].push(eventoObj);
 					});
+				}
 				});
 
 				setEvents(eventosMap);
