@@ -495,32 +495,38 @@ const Calendario = () => {
 				);
 				const eventos = res.data;
 
-				// Convertir y organizar eventos por fecha
 				const eventosMap = {};
 
 				eventos.forEach(ev => {
 					const fechaInicio = new Date(ev.fecha_inicio);
-					const fechaFinal = new Date(ev.fecha_final || ev.fecha_inicio);
+					const fechaFinal = ev.fecha_final ? new Date(ev.fecha_final) : null;
 
-					const fechas = datesBetween(fechaInicio, fechaFinal);
+					// Detecta “todo el día” si se usa por ejemplo 00:00 → 23:59
+					const isAllDay =
+						fechaFinal &&
+						fechaInicio.getHours() === 0 &&
+						fechaInicio.getMinutes() === 0 &&
+						fechaFinal.getHours() === 23 &&
+						fechaFinal.getMinutes() === 59;
 
-					if(ev.ishabilitado){
-					const eventoObj = {
-						id: ev.id,
-						title: ev.nombre,
-						description: ev.descripcion,
-						date: fechaInicio, // Date ✅
-						endDate: fechaFinal, // Date ✅
-						time: '',
-						endTime: '',
-						type: 'event',
-					};
+					if (ev.ishabilitado) {
+						const eventoObj = {
+							id: ev.id,
+							title: ev.nombre,
+							description: ev.descripcion,
+							date: fechaInicio, // Date en estado
+							endDate: fechaFinal || fechaInicio, // Date
+							time: isAllDay ? '' : toHHMM(fechaInicio),
+							endTime: isAllDay || !fechaFinal ? '' : toHHMM(fechaFinal),
+							type: 'event',
+						};
 
-					fechas.forEach(f => {
-						if (!eventosMap[f]) eventosMap[f] = [];
-						eventosMap[f].push(eventoObj);
-					});
-				}
+						const fechas = datesBetween(fechaInicio, fechaFinal || fechaInicio);
+						fechas.forEach(f => {
+							if (!eventosMap[f]) eventosMap[f] = [];
+							eventosMap[f].push(eventoObj);
+						});
+					}
 				});
 
 				setEvents(eventosMap);
@@ -923,6 +929,7 @@ const Calendario = () => {
 													id: Date.now(),
 													...eventForm,
 													time: timeToUse,
+													endTime: endTimeToUse,
 													endDate: endEventDate,
 													date: eventDate,
 												};
@@ -973,21 +980,6 @@ const Calendario = () => {
 														)}
 														<span>{event.title}</span>
 													</div>
-													{event.date &&
-													event.endDate &&
-													formatDateKey(event.date) !==
-														formatDateKey(new Date(event.endDate)) ? (
-														<div className='event-dates'>
-															<span>
-																🗓 {formatDateKey(event.date)} →{' '}
-																{formatDateKey(new Date(event.endDate))}
-															</span>
-														</div>
-													) : event.date ? (
-														<div className='event-dates'>
-															<span>🗓 {formatDateKey(event.date)}</span>
-														</div>
-													) : null}
 													{event.time && event.endTime ? (
 														<div className='event-time'>
 															<Clock />
@@ -1000,7 +992,12 @@ const Calendario = () => {
 															<Clock />
 															<span>{event.time}</span>
 														</div>
-													) : null}
+													) : (
+														<div className='event-time'>
+															<Clock />
+															<span>Todo el día</span>
+														</div>
+													)}
 
 													{event.description && (
 														<p className='event-description'>
