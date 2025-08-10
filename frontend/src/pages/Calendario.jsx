@@ -308,17 +308,26 @@ const Calendario = () => {
 		const dateKey = formatDateKey(selectedDate);
 		const event = events[dateKey][index];
 
+		// event.date es Date, endDate es ISO string
+		const { date: fi, time: hi } =
+			event.date instanceof Date
+				? splitISO(event.date.toISOString())
+				: splitISO(event.date);
+
+		const { date: ff, time: hf } = splitISO(event.endDate);
+
 		setEditingIndex(index);
-		setOriginalDateKey(dateKey); // Guardar la fecha original del evento
+		setOriginalDateKey(dateKey);
 		setShowModal(true);
+
 		setEventForm({
-			title: event.title,
-			time: event.time || '',
-			endTime: event.endTime || '',
-			endDate: event.endDate || formatDateKey(event.date),
+			title: event.title || '',
+			time: event.time || hi || '',
+			endTime: event.endTime || hf || '',
+			date: fi || formatDateKey(event.date || selectedDate),
+			endDate: ff || fi, // si no había fin, usa el inicio
 			description: event.description || '',
 			type: event.type || 'event',
-			date: formatDateKey(event.date || selectedDate),
 		});
 	};
 
@@ -327,8 +336,8 @@ const Calendario = () => {
 			const url = `http://localhost:3000/auth/evento/${id}`;
 			const body = {
 				nombre: eventoActualizado.title,
-				fecha_inicio: eventoActualizado.date,
-				fecha_final: eventoActualizado.endDate,
+				fecha_inicio: new Date(eventoActualizado.date).toISOString(),
+				fecha_final: new Date(eventoActualizado.endDate).toISOString(),
 				descripcion: eventoActualizado.description,
 			};
 
@@ -427,6 +436,23 @@ const Calendario = () => {
 
 		return result;
 	};
+
+	// '2025-08-07T13:30:00.000Z' -> { date: '2025-08-07', time: '13:30' }
+	const splitISO = iso => {
+		if (!iso) return { date: '', time: '' };
+		const d = new Date(iso);
+		const pad = n => n.toString().padStart(2, '0');
+		const date = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+		const time = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+		return { date, time };
+	};
+
+	const toHHMM = d => {
+		if (!d) return '';
+		const pad = n => n.toString().padStart(2, '0');
+		return `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+	};
+
 	const realizarPeticion = async (date, endDate) => {
 		const url = 'http://localhost:3000/auth/registrarevento';
 
@@ -482,10 +508,10 @@ const Calendario = () => {
 						id: ev.id,
 						title: ev.nombre,
 						description: ev.descripcion,
-						date: fechaInicio,
-						endDate: fechaFinal.toISOString(),
-						time: '', // podrías agregar si guardás hora
-						endTime: '', // idem
+						date: fechaInicio, // Date ✅
+						endDate: fechaFinal, // Date ✅
+						time: '',
+						endTime: '',
 						type: 'event',
 					};
 
@@ -832,11 +858,10 @@ const Calendario = () => {
 													id: events[originalDateKey][editingIndex].id,
 													time: timeToUse,
 													endTime: endTimeToUse,
-													endDate: endEventDate.toISOString(), // ✅ ISO string
-													date: eventDate.toISOString(),
+													endDate: endEventDate,
+													date: eventDate,
 												};
 
-												
 												// Guardar en backend
 												await actualizarEvento(updatedEvent.id, updatedEvent);
 
@@ -896,13 +921,13 @@ const Calendario = () => {
 													id: Date.now(),
 													...eventForm,
 													time: timeToUse,
-													endDate: endEventDate.toISOString(),
-													date: eventDate.toISOString(),
+													endDate: endEventDate,
+													date: eventDate,
 												};
 
 												const data = await realizarPeticion(
-													newEvent.date,
-													newEvent.endDate,
+													newEvent.date.toISOString(),
+													newEvent.endDate.toISOString(),
 												);
 												console.log(data);
 
@@ -948,7 +973,8 @@ const Calendario = () => {
 													</div>
 													{event.date &&
 													event.endDate &&
-													formatDateKey(event.date) !== event.endDate ? (
+													formatDateKey(event.date) !==
+														formatDateKey(new Date(event.endDate)) ? (
 														<div className='event-dates'>
 															<span>
 																🗓 {formatDateKey(event.date)} →{' '}
