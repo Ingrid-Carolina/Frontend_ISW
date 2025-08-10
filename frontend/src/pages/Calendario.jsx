@@ -168,6 +168,17 @@ const Calendario = () => {
 	}
 
 	useEffect(() => {
+		// Si cualquiera de los dos modales está abierto, bloquea el scroll de fondo
+		if (!showMonthEvents && !selectedDate) return;
+
+		const prev = document.body.style.overflow;
+		document.body.style.overflow = 'hidden';
+		return () => {
+			document.body.style.overflow = prev;
+		};
+	}, [showMonthEvents, selectedDate]);
+
+	useEffect(() => {
 		const userRole = localStorage.getItem('userRole');
 		setIsLoggedIn(userRole === 'admin-calendario' || userRole === 'admin');
 	}, []);
@@ -1041,41 +1052,36 @@ const Calendario = () => {
 
 			{/* Modal de Eventos del Mes */}
 			{showMonthEvents && (
-				<div className='modal'>
-					<div className='modal-content' style={{ maxWidth: '700px' }}>
-						<div className='modal-header'>
-							<h3 className='modal-title'>
-								Eventos de {months[currentDate.getMonth()]}{' '}
+				<div className='mx-overlay'>
+					<div className='mx-box'>
+						{/* Header */}
+						<div className='mx-header'>
+							<h3 className='mx-title'>
+								Eventos De {months[currentDate.getMonth()]}{' '}
 								{currentDate.getFullYear()}
 							</h3>
 							<button
-								className='close-button'
+								className='mx-close'
 								onClick={() => setShowMonthEvents(false)}
 							>
 								<X />
 							</button>
 						</div>
 
-						<div style={{ maxHeight: '500px', overflowY: 'auto' }}>
+						{/* LISTA SCROLLEABLE */}
+						<div className='mx-body-list'>
 							{(() => {
 								const monthEvents = getEventsForMonth(currentDate);
 
 								if (monthEvents.length === 0) {
 									return (
-										<div
-											style={{
-												textAlign: 'center',
-												padding: '40px 20px',
-												color: '#6b7280',
-												fontSize: '16px',
-											}}
-										>
+										<div className='mx-empty'>
 											No hay eventos programados para este mes
 										</div>
 									);
 								}
 
-								// Agrupar eventos por fecha
+								// Agrupar por fecha
 								const eventsByDate = {};
 								monthEvents.forEach(event => {
 									const dateStr = event.date.toLocaleDateString('es-ES', {
@@ -1083,82 +1089,65 @@ const Calendario = () => {
 										day: 'numeric',
 										month: 'long',
 									});
-									if (!eventsByDate[dateStr]) {
-										eventsByDate[dateStr] = [];
-									}
+									if (!eventsByDate[dateStr]) eventsByDate[dateStr] = [];
 									eventsByDate[dateStr].push(event);
 								});
 
 								return Object.entries(eventsByDate).map(
 									([dateStr, dateEvents]) => (
-										<div key={dateStr} style={{ marginBottom: '24px' }}>
-											<h4
-												style={{
-													margin: '0 0 12px 0',
-													fontSize: '16px',
-													fontWeight: '600',
-													color: '#374151',
-													borderBottom: '2px solid #e5e7eb',
-													paddingBottom: '8px',
-													textTransform: 'capitalize',
-												}}
-											>
-												{dateStr}
-											</h4>
+										<section key={dateStr} className='mx-day'>
+											<h4 className='mx-day-header'>{dateStr}</h4>
 
-											<div style={{ paddingLeft: '16px' }}>
-												{dateEvents.map(event => (
-													<div
-														key={event.id}
-														className={`event-card ${event.type === 'event' ? 'event-type' : 'note-type'}`}
-														style={{ marginBottom: '12px' }}
-													>
-														<div className='event-card-header'>
-															<div className='event-card-content'>
-																<div className='event-card-title'>
-																	{event.type === 'event' ? (
-																		<Calendar />
-																	) : (
-																		<FileText />
+											<ul className='mx-list'>
+												{dateEvents
+													.sort((a, b) =>
+														(a.time || '99:99').localeCompare(
+															b.time || '99:99',
+														),
+													)
+													.map(event => (
+														<li key={event.id} className='mx-card'>
+															<div className='mx-card-color' aria-hidden />
+															<div className='mx-card-main'>
+																<div className='mx-card-top'>
+																	<div className='mx-title-row'>
+																		<Calendar /> <span>{event.title}</span>
+																	</div>
+																	{isLoggedIn && (
+																		<button
+																			className='mx-delete'
+																			title='Eliminar'
+																			onClick={() =>
+																				deleteEvent(event.dateKey, event.id)
+																			}
+																		>
+																			<X />
+																		</button>
 																	)}
-																	<span>{event.title}</span>
 																</div>
-																{event.time && event.endTime ? (
-																	<div className='event-time'>
-																		<Clock />
-																		<span>
-																			{event.time} - {event.endTime}
+
+																<div className='mx-meta'>
+																	{!event.time && !event.endTime ? (
+																		<span className='mx-pill'>Todo el día</span>
+																	) : event.time && event.endTime ? (
+																		<span className='mx-pill'>
+																			{event.time} – {event.endTime}
 																		</span>
-																	</div>
-																) : event.time ? (
-																	<div className='event-time'>
-																		<Clock />
-																		<span>{event.time}</span>
-																	</div>
-																) : null}
+																	) : event.time ? (
+																		<span className='mx-pill'>
+																			{event.time}
+																		</span>
+																	) : null}
+																</div>
 
 																{event.description && (
-																	<p className='event-description'>
-																		{event.description}
-																	</p>
+																	<p className='mx-desc'>{event.description}</p>
 																)}
 															</div>
-															{isLoggedIn && (
-																<button
-																	onClick={() => {
-																		deleteEvent(event.dateKey, event.id);
-																		// Actualizar la vista si es necesario
-																	}}
-																	className='delete-button'
-																>
-																	<X />
-																</button>
-															)}
-														</div>
-													</div>
-												))}
-											</div>
-										</div>
+														</li>
+													))}
+											</ul>
+										</section>
 									),
 								);
 							})()}
@@ -1179,30 +1168,11 @@ const Calendario = () => {
 						>
 							{(() => {
 								const monthEvents = getEventsForMonth(currentDate);
-								const totalEvents = monthEvents.length;
 								const eventCount = monthEvents.filter(
 									e => e.type === 'event',
 								).length;
-								const noteCount = monthEvents.filter(
-									e => e.type === 'note',
-								).length;
-
 								return (
 									<>
-										<div style={{ textAlign: 'center' }}>
-											<div
-												style={{
-													fontSize: '24px',
-													fontWeight: 'bold',
-													color: '#3b82f6',
-												}}
-											>
-												{totalEvents}
-											</div>
-											<div style={{ fontSize: '14px', color: '#6b7280' }}>
-												Total
-											</div>
-										</div>
 										<div style={{ textAlign: 'center' }}>
 											<div
 												style={{
@@ -1213,22 +1183,8 @@ const Calendario = () => {
 											>
 												{eventCount}
 											</div>
-											<div style={{ fontSize: '14px', color: '#6b7280' }}>
-												Eventos
-											</div>
-										</div>
-										<div style={{ textAlign: 'center' }}>
-											<div
-												style={{
-													fontSize: '24px',
-													fontWeight: 'bold',
-													color: '#166534',
-												}}
-											>
-												{noteCount}
-											</div>
-											<div style={{ fontSize: '14px', color: '#6b7280' }}>
-												Notas
+											<div style={{ fontSize: '14px', color: '#1e40af' }}>
+												Eventos de Este Mes
 											</div>
 										</div>
 									</>
