@@ -30,16 +30,19 @@ const DonarcionSubpagina = ({ onClose }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Estilos responsive principales
+    // Estilos responsive principales - SOLUCION: Eliminar completamente el espacio extra
     const rootStyles = {
         width: '100%',
-        minHeight: '100vh',
+        // Usar height: auto para que se ajuste al contenido
+        height: 'auto',
         backgroundColor: '#f5f5f5',
         display: 'flex',
-        alignItems: screenSize === 'xs' ? 'flex-start' : 'center',
+        alignItems: 'flex-start',
         justifyContent: 'center',
         padding: screenSize === 'xs' ? '16px 8px' : screenSize === 'sm' ? '24px 16px' : '32px',
-        overflowX: 'hidden'
+        overflowX: 'hidden',
+        // Eliminar paddingBottom extra
+        paddingBottom: '0'
     };
 
     const containerStyles = {
@@ -48,7 +51,10 @@ const DonarcionSubpagina = ({ onClose }) => {
         display: 'flex',
         flexDirection: screenSize === 'xs' || screenSize === 'sm' ? 'column' : 'row',
         gap: screenSize === 'xs' ? '16px' : '24px',
-        padding: screenSize === 'xs' ? '0' : screenSize === 'sm' ? '16px' : '32px'
+        padding: screenSize === 'xs' ? '0' : screenSize === 'sm' ? '16px' : '32px',
+        // Eliminar margen superior extra
+        marginTop: '0'
+        
     };
 
     const leftPanelStyles = {
@@ -72,9 +78,10 @@ const DonarcionSubpagina = ({ onClose }) => {
         flexDirection: 'column',
         gap: '16px',
         order: screenSize === 'xs' || screenSize === 'sm' ? 2 : 1,
-        position: screenSize === 'xs' || screenSize === 'sm' ? 'sticky' : 'static',
-        bottom: screenSize === 'xs' || screenSize === 'sm' ? '0' : 'auto',
-        zIndex: screenSize === 'xs' || screenSize === 'sm' ? 10 : 'auto'
+        // Mantener sticky solo en móviles si es necesario
+        position: screenSize === 'xs' ? 'static' : 'static',
+        bottom: 'auto',
+        zIndex: 'auto'
     };
 
     const backButtonStyles = {
@@ -116,7 +123,7 @@ const DonarcionSubpagina = ({ onClose }) => {
         transition: 'all 0.3s',
         backgroundColor: isSelected ? 'rgba(230, 105, 29, 0.1)' : 'white',
         boxShadow: isSelected ? '0 0 5px rgba(230, 105, 29, 0.5)' : 'none',
-        minHeight: '48px' // Para accesibilidad táctil
+        minHeight: '48px'
     });
 
     const amountTextStyles = {
@@ -150,7 +157,7 @@ const DonarcionSubpagina = ({ onClose }) => {
         fontSize: screenSize === 'xs' ? '1rem' : '1rem',
         outline: 'none',
         transition: 'border-color 0.3s',
-        minHeight: '44px', // Para accesibilidad táctil
+        minHeight: '44px',
         boxSizing: 'border-box'
     };
 
@@ -191,11 +198,10 @@ const DonarcionSubpagina = ({ onClose }) => {
         fontSize: screenSize === 'xs' ? '1.1rem' : '1rem',
         transition: 'background-color 0.3s',
         fontWeight: '500',
-        minHeight: '48px', // Para accesibilidad táctil
+        minHeight: '48px',
         width: screenSize === 'xs' || screenSize === 'sm' ? '100%' : 'auto'
     });
 
-    // Estilos adicionales para mejor UX móvil
     const mobileInstructionStyles = {
         fontSize: '0.9rem',
         color: '#666',
@@ -220,7 +226,6 @@ const DonarcionSubpagina = ({ onClose }) => {
 
     const handleCustomAmountChange = (event) => {
         const value = event.target.value;
-        // Validar que solo contenga números y punto decimal
         if (value === '' || /^\d*\.?\d*$/.test(value)) {
             setCustomAmount(value);
             setSelectedAmount(null);
@@ -255,7 +260,6 @@ const DonarcionSubpagina = ({ onClose }) => {
         console.log(`Donación de L.${amount} confirmada.`);
         
         if (screenSize === 'xs') {
-            // En móviles, mostrar confirmación más amigable
             if (window.confirm(`¿Confirmas tu donación de L.${amount}?`)) {
                 alert(`¡Gracias por tu donación de L.${amount}!`);
             }
@@ -305,7 +309,6 @@ const DonarcionSubpagina = ({ onClose }) => {
                                         e.target.style.boxShadow = 'none';
                                     }
                                 }}
-                                // Mejorar accesibilidad táctil
                                 role="button"
                                 tabIndex={0}
                                 onKeyDown={(e) => {
@@ -346,7 +349,6 @@ const DonarcionSubpagina = ({ onClose }) => {
                                         e.target.style.borderColor = '#ccc';
                                     }
                                 }}
-                                // Prevenir entrada de caracteres no válidos en móviles
                                 inputMode="decimal"
                             />
                         </div>
@@ -378,7 +380,6 @@ const DonarcionSubpagina = ({ onClose }) => {
                                 e.target.style.backgroundColor = '#e6691d';
                             }
                         }}
-                        // Mejorar accesibilidad
                         aria-label={`Continuar con donación de L.${getSelectedAmountValue()}`}
                     >
                         {screenSize === 'xs' ? `Donar L.${getSelectedAmountValue()}` : 'Continuar'}
