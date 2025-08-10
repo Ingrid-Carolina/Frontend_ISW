@@ -37,11 +37,11 @@ import camisaVisita from '/Images/camisa_visita.jpg';
 import camisaAngelito from '/Images/camiseta_ange.jpg';
 import camisetaLocal from '/Images/Camiseta_Local.jpg';
 import camisetaVisita from '/Images/Camiseta_visita.jpg';
-import gorra1 from '/Images/Gorra1.jpg';
-import gorra2 from '/Images/Gorra2.jpg';
-import gorra3 from '/Images/Gorra3.jpg';
-import gorra4 from '/Images/Gorra4.jpg';
-import gorra5 from '/Images/Gorra5.jpg';
+import gorra1 from '/Images/Gorras1.png';
+import gorra2 from '/Images/Gorras2.png';
+import gorra3 from '/Images/Gorras3.png';
+import gorra4 from '/Images/Gorras4.png';
+import gorra5 from '/Images/Gorras5.png';
 import gorra6 from '/Images/Gorra6.jpg';
 import bandera from '/Images/Bandera.jpg';
 import banderin from '/Images/Banderines.jpg';
@@ -124,50 +124,36 @@ class Tienda extends React.Component {
       id: 8,
       nombre: "Gorra",
       descripcion: "Gorra de diseño clásico, cómoda y con protección solar.",
-      precio: 450.00,
+      precio: 300.00,
       imagen: gorra1
     },
     {
       id: 9,
       nombre: "Gorras 2",
       descripcion: "Nueva colección de gorras con bordados premium y ajuste perfecto.",
-      precio: 3200.00,
+      precio: 300.00,
       imagen: gorra2
     },
     {
       id: 10,
       nombre: "Gorras 3",
       descripcion: "Gorras de edición limitada con materiales reciclados y un estilo moderno.",
-      precio: 280.50,
+      precio: 300.00,
       imagen: gorra3
     },
     {
       id: 11,
       nombre: "Gorras 4",
       descripcion: "Diseño urbano para las gorras 4, con visera plana y logotipos discretos.",
-      precio: 1150.00,
+      precio: 300.00,
       imagen: gorra4
     },
     {
       id: 12,
       nombre: "Gorras 5",
       descripcion: "Gorras 5: Máximo confort y estilo deportivo, ideales para el día a día.",
-      precio: 195.00,
+      precio: 300.00,
       imagen: gorra5
-    },
-    {
-      id: 13,
-      nombre: "Gorras 6",
-      descripcion: "La gorra 6 combina funcionalidad y moda, perfecta para cualquier ocasión.",
-      precio: 2800.00,
-      imagen: gorra6
-    },
-    {
-      id: 14,
-      nombre: "CamisadeNiño",
-      descripcion: "La gorra 6 combina funcionalidad y moda, perfecta para cualquier ocasión.",
-      precio: 2800.00,
-      imagen: camisaLocal
     },
    
   ];
@@ -748,7 +734,7 @@ buscarPorCategoria = (producto, searchTerm) => {
               <Typography variant="body2" color="text.secondary" sx={{fontFamily: 'PeterMedium', fontWeight: 'bold' }}>{producto.descripcion}</Typography>
               {this.productoRequiereTalla(producto) && (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 2 }}>
-                  {["6", "8", "10", "12", "14", "15", "16", "S", "M", "L", "XL"].map(size => (
+                  {["6", "8", "10", "12", "14", "16", "XS", "S", "M", "L", "XL","2XL"].map(size => (
                     <Button key={size} onClick={() => this.setState(prev => ({ selectedSizes: { ...prev.selectedSizes, [producto.id]: size } }))} variant={this.state.selectedSizes?.[producto.id] === size ? 'contained' : 'outlined'} sx={{
                       minWidth: 0,
                       width: 36,
