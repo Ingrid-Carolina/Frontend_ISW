@@ -26,6 +26,7 @@ import NewsTest from './pages/NewsTest.jsx';
 import PaginaTestimonios from './pages/Testimonio.jsx';
 import EditarPerfil from './pages/EditarPerfil.jsx';
 import Donaciones from './pages/Donaciones.jsx';
+import SeleccionarAvatar from './pages/SeleccionarAvatar.jsx';
 
 function App() {
 	return (
@@ -54,6 +55,7 @@ function App() {
 						<Route path='/Noticia3' element={<Noticia3 />}/>
 						<Route path='/Testimonio' element={<PaginaTestimonios/>}/>
 						<Route path='/Donaciones' element={<Donaciones/>}/>
+						<Route path='/Avatars' element={<SeleccionarAvatar />} />
 					</Routes>
 				</main>
 				<Footer />

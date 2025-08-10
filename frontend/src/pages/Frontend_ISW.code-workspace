@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": "../../.."
+		},
+		{
+			"name": "Backend_ISW",
+			"path": "../../../../../Backend_ISW"
+		}
+	],
+	"settings": {}
+}

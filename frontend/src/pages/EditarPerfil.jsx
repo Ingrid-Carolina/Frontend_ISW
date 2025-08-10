@@ -1,10 +1,12 @@
 import { useState } from 'react';
 import './EditarPerfil.css';
+import { Link } from 'react-router-dom';
 
 function EditarPerfil() {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [avatar, setAvatar] = useState('/Images/AvatarBboy.jpeg'); // imagen por defecto
+  const [isLoading, setIsLoading] = useState(true);
 
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
@@ -15,12 +17,12 @@ function EditarPerfil() {
   };
 
   const handleGuardar = () => {
-    // Aquí iría la lógica para guardar los cambios (ej. API)
+
     alert('Cambios guardados');
   };
 
   const handleCancelar = () => {
-    // Reinicia campos (o navegar hacia atrás si prefieres)
+    
     setNombre('');
     setDescripcion('');
     setAvatar('/images/avatar-default.png');
@@ -32,10 +34,9 @@ function EditarPerfil() {
       <div className="perfil-content">
         <div className="avatar-section">
           <img src={avatar} alt="Avatar" className="avatar-img" />
-          <label className="avatar-button">
+          <Link to="/Avatars" className="avatar-button" style={{ textDecoration: 'none' }}>
             Cambiar Avatar
-            <input type="file" accept="image/*" onChange={handleAvatarChange} hidden />
-          </label>
+          </Link>
         </div>
         <div className="info-section">
           <label>Nombre</label>

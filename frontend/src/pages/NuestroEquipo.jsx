@@ -92,7 +92,7 @@ const Jugadores = () => {
         loop: true,
         margin: 20, // Margen entre las tarjetas
         autoplay: true, // Puedes ponerlo en true si quieres que se mueva automáticamente
-        autoplayTimeout: 5000,
+        autoplayTimeout: 4000,
         autoplayHoverPause: true,
         nav: false, // Muestra los botones de navegación (flechas)
         dots: false, // Muestra los puntos de navegación
