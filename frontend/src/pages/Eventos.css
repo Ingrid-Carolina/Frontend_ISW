@@ -22,3 +22,49 @@
     line-height: 0.3;
 
 }
+
+.event-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.event-item {
+  background-color: white;
+  color: black;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px;
+  margin-bottom: 8px;
+  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
+}
+
+.event-title {
+  font-family: 'GroteskBold';
+  font-size: 1.1rem;
+  margin-bottom: 5px;
+}
+
+.event-date {
+  font-family: 'GroteskRegular';
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.event-location {
+  font-family: 'GroteskRegular';
+  font-size: 0.9rem;
+  color: #333;
+}
+
+.event-description {
+  font-family: 'GroteskRegular';
+  font-size: 0.85rem;
+  color: #444;
+}
+
+.no-eventos {
+  text-align: center;
+  font-size: 1.2rem;
+  margin-top: 2rem;
+}

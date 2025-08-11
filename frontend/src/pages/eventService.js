@@ -18,8 +18,6 @@ export async function obtenerEventosProximos(cantidad = 3) {
 					titulo: ev.nombre,
 					fecha: fecha,
 					lugar: ev.descripcion,
-					image: '/Images/default.jpg', // Puedes adaptar esto si tienes imágenes reales
-					hora: '', // Si tienes hora de inicio, colócala aquí
 				};
 			})
 			.filter(ev => ev.fecha >= hoy)

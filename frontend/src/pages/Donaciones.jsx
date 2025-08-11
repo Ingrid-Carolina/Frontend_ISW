@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import DonarcionSubpagina from './DonarcionSubpagina';
+import DonacionSubpagina from './DonarIndumentarea';
 
 const MediaCard = ({ title, content, image, onDonateClick }) => {
     const [isHovered, setIsHovered] = useState(false);
@@ -97,6 +98,7 @@ const Donaciones = () => {
     const [donationType, setDonationType] = useState('');
     const [donationCard, setDonationCard] = useState('');
     const [showDonarcionSubpagina, setShowDonarcionSubpagina] = useState(false);
+    const [showDonacionSubpagina, setShowDonacionSubpagina] = useState(false);
 
     const longText = `Creemos que cada niño merece la oportunidad de practicar el deporte que ama, recibir una educación de calidad y perseguir sus sueños. Hoy, les pedimos su apoyo para hacer realidad esta convicción.
     Gracias a nuestros generosos donantes y socios, hemos logrado avances increíbles en los últimos 15 años. Nuestro dedicado equipo se ha enfocado en abordar los problemas fundamentales que impactan a las comunidades y el crecimiento del béisbol y el sóftbol en Latinoamérica. Desde México y Nicaragua hasta Colombia y Brasil, hemos perfeccionado nuestro enfoque para generar cambios positivos y duraderos en la vida de los niños a través de los valores del trabajo en equipo, la estrategia y el esfuerzo.
@@ -383,12 +385,16 @@ const Donaciones = () => {
             handleClose();
         } else if (donationType === 'campaign') {
             console.log(`Se ha seleccionado la opción de donación: ${donationType} para la tarjeta: ${donationCard}`);
+            setShowDonacionSubpagina(true);
             handleClose();
         }
     };
 
     if (showDonarcionSubpagina) {
         return <DonarcionSubpagina onClose={() => setShowDonarcionSubpagina(false)} />;
+    }
+    if (showDonacionSubpagina) {
+        return <DonacionSubpagina onClose={() => setShowDonacionSubpagina(false)} />;
     }
 
     return (
