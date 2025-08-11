@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import './EditarPerfil.css';
 import { Link, useSearchParams } from 'react-router-dom';
+import axios from 'axios';
 
 function EditarPerfil() {
   const [nombre, setNombre] = useState('');
@@ -9,12 +10,34 @@ function EditarPerfil() {
   const [popup, setPopup] = useState({ visible: false, titulo: '', mensaje: '', tipo: '' });
   const [searchParams] = useSearchParams();
 
+   const fetchPerfil = async () => {
+      try {
+        const res = await axios.get(
+          'http://localhost:3000/auth/obtenerperfil',
+        );
+        const perfil = res.data; //estoy trasladando a testimonios el fetch de la tabla del formato JSON sended del res en Authcontroller
+ 
+
+        setNombre(perfil[0].nombre);
+        setDescripcion(perfil[0].descripcion);
+       
+ 
+      } catch (err) {
+        console.error('Error al obtener el perfil:', err);
+      }
+    };
+ 
+
+
   // ✅ Detectar si se pasa un avatar por parámetro en la URL (desde otra página)
   useEffect(() => {
     const nuevoAvatar = searchParams.get('avatar');
     if (nuevoAvatar) {
       setAvatar(decodeURIComponent(nuevoAvatar));
     }
+
+    fetchPerfil();
+    
   }, [searchParams]);
 
   const mostrarPopup = (titulo, mensaje, tipo) => {
@@ -41,7 +64,7 @@ function EditarPerfil() {
 
     try {
       const response = await fetch('http://localhost:3000/auth/editarperfil', {
-        method: 'PUT',
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',
         body: JSON.stringify({ nombre, descripcion, avatar }) // 🔹 Enviamos todo
