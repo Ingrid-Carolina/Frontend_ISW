@@ -33,6 +33,7 @@ const SeleccionarAvatar = () => {
 
   const handleSeleccionarAvatar = (imagenUrl) => {
     console.log(`Avatar seleccionado: ${imagenUrl}`);
+
     navigate(`/perfil?avatar=${encodeURIComponent(imagenUrl)}`);
   };
 

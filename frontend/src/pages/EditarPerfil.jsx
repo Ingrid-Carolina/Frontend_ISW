@@ -1,14 +1,27 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import './EditarPerfil.css';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 
 function EditarPerfil() {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
-  const [avatar, setAvatar] = useState('/Images/AvatarBboy.jpeg'); // imagen por defecto
+  const [avatar, setAvatar] = useState('/Images/AvatarBboy.jpeg');
   const [isLoading, setIsLoading] = useState(true);
   const [popup, setPopup] = useState({ visible: false, titulo: '', mensaje: '', tipo: '' });
+  const [searchParams, setSearchParams] = useSearchParams();
+ 
+  useEffect(() => {
+    const nuevoAvatar = searchParams.get('avatar'); // Obtiene el valor del parámetro 'avatar'
+    
+    if (nuevoAvatar) {
+      setAvatar(decodeURIComponent(nuevoAvatar)); // Decodifica y actualiza el estado 'avatar'
+    }
+  }, [searchParams]);
 
+
+  const handleGuardar = () => {
+    alert(`Cambios guardados. Nuevo avatar: ${avatar}`);
+  };
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -17,16 +30,10 @@ function EditarPerfil() {
     }
   };
 
-  const handleGuardar = () => {
-
-    alert('Cambios guardados');
-  };
-
   const handleCancelar = () => {
-    
     setNombre('');
     setDescripcion('');
-    setAvatar('/images/avatar-default.png');
+    setAvatar('/Images/AvatarBboy.jpeg');
   };
 
   return (
