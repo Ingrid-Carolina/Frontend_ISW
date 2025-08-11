@@ -95,7 +95,7 @@ const Registro = ({ onLoginClick }) => {
     }));
   };
 
-  
+  // Repeticion de logica aqui.
  const realizarPeticion = async () => {
     const url = "http://localhost:3000/auth/signup"; 
 

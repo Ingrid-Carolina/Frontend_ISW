@@ -1,56 +1,28 @@
 import React, { useState, useEffect } from 'react';
-import MediaCard from '../components/Card';
 import {
   Box,
   TextField,
   Divider,
   Container,
+  Alert,
+  CircularProgress,
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import './Eventos.css';
 import FeaturedPost from '../components/FeaturedPost';
-import Post from '../components/Post';
 import { obtenerEventosProximos } from '../pages/eventService';
+import axios from 'axios';
 
-// Lista de eventos estáticos (solo para noticias/noticias filtradas)
-const eventosNoticias = [
-  {
-    fecha: '2025-07-10',
-    titulo: 'Clínica de Béisbol Infantil en San Pedro Sula',
-    lugar: 'Estadio Chochi Sosa, San Pedro Sula, Honduras',
-    hora: 'Julio 10 @ 9:00 am - 1:00 pm',
-    image: '/Images/clinicaSps.jpg',
-  },
-  {
-    fecha: '2025-05-30',
-    titulo: '2025 Central Region Tournament Preparation Umpire Clinic',
-    lugar: '7185 S. Indianapolis Road, Whitestown, IN',
-    hora: 'May 30 @ 1:00 pm - June 1 @ 12:00 pm',
-    image: '/Images/equipo.jpg',
-  },
-  {
-    fecha: '2025-08-05',
-    titulo: 'Capacitación para Entrenadores y Voluntarios de Little League®',
-    lugar: 'Centro Deportivo FAH, Tegucigalpa, Honduras',
-    hora: 'Agosto 5 @ 2:00 pm - 6:00 pm',
-    image: '/Images/capcitacion.jpg',
-  },
-  {
-    fecha: '2025-06-15',
-    titulo: 'Entrenamiento Regional de Verano',
-    lugar: 'Tegucigalpa, Honduras',
-    hora: 'June 15 @ 10:00 am - 4:00 pm',
-    image: '/Images/equipo2.jpg',
-  },
-];
+// ❗ Evita doble slash al construir URLs
+const baseUrl = 'http://localhost:3000';
 
-//  Componente para mostrar la lista de próximos eventos desde el backend
+// --- Lista de próximos eventos (como lo tenías) ---
 const ListaEventos = () => {
   const [eventos, setEventos] = useState([]);
 
   useEffect(() => {
     const cargarEventos = async () => {
-      const proximos = await obtenerEventosProximos(3); // 3 más cercanos
+      const proximos = await obtenerEventosProximos(3);
       setEventos(proximos);
     };
     cargarEventos();
@@ -58,61 +30,24 @@ const ListaEventos = () => {
 
   if (eventos.length === 0) {
     return (
-      <div
-        style={{
-          color: '#e06c14',
-          textAlign: 'center',
-          fontFamily: 'GroteskBold',
-          padding: '2rem',
-          fontSize: '1.2rem',
-        }}
-      >
-        No hay eventos actuales
-      </div>
+      <div className="sin-eventos">No hay eventos actuales</div>
     );
   }
 
-  // Formateador de fecha estilo calendario
-  const formatFecha = (fecha) => {
-    return new Date(fecha).toLocaleDateString('es-ES', {
+  const formatFecha = (fecha) =>
+    new Date(fecha).toLocaleDateString('es-ES', {
       day: 'numeric',
       month: 'long',
       year: 'numeric',
     });
-  };
 
   return (
-    <ul style={{ listStyle: 'none', margin: 0, padding: 0 }}>
+    <ul className="lista-eventos">
       {eventos.map((evento, index) => (
-        <li
-          key={evento.id || index}
-          style={{
-            backgroundColor: '#fff',
-            color: '#000',
-            border: '1px solid #ddd',
-            borderRadius: '6px',
-            padding: '10px',
-            marginBottom: '8px',
-            boxShadow: '0px 2px 5px rgba(0,0,0,0.1)',
-          }}
-        >
-          <div
-            style={{
-              fontFamily: 'GroteskBold',
-              fontSize: '1.1rem',
-              marginBottom: '4px',
-            }}
-          >
-            {evento.titulo}
-          </div>
-          <div style={{ fontSize: '0.9rem', color: '#555' }}>
-            {formatFecha(evento.fecha)}
-          </div>
-          {evento.lugar && (
-            <div style={{ fontSize: '0.9rem', color: '#333' }}>
-              {evento.lugar}
-            </div>
-          )}
+        <li key={evento.id || index} className="evento-item">
+          <div className="evento-titulo">{evento.titulo}</div>
+          <div className="evento-fecha">{formatFecha(evento.fecha)}</div>
+          {evento.lugar && <div className="evento-lugar">{evento.lugar}</div>}
         </li>
       ))}
     </ul>
@@ -131,9 +66,64 @@ const Featured = () => (
 const Eventos = () => {
   const [query, setQuery] = useState('');
 
-  const filteredEvents = eventosNoticias.filter((e) =>
-    e.titulo.toLowerCase().includes(query.toLowerCase())
-  );
+  // Estados reales para NOTICIAS (tabla noticia)
+  const [noticias, setNoticias] = useState([]);
+  const [loadingNoticias, setLoadingNoticias] = useState(false);
+  const [errorNoticias, setErrorNoticias] = useState(null);
+
+  useEffect(() => {
+    let cancel;
+    async function loadNoticias() {
+      try {
+        setLoadingNoticias(true);
+        setErrorNoticias(null);
+
+        // Devuelve { noticias: [...] }
+        const { data } = await axios.get(`${baseUrl}/auth/noticias`, {
+          cancelToken: new axios.CancelToken((c) => (cancel = c)),
+        });
+
+        const lista = Array.isArray(data?.noticias) ? data.noticias : [];
+
+        // Normaliza a tus props
+        const mapeadas = lista.map((n) => ({
+          id: n.id,
+          titulo: n.titulo,
+          contenido: n.contenido,
+          imagen_url: n.imagen_url,
+          fecha_publicacion: n.fecha_publicacion,
+          autor_id: n.autor_id,
+        }));
+
+        setNoticias(mapeadas);
+      } catch (err) {
+        if (axios.isCancel(err)) return;
+        setErrorNoticias(err?.response?.data?.message || err.message || 'Error cargando noticias');
+      } finally {
+        setLoadingNoticias(false);
+      }
+    }
+    loadNoticias();
+    return () => cancel && cancel();
+  }, []);
+
+  // 🔎 Filtro por título y contenido
+  const filteredNews = noticias.filter((n) => {
+    const q = query.toLowerCase();
+    return (
+      (n.titulo || '').toLowerCase().includes(q) ||
+      (n.contenido || '').toLowerCase().includes(q)
+    );
+  });
+
+  const formatFechaPub = (iso) =>
+    iso
+      ? new Date(iso).toLocaleDateString('es-ES', {
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+      })
+      : '';
 
   return (
     <div style={{ paddingTop: '90px' }}>
@@ -142,6 +132,7 @@ const Eventos = () => {
           <p>NOTICIAS Y EVENTOS</p>
         </div>
       </div>
+
       <Container maxWidth="md">
         {/* Buscador */}
         <Box paddingTop="90px" display="flex" alignItems="center" mb={3}>
@@ -150,7 +141,7 @@ const Eventos = () => {
             fullWidth
             variant="outlined"
             size="small"
-            label="Buscar eventos y/o noticias"
+            label="Buscar noticias por título o contenido"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
           />
@@ -159,22 +150,53 @@ const Eventos = () => {
         <Featured />
         <Divider style={{ margin: '2rem 0' }} />
 
-        {/* Lista de noticias */}
-        {filteredEvents.map((evento, index) => (
-          <div key={index}>
-            <Post
-              title={evento.titulo}
-              date={evento.fecha}
-              image={evento.image}
-              location={evento.lugar}
-              time={evento.hora}
-            />
-            <Divider style={{ margin: '2rem 0' }} />
+        {/* Estado de carga / error / vacío */}
+        {loadingNoticias && (
+          <div className="loading-wrap">
+            <CircularProgress size={24} />
+            <span>Cargando noticias…</span>
           </div>
-        ))}
+        )}
+
+        {errorNoticias && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {errorNoticias}
+          </Alert>
+        )}
+
+        {!loadingNoticias && !errorNoticias && filteredNews.length === 0 && (
+          <div className="sin-noticias">No hay noticias por mostrar.</div>
+        )}
+
+        {/* Grid de noticias  */}
+        <div className="noticia-grid">
+          {([...filteredNews]
+            .sort((a, b) => new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion))
+            .slice(0, 3)
+          ).map((n) => (
+            <article key={n.id} className="noticia-card-horizontal">
+              {n.imagen_url && (
+                <div className="noticia-img-wrap-horizontal">
+                  <img src={n.imagen_url} alt={n.titulo} className="noticia-img-horizontal" />
+                </div>
+              )}
+
+              <div className="noticia-body-horizontal">
+                <h3 className="noticia-title-horizontal">{n.titulo}</h3>
+                <div className="noticia-meta-horizontal">
+                  <span className="noticia-fecha-horizontal">
+                    {formatFechaPub(n.fecha_publicacion)}
+                  </span>
+                </div>
+                <p className="noticia-contenido-horizontal">{n.contenido}</p>
+              </div>
+            </article>
+          ))}
+        </div>
+
       </Container>
 
-      {/*Lista de próximos eventos */}
+      {/* Lista de próximos eventos */}
       <div className="eventos-container" style={{ paddingTop: '2rem' }}>
         <h1 className="eventos-titulo" style={{ fontFamily: 'GroteskBold' }}>
           Próximos Eventos

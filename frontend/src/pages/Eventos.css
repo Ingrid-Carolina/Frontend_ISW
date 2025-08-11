@@ -1,70 +1,85 @@
-.event-header {
-    background-image: url('/Images/equipo2.jpg');
-    background-size: cover;
-    background-position: center;
-    height: 450px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    /* Sigue alineado a la derecha */
-    box-sizing: border-box;
+/* Grid para las cards */
+.noticia-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.event-header-title {
-    color: white;
-    font-size: 7.5vw;
-    /* Escala según el ancho de pantalla */
-    font-weight: bold;
-    text-align: center;
-    text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
-    font-family: 'Varsity', sans-serif;
-    line-height: 0.3;
-
+/* Card horizontal */
+.noticia-card-horizontal {
+  display: flex;
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e8ecf0;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.06);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
 }
 
-.event-list {
-  list-style: none;
+.noticia-card-horizontal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 18px rgba(17, 24, 39, 0.10);
+}
+
+/* Imagen a la izquierda */
+.noticia-img-wrap-horizontal {
+  flex: 0 0 220px; /* ancho fijo de imagen */
+  height: 160px;
+  background: #f6f6f6;
+}
+
+.noticia-img-horizontal {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Texto a la derecha */
+.noticia-body-horizontal {
+  flex: 1;
+  padding: 14px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.noticia-title-horizontal {
   margin: 0;
-  padding: 0;
-}
-
-.event-item {
-  background-color: white;
-  color: black;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px;
-  margin-bottom: 8px;
-  box-shadow: 0px 2px 5px rgba(0,0,0,0.1);
-}
-
-.event-title {
-  font-family: 'GroteskBold';
+  font-family: 'GroteskBold', sans-serif;
   font-size: 1.1rem;
-  margin-bottom: 5px;
+  font-weight: 700;
+  color: #0b1f3a;
 }
 
-.event-date {
-  font-family: 'GroteskRegular';
-  font-size: 0.9rem;
-  color: #555;
-}
-
-.event-location {
-  font-family: 'GroteskRegular';
-  font-size: 0.9rem;
-  color: #333;
-}
-
-.event-description {
-  font-family: 'GroteskRegular';
+.noticia-meta-horizontal {
   font-size: 0.85rem;
-  color: #444;
+  color: #607d8b;
 }
 
-.no-eventos {
-  text-align: center;
-  font-size: 1.2rem;
-  margin-top: 2rem;
+.noticia-fecha-horizontal::before {
+  content: "🗓 ";
+}
+
+.noticia-contenido-horizontal {
+  margin: 0;
+  font-family: 'PeterMedium', sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  color: #2a2f36;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+/* Responsive: en móvil pasa a vertical */
+@media (max-width: 640px) {
+  .noticia-card-horizontal {
+    flex-direction: column;
+  }
+  .noticia-img-wrap-horizontal {
+    flex: none;
+    width: 100%;
+    height: 200px;
+  }
 }
