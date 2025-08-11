@@ -125,9 +125,25 @@ function NoticiasAdmin() {
     setEditando(noticia.id);
   };
 
-  const handleEliminar = (id) => {
+  const eliminacionNoticia = async (id) => {
+    try {
+      await axios.delete(`${ API_BASE }/auth/eliminarnoticia/${ id }`, {
+        withCredentials: true,
+      });
+      setNoticias((prev) => prev.filter((n) => n.id !== id));
+      alert("Noticia eliminada correctamente");
+    } catch (err) {
+      console.error("Error al eliminar noticia:", err);
+      alert("Hubo un error al eliminar la noticia");
+    }
+  }
+
+  const handleEliminar = async (id) => {
+    await eliminacionNoticia(id);
+
+    /*
     if (window.confirm("¿Seguro que quieres eliminar esta noticia?")) {
-      fetch(`${API_BASE}/auth/eliminarnoticia/${id}`, { method: "DELETE" })
+      fetch(${API_BASE}/auth/eliminarnoticia/${id}, { method: "DELETE", withCredentials: true })
         .then(() => {
           alert("Noticia eliminada");
           setNoticias((prev) => prev.filter((n) => n.id !== id));
@@ -136,7 +152,7 @@ function NoticiasAdmin() {
           console.error("Error al eliminar noticia:", err);
           alert("Hubo un error al eliminar la noticia");
         });
-    }
+    }*/
   };
 
   return (
