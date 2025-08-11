@@ -76,9 +76,12 @@ const SeleccionarAvatar = () => {
               onClick={() => handleSeleccionarAvatar(avatar.imagen)}
               sx={{
                 p: 0,
-                // Mueve la lógica de hover aquí, ya que no es válida dentro del atributo 'style'
-                '&:hover img': {
-                  border: '3px solid #10045c',
+                '&:hover': {
+                  '& img': {
+                    border: '3px solid #1976d2',
+                    // Aumenta el tamaño de la imagen un 15%
+                    transform: 'scale(1.15)',
+                  },
                 },
               }}
             >
@@ -89,7 +92,7 @@ const SeleccionarAvatar = () => {
                   width: '100%',
                   borderRadius: '50%',
                   border: '3px solid transparent',
-                  transition: 'border 0.2s',
+                  transition: 'border 0.2s, transform 0.2s',
                 }}
               />
             </IconButton>
