@@ -27,13 +27,20 @@ const avataresPredefinidos = [
   { id: 20, imagen: '../public/images/avatar12.png' },
   { id: 21, imagen: '../public/images/avatar13.png' },
   { id: 22, imagen: '../public/images/avatar14.png' },
+  { id: 23, imagen: '../public/images/avatar15.jpg' },
+  { id: 24, imagen: '../public/images/avatar16.jpg' },
+  { id: 25, imagen: '../public/images/avatar17.jpg' },
+  { id: 26, imagen: '../public/images/avatar18.jpg' },
+  { id: 27, imagen: '../public/images/avatar19.jpg' },
+  { id: 28, imagen: '../public/images/avatar20.jpg' },
+  { id: 29, imagen: '../public/images/avatar21.jpg' },
+  { id: 30, imagen: '../public/images/avatar22.png' },
 ];
 const SeleccionarAvatar = () => {
   const navigate = useNavigate();
 
   const handleSeleccionarAvatar = (imagenUrl) => {
     console.log(`Avatar seleccionado: ${imagenUrl}`);
-
     navigate(`/perfil?avatar=${encodeURIComponent(imagenUrl)}`);
   };
 
