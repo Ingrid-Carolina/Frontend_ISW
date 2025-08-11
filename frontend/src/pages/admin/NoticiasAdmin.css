@@ -1,0 +1,106 @@
+.noticias-admin-container {
+  padding: 20px;
+  width: 100%; /* que ocupe todo el ancho disponible */
+}
+
+.titulo-seccion {
+  font-family: "GroteskBold", sans-serif;
+  color: #10045c;
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.form-noticia {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  width: 100%; /* ocupa todo el ancho */
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-sizing: border-box;
+}
+
+.form-noticia input,
+.form-noticia textarea {
+  font-family: "ManropeEB", sans-serif;
+  padding: 12px;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  font-size: 15px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.descripcion-seccion {
+  font-family: "ManropeEB", sans-serif;
+  font-size: 15px;
+  color: #444;
+  max-width: 900px;
+  margin: 0 auto 25px auto;
+  text-align: center;
+  line-height: 1.5;
+}
+
+
+.form-noticia button {
+  font-family: "ManropeEB", sans-serif;
+  background: #e06c14;
+  color: white;
+  padding: 12px;
+  border: none;
+  border-radius: 6px;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 15px;
+  width: 200px;
+}
+
+.form-noticia button:hover {
+  background: #c45a10;
+}
+
+.vista-previa {
+  max-width: 300px;
+  border-radius: 6px;
+  margin-top: 10px;
+}
+
+.lista-noticias {
+  margin-top: 30px;
+  width: 100%;
+}
+
+.lista-noticias h2 {
+  font-family: "GroteskBold", sans-serif;
+  color: #10045c;
+  margin-bottom: 15px;
+}
+
+.noticia-item {
+  display: flex;
+  gap: 15px;
+  padding: 15px;
+  background: #f9f9f9;
+  margin-bottom: 15px;
+  border-radius: 6px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.noticia-item img {
+  width: 150px;
+  height: auto;
+  border-radius: 6px;
+}
+
+.noticia-item h3 {
+  font-family: "GroteskBold", sans-serif;
+  margin: 0;
+  color: #10045c;
+}
+
+.noticia-item p {
+  font-family: "ManropeEB", sans-serif;
+  margin: 5px 0;
+}

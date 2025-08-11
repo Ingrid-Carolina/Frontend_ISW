@@ -8,7 +8,7 @@ const drawerWidth = 240; // Ancho del Drawer lateral
 
 const menuItems = [
   { text: 'Estadisticas del Sitio', path: 'dashboard' },
-  { text: 'Comentarios de Visitantes', path: 'comments' },
+  { text: 'Noticias', path: 'newsadm' },
   { text: 'Control de Jugadores', path: 'players' },
   { text: 'Testimonios', path: 'mngtestimonios' },
 ];

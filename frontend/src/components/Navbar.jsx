@@ -309,14 +309,6 @@ export default function CustomNavbar() {
 										</MenuItem>
 										<MenuItem
 											component={Link}
-											to='/acercade'
-											onClick={() => setDrawerOpen(false)}
-											sx={subMenuStyle}
-										>
-											Acerca de
-										</MenuItem>
-										<MenuItem
-											component={Link}
 											to='/aliados'
 											onClick={() => setDrawerOpen(false)}
 											sx={subMenuStyle}
@@ -534,11 +526,11 @@ export default function CustomNavbar() {
 										<ListItem
 											button
 											component={Link}
-											to='/acercade'
+											to='/Testimonio'
 											sx={mobileSubItem}
 										>
 											<ListItemText
-												primary='Acerca de'
+												primary='Testimonios'
 												primaryTypographyProps={mobileTypography}
 											/>
 										</ListItem>
