@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./NoticiasAdmin.css";
+import axios from "axios";
 
 function NoticiasAdmin() {
   const [titulo, setTitulo] = useState("");
@@ -8,26 +9,41 @@ function NoticiasAdmin() {
   const [imagen, setImagen] = useState(null);
   const [vistaPrevia, setVistaPrevia] = useState(null);
   const [noticias, setNoticias] = useState([]);
+  const [editando, setEditando] = useState(null);
 
-  // Cargar noticias al inicio
+  const API_BASE =
+    process.env.NODE_ENV === "production"
+      ? "https://midominio.com"
+      : "http://localhost:3000";
+
+
+  
   useEffect(() => {
-    fetch("/api/noticias")
-      .then(res => res.json())
-      .then(data => setNoticias(data))
-      .catch(err => console.error("Error cargando noticias:", err));
+    const fetchNoticias = async () => {
+      try {
+        const res = await axios.get(`${API_BASE}/auth/noticias`);
+        const noticiasRaw = res.data.noticias;  // <- acceso al array dentro del objeto JSON
+        const noticiasLista = noticiasRaw.map((noticia) => ({
+          id: noticia.id,
+          titulo: noticia.titulo,
+          fecha: new Date(noticia.fecha_publicacion).toISOString().slice(0, 10),
+          cuerpo: noticia.contenido,
+          imagenUrl: noticia.imagen_url,
+        }));
+
+        setNoticias(noticiasLista);
+        console.log(noticiasLista);
+      } catch (err) {
+        console.error("Error al obtener noticias:", err);
+      }
+    };
+
+    fetchNoticias();
   }, []);
 
-  const handleImagenChange = (e) => {
-    const file = e.target.files[0];
-    setImagen(file);
-    if (file) {
-      setVistaPrevia(URL.createObjectURL(file));
-    } else {
-      setVistaPrevia(null);
-    }
-  };
 
-  const handleSubmit = (e) => {
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!titulo || !fecha || !cuerpo || !imagen) {
@@ -41,24 +57,64 @@ function NoticiasAdmin() {
     formData.append("cuerpo", cuerpo);
     formData.append("imagen", imagen);
 
-    fetch("/api/noticias", {
-      method: "POST",
-      body: formData,
-    })
-      .then(res => res.json())
-      .then(data => {
-        alert("Noticia creada con éxito");
-        setNoticias(prev => [...prev, data]); // Agregar nueva noticia a la lista
-        setTitulo("");
-        setFecha("");
-        setCuerpo("");
-        setImagen(null);
-        setVistaPrevia(null);
+    try {
+      const res = await axios.post(
+        "http://localhost:3000/agregarnoticia/1", // cambia "1" por el autor_id correcto
+        formData,
+        { headers: { "Content-Type": "multipart/form-data" } }
+      );
+      alert("Noticia creada con éxito");
+      setNoticias((prev) => [...prev, res.data]);
+      setTitulo("");
+      setFecha("");
+      setCuerpo("");
+      setImagen(null);
+      setVistaPrevia(null);
+    } catch (err) {
+      console.error("Error al crear noticia:", err);
+      alert("Hubo un error al crear la noticia");
+    }
+  };
+  
+  const handleImagenChange = (e) => {
+    const file = e.target.files[0];
+    setImagen(file);
+
+    // Para mostrar la vista previa de la imagen que el usuario selecciona:
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setVistaPrevia(reader.result);
+      };
+      reader.readAsDataURL(file);
+    } else {
+      setVistaPrevia(null);
+    }
+  };
+
+
+  const handleEditar = (noticia) => {
+    setTitulo(noticia.titulo);
+    setFecha(noticia.fecha);
+    setCuerpo(noticia.cuerpo);
+    setVistaPrevia(noticia.imagenUrl);
+    setEditando(noticia.id);
+  };
+
+  const handleEliminar = (id) => {
+    if (window.confirm("¿Seguro que quieres eliminar esta noticia?")) {
+      fetch(`${API_BASE}/api/noticias/${id}`, {
+        method: "DELETE",
       })
-      .catch(err => {
-        console.error("Error al crear noticia:", err);
-        alert("Hubo un error al crear la noticia");
-      });
+        .then(() => {
+          alert("Noticia eliminada");
+          fetchNoticias();
+        })
+        .catch((err) => {
+          console.error("Error al eliminar noticia:", err);
+          alert("Hubo un error al eliminar la noticia");
+        });
+    }
   };
 
   return (
@@ -66,9 +122,7 @@ function NoticiasAdmin() {
       <h1 className="titulo-seccion">Gestión de Noticias</h1>
 
       <p className="descripcion-seccion">
-        En este apartado puedes crear nuevas noticias para el sitio web. 
-        Ingresa el título, fecha, cuerpo de la noticia y una imagen representativa. 
-        Una vez creada, la noticia aparecerá en la lista de abajo y se mostrará en la sección pública.
+        En este apartado puedes crear y administrar las noticias del sitio web.
       </p>
 
       <form className="form-noticia" onSubmit={handleSubmit}>
@@ -97,7 +151,7 @@ function NoticiasAdmin() {
           <img className="vista-previa" src={vistaPrevia} alt="Vista previa" />
         )}
 
-        <button type="submit">Crear Noticia</button>
+        <button type="submit">{editando ? "Actualizar" : "Crear"} Noticia</button>
       </form>
 
       <div className="lista-noticias">
@@ -112,6 +166,8 @@ function NoticiasAdmin() {
                 <h3>{n.titulo}</h3>
                 <p><strong>Fecha:</strong> {n.fecha}</p>
                 <p>{n.cuerpo}</p>
+                <button onClick={() => handleEditar(n)}>Editar</button>
+                <button onClick={() => handleEliminar(n.id)}>Eliminar</button>
               </div>
             </div>
           ))
@@ -119,7 +175,7 @@ function NoticiasAdmin() {
       </div>
     </div>
   );
-
 }
 
 export default NoticiasAdmin;
+

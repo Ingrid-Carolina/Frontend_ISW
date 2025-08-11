@@ -6,14 +6,9 @@ import Hero from '../components/Hero';
 import axios from 'axios';
 
 const videos = [
-	{ url: 'https://youtu.be/4VNYG77bQA4?si=mvj9fQJ2bgo5S_Lj' },
+	{ url: 'https://youtu.be/CSfEwT8x6B0?si=OJpKv5GCK71caBu6' },
 	{ url: 'https://youtu.be/7AU0m2Du_VY?si=LTod5L0RJbvHzoPS' },
 	{ url: 'https://youtu.be/bx242zV3_ME?si=9_1EAN8m6DVhIagp' },
-];
-const freaky = [
-	{ url: 'https://youtu.be/CkMF9adhlkM?si=yfuo1aen3TCEcAjp' },
-	{ url: 'https://youtu.be/2gj9wficEdk?si=fTXQXqSKCMhKaXz6' },
-	{ url: 'https://youtu.be/u5NqO2v_xnY?si=oVtEUlkh4iDo_eEb' },
 ];
 
 
@@ -64,7 +59,7 @@ return (
         const invertir = index % 2 === 1;
         const superponer = index !== 0;
         const invertirDiagonal = index % 2 === 0;
-        const zIndex = 4 - (index % 4);
+        const zIndex = 6 - (index % 6);
         const rol = roles[Math.floor(Math.random() * roles.length)];
 
         return (
