@@ -7,7 +7,7 @@ export default function StatsJugadores() {
       <Typography
         variant="h2"
         sx={{
-          fontFamily: 'Varsity',
+          fontFamily: 'GroteskBold',
           color: '#10045c',
           mb: 4,
           textAlign: 'center'

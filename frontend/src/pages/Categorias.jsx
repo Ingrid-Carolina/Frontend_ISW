@@ -6,16 +6,8 @@ import Img from '/Images/Categoria.png';
 
 const categorias = [
   {
-    title: 'Liga Mayor',
-    image: '/Images/Cat1.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Profesional',
-    descripcion:
-      'Jugadores de nivel profesional que compiten en la liga principal. Participan en torneos oficiales y representan el máximo nivel del béisbol nacional, con entrenamientos exigentes y alto rendimiento técnico y físico.',
-  },
-  {
     title: 'Sub-7',
-    image: '/Images/Cat2.png',
+    image: '/Images/Cat_Sub7.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Formativa',
     descripcion:
@@ -23,7 +15,7 @@ const categorias = [
   },
   {
     title: 'Sub-10',
-    image: '/Images/Cat3.png',
+    image: '/Images/Cat_Sub10.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Formativa',
     descripcion:
@@ -31,7 +23,7 @@ const categorias = [
   },
   {
     title: 'Sub-15',
-    image: '/Images/Cat4.png',
+    image: '/Images/Cat_Sub15.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Competitiva',
     descripcion:
@@ -39,11 +31,19 @@ const categorias = [
   },
   {
     title: 'Sub-18',
-    image: '/Images/Cat5.png',
+    image: '/Images/Cat_Sub18.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Avanzada',
     descripcion:
       'Jugadores avanzados, cerca de pasar a ligas mayores, entrenamiento intensivo. Se perfecciona el rendimiento técnico y mental del jugador, con seguimiento profesional y oportunidades para ascender a niveles élite del deporte.',
+  },
+  {
+    title: 'Liga Mayor',
+    image: '/Images/Cat_Mayor.jpg',
+    logo: '/Images/Logo-pilotos.png',
+    tipo: 'Profesional',
+    descripcion:
+      'Jugadores de nivel profesional que compiten en la liga principal. Participan en torneos oficiales y representan el máximo nivel del béisbol nacional, con entrenamientos exigentes y alto rendimiento técnico y físico.',
   },
 ];
 
@@ -124,7 +124,7 @@ const Categorias = () => {
         sx={{
           py: 6,
           px: { xs: 3, md: 10 },
-          backgroundImage: `url('/Images/Fondo_Carrusel_Categorias.png')`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/Images/Fondo_Carrusel_Categorias.png')`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
