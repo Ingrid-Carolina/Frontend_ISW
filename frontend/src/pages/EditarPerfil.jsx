@@ -6,27 +6,61 @@ function EditarPerfil() {
   const [nombre, setNombre] = useState('');
   const [descripcion, setDescripcion] = useState('');
   const [avatar, setAvatar] = useState('/Images/AvatarBboy.jpeg');
-  const [isLoading, setIsLoading] = useState(true);
   const [popup, setPopup] = useState({ visible: false, titulo: '', mensaje: '', tipo: '' });
-  const [searchParams, setSearchParams] = useSearchParams();
- 
+  const [searchParams] = useSearchParams();
+
+  // ✅ Detectar si se pasa un avatar por parámetro en la URL (desde otra página)
   useEffect(() => {
-    const nuevoAvatar = searchParams.get('avatar'); // Obtiene el valor del parámetro 'avatar'
-    
+    const nuevoAvatar = searchParams.get('avatar');
     if (nuevoAvatar) {
-      setAvatar(decodeURIComponent(nuevoAvatar)); // Decodifica y actualiza el estado 'avatar'
+      setAvatar(decodeURIComponent(nuevoAvatar));
     }
   }, [searchParams]);
 
-
-  const handleGuardar = () => {
-    alert(`Cambios guardados. Nuevo avatar: ${avatar}`);
+  const mostrarPopup = (titulo, mensaje, tipo) => {
+    setPopup({ visible: true, titulo, mensaje, tipo });
   };
+
+  const cerrarPopup = () => {
+    setPopup({ visible: false, titulo: '', mensaje: '', tipo: '' });
+  };
+
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
       setAvatar(url);
+    }
+  };
+
+  const handleGuardar = async () => {
+    if (!nombre.trim()) {
+      mostrarPopup("Cambio fallido", "El nombre no puede estar vacío.", "error");
+      return;
+    }
+
+    try {
+      const response = await fetch('http://localhost:3000/auth/editarperfil', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ nombre, descripcion, avatar }) // 🔹 Enviamos todo
+      });
+
+      const data = await response.json();
+      console.log("Respuesta backend:", data);
+
+      if (response.ok) {
+        mostrarPopup("Cambio exitoso", "Perfil actualizado correctamente.", "success");
+      } else if (data.errors && Array.isArray(data.errors)) {
+        const mensajes = data.errors.map(err => err.msg).join('\n');
+        mostrarPopup("Cambio fallido", mensajes, "error");
+      } else {
+        mostrarPopup("Cambio fallido", data.mensaje || "Error desconocido.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      mostrarPopup("Cambio fallido", "Hubo un error al guardar los cambios.", "error");
     }
   };
 
@@ -42,10 +76,19 @@ function EditarPerfil() {
       <div className="perfil-content">
         <div className="avatar-section">
           <img src={avatar} alt="Avatar" className="avatar-img" />
+          
+          {/* 🔹 Link para ir a la página de selección de avatares */}
           <Link to="/Avatars" className="avatar-button" style={{ textDecoration: 'none' }}>
             Cambiar Avatar
           </Link>
+
+          {/* 🔹 También opción para subir archivo */}
+          <label className="avatar-button">
+            Subir Avatar
+            <input type="file" accept="image/*" onChange={handleAvatarChange} hidden />
+          </label>
         </div>
+
         <div className="info-section">
           <label>Nombre</label>
           <input
