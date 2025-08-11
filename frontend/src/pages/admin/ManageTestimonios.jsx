@@ -171,7 +171,7 @@ const ActualizarContainer=(index)=>{
       <Typography
         variant="h3"
         sx={{
-          fontFamily: 'Varsity',
+          fontFamily: 'GroteskBold',
           color: '#10045c',
           mb: 4,
           textAlign: 'center'

@@ -23,7 +23,7 @@ export default function Dashboard() {
       <Typography
         variant="h2"
         sx={{
-          fontFamily: 'Varsity',
+          fontFamily: 'GroteskBold',
           color: '#10045c',
           mb: 4,
           textAlign: 'center'

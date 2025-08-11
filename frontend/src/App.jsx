@@ -17,7 +17,6 @@ import Eventos from './pages/Eventos.jsx';
 import Contacto from './pages/Contacto.jsx';
 import Tienda from './pages/Tienda.jsx';
 import Aliados from './pages/Aliados.jsx';
-import Acercade from './pages/Acercade.jsx';
 import MostrarLoginyRegistro from './pages/MostrarLoginyRegistro';
 import Noticia1 from './pages/Noticia1.jsx';
 import Noticia2 from './pages/Noticia2.jsx';
@@ -47,7 +46,6 @@ function App() {
 						<Route path='/Contacto' element={<Contacto />} />
 						<Route path='/tienda' element={<Tienda />} />
 						<Route path='/aliados' element={<Aliados />} />
-						<Route path='/acercade' element={<Acercade />} />
 						<Route path='/perfil' element={<EditarPerfil />} />
 						<Route path='/login' element={<MostrarLoginyRegistro />} />
 						<Route path='/Noticia1' element={<NewsTest />}/>
