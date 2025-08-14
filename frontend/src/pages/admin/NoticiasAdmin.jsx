@@ -20,7 +20,7 @@ function NoticiasAdmin() {
   useEffect(() => {
     const fetchNoticias = async () => {
       try {
-        const res = await axios.get(`${API_BASE}/auth/noticias`);
+        const res = await axios.get(`http://localhost:3000/auth/noticias`);
         const noticiasLista = res.data.noticias.map((noticia) => ({
           id: noticia.id,
           titulo: noticia.titulo,
@@ -50,7 +50,7 @@ function NoticiasAdmin() {
       if (editando) {
         // PUT para modificar
         const res = await axios.put(
-          `${API_BASE}/auth/modificarnoticia/${editando}/cbq1s3VNeMXEdjTJQmpNJEA0Vsk2`, // aquí "1" sería el autor_id real
+          `http://localhost:3000/auth/modificarnoticia/${editando}/cbq1s3VNeMXEdjTJQmpNJEA0Vsk2`, // aquí "1" sería el autor_id real
           {
             titulo,
             contenido: cuerpo,
@@ -84,7 +84,7 @@ function NoticiasAdmin() {
       } else {
         // POST para crear
         const res = await axios.post(
-          `${API_BASE}/auth/agregarnoticia/cbq1s3VNeMXEdjTJQmpNJEA0Vsk2`, // aqui esta el autor id
+          `http://localhost:3000/auth/agregarnoticia/cbq1s3VNeMXEdjTJQmpNJEA0Vsk2`, // aqui esta el autor id
           {
             titulo,
             contenido: cuerpo,
@@ -127,7 +127,7 @@ function NoticiasAdmin() {
 
   const eliminacionNoticia = async (id) => {
     try {
-      await axios.delete(`${ API_BASE }/auth/eliminarnoticia/${ id }`, {
+      await axios.delete(`http://localhost:3000/auth/eliminarnoticia/${ id }`, {
         withCredentials: true,
       });
       setNoticias((prev) => prev.filter((n) => n.id !== id));
