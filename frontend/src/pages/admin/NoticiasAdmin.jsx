@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import "./NoticiasAdmin.css";
 import axios from "axios";
+import { api } from "../../api/api";
 
 function NoticiasAdmin() {
   const [titulo, setTitulo] = useState("");
@@ -12,6 +13,8 @@ function NoticiasAdmin() {
   const [noticias, setNoticias] = useState([]);
   const [editando, setEditando] = useState(null);
 
+  const AUTOR_ID = "cbq1s3VNeMXEdjTJQmpNJEA0Vsk2";
+
   const API_BASE =
     process.env.NODE_ENV === "production"
       ? "https://midominio.com"
@@ -20,7 +23,7 @@ function NoticiasAdmin() {
   useEffect(() => {
     const fetchNoticias = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/auth/noticias`);
+        const res = await api.get("/auth/noticias");
         const noticiasLista = res.data.noticias.map((noticia) => ({
           id: noticia.id,
           titulo: noticia.titulo,
@@ -49,28 +52,25 @@ function NoticiasAdmin() {
     try {
       if (editando) {
         // PUT para modificar
-        const res = await axios.put(
-          `http://localhost:3000/auth/modificarnoticia/${editando}/cbq1s3VNeMXEdjTJQmpNJEA0Vsk2`, // aquí "1" sería el autor_id real
+        await api.put(
+          `/auth/modificarnoticia/${editando}/${AUTOR_ID}`,
           {
             titulo,
             contenido: cuerpo,
             imagen_url: imagenUrl,
-            fecha
-          },
-          { withCredentials: true } // si usas cookies para auth
+            fecha,
+          }
         );
 
         alert("Noticia actualizada correctamente");
 
         // Actualizar lista de noticias en el estado
         setNoticias((prev) =>
-          prev.map((n) => (n.id === editando ? {
-            ...n,
-            titulo,
-            fecha,
-            cuerpo,
-            imagenUrl
-          } : n))
+          prev.map((n) =>
+            n.id === editando
+              ? { ...n, titulo, fecha, cuerpo, imagenUrl }
+              : n
+          )
         );
 
         // Resetear formulario
@@ -83,15 +83,14 @@ function NoticiasAdmin() {
 
       } else {
         // POST para crear
-        const res = await axios.post(
-          `http://localhost:3000/auth/agregarnoticia/cbq1s3VNeMXEdjTJQmpNJEA0Vsk2`, // aqui esta el autor id
+        const res = await api.post(
+          `/auth/agregarnoticia/${AUTOR_ID}`,
           {
             titulo,
             contenido: cuerpo,
             imagen_url: imagenUrl,
             fecha,
-          },
-          { withCredentials: true }
+          }
         );
 
 
@@ -127,7 +126,7 @@ function NoticiasAdmin() {
 
   const eliminacionNoticia = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/auth/eliminarnoticia/${ id }`, {
+      await axios.delete(`http://localhost:3000/auth/eliminarnoticia/${id}`, {
         withCredentials: true,
       });
       setNoticias((prev) => prev.filter((n) => n.id !== id));
