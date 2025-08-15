@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import TestimonioCapsula from '../../components/TestimonioCapsula';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../../api/api';
 
 import {
   Box,
@@ -20,61 +21,55 @@ const ManageTestimonios = () => {
   const [selectedIndex, setSelectedIndex] = useState(null);
 
   const realizarPeticion = async () => {
-    const url = "http://localhost:3000/auth/registrartestimonio"; 
+    const url = `/auth/registrartestimonio`;
 
     const body = {
-        nombre: nombre,
-        contenido: contenido,
-        imagen: imagen,
+      nombre: nombre,
+      contenido: contenido,
+      imagen: imagen,
     };
 
     try {
-        const res = await axios.post(url, body, {
-            headers: { "Content-Type": "application/json" }
-        });
-
-       
-        window.alert(res.data.mensaje); //recibe el mensaje del res.send del endpoint
+      const res = await api.post(url, body, {
+        headers: { "Content-Type": "application/json" }
+      });
+      window.alert(res.data?.mensaje || "Testimonio registrado");
     } catch (error) {
-
-        if (error.response) {
-            console.log("Error data:", error.response.data.mensaje);
-            window.alert((error.response.data.mensaje));
-        } else if (error.request) {
-            window.alert("Ninguna respuesta del servidor.Por favor verifique su red.");
-        } else {
-            window.alert("Error en la red.");
-        }
+      // Compatible con interceptor (error.message) y con respuestas crudas (error.response)
+      const msg =
+        error?.response?.data?.mensaje ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error en la red.";
+      window.alert(msg);
     }
-};
+  };
 
   // Cargar desde localStorage
-   useEffect(() => {
+  useEffect(() => {
     const fetchTestimonios = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:3000/auth/obtenertestimonios',
-        );
+        const res = await api.get('/auth/obtenertestimonios');
         const testimonios = res.data; //estoy trasladando a testimonios el fetch de la tabla del formato JSON sended del res en Authcontroller
- 
-       
- 
+
+
+
         const testimoniosLista = testimonios.map(testimonio => ({ //transformo my res.data en un array que el frontend pueda leer
-            id: testimonio.id_testimonio,
-            nombre: testimonio.nombre,
-            contenido: testimonio.contenido,
-            imagen: testimonio.imagen,
+          id: testimonio.id_testimonio,
+          nombre: testimonio.nombre,
+          contenido: testimonio.contenido,
+          imagen: testimonio.imagen,
         }));
 
         setTestimonios(testimoniosLista);
         console.log(testimonios);
 
- 
+
       } catch (err) {
         console.error('Error al obtener testimonios:', err);
       }
     };
- 
+
     fetchTestimonios();
   }, []);
 
@@ -82,88 +77,92 @@ const ManageTestimonios = () => {
     if (!nombre || !contenido) return
     else
       await realizarPeticion();
-    
+
     setNombre('');
     setContenido('');
     setImagen('');
 
     setTimeout(() => {
-				window.location.reload();
-			}, 100);
+      window.location.reload();
+    }, 100);
   };
 
   const handleEliminar = async (index) => {
-  try {
-   
-    const id = testimonios[index].id;
-  
-    const url = `http://localhost:3000/auth/testimonio/${id}`;
-    const res= await axios.delete(url);
-    console.log(id);
+    try {
 
-    window.alert(res.data.mensaje);
-    
+      const id = testimonios[index].id;
+      const url = `/auth/testimonio/${id}`;
+      const res = await api.delete(url);
+      console.log(id);
 
-    const nuevaLista = [...testimonios];
-  nuevaLista.splice(index, 1);
-  setTestimonios(nuevaLista);
-  } catch (error) {
-     window.alert(error.response.data.mensaje);
-    console.error("Error eliminando testimonio:", error);
-  }
+      window.alert(res.data.mensaje);
 
-};
 
-const ActualizarContainer=(index)=>{
-   const testimonio = testimonios[index];
+      const nuevaLista = [...testimonios];
+      nuevaLista.splice(index, 1);
+      setTestimonios(nuevaLista);
+    } catch (error) {
+      const msg =
+        error?.response?.data?.mensaje ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Error eliminando testimonio";
+      window.alert(msg);
+      console.error("Error eliminando testimonio:", error);
+    }
+
+  };
+
+  const ActualizarContainer = (index) => {
+    const testimonio = testimonios[index];
     setNombre(testimonio.nombre);
     setContenido(testimonio.contenido);
-   setImagen(testimonio.imagen);
-   setModoEdicion(true);
-   setSelectedIndex(index);
-   console.log( "El index es"+" "+selectedIndex);
-   
-}
+    setImagen(testimonio.imagen);
+    setModoEdicion(true);
+    setSelectedIndex(index);
+    console.log("El index es" + " " + selectedIndex);
+
+  }
 
 
 
- const handleModificar = async (index) => {
-  try {
-   
-    const id = testimonios[index].id;
-  
-    const url = `http://localhost:3000/auth/testimonio/${id}`;
+  const handleModificar = async (index) => {
+    try {
 
-    const updatedbody={
+      const id = testimonios[index].id;
+
+      const url = `/auth/testimonio/${id}`;
+
+      const updatedbody = {
         nombre: nombre,
         contenido: contenido,
         imagen: imagen,
 
-    };
+      };
 
-    const res= await axios.put(url,updatedbody, {
-       headers: { "Content-Type": "application/json" }
-    })
+      const res = await api.put(url, updatedbody, {
+        headers: { "Content-Type": "application/json" }
+      });
 
-    console.log(id);
+      console.log(id);
 
-    window.alert(res.data.mensaje);
-    
-  } catch (error) {
-     console.log(error);
-    console.error("Error modificando testimonio:", error);
-  }
-  setNombre('');
+      window.alert(res.data.mensaje);
+
+    } catch (error) {
+      console.log(error);
+      console.error("Error modificando testimonio:", error);
+    }
+    setNombre('');
     setContenido('');
     setImagen('');
 
     setTimeout(() => {
-				window.location.reload();
-			}, 100);
+      window.location.reload();
+    }, 100);
 
 
-  
-};
+
+  };
 
 
   return (
@@ -209,21 +208,21 @@ const ActualizarContainer=(index)=>{
           inputProps={{ style: { fontFamily: 'ManropeEB' } }}
         />
 
-    <Button
-     variant="contained"
-     onClick={modoEdicion ? () => handleModificar(selectedIndex) : handleAgregar}
-    sx={{
-      backgroundColor: '#10045c',
-      fontFamily: 'GroteskBold',
-      '&:hover': {
-        backgroundColor: '#1a067a'
-      },
-      width: 'fit-content',
-      alignSelf: 'flex-start'
-    }}
-  >
-    {modoEdicion ? 'Modificar Testimonio' : 'Agregar Testimonio'}
-  </Button>
+        <Button
+          variant="contained"
+          onClick={modoEdicion ? () => handleModificar(selectedIndex) : handleAgregar}
+          sx={{
+            backgroundColor: '#10045c',
+            fontFamily: 'GroteskBold',
+            '&:hover': {
+              backgroundColor: '#1a067a'
+            },
+            width: 'fit-content',
+            alignSelf: 'flex-start'
+          }}
+        >
+          {modoEdicion ? 'Modificar Testimonio' : 'Agregar Testimonio'}
+        </Button>
       </Stack>
 
       <Divider sx={{ mb: 3 }} />
@@ -291,7 +290,7 @@ const ActualizarContainer=(index)=>{
               variant="outlined"
               color="error"
               size="small"
-              onClick={() => {ActualizarContainer(index)}}
+              onClick={() => { ActualizarContainer(index) }}
               sx={{ mt: 1, fontFamily: 'ManropeEB' }}
             >
               Modificar
