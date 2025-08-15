@@ -6,15 +6,19 @@ import Img from '/Images/Categoria.png';
 
 const categorias = [
   {
-    title: 'Sub-7',
-    image: '/Images/Cat_Sub7.png',
+    slug: 'sub-8-escuelita',
+    titleText: 'Sub-8 (Escuelita)',
+    title: <>Sub-8<br />(Escuelita)</>,
+    image: '/Images/Cat_Sub8.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Formativa',
     descripcion:
-      'Niños de hasta 7 años que están dando sus primeros pasos en el béisbol. Se enfoca en el juego recreativo, el aprendizaje básico y el desarrollo motriz en un ambiente divertido, seguro y adaptado a su edad.',
+      'Niños de hasta 8 años que están dando sus primeros pasos en el béisbol. Se enfoca en el juego recreativo, el aprendizaje básico y el desarrollo motriz en un ambiente divertido, seguro y adaptado a su edad.',
   },
   {
-    title: 'Sub-10',
+    slug: 'sub-10-pre-infantil',
+    titleText: 'Sub-10 (Pre-Infantil)',
+    title: <>Sub-10<br />(Pre-Infantil)</>,
     image: '/Images/Cat_Sub10.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Formativa',
@@ -22,28 +26,24 @@ const categorias = [
       'Categoría para jóvenes hasta 10 años, desarrollo básico de técnica y juego. Se fortalecen habilidades como lanzamiento, bateo y reglas del juego, con una estructura pedagógica que incentiva la disciplina y el trabajo en equipo.',
   },
   {
-    title: 'Sub-15',
-    image: '/Images/Cat_Sub15.png',
+    slug: 'sub-13-infantil',
+    titleText: 'Sub-13 (Infantil)',
+    title: <>Sub-13<br />(Infantil)</>,
+    image: '/Images/Cat_Sub13.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Competitiva',
     descripcion:
-      'Jugadores entre 11 y 15 años, nivel intermedio y enfoque competitivo. Se introducen estrategias de juego, entrenamientos más rigurosos, y participación en competencias regionales, preparando la base para etapas superiores.',
+      'Jugadores entre 11 y 13 años, nivel intermedio y enfoque competitivo. Se introducen estrategias de juego, entrenamientos más rigurosos, y participación en competencias regionales, preparando la base para etapas superiores.',
   },
   {
-    title: 'Sub-18',
-    image: '/Images/Cat_Sub18.png',
+    slug: 'sub-16-pre-junior',
+    titleText: 'Sub-16 (Pre-Junior)',
+    title: <>Sub-16<br />(Pre-Junior)</>,
+    image: '/Images/Cat_Sub16.png',
     logo: '/Images/Logo-pilotos.png',
     tipo: 'Avanzada',
     descripcion:
       'Jugadores avanzados, cerca de pasar a ligas mayores, entrenamiento intensivo. Se perfecciona el rendimiento técnico y mental del jugador, con seguimiento profesional y oportunidades para ascender a niveles élite del deporte.',
-  },
-  {
-    title: 'Liga Mayor',
-    image: '/Images/Cat_Mayor.jpg',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Profesional',
-    descripcion:
-      'Jugadores de nivel profesional que compiten en la liga principal. Participan en torneos oficiales y representan el máximo nivel del béisbol nacional, con entrenamientos exigentes y alto rendimiento técnico y físico.',
   },
 ];
 
@@ -68,8 +68,8 @@ const Categorias = () => {
     return cards;
   };
 
-  const scrollToCategory = (title) => {
-    const element = document.getElementById(`detalle-${title}`);
+  const scrollToCategory = (slug) => {
+    const element = document.getElementById(`detalle-${slug}`);
     if (element) {
       element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
@@ -169,10 +169,10 @@ const Categorias = () => {
           </IconButton>
 
           <Box sx={{ display: 'flex', gap: 3, overflow: 'hidden', width: '80%', justifyContent: 'center' }}>
-            {getVisibleCards().map((categoria, i) => (
+            {getVisibleCards().map((categoria) => (
               <Box
-                key={i}
-                onClick={() => scrollToCategory(categoria.title)}
+                key={categoria.slug}
+                onClick={() => scrollToCategory(categoria.slug)}
                 sx={{
                   width: '250px',
                   transition: 'transform 0.5s ease',
@@ -188,7 +188,7 @@ const Categorias = () => {
                 <Box
                   component='img'
                   src={categoria.image}
-                  alt={categoria.title}
+                  alt={categoria.titleText}
                   sx={{
                     width: '100%',
                     height: '250px',
@@ -247,10 +247,10 @@ const Categorias = () => {
           Conocé cada categoría en detalle
         </Typography>
 
-        {categorias.map((cat, index) => (
+        {categorias.map((cat) => (
           <Box
-            key={index}
-            id={`detalle-${cat.title}`}
+            key={cat.slug}
+            id={`detalle-${cat.slug}`}
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
@@ -266,7 +266,7 @@ const Categorias = () => {
             <Box
               component='img'
               src={cat.image}
-              alt={cat.title}
+              alt={cat.titleText}
               sx={{
                 width: { xs: '100%', md: '40%' },
                 objectFit: 'cover',
@@ -290,7 +290,7 @@ const Categorias = () => {
                     display: 'flex',
                     alignItems: 'center',
                     gap: 2,
-                    mb: 2,
+                    mb: 0, // sin margen debajo
                   }}
                 >
                   <Box
@@ -322,6 +322,7 @@ const Categorias = () => {
                   fontFamily: '"Varsity", cursive',
                   fontWeight: 'bold',
                   color: '#f26c23',
+                  mt: -0.5, // subido un poquito más
                 }}
               >
                 {cat.title}
