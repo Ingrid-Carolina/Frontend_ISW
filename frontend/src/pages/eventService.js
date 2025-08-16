@@ -1,13 +1,14 @@
 // src/services/eventService.js
 
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 
 export async function obtenerEventosProximos(cantidad = 3) {
 	const hoy = new Date();
 	hoy.setHours(0, 0, 0, 0);
 
 	try {
-		const res = await axios.get('http://localhost:3000/auth/obtenereventos');
+		const res = await api.get('/auth/obtenereventos');
 		const eventos = res.data;
 
 		const proximos = eventos

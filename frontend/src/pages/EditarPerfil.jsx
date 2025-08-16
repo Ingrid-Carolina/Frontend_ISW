@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
 import './EditarPerfil.css';
 import { Link, useSearchParams } from 'react-router-dom';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 
 function EditarPerfil() {
   const [nombre, setNombre] = useState('');
@@ -10,23 +11,18 @@ function EditarPerfil() {
   const [popup, setPopup] = useState({ visible: false, titulo: '', mensaje: '', tipo: '' });
   const [searchParams] = useSearchParams();
 
-   const fetchPerfil = async () => {
-      try {
-        const res = await axios.get(
-          'http://localhost:3000/auth/obtenerperfil',
-        );
-        const perfil = res.data; //estoy trasladando a testimonios el fetch de la tabla del formato JSON sended del res en Authcontroller
- 
+  const fetchPerfil = async () => {
+    try {
+      const res = await api.get('/auth/obtenerperfil');
+      const perfil = res.data; //estoy trasladando a testimonios el fetch de la tabla del formato JSON sended del res en Authcontroller
+      setNombre(perfil[0].nombre);
+      setDescripcion(perfil[0].descripcion);
 
-        setNombre(perfil[0].nombre);
-        setDescripcion(perfil[0].descripcion);
-       
- 
-      } catch (err) {
-        console.error('Error al obtener el perfil:', err);
-      }
-    };
- 
+    } catch (err) {
+      console.error('Error al obtener el perfil:', err);
+    }
+  };
+
 
 
   // ✅ Detectar si se pasa un avatar por parámetro en la URL (desde otra página)
@@ -37,7 +33,7 @@ function EditarPerfil() {
     }
 
     fetchPerfil();
-    
+
   }, [searchParams]);
 
   const mostrarPopup = (titulo, mensaje, tipo) => {
@@ -63,27 +59,26 @@ function EditarPerfil() {
     }
 
     try {
-      const response = await fetch('http://localhost:3000/auth/editarperfil', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ nombre, descripcion, avatar }) // 🔹 Enviamos todo
+      const response = await api.post('/auth/editarperfil', {
+        nombre,
+        descripcion,
+        avatar, // 🔹 lo envías si lo manejas en backend
       });
 
-      const data = await response.json();
+      const data = response.data || {};
       console.log("Respuesta backend:", data);
 
-      if (response.ok) {
-        mostrarPopup("Cambio exitoso", "Perfil actualizado correctamente.", "success");
-      } else if (data.errors && Array.isArray(data.errors)) {
-        const mensajes = data.errors.map(err => err.msg).join('\n');
+      mostrarPopup("Cambio exitoso", data.mensaje || "Perfil actualizado correctamente.", "success");
+    } catch (err) {
+      // soporta tanto error de interceptor (err.message) como error.response
+      const data = err?.response?.data;
+      if (data?.errors && Array.isArray(data.errors)) {
+        const mensajes = data.errors.map(e => e.msg).join('\n');
         mostrarPopup("Cambio fallido", mensajes, "error");
       } else {
-        mostrarPopup("Cambio fallido", data.mensaje || "Error desconocido.", "error");
+        mostrarPopup("Cambio fallido", data?.mensaje || err?.message || "Error desconocido.", "error");
       }
-    } catch (err) {
       console.error(err);
-      mostrarPopup("Cambio fallido", "Hubo un error al guardar los cambios.", "error");
     }
   };
 
@@ -99,7 +94,7 @@ function EditarPerfil() {
       <div className="perfil-content">
         <div className="avatar-section">
           <img src={avatar} alt="Avatar" className="avatar-img" />
-          
+
           {/* 🔹 Link para ir a la página de selección de avatares */}
           <Link to="/Avatars" className="avatar-button" style={{ textDecoration: 'none' }}>
             Cambiar Avatar

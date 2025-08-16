@@ -3,7 +3,8 @@ import TestimonioTrapezoide from '../components/TestimonioTrapezoide';
 import VidCarousel from '../components/VideoCarousel';
 import ReactPlayer from 'react-player';
 import Hero from '../components/Hero';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 
 const videos = [
 	{ url: 'https://youtu.be/CSfEwT8x6B0?si=OJpKv5GCK71caBu6' },
@@ -26,9 +27,7 @@ const PaginaTestimonios = () => {
    useEffect(() => {
     const fetchTestimonios = async () => {
       try {
-        const res = await axios.get(
-          'http://localhost:3000/auth/obtenertestimonios',
-        );
+        const res = await api.get('/auth/obtenertestimonios');
         const testimonios = res.data; //estoy trasladando a testimonios el fetch de la tabla del formato JSON sended del res en Authcontroller
  
        

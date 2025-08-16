@@ -8,7 +8,8 @@ import {
 	IconButton,
 } from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 
 const ResetPasswordModal = ({ open, onClose, emailValue }) => {
 	const [email, setEmail] = useState(emailValue || '');
@@ -18,12 +19,7 @@ const ResetPasswordModal = ({ open, onClose, emailValue }) => {
 	const handleSubmit = async e => {
 		e.preventDefault();
 		try {
-			const response = await axios.post(
-				'http://localhost:3000/auth/restablecer',
-				{
-					email: email,
-				},
-			);
+			const response = await api.post('/auth/restablecer', { email });
 
 			setMessage(response.data.mensaje || 'Correo enviado exitosamente.');
 			setError('');
@@ -34,16 +30,13 @@ const ResetPasswordModal = ({ open, onClose, emailValue }) => {
 			}, 5000);
 		} catch (err) {
 			console.error('Error desde backend:', err);
-
-			if (err.response && err.response.data && err.response.data.mensaje) {
-				setError(err.response.data.mensaje);
-			} else {
-				setError('Hubo un error al enviar el correo. Intenta de nuevo.');
-			}
+			const msg =
+				err?.response?.data?.mensaje ||
+				err?.message ||
+				'Hubo un error al enviar el correo. Intenta de nuevo.';
+			setError(msg);
 			setMessage('');
-			setTimeout(() => {
-				setError('');
-			}, 5000);
+			setTimeout(() => setError(''), 5000);
 		}
 	};
 

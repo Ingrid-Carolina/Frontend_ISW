@@ -11,10 +11,11 @@ import SearchIcon from '@mui/icons-material/Search';
 import './Eventos.css';
 import FeaturedPost from '../components/FeaturedPost';
 import { obtenerEventosProximos } from '../pages/eventService';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 
 // ❗ Evita doble slash al construir URLs
-const baseUrl = 'http://localhost:3000';
+//const baseUrl = 'http://localhost:3000';
 
 // --- Lista de próximos eventos (como lo tenías) ---
 const ListaEventos = () => {
@@ -72,20 +73,17 @@ const Eventos = () => {
   const [errorNoticias, setErrorNoticias] = useState(null);
 
   useEffect(() => {
-    let cancel;
+    let cancelled = false;
+
     async function loadNoticias() {
       try {
         setLoadingNoticias(true);
         setErrorNoticias(null);
 
-        // Devuelve { noticias: [...] }
-        const { data } = await axios.get(`${baseUrl}/auth/noticias`, {
-          cancelToken: new axios.CancelToken((c) => (cancel = c)),
-        });
+        const { data } = await api.get('/auth/noticias');
 
         const lista = Array.isArray(data?.noticias) ? data.noticias : [];
 
-        // Normaliza a tus props
         const mapeadas = lista.map((n) => ({
           id: n.id,
           titulo: n.titulo,
@@ -95,16 +93,21 @@ const Eventos = () => {
           autor_id: n.autor_id,
         }));
 
-        setNoticias(mapeadas);
+        if (!cancelled) setNoticias(mapeadas);
       } catch (err) {
-        if (axios.isCancel(err)) return;
-        setErrorNoticias(err?.response?.data?.message || err.message || 'Error cargando noticias');
+        if (!cancelled) {
+          setErrorNoticias(
+            err?.response?.data?.message || err.message || 'Error cargando noticias'
+          );
+        }
       } finally {
-        setLoadingNoticias(false);
+        if (!cancelled) setLoadingNoticias(false);
       }
     }
     loadNoticias();
-    return () => cancel && cancel();
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   // 🔎 Filtro por título y contenido

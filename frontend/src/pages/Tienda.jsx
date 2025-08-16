@@ -1,5 +1,6 @@
 import React from 'react';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 import {
   Box,
   Container,
@@ -27,7 +28,7 @@ import {
   Remove as RemoveIcon,
   Delete as DeleteIcon,
   //AccountCircle as AccountCircleIcon, // Usado en la barra superior, no en productos
-  
+
 } from '@mui/icons-material';
 
 // --- Importa imágenes  ---
@@ -77,7 +78,7 @@ class Tienda extends React.Component {
       descripcion: "Camisa oficial de local, diseño exclusivo para esta temporada.",
       precio: 500.00,
       imagen: camisaLocal
-    }, 
+    },
     {
       id: 2,
       nombre: "Camiseta Local Blanca",
@@ -85,7 +86,7 @@ class Tienda extends React.Component {
       precio: 350.00,
       imagen: camisetaLocal
     },
-     {
+    {
       id: 3,
       nombre: "Camisa de Botones Visita Moteada",
       descripcion: "Uniforme completo de 4 piezas con galones dorados y insignias bordadas.",
@@ -115,10 +116,10 @@ class Tienda extends React.Component {
     },
     {
       id: 7,
-      nombre: "Banderines", 
+      nombre: "Banderines",
       descripcion: "Pequeños banderines decorativos, perfectos para coleccionar o regalar.",
       precio: 125.00,
-      imagen:banderin
+      imagen: banderin
     },
     {
       id: 8,
@@ -155,23 +156,23 @@ class Tienda extends React.Component {
       precio: 300.00,
       imagen: gorra5
     },
-   
+
   ];
 
-   
+
 
   // Manejar búsqueda
   handleSearchChange = (event) => {
-   const query = event.target.value;
-  this.setState({ searchQuery: query });
-  
-  // Debug: mostrar cuántos productos se encontraron
-  if (query.trim()) {
-    setTimeout(() => {
-      const filtered = this.getFilteredProducts();
-      console.log(`Búsqueda "${query}" encontró ${filtered.length} productos`);
-    }, 100);
-  }
+    const query = event.target.value;
+    this.setState({ searchQuery: query });
+
+    // Debug: mostrar cuántos productos se encontraron
+    if (query.trim()) {
+      setTimeout(() => {
+        const filtered = this.getFilteredProducts();
+        console.log(`Búsqueda "${query}" encontró ${filtered.length} productos`);
+      }, 100);
+    }
   }
 
   handleSearchSubmit = (event) => {
@@ -258,351 +259,340 @@ class Tienda extends React.Component {
     // Aquí puedes agregar la lógica para ir al perfil
   }
 
-cambiarTallaEnCarrito = (itemId, tallaActual, nuevaTalla) => {
-  if (!nuevaTalla || tallaActual === nuevaTalla) return;
+  cambiarTallaEnCarrito = (itemId, tallaActual, nuevaTalla) => {
+    if (!nuevaTalla || tallaActual === nuevaTalla) return;
 
-  this.setState(prevState => {
-    const newCartItems = prevState.cartItems.map(item => {
-      // Encontrar el item específico por ID y talla actual
-      if (item.id === itemId && item.talla === tallaActual) {
-        // Buscar el producto original para obtener el precio base
-        const productoOriginal = prevState.productos ? 
-          prevState.productos.find(p => p.id === itemId) : 
-          { precio: item.precioOriginal || item.precio, precioNino: item.precioNino };
+    this.setState(prevState => {
+      const newCartItems = prevState.cartItems.map(item => {
+        // Encontrar el item específico por ID y talla actual
+        if (item.id === itemId && item.talla === tallaActual) {
+          // Buscar el producto original para obtener el precio base
+          const productoOriginal = prevState.productos ?
+            prevState.productos.find(p => p.id === itemId) :
+            { precio: item.precioOriginal || item.precio, precioNino: item.precioNino };
 
-        if (productoOriginal) {
-          // Calcular el nuevo precio según la nueva talla
-          const nuevoPrecio = this.getPrecioByTalla(productoOriginal, nuevaTalla);
-          
-          console.log(`Cambiando talla de ${tallaActual} a ${nuevaTalla}. Precio: ${item.precio} -> ${nuevoPrecio}`);
-          
+          if (productoOriginal) {
+            // Calcular el nuevo precio según la nueva talla
+            const nuevoPrecio = this.getPrecioByTalla(productoOriginal, nuevaTalla);
+
+            console.log(`Cambiando talla de ${tallaActual} a ${nuevaTalla}. Precio: ${item.precio} -> ${nuevoPrecio}`);
+
+            return {
+              ...item,
+              talla: nuevaTalla,
+              precio: nuevoPrecio
+            };
+          }
+        }
+        return item;
+      });
+
+      return {
+        cartItems: newCartItems
+      };
+    });
+  }
+
+
+  // Función para obtener el precio según la talla
+  getPrecioByTalla = (producto, talla) => {
+    const tallasNino = ['6', '8', '10', '12'];
+
+    if (tallasNino.includes(talla)) {
+      // Si el producto tiene un precio específico para niños, úsalo, sino usa un precio por defecto
+      return producto.precioNino || (producto.precio - 50); // 20% descuento como ejemplo
+    }
+
+    return producto.precio; // Precio normal para tallas S, M, L, XL
+  };
+
+  productoRequiereTalla = (producto) => {
+    const nombre = producto.nombre.toLowerCase();
+    return nombre.includes("camisa") ||
+      nombre.includes("camiseta")
+  };
+
+  // Agregar item al carrito
+  addToCart = (producto) => {
+    const tallaSeleccionada = this.state.selectedSizes?.[producto.id] || null;
+
+    // Verificar si el producto requiere talla y si está seleccionada
+    const requiereTalla = this.productoRequiereTalla(producto);
+    if (requiereTalla && !tallaSeleccionada) {
+      alert("Por favor selecciona una talla antes de agregar al carrito.");
+
+      return;
+    }
+    //
+
+    this.setState(prevState => {
+      // Buscar si el producto ya existe en el carrito (considerando la talla)
+      const existingItem = prevState.cartItems.find(item =>
+        item.id === producto.id &&
+        (requiereTalla ? item.talla === tallaSeleccionada : true)
+      );
+
+      let newCartItems;
+
+      if (existingItem) {
+        // Si el producto ya existe, incrementar cantidad
+        newCartItems = prevState.cartItems.map(item =>
+          item.id === producto.id &&
+            (requiereTalla ? item.talla === tallaSeleccionada : true)
+            ? { ...item, cantidad: item.cantidad + 1 }
+            : item
+        );
+      } else {
+        const precioFinal = requiereTalla ?
+          this.getPrecioByTalla(producto, tallaSeleccionada) :
+          producto.precio;
+        // Si es un producto nuevo, agregarlo al carrito
+        const nuevoItem = {
+          ...producto,
+          precio: precioFinal,
+          precioOriginal: producto.precio, // ⭐ Guardar precio original
+          precioNino: producto.precioNino, // ⭐ Guardar precio de niño si existe
+          cantidad: 1,
+          ...(requiereTalla && { talla: tallaSeleccionada })
+        };
+        newCartItems = [...prevState.cartItems, nuevoItem];
+      }
+
+      // Calcular total de items
+      const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
+
+      return {
+        cartItems: newCartItems,
+        totalItems: totalItems
+      };
+    });
+  }
+
+  // VERSIÓN ALTERNATIVA de cambiarTallaEnCarrito si usas precioOriginal:
+  cambiarTallaEnCarritoAlternativa = (itemId, tallaActual, nuevaTalla) => {
+    if (!nuevaTalla || tallaActual === nuevaTalla) return;
+
+    this.setState(prevState => {
+      const newCartItems = prevState.cartItems.map(item => {
+        if (item.id === itemId && item.talla === tallaActual) {
+          // Usar la información guardada en el item
+          const productoBase = {
+            precio: item.precioOriginal || item.precio,
+            precioNino: item.precioNino
+          };
+
+          const nuevoPrecio = this.getPrecioByTalla(productoBase, nuevaTalla);
+
           return {
             ...item,
             talla: nuevaTalla,
             precio: nuevoPrecio
           };
         }
-      }
-      return item;
-    });
+        return item;
+      });
 
-    return {
-      cartItems: newCartItems
-    };
-  });
-}
-
-
-// Función para obtener el precio según la talla
-getPrecioByTalla = (producto, talla) => {
-  const tallasNino = ['6', '8', '10', '12'];
-  
-  if (tallasNino.includes(talla)) {
-    // Si el producto tiene un precio específico para niños, úsalo, sino usa un precio por defecto
-    return producto.precioNino || (producto.precio - 50); // 20% descuento como ejemplo
-  }
-  
-  return producto.precio; // Precio normal para tallas S, M, L, XL
-};
-
- productoRequiereTalla = (producto) => {
-    const nombre = producto.nombre.toLowerCase();
-    return nombre.includes("camisa") || 
-           nombre.includes("camiseta") 
-  };
-
-  // Agregar item al carrito
- addToCart = (producto) => {
-  const tallaSeleccionada = this.state.selectedSizes?.[producto.id] || null;
-  
-  // Verificar si el producto requiere talla y si está seleccionada
-  const requiereTalla = this.productoRequiereTalla(producto);
-  if (requiereTalla && !tallaSeleccionada) {
-    alert("Por favor selecciona una talla antes de agregar al carrito.");
-  
-    return;
-  }
-  //
-
-  this.setState(prevState => {
-    // Buscar si el producto ya existe en el carrito (considerando la talla)
-    const existingItem = prevState.cartItems.find(item => 
-      item.id === producto.id && 
-      (requiereTalla ? item.talla === tallaSeleccionada : true)
-    );
-
-    let newCartItems;
-    
-    if (existingItem) {
-      // Si el producto ya existe, incrementar cantidad
-      newCartItems = prevState.cartItems.map(item =>
-        item.id === producto.id && 
-        (requiereTalla ? item.talla === tallaSeleccionada : true)
-          ? { ...item, cantidad: item.cantidad + 1 }
-          : item
-      );
-    } else {
-      const precioFinal = requiereTalla ? 
-        this.getPrecioByTalla(producto, tallaSeleccionada) : 
-        producto.precio;
-      // Si es un producto nuevo, agregarlo al carrito
-      const nuevoItem = { 
-        ...producto, 
-        precio: precioFinal,
-        precioOriginal: producto.precio, // ⭐ Guardar precio original
-        precioNino: producto.precioNino, // ⭐ Guardar precio de niño si existe
-        cantidad: 1,
-        ...(requiereTalla && { talla: tallaSeleccionada })
+      return {
+        cartItems: newCartItems
       };
-      newCartItems = [...prevState.cartItems, nuevoItem];
-    }
-
-    // Calcular total de items
-    const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
-
-    return {
-      cartItems: newCartItems,
-      totalItems: totalItems
-    };
-  });
-}
-
-// VERSIÓN ALTERNATIVA de cambiarTallaEnCarrito si usas precioOriginal:
-cambiarTallaEnCarritoAlternativa = (itemId, tallaActual, nuevaTalla) => {
-  if (!nuevaTalla || tallaActual === nuevaTalla) return;
-
-  this.setState(prevState => {
-    const newCartItems = prevState.cartItems.map(item => {
-      if (item.id === itemId && item.talla === tallaActual) {
-        // Usar la información guardada en el item
-        const productoBase = {
-          precio: item.precioOriginal || item.precio,
-          precioNino: item.precioNino
-        };
-        
-        const nuevoPrecio = this.getPrecioByTalla(productoBase, nuevaTalla);
-        
-        return {
-          ...item,
-          talla: nuevaTalla,
-          precio: nuevoPrecio
-        };
-      }
-      return item;
     });
-
-    return {
-      cartItems: newCartItems
-    };
-  });
-}
+  }
 
   // Aumentar cantidad de un producto
   aumentarCantidad = (productId, talla) => {
-  this.setState(prevState => {
-    const newCartItems = prevState.cartItems.map(item =>
-      item.id === productId && item.talla === talla
-        ? { ...item, cantidad: item.cantidad + 1 }
-        : item
-    );
-    const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
-    return { cartItems: newCartItems, totalItems };
-  });
-};
+    this.setState(prevState => {
+      const newCartItems = prevState.cartItems.map(item =>
+        item.id === productId && item.talla === talla
+          ? { ...item, cantidad: item.cantidad + 1 }
+          : item
+      );
+      const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
+      return { cartItems: newCartItems, totalItems };
+    });
+  };
 
   // Disminuir cantidad de un producto
   disminuirCantidad = (productId, talla) => {
-  this.setState(prevState => {
-    const newCartItems = prevState.cartItems.map(item =>
-      item.id === productId && item.talla === talla && item.cantidad > 1
-        ? { ...item, cantidad: item.cantidad - 1 }
-        : item
-    );
-    const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
-    return { cartItems: newCartItems, totalItems };
-  });
-};
+    this.setState(prevState => {
+      const newCartItems = prevState.cartItems.map(item =>
+        item.id === productId && item.talla === talla && item.cantidad > 1
+          ? { ...item, cantidad: item.cantidad - 1 }
+          : item
+      );
+      const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
+      return { cartItems: newCartItems, totalItems };
+    });
+  };
 
   // Eliminar producto del carrito
   eliminarDelCarrito = (productId, talla) => {
-  this.setState(prevState => {
-    const newCartItems = prevState.cartItems.filter(item =>
-      !(item.id === productId && item.talla === talla)
-    );
-    const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
-    return { cartItems: newCartItems, totalItems };
-  });
-};
+    this.setState(prevState => {
+      const newCartItems = prevState.cartItems.filter(item =>
+        !(item.id === productId && item.talla === talla)
+      );
+      const totalItems = newCartItems.reduce((total, item) => total + item.cantidad, 0);
+      return { cartItems: newCartItems, totalItems };
+    });
+  };
 
   actualizarPreciosCarrito = () => {
-  this.setState(prevState => {
-    const newCartItems = prevState.cartItems.map(item => {
-      // Si el producto requiere talla, recalcular precio
+    this.setState(prevState => {
+      const newCartItems = prevState.cartItems.map(item => {
+        // Si el producto requiere talla, recalcular precio
+        const requiereTalla = this.productoRequiereTalla(item);
+
+        if (requiereTalla && item.talla) {
+          const productoBase = {
+            precio: item.precioOriginal || item.precio,
+            precioNino: item.precioNino
+          };
+
+          const nuevoPrecio = this.getPrecioByTalla(productoBase, item.talla);
+
+          return {
+            ...item,
+            precio: nuevoPrecio
+          };
+        }
+
+        return item;
+      });
+
+      return {
+        cartItems: newCartItems
+      };
+    });
+  }
+
+  // Calcular total del carrito
+  calcularTotal = () => {
+    return this.state.cartItems.reduce((total, item) => {
+      return total + (item.precio * item.cantidad);
+    }, 0).toFixed(2);
+  }
+
+  calcularTotalConActualizacion = () => {
+    // Primero actualizar precios si es necesario
+    this.actualizarPreciosCarrito();
+
+    // Luego calcular con un pequeño delay para asegurar que el state se actualice
+    setTimeout(() => {
+      const total = this.calcularTotal();
+      console.log('Total calculado:', total);
+      return total;
+    }, 0);
+  }
+
+  // Versión síncrona que calcula directamente sin depender del state
+  calcularTotalSincrono = (cartItems = null) => {
+    const items = cartItems || this.state.cartItems;
+
+    return items.reduce((total, item) => {
+      // Recalcular precio en tiempo real si es necesario
+      let precioFinal = item.precio;
+
+      // Si el producto requiere talla, verificar que el precio sea correcto
       const requiereTalla = this.productoRequiereTalla(item);
-      
       if (requiereTalla && item.talla) {
         const productoBase = {
           precio: item.precioOriginal || item.precio,
           precioNino: item.precioNino
         };
-        
-        const nuevoPrecio = this.getPrecioByTalla(productoBase, item.talla);
-        
-        return {
-          ...item,
-          precio: nuevoPrecio
-        };
+        precioFinal = this.getPrecioByTalla(productoBase, item.talla);
       }
-      
-      return item;
-    });
 
-    return {
-      cartItems: newCartItems
-    };
-  });
-}
+      const precio = parseFloat(precioFinal) || 0;
+      const cantidad = parseInt(item.cantidad) || 0;
 
-  // Calcular total del carrito
-  calcularTotal = () => {
-  return this.state.cartItems.reduce((total, item) => {
-    return total + (item.precio * item.cantidad);
-  }, 0).toFixed(2);
-}
-
-calcularTotalConActualizacion = () => {
-  // Primero actualizar precios si es necesario
-  this.actualizarPreciosCarrito();
-  
-  // Luego calcular con un pequeño delay para asegurar que el state se actualice
-  setTimeout(() => {
-    const total = this.calcularTotal();
-    console.log('Total calculado:', total);
-    return total;
-  }, 0);
-}
-
-// Versión síncrona que calcula directamente sin depender del state
-calcularTotalSincrono = (cartItems = null) => {
-  const items = cartItems || this.state.cartItems;
-  
-  return items.reduce((total, item) => {
-    // Recalcular precio en tiempo real si es necesario
-    let precioFinal = item.precio;
-    
-    // Si el producto requiere talla, verificar que el precio sea correcto
-    const requiereTalla = this.productoRequiereTalla(item);
-    if (requiereTalla && item.talla) {
-      const productoBase = {
-        precio: item.precioOriginal || item.precio,
-        precioNino: item.precioNino
-      };
-      precioFinal = this.getPrecioByTalla(productoBase, item.talla);
-    }
-    
-    const precio = parseFloat(precioFinal) || 0;
-    const cantidad = parseInt(item.cantidad) || 0;
-    
-    return total + (precio * cantidad);
-  }, 0).toFixed(2);
-}
+      return total + (precio * cantidad);
+    }, 0).toFixed(2);
+  }
 
   // Filtrar productos basado en la búsqueda
   //2. FUNCIÓN DE FILTRADO MEJORADA:
-getFilteredProducts = () => {
-  if (!this.state.searchQuery || this.state.searchQuery.trim() === '') {
-    return this.productos;
+  getFilteredProducts = () => {
+    if (!this.state.searchQuery || this.state.searchQuery.trim() === '') {
+      return this.productos;
+    }
+
+    const searchTerm = this.state.searchQuery.toLowerCase().trim();
+    console.log('Buscando:', searchTerm); // Para debug
+
+    return this.productos.filter(producto => {
+      // Búsqueda en nombre
+      const nombreMatch = producto.nombre.toLowerCase().includes(searchTerm);
+
+      // Búsqueda en descripción
+      const descripcionMatch = producto.descripcion.toLowerCase().includes(searchTerm);
+
+      // Búsqueda por palabras individuales (más flexible)
+      const palabrasBusqueda = searchTerm.split(' ').filter(palabra => palabra.length > 0);
+      const palabrasMatch = palabrasBusqueda.some(palabra =>
+        producto.nombre.toLowerCase().includes(palabra) ||
+        producto.descripcion.toLowerCase().includes(palabra)
+      );
+
+      // Búsqueda por categorías comunes
+      const categoriaMatch = this.buscarPorCategoria(producto, searchTerm);
+
+      const match = nombreMatch || descripcionMatch || palabrasMatch || categoriaMatch;
+
+      if (match) {
+        console.log('Producto encontrado:', producto.nombre); // Para debug
+      }
+
+      return match;
+    });
   }
 
-  const searchTerm = this.state.searchQuery.toLowerCase().trim();
-  console.log('Buscando:', searchTerm); // Para debug
+  // 3. FUNCIÓN AUXILIAR PARA BÚSQUEDA POR CATEGORÍAS:
+  buscarPorCategoria = (producto, searchTerm) => {
+    const nombre = producto.nombre.toLowerCase();
 
-  return this.productos.filter(producto => {
-    // Búsqueda en nombre
-    const nombreMatch = producto.nombre.toLowerCase().includes(searchTerm);
-    
-    // Búsqueda en descripción
-    const descripcionMatch = producto.descripcion.toLowerCase().includes(searchTerm);
-    
-    // Búsqueda por palabras individuales (más flexible)
-    const palabrasBusqueda = searchTerm.split(' ').filter(palabra => palabra.length > 0);
-    const palabrasMatch = palabrasBusqueda.some(palabra => 
-      producto.nombre.toLowerCase().includes(palabra) || 
-      producto.descripcion.toLowerCase().includes(palabra)
-    );
-    
-    // Búsqueda por categorías comunes
-    const categoriaMatch = this.buscarPorCategoria(producto, searchTerm);
-    
-    const match = nombreMatch || descripcionMatch || palabrasMatch || categoriaMatch;
-    
-    if (match) {
-      console.log('Producto encontrado:', producto.nombre); // Para debug
-    }
-    
-    return match;
-  });
-}
+    // Mapeo de términos de búsqueda a categorías
+    const categorias = {
+      'camisa': ['camisa', 'camiseta'],
+      'camiseta': ['camisa', 'camiseta'],
+      'gorra': ['gorra', 'gorras'],
+      'gorras': ['gorra', 'gorras'],
+      'bandera': ['bandera', 'banderas', 'banderin', 'banderines'],
+      'niño': ['niño', 'niña', 'infantil', 'kid'],
+      'local': ['local', 'casa', 'home'],
+      'visita': ['visita', 'visitante', 'away'],
+      'angelito': ['angelito', 'angelitos', 'fundacion'],
+      'conmemorativa': ['conmemorativa', 'especial', 'edicion']
+    };
 
-// 3. FUNCIÓN AUXILIAR PARA BÚSQUEDA POR CATEGORÍAS:
-buscarPorCategoria = (producto, searchTerm) => {
-  const nombre = producto.nombre.toLowerCase();
-  
-  // Mapeo de términos de búsqueda a categorías
-  const categorias = {
-    'camisa': ['camisa', 'camiseta'],
-    'camiseta': ['camisa', 'camiseta'],
-    'gorra': ['gorra', 'gorras'],
-    'gorras': ['gorra', 'gorras'],
-    'bandera': ['bandera', 'banderas', 'banderin', 'banderines'],
-    'niño': ['niño', 'niña', 'infantil', 'kid'],
-    'local': ['local', 'casa', 'home'],
-    'visita': ['visita', 'visitante', 'away'],
-    'angelito': ['angelito', 'angelitos', 'fundacion'],
-    'conmemorativa': ['conmemorativa', 'especial', 'edicion']
-  };
-  
-  // Verificar si el término de búsqueda coincide con alguna categoría
-  for (const [termino, sinonimos] of Object.entries(categorias)) {
-    if (searchTerm.includes(termino)) {
-      return sinonimos.some(sinonimo => nombre.includes(sinonimo));
+    // Verificar si el término de búsqueda coincide con alguna categoría
+    for (const [termino, sinonimos] of Object.entries(categorias)) {
+      if (searchTerm.includes(termino)) {
+        return sinonimos.some(sinonimo => nombre.includes(sinonimo));
+      }
     }
+
+    return false;
   }
-  
-  return false;
-}
 
 
- realizarPeticion = async () => {
-    const url = "http://localhost:3000/auth/comprar"; 
-
-    const body = {
-    nombreproducto: this.state.cartItems.map(item => item.nombre),
-    cantidad: this.state.cartItems.map(item => item.cantidad)
-};
-
+  realizarPeticion = async () => {
     try {
-        const res = await axios.post(url, body, {
-            headers: { "Content-Type": "application/json" }
-        });
-
-        console.log("response data: ", res.data.mensaje);
-        return res.data;
+      const body = {
+        nombreproducto: this.state.cartItems.map((item) => item.nombre),
+        cantidad: this.state.cartItems.map((item) => item.cantidad),
+      };
+      const res = await api.post('/auth/comprar', body); 
+      console.log('response data: ', res.data.mensaje);
+      return res.data;
     } catch (error) {
-        console.log("Error:", error);
-
-        if (error.response) {
-            console.log("Error data:", error.response.data.mensaje);
-            console.log("Error status:", error.response.status);
-
-            window.alert((error.response.data.mensaje));
-        } else if (error.request) {
-            window.alert("Ninguna respuesta del servidor.Por favor verifique su red.");
-        } else {
-            window.alert("Error en la red.");
-        }
+      if (error.response) {
+        window.alert(error.response.data.mensaje);
+      } else if (error.request) {
+        window.alert('Ninguna respuesta del servidor.Por favor verifique su red.');
+      } else {
+        window.alert('Error en la red.');
+      }
     }
-};
+  };
 
 
   // Renderizar la Navbar
@@ -706,7 +696,7 @@ buscarPorCategoria = (producto, searchTerm) => {
   }
 
   // Renderizar contenido de la tienda
- renderTiendaContent = () => {
+  renderTiendaContent = () => {
     const filteredProducts = this.getFilteredProducts();
     return (
       <Container maxWidth="lg" sx={{ py: 4 }}>
@@ -731,16 +721,16 @@ buscarPorCategoria = (producto, searchTerm) => {
                 <img src={producto.imagen} alt={producto.nombre} style={{ maxWidth: '100%', maxHeight: '100%', objectFit: 'contain' }} />
               </Box>
               <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'Varsity' }}>{producto.nombre}</Typography>
-              <Typography variant="body2" color="text.secondary" sx={{fontFamily: 'PeterMedium', fontWeight: 'bold' }}>{producto.descripcion}</Typography>
+              <Typography variant="body2" color="text.secondary" sx={{ fontFamily: 'PeterMedium', fontWeight: 'bold' }}>{producto.descripcion}</Typography>
               {this.productoRequiereTalla(producto) && (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 2 }}>
-                  {["6", "8", "10", "12", "14", "16", "XS", "S", "M", "L", "XL","2XL"].map(size => (
+                  {["6", "8", "10", "12", "14", "16", "XS", "S", "M", "L", "XL", "2XL"].map(size => (
                     <Button key={size} onClick={() => this.setState(prev => ({ selectedSizes: { ...prev.selectedSizes, [producto.id]: size } }))} variant={this.state.selectedSizes?.[producto.id] === size ? 'contained' : 'outlined'} sx={{
                       minWidth: 0,
                       width: 36,
                       height: 36,
                       borderRadius: '50%',
-                      borderColor : '666666',
+                      borderColor: '666666',
                       p: 0,
                       fontFamily: 'Varsity',
                       fontWeight: 'bold',
@@ -767,224 +757,226 @@ buscarPorCategoria = (producto, searchTerm) => {
 
   // Renderizar modal del carrito
   renderCarritoModal = () => {
-  const totalActualizado = this.calcularTotalSincrono();
-  
-  return (
-    <Drawer
-      anchor="right"
-      open={this.state.cartModalOpen}
-      onClose={this.cerrarCarritoModal}
-      PaperProps={{
-        sx: { width: { xs: '100%', sm: 400, md: 550 },
-          overflowX: 'hidden',
-        overflowY: 'hidden'  }
-      }}
-    >
-      <Box sx={{ p: 3, pt: { xs: '130px', sm: '130px' }, display: 'flex', flexDirection: 'column', height: '100%' }}>
-        {/* Header */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-          <Typography variant="h5" sx={{ color: '#2c1a99',fontFamily: 'Varsity', fontWeight: 'bold' }}>Carrito de Compras</Typography>
-          <IconButton onClick={this.cerrarCarritoModal}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
+    const totalActualizado = this.calcularTotalSincrono();
 
-        {/* Contenido del carrito */}
-        {this.state.cartItems.length === 0 ? (
-          <Box
-  sx={{
-    flexGrow: 1,
-    display: 'flex',
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    gap: 2,
-    py: 4
-  }}
->
-  <ShoppingCartIcon sx={{ fontSize: 48, color: 'grey.500' }} />
-  <Typography variant="h6" color="text.secondary" sx={{fontFamily: 'Varsity', fontWeight: 'bold' }}>
-    Tu carrito está vacío
-  </Typography>
-</Box>
-          
-        ) : (
-          
-          <>
-            {/* Lista de productos con scroll propio */}
-            <List sx={{ flexGrow: 1, overflowY: 'auto' }}>
-              {this.state.cartItems.map((item, index) => {
-                 const itemKey = item.talla ? `${item.id}-${item.talla}` : item.id;
-                  return(
-                <React.Fragment key={itemKey}>
-                  <ListItem key={item.id} disableGutters sx={{ px: 1 }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
-                    <Avatar
-                      src={item.imagen}
-                      alt={item.nombre}
-                      variant="square"
-                      sx={{ width: 70, height: 70, borderRadius: 1, mr: 2 }}
-                    />
-                        <Box sx={{ flexGrow: 1 }}>
-                          <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.05rem', color: '#2c1a99', fontFamily: 'Varsity', fontWeight: 'bold' }}>
-                            {item.nombre}
-                          </Typography>
-                          <Typography variant="body1" sx={{ fontSize: '0.95rem', color: 'text.secondary' }}>
-                            L{(item.precio).toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
-                          </Typography>
-                          {/* Mostrar talla si existe */}
+    return (
+      <Drawer
+        anchor="right"
+        open={this.state.cartModalOpen}
+        onClose={this.cerrarCarritoModal}
+        PaperProps={{
+          sx: {
+            width: { xs: '100%', sm: 400, md: 550 },
+            overflowX: 'hidden',
+            overflowY: 'hidden'
+          }
+        }}
+      >
+        <Box sx={{ p: 3, pt: { xs: '130px', sm: '130px' }, display: 'flex', flexDirection: 'column', height: '100%' }}>
+          {/* Header */}
+          <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+            <Typography variant="h5" sx={{ color: '#2c1a99', fontFamily: 'Varsity', fontWeight: 'bold' }}>Carrito de Compras</Typography>
+            <IconButton onClick={this.cerrarCarritoModal}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+
+          {/* Contenido del carrito */}
+          {this.state.cartItems.length === 0 ? (
+            <Box
+              sx={{
+                flexGrow: 1,
+                display: 'flex',
+                flexDirection: 'row',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: 2,
+                py: 4
+              }}
+            >
+              <ShoppingCartIcon sx={{ fontSize: 48, color: 'grey.500' }} />
+              <Typography variant="h6" color="text.secondary" sx={{ fontFamily: 'Varsity', fontWeight: 'bold' }}>
+                Tu carrito está vacío
+              </Typography>
+            </Box>
+
+          ) : (
+
+            <>
+              {/* Lista de productos con scroll propio */}
+              <List sx={{ flexGrow: 1, overflowY: 'auto' }}>
+                {this.state.cartItems.map((item, index) => {
+                  const itemKey = item.talla ? `${item.id}-${item.talla}` : item.id;
+                  return (
+                    <React.Fragment key={itemKey}>
+                      <ListItem key={item.id} disableGutters sx={{ px: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', width: '100%' }}>
+                          <Avatar
+                            src={item.imagen}
+                            alt={item.nombre}
+                            variant="square"
+                            sx={{ width: 70, height: 70, borderRadius: 1, mr: 2 }}
+                          />
+                          <Box sx={{ flexGrow: 1 }}>
+                            <Typography variant="h6" fontWeight="bold" sx={{ fontSize: '1.05rem', color: '#2c1a99', fontFamily: 'Varsity', fontWeight: 'bold' }}>
+                              {item.nombre}
+                            </Typography>
+                            <Typography variant="body1" sx={{ fontSize: '0.95rem', color: 'text.secondary' }}>
+                              L{(item.precio).toLocaleString('es-HN', { minimumFractionDigits: 2 })} c/u
+                            </Typography>
+                            {/* Mostrar talla si existe */}
                             {item.talla && (
                               <Typography variant="body2" color="text.secondary">
                                 Talla: {item.talla}
                               </Typography>
                             )}
 
-                        </Box>
-                        {/* Cantidad: más alejado del texto, más cerca del precio */}
-                      <Box sx={{ display: 'flex', alignItems: 'center', ml: 3, mr: 1 }}>
-                        <IconButton size="small" onClick={() => this.disminuirCantidad(item.id, item.talla)} disabled={item.cantidad <= 1}>
-                          <RemoveIcon />
-                        </IconButton>
-                        <Typography sx={{ mx: 1, minWidth: 30, textAlign: 'center', fontWeight: 'bold' }}>
-                          {item.cantidad}
-                        </Typography>
-                        <IconButton size="small" onClick={() => this.aumentarCantidad(item.id, item.talla)}>
-                          {item.cantidad <= 1}
-                          <AddIcon />
-                        </IconButton>
-                      </Box>
-                      {/* Total */}
-                      <Box sx={{ minWidth: 90, textAlign: 'right', mr: 1 }}>
-                        <Typography fontWeight="bold" noWrap>
-                          L{(item.precio * item.cantidad).toLocaleString('es-HN', { minimumFractionDigits: 2 })}
-                        </Typography>
-                        {/*boton de Eliminar*/}
-                      </Box>
-                          <IconButton onClick={() => this.eliminarDelCarrito(item.id, item.talla)} 
-                          sx={{
-                            color: '#d32f2f',
-                            '&:hover': { 
-                              bgcolor: 'rgba(211, 47, 47, 0.1)',
-                              transform: 'scale(1.1)'
-                            },
-                            transition: 'all 0.2s ease'
-                          }}>
+                          </Box>
+                          {/* Cantidad: más alejado del texto, más cerca del precio */}
+                          <Box sx={{ display: 'flex', alignItems: 'center', ml: 3, mr: 1 }}>
+                            <IconButton size="small" onClick={() => this.disminuirCantidad(item.id, item.talla)} disabled={item.cantidad <= 1}>
+                              <RemoveIcon />
+                            </IconButton>
+                            <Typography sx={{ mx: 1, minWidth: 30, textAlign: 'center', fontWeight: 'bold' }}>
+                              {item.cantidad}
+                            </Typography>
+                            <IconButton size="small" onClick={() => this.aumentarCantidad(item.id, item.talla)}>
+                              {item.cantidad <= 1}
+                              <AddIcon />
+                            </IconButton>
+                          </Box>
+                          {/* Total */}
+                          <Box sx={{ minWidth: 90, textAlign: 'right', mr: 1 }}>
+                            <Typography fontWeight="bold" noWrap>
+                              L{(item.precio * item.cantidad).toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+                            </Typography>
+                            {/*boton de Eliminar*/}
+                          </Box>
+                          <IconButton onClick={() => this.eliminarDelCarrito(item.id, item.talla)}
+                            sx={{
+                              color: '#d32f2f',
+                              '&:hover': {
+                                bgcolor: 'rgba(211, 47, 47, 0.1)',
+                                transform: 'scale(1.1)'
+                              },
+                              transition: 'all 0.2s ease'
+                            }}>
                             <DeleteIcon />
-                        </IconButton>
-                    </Box>
-                  </ListItem>
+                          </IconButton>
+                        </Box>
+                      </ListItem>
                       {index < this.state.cartItems.length - 1 && <Divider />}
-                </React.Fragment>
-                
-                // Crear una key única que incluya la talla si existe
-                
-                );
-              })}
-            </List>
+                    </React.Fragment>
+
+                    // Crear una key única que incluya la talla si existe
+
+                  );
+                })}
+              </List>
 
 
-            {/* Total y botón de pago */}
-            <Divider sx={{ my: 2 }} />
-            <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-              
-              <Box>
-                <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
-                  Total: L{parseFloat(this.calcularTotal()).toLocaleString('es-HN', { minimumFractionDigits: 2 })}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  {this.state.totalItems} {this.state.totalItems === 1 ? 'artículo' : 'artículos'}
-                </Typography>
+              {/* Total y botón de pago */}
+              <Divider sx={{ my: 2 }} />
+              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+
+                <Box>
+                  <Typography variant="h5" sx={{ fontWeight: 'bold' }}>
+                    Total: L{parseFloat(this.calcularTotal()).toLocaleString('es-HN', { minimumFractionDigits: 2 })}
+                  </Typography>
+                  <Typography variant="body2" color="text.secondary">
+                    {this.state.totalItems} {this.state.totalItems === 1 ? 'artículo' : 'artículos'}
+                  </Typography>
+                </Box>
+
+                <Button
+                  variant="contained"
+                  sx={{
+                    bgcolor: '#E06C14',
+                    fontWeight: 'bold',
+                    '&:hover': { bgcolor: '#28a428' }
+                  }}
+                  onClick={() => {
+                    this.realizarPeticion();
+                    alert('¡Gracias por tu compra!');
+                    this.setState({
+                      cartItems: [],
+                      totalItems: 0,
+                      cartModalOpen: false,
+                      selectedSizes: {} // Limpiar tallas seleccionadas
+                    });
+                  }}
+                >
+                  Proceder al Pago
+                </Button>
               </Box>
-              
-              <Button
-                variant="contained"
-                sx={{
-                  bgcolor: '#E06C14',
-                  fontWeight: 'bold',
-                  '&:hover': { bgcolor: '#28a428' }
-                }}
-                onClick={() => {
-                  this.realizarPeticion();
-                  alert('¡Gracias por tu compra!');
-                  this.setState({ 
-                    cartItems: [], 
-                    totalItems: 0, 
-                    cartModalOpen: false,
-                    selectedSizes: {} // Limpiar tallas seleccionadas
-                  });
-                }}
-              >
-                Proceder al Pago
-              </Button>
-            </Box>
-          </>
-        )}
-      </Box>
-    </Drawer>
-  );
-}
+            </>
+          )}
+        </Box>
+      </Drawer>
+    );
+  }
 
- render() {
-  console.log('Renderizando Tienda - Vista actual:', this.state.currentView);
+  render() {
+    console.log('Renderizando Tienda - Vista actual:', this.state.currentView);
 
-  // Renderizar componente según la vista actual
-  switch (this.state.currentView) {
-    case 'login':
-      return (
-        <Login
-          onLoginSuccess={this.handleLoginSuccess}
-          onBackToTienda={this.handleBackToTienda}
-        />
-      );
+    // Renderizar componente según la vista actual
+    switch (this.state.currentView) {
+      case 'login':
+        return (
+          <Login
+            onLoginSuccess={this.handleLoginSuccess}
+            onBackToTienda={this.handleBackToTienda}
+          />
+        );
 
-    case 'registro':
-      return (
-        <Registro
-          onRegistroSuccess={this.handleRegistroSuccess}
-          onBackToTienda={this.handleBackToTienda}
-        />
-      );
+      case 'registro':
+        return (
+          <Registro
+            onRegistroSuccess={this.handleRegistroSuccess}
+            onBackToTienda={this.handleBackToTienda}
+          />
+        );
 
-    case 'tienda':
-    default:
-      return (
-        <>
-          {/* Contenido principal de la tienda */}
-          <Box
-            sx={{
-              minHeight: '100vh',
-              width: '100%',
-              background: '#f5f5f5',
-              display: 'flex',
-              flexDirection: 'column',
-              position: 'relative',
-              overflow: 'hidden'
-            }}
-          >
-            {/* Espaciado superior para separar de la navbar principal */}
-            <Box sx={{ height: '20px' }} />
-
-            {/* Navbar secundaria de la tienda */}
-            {this.renderSecondaryNavbar()}
-
+      case 'tienda':
+      default:
+        return (
+          <>
             {/* Contenido principal de la tienda */}
             <Box
               sx={{
-                flex: 1,
-                backgroundColor: '#ffffff', // fondo de toda la página
+                minHeight: '100vh',
+                width: '100%',
+                background: '#f5f5f5',
+                display: 'flex',
+                flexDirection: 'column',
+                position: 'relative',
                 overflow: 'hidden'
               }}
             >
-              {this.renderTiendaContent()}
-            </Box>
-          </Box>
+              {/* Espaciado superior para separar de la navbar principal */}
+              <Box sx={{ height: '20px' }} />
 
-          {/* Modal del carrito de compras */}
-          {this.renderCarritoModal()}
-        </>
-      );
+              {/* Navbar secundaria de la tienda */}
+              {this.renderSecondaryNavbar()}
+
+              {/* Contenido principal de la tienda */}
+              <Box
+                sx={{
+                  flex: 1,
+                  backgroundColor: '#ffffff', // fondo de toda la página
+                  overflow: 'hidden'
+                }}
+              >
+                {this.renderTiendaContent()}
+              </Box>
+            </Box>
+
+            {/* Modal del carrito de compras */}
+            {this.renderCarritoModal()}
+          </>
+        );
+    }
   }
-}
 }
 
 export default Tienda;

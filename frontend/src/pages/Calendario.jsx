@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import './stylesCalendario.css';
 import { Padding } from '@mui/icons-material';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 
 // Componentes de iconos SVG simples
 const ChevronLeft = () => (
@@ -344,7 +345,6 @@ const Calendario = () => {
 
 	const actualizarEvento = async (id, eventoActualizado) => {
 		try {
-			const url = `http://localhost:3000/auth/evento/${id}`;
 			const body = {
 				nombre: eventoActualizado.title,
 				fecha_inicio: new Date(eventoActualizado.date).toISOString(),
@@ -352,10 +352,7 @@ const Calendario = () => {
 				descripcion: eventoActualizado.description,
 			};
 
-			const res = await axios.put(url, body, {
-				headers: { 'Content-Type': 'application/json' },
-			});
-
+			const res = await api.put(`/auth/evento/${id}`, body);
 			console.log('Evento actualizado:', res.data.mensaje);
 			window.alert(res.data.mensaje);
 		} catch (error) {
@@ -465,8 +462,6 @@ const Calendario = () => {
 	};
 
 	const realizarPeticion = async (date, endDate) => {
-		const url = 'http://localhost:3000/auth/registrarevento';
-
 		const body = {
 			nombre: eventForm.title,
 			fecha_inicio: date,
@@ -475,23 +470,16 @@ const Calendario = () => {
 		};
 
 		try {
-			const res = await axios.post(url, body, {
-				headers: { 'Content-Type': 'application/json' },
-			});
-
+			const res = await api.post('/auth/registrarevento', body);
 			console.log('response data: ', res.data.mensaje);
 			window.alert(res.data.mensaje);
-
 			return res.data;
 		} catch (error) {
 			if (error.response) {
 				console.log('Error data:', error.response.data.mensaje);
-				console.log('Error status:', error.response.status);
 				window.alert(error.response.data.mensaje);
 			} else if (error.request) {
-				window.alert(
-					'Ninguna respuesta del servidor. Por favor verifique su red.',
-				);
+				window.alert('Ninguna respuesta del servidor. Por favor verifique su red.');
 			} else {
 				window.alert('Error en la red.');
 			}
@@ -501,9 +489,7 @@ const Calendario = () => {
 	useEffect(() => {
 		const fetchEventos = async () => {
 			try {
-				const res = await axios.get(
-					'http://localhost:3000/auth/obtenereventos',
-				);
+				const res = await api.get('/auth/obtenereventos');
 				const eventos = res.data;
 
 				const eventosMap = {};
@@ -1212,9 +1198,7 @@ const Calendario = () => {
 									if (eventToDelete) {
 										const { eventId } = eventToDelete;
 										try {
-											await axios.delete(
-												`http://localhost:3000/auth/evento/${eventId}`,
-											);
+											await api.delete(`/auth/evento/${eventId}`);
 
 											// Eliminar del estado local
 											setEvents(prev => {

@@ -14,9 +14,10 @@ import {
 import logo from '/Images/Logo-pilotos.png';
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from './firebaseConfig';
-import axios from 'axios';
-axios.defaults.withCredentials = true;
+//import axios from 'axios';
+//axios.defaults.withCredentials = true;
 import ResetPasswordModal from './ResetPasswordModal';
+import { api } from '../api/api';
 
 const Login = ({ onRegistroClick }) => {
 	const [formData, setFormData] = useState({
@@ -170,35 +171,22 @@ const Login = ({ onRegistroClick }) => {
 	};
 
 	const realizarPeticion = async () => {
-		const url = 'http://localhost:3000/auth/signin';
-
-		const body = {
-			email: formData.email,
-			password: formData.password,
-		};
-
 		try {
-			const res = await axios.post(url, body, {
-				headers: { 'Content-Type': 'application/json' },
-				withCredentials: true, // <-- importante para cookie HttpOnly
+			const res = await api.post('/auth/signin', {
+				email: formData.email,
+				password: formData.password,
 			});
-
-			console.log('response data: ', res.data.mensaje);
 			window.alert(res.data.mensaje);
 			return res.data;
 		} catch (error) {
 			if (error.response) {
-				console.log('Error data:', error.response.data.mensaje);
-				console.log('Error status:', error.response.status);
 				window.alert(error.response.data.mensaje);
 			} else if (error.request) {
-				window.alert(
-					'Ninguna respuesta del servidor. Por favor verifique su red.',
-				);
+				window.alert('Ninguna respuesta del servidor. Por favor verifique su red.');
 			} else {
 				window.alert('Error en la red.');
 			}
-			throw error; // Re-lanzamos para que handleFailedAttempt se encargue
+			throw error;
 		}
 	};
 

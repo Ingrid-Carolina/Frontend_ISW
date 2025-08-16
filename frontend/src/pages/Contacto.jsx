@@ -16,7 +16,8 @@ import { Link } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { Controller } from 'react-hook-form';
 import { Snackbar, Alert } from '@mui/material';
-import axios from 'axios';
+//import axios from 'axios';
+import { api } from '../api/api';
 import ReCAPTCHA from 'react-google-recaptcha';
 
 const Contacto = () => {
@@ -55,9 +56,7 @@ const Contacto = () => {
 
 		// Verificar token con el backend
 		try {
-			const res = await axios.post('http://localhost:3000/auth/verificar', {
-				token,
-			});
+			const res = await api.post('/auth/verificar', { token });
 
 			if (!res.data.success) {
 				setSnackbarType('error');
@@ -77,13 +76,7 @@ const Contacto = () => {
 				mensaje: data.mensaje,
 			};
 
-			const response = await axios.post(
-				'http://localhost:3000/auth/registrarformulario',
-				body,
-				{
-					headers: { 'Content-Type': 'application/json' },
-				},
-			);
+			const response = await api.post('/auth/registrarformulario', body);
 
 			reset({
 				nombre: '',
