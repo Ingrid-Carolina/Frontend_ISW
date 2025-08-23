@@ -156,6 +156,7 @@ const Calendario = () => {
 		description: '',
 		type: 'event',
 		date: '',
+		img_url: '',
 	});
 	const [view, setView] = useState('month'); // 'week' o 'month'
 	const [showMonthEvents, setShowMonthEvents] = useState(false);
@@ -300,6 +301,7 @@ const Calendario = () => {
 			description: '',
 			type: 'event',
 			date: localDateString,
+			img_url: '',
 		});
 	};
 
@@ -340,21 +342,28 @@ const Calendario = () => {
 			endDate: ff || fi, // si no había fin, usa el inicio
 			description: event.description || '',
 			type: event.type || 'event',
+			img_url: event.img_url || '',
 		});
 	};
 
 	const actualizarEvento = async (id, eventoActualizado) => {
 		try {
+			const toISO = (d) => {
+				if (!d) return null;
+				return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
+			};
+
 			const body = {
-				nombre: eventoActualizado.title,
-				fecha_inicio: new Date(eventoActualizado.date).toISOString(),
-				fecha_final: new Date(eventoActualizado.endDate).toISOString(),
-				descripcion: eventoActualizado.description,
+				nombre: eventoActualizado.title ?? '',
+				fecha_inicio: toISO(eventoActualizado.date),
+				fecha_final: toISO(eventoActualizado.endDate),
+				descripcion: eventoActualizado.description ?? '',
+				img_url: eventoActualizado?.img_url ?? null, // <- null-safe
 			};
 
 			const res = await api.put(`/auth/evento/${id}`, body);
-			console.log('Evento actualizado:', res.data.mensaje);
-			window.alert(res.data.mensaje);
+			console.log('Evento actualizado:', res.data?.mensaje);
+			window.alert(res.data?.mensaje);
 		} catch (error) {
 			console.error('Error al actualizar evento:', error);
 			window.alert('No se pudo actualizar el evento.');
@@ -467,6 +476,7 @@ const Calendario = () => {
 			fecha_inicio: date,
 			fecha_final: endDate,
 			descripcion: eventForm.description,
+			img_url: eventForm.img_url || null,
 		};
 
 		try {
@@ -516,6 +526,7 @@ const Calendario = () => {
 							time: isAllDay ? '' : toHHMM(fechaInicio),
 							endTime: isAllDay || !fechaFinal ? '' : toHHMM(fechaFinal),
 							type: 'event',
+							img_url: ev.img_url,
 						};
 
 						const fechas = datesBetween(fechaInicio, fechaFinal || fechaInicio);
@@ -805,6 +816,25 @@ const Calendario = () => {
 											disabled={!isLoggedIn}
 										/>
 									</div>
+
+									<div>
+
+										{/*Placeholder para subir imagen */}
+										<label className='form-label'>URL de imangen</label>
+										<textarea
+											value={eventForm.img_url}
+											onChange={e =>
+												isLoggedIn &&
+												setEventForm({
+													...eventForm,
+													img_url: e.target.value,
+												})
+											}
+											className='form-textarea'
+											placeholder='URL de la imagen'
+											disabled={!isLoggedIn}
+										/>
+									</div>
 								</div>
 							</>
 						)}
@@ -865,9 +895,11 @@ const Calendario = () => {
 													endTime: endTimeToUse,
 													endDate: endEventDate,
 													date: eventDate,
+													img_url: eventForm.img_url || '',
 												};
 
 												// Guardar en backend
+												console.log('updatedEvent ->', updatedEvent);
 												await actualizarEvento(updatedEvent.id, updatedEvent);
 
 												// Rango original y nuevo

@@ -3,7 +3,7 @@
 //import axios from 'axios';
 import { api } from '../api/api';
 
-export async function obtenerEventosProximos(cantidad = 3) {
+export async function obtenerEventosProximos() {
 	const hoy = new Date();
 	hoy.setHours(0, 0, 0, 0);
 
@@ -19,11 +19,11 @@ export async function obtenerEventosProximos(cantidad = 3) {
 					titulo: ev.nombre,
 					fecha: fecha,
 					lugar: ev.descripcion,
+					img_url: ev.img_url
 				};
 			})
 			.filter(ev => ev.fecha >= hoy)
 			.sort((a, b) => a.fecha - b.fecha)
-			.slice(0, cantidad);
 
 		return proximos;
 	} catch (err) {

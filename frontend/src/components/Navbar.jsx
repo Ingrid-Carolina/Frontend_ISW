@@ -33,7 +33,6 @@ import axios from 'axios';
 axios.defaults.withCredentials = true; // <-- importante para logout y rutas protegidas
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
-import { api } from '../api/api';
 
 {
 	/* Items de la navbarbar*/
@@ -238,7 +237,7 @@ export default function CustomNavbar() {
 
 	const handleLogout = async () => {
 		try {
-			await api.post('/auth/signout');
+			await axios.post('http://localhost:3000/auth/signout');
 			localStorage.removeItem('userRole');
 			localStorage.removeItem('userName');
 			localStorage.removeItem('userEmail');

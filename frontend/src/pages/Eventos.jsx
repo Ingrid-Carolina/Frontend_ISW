@@ -6,52 +6,295 @@ import {
   Container,
   Alert,
   CircularProgress,
+  Grid,
+  Card,
+  CardContent,
+  CardHeader,
+  Typography,
+  CardMedia,
+  Button,
+  IconButton,
+  DialogTitle
 } from '@mui/material';
 import SearchIcon from '@mui/icons-material/Search';
 import './Eventos.css';
 import FeaturedPost from '../components/FeaturedPost';
 import { obtenerEventosProximos } from '../pages/eventService';
+import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
+import ChevronRightIcon from '@mui/icons-material/ChevronRight';
+import fond from '/Images/pilotos.c.jpg';
 //import axios from 'axios';
 import { api } from '../api/api';
 
-// ❗ Evita doble slash al construir URLs
-//const baseUrl = 'http://localhost:3000';
+const chunk = (arr, size) =>
+  Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
+    arr.slice(i * size, i * size + size)
+  );
 
 // --- Lista de próximos eventos (como lo tenías) ---
 const ListaEventos = () => {
   const [eventos, setEventos] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+  const [page, setPage] = useState(0);
+
 
   useEffect(() => {
     const cargarEventos = async () => {
-      const proximos = await obtenerEventosProximos(3);
-      setEventos(proximos);
+      try {
+        const data = await obtenerEventosProximos();
+        setEventos(data);
+      } catch (err) {
+        setError('Error al cargar los eventos');
+      } finally {
+        setLoading(false);
+      }
     };
     cargarEventos();
   }, []);
 
-  if (eventos.length === 0) {
+  if (loading) {
     return (
-      <div className="sin-eventos">No hay eventos actuales</div>
+      <Box display="flex" justifyContent="center" mt={4}>
+        <CircularProgress />
+      </Box>
     );
   }
 
-  const formatFecha = (fecha) =>
-    new Date(fecha).toLocaleDateString('es-ES', {
-      day: 'numeric',
-      month: 'long',
-      year: 'numeric',
-    });
+  if (error) {
+    return (
+      <Box mt={4}>
+        <Alert severity='error'>{error}</Alert>
+      </Box>
+    );
+  }
 
+  // --- Carousel por páginas ---
+  const pageSize = 4; // cuántas cards por página
+  const pages = chunk(eventos, pageSize);
+  const total = pages.length || 1;
+  const prev = () => setPage(p => Math.max(0, p - 1));
+  const next = () => setPage(p => Math.min(total - 1, p + 1));
+
+  {/*Grid de eventos */ }
   return (
-    <ul className="lista-eventos">
-      {eventos.map((evento, index) => (
-        <li key={evento.id || index} className="evento-item">
-          <div className="evento-titulo">{evento.titulo}</div>
-          <div className="evento-fecha">{formatFecha(evento.fecha)}</div>
-          {evento.lugar && <div className="evento-lugar">{evento.lugar}</div>}
-        </li>
-      ))}
-    </ul>
+    <div className="w-full bg-background py-8">
+      <div className="container mx-auto px-4">
+        <Container sx={{ py: 2, position: 'relative' }}>
+
+          {/* 📱 Móvil/Tablet: grid normal */}
+          <Box sx={{ display: { xs: 'block', md: 'none' } }}>
+            <Grid container spacing={3}>
+              {eventos.map((e) => (
+                <Grid item key={e.id} xs={12} sm={6}>
+                  <Card
+                    sx={{
+                      borderRadius: 3,
+                      width: 350,
+                      boxShadow: 3,
+                      transition: '0.3s',
+                      '&:hover': { boxShadow: 6 },
+                    }}
+                  >
+                    {e.img_url ? (
+                      <CardMedia
+                        component="img"
+                        height="160"
+                        image={e.img_url}
+                        alt={e.titulo}
+                        sx={{ objectFit: 'cover' }}
+                      />
+                    ) : (
+                      <Box
+                        height={160}
+                        display="flex"
+                        alignItems="center"
+                        justifyContent="center"
+                        bgcolor="primary.main"
+                        color="white"
+                      >
+                        <Typography variant="h5">
+                          {e.titulo ? e.titulo.charAt(0) : 'E'}
+                        </Typography>
+                      </Box>
+                    )}
+
+                    <CardContent sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="h6" sx={{ fontWeight: 'bold', mb: .5 }}>
+                        {e.titulo}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        {new Date(e.fecha).toLocaleDateString('es-ES', {
+                          day: 'numeric', month: 'long', year: 'numeric',
+                        })}
+                      </Typography>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          display: '-webkit-box',
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: 'vertical',
+                          overflow: 'hidden',
+                          mt: 1,
+                        }}
+                      >
+                        📍 {e.lugar}
+                      </Typography>
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        sx={{
+                          backgroundColor: '#0c005a',
+                          color: 'white',
+                          '&:hover': { backgroundColor: '#0a0047' },
+                        }}
+                      >
+                        Ver más
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+          </Box>
+
+          {/* 💻 Desktop: carousel */}
+          <Box sx={{ display: { xs: 'none', md: 'block' } }}>
+            {/* Controles */}
+            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+              <IconButton onClick={prev} disabled={page === 0}>
+                <ChevronLeftIcon />
+              </IconButton>
+              <IconButton onClick={next} disabled={page === total - 1 || total === 0}>
+                <ChevronRightIcon />
+              </IconButton>
+            </Box>
+
+            {/* Viewport del carousel */}
+            <Box sx={{ overflow: 'hidden', borderRadius: 2 }}>
+              {/* Track */}
+              <Box
+                sx={{
+                  display: 'flex',
+                  width: `${total * 100}%`,
+                  transform: `translateX(-${page * (100 / total)}%)`,
+                  transition: 'transform .4s ease',
+                }}
+              >
+                {pages.map((group, idx) => (
+                  <Box key={idx} sx={{ minWidth: '100%' }}>
+                    {/* Cada página en grid 4-columnas */}
+                    <Grid container spacing={3}>
+                      {group.map((e) => (
+                        <Grid item key={e.id} md={3}>
+                          <Card
+                            sx={{
+                              height: 380, // alinea botones
+                              display: 'flex',
+                              flexDirection: 'column',
+                              borderRadius: 3,
+                              boxShadow: 3,
+                              transition: '0.3s',
+                              '&:hover': { boxShadow: 6 },
+                            }}
+                          >
+                            {e.img_url ? (
+                              <CardMedia
+                                component="img"
+                                height="160"
+                                image={e.img_url}
+                                alt={e.titulo}
+                                sx={{ objectFit: 'cover' }}
+                              />
+                            ) : (
+                              <Box
+                                height={160}
+                                display="flex"
+                                alignItems="center"
+                                justifyContent="center"
+                                bgcolor="primary.main"
+                                color="white"
+                              >
+                                <Typography variant="h5">
+                                  {e.titulo ? e.titulo.charAt(0) : 'E'}
+                                </Typography>
+                              </Box>
+                            )}
+
+                            <CardContent sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
+                              <Typography variant="h6" sx={{ fontWeight: 'bold', mb: .5, textAlign: 'center' }}>
+                                {e.titulo}
+                              </Typography>
+                              <Typography variant="subtitle2" color="text.secondary" sx={{ textAlign: 'center' }}>
+                                {new Date(e.fecha).toLocaleDateString('es-ES', {
+                                  day: 'numeric', month: 'long', year: 'numeric',
+                                })}
+                              </Typography>
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                                sx={{
+                                  display: '-webkit-box',
+                                  WebkitLineClamp: 2,
+                                  WebkitBoxOrient: 'vertical',
+                                  overflow: 'hidden',
+                                  mt: 1,
+                                  textAlign: 'center',
+                                }}
+                              >
+                                📍 {e.lugar}
+                              </Typography>
+
+                              <Box sx={{ mt: 'auto' }} />
+                              <Divider sx={{ my: 2 }} />
+
+                              <Button
+                                fullWidth
+                                variant="contained"
+                                sx={{
+                                  backgroundColor: '#0c005a',
+                                  color: 'white',
+                                  '&:hover': { backgroundColor: '#0a0047' },
+                                }}
+                              >
+                                Ver más
+                              </Button>
+                            </CardContent>
+                          </Card>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+                ))}
+              </Box>
+            </Box>
+
+            {/* Dots de paginación */}
+            {total > 1 && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', gap: 1, mt: 2 }}>
+                {pages.map((_, i) => (
+                  <Box
+                    key={i}
+                    onClick={() => setPage(i)}
+                    sx={{
+                      width: 10,
+                      height: 10,
+                      borderRadius: '50%',
+                      cursor: 'pointer',
+                      bgcolor: i === page ? '#0c005a' : 'grey.300',
+                    }}
+                  />
+                ))}
+              </Box>
+            )}
+          </Box>
+        </Container>
+      </div>
+    </div>
   );
 };
 
@@ -130,15 +373,78 @@ const Eventos = () => {
 
   return (
     <div style={{ paddingTop: '90px' }}>
-      <div className="event-header">
-        <div className="event-header-title">
-          <p>NOTICIAS Y EVENTOS</p>
-        </div>
-      </div>
 
-      <Container maxWidth="md">
+      {/*Encabezado*/}
+
+
+      <Box
+        sx={{
+          position: 'relative',
+          width: '100%',
+          minHeight: { xs: '65vh', md: '80vh' },
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          backgroundImage: 'url(https://scontent.ftgu2-3.fna.fbcdn.net/v/t39.30808-6/473273115_1067940641803858_2235185049279648708_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeFHW3J5TNPCrkMQgDaCzelGvlJfLYtzJu2-Ul8ti3Mm7UBiBwdgHcZMeHZi6fdkWpscjAWuMGwt-vJNq6S0swHG&_nc_ohc=BtV5Z3-M1FAQ7kNvwHxvQj_&_nc_oc=AdlvyixySDeERA22IKz7T1uS-svzMDXGb0u__JKr3bWR3E-lTaLpHqgTRwc2cIEI2ec&_nc_zt=23&_nc_ht=scontent.ftgu2-3.fna&_nc_gid=mdAwa0H1shhD2vRKbrSTBQ&oh=00_AfUQjjZw6obYLb1qRQRl1qJh3jTX6MZbx6pkFmaCoIjcfA&oe=68B01B02)', 
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          py: { xs: 6, md: 8 },
+        }}
+      >
+        {/* Overlay */}
+        <Box
+          sx={{
+            position: 'absolute',
+            width: '100%',
+            height: '100%',
+            background: 'linear-gradient(to bottom right, rgba(12,0,90,0.85), rgba(0,0,0,0.7))',
+          }}
+        />
+
+        {/* Contenido */}
+        <Box
+          sx={{
+            position: 'relative',
+            zIndex: 2,
+            textAlign: 'center',
+            color: 'white',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            px: 2,
+          }}
+        >
+          <Typography
+            variant='h2'
+            sx={{
+              fontWeight: 'bold',
+              fontSize: { xs: '2.8rem', md: '5rem' },
+              fontFamily: 'Varsity, sans-serif',
+              textShadow: '2px 2px 6px rgba(0,0,0,0.7)',
+              mb: 2,
+            }}
+          >
+            Noticias y Eventos
+          </Typography>
+
+          <Typography
+            variant='h6'
+            sx={{
+              maxWidth: 800,
+              fontSize: { xs: '1rem', md: '1.3rem' },
+              color: 'rgba(255,255,255,0.9)',
+              textShadow: '1px 1px 4px rgba(0,0,0,0.6)',
+              fontWeight: 300,
+            }}
+          >
+            Mantente al día con las últimas noticias, logros y actividades de la Asociación de Béisbol Menor Pilotos.
+          </Typography>
+        </Box>
+      </Box>
+
+      <Container maxWidth="xl">
         {/* Buscador */}
-        <Box paddingTop="90px" display="flex" alignItems="center" mb={3}>
+        <Box paddingTop="70px" display="flex" alignItems="center" mb={3}>
           <SearchIcon style={{ marginRight: '8px' }} />
           <TextField
             fullWidth
@@ -150,7 +456,7 @@ const Eventos = () => {
           />
         </Box>
 
-        <Featured />
+        {/*<Featured />*/}
         <Divider style={{ margin: '2rem 0' }} />
 
         {/* Estado de carga / error / vacío */}
@@ -172,40 +478,87 @@ const Eventos = () => {
         )}
 
         {/* Grid de noticias  */}
-        <div className="noticia-grid">
-          {([...filteredNews]
+        <Grid container spacing={3} justifyContent="center">
+          {[...filteredNews]
             .sort((a, b) => new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion))
-            .slice(0, 3)
-          ).map((n) => (
-            <article key={n.id} className="noticia-card-horizontal">
-              {n.imagen_url && (
-                <div className="noticia-img-wrap-horizontal">
-                  <img src={n.imagen_url} alt={n.titulo} className="noticia-img-horizontal" />
-                </div>
-              )}
+            .map((n) => (
+              <Grid item xs={12} sm={6} md={4} key={n.id}>
+                <Card
+                  sx={{
+                    width: 350,
+                    minHeight: 450,
+                    display: "flex",
+                    flexDirection: "column",   // 🔹 hace que el contenido se estire
+                    borderRadius: 3,
+                    boxShadow: 3,
+                    transition: "0.3s",
+                    "&:hover": { boxShadow: 6 },
+                    mb: { xs: 2, md: 0 },
+                  }}
+                >
+                  <CardMedia
+                    component="img"
+                    height="160"
+                    image={n.imagen_url || "/placeholder.jpg"}
+                    alt={n.titulo}
+                  />
 
-              <div className="noticia-body-horizontal">
-                <h3 className="noticia-title-horizontal">{n.titulo}</h3>
-                <div className="noticia-meta-horizontal">
-                  <span className="noticia-fecha-horizontal">
-                    {formatFechaPub(n.fecha_publicacion)}
-                  </span>
-                </div>
-                <p className="noticia-contenido-horizontal">{n.contenido}</p>
-              </div>
-            </article>
-          ))}
+                  {/* Contenido flexible */}
+                  <CardContent sx={{ display: "flex", flexDirection: "column", flex: 1 }}>
+                    <Box display="flex" flexDirection="column" flex={1}>
+                      <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
+                        {n.titulo}
+                      </Typography>
+                      <Typography variant="subtitle2" color="text.secondary">
+                        {formatFechaPub(n.fecha_publicacion)}
+                      </Typography>
+
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{
+                          display: "-webkit-box",
+                          WebkitLineClamp: 2,
+                          WebkitBoxOrient: "vertical",
+                          overflow: "hidden",
+                          mt: 1,
+                        }}
+                      >
+                        {n.contenido}
+                      </Typography>
+
+                      {/* Empuja el botón hacia abajo */}
+                      <Box sx={{ flexGrow: 1 }} />
+
+                      <Divider sx={{ my: 2 }} />
+
+                      <Button
+                        fullWidth
+                        variant="contained"
+                        sx={{
+                          backgroundColor: "#0c005a",
+                          color: "white",
+                          "&:hover": { backgroundColor: "#0a0047" },
+                        }}
+                      >
+                        Ver más
+                      </Button>
+                    </Box>
+                  </CardContent>
+                </Card>
+              </Grid>
+            ))}
+        </Grid>
+
+        {/* Lista de próximos eventos */}
+
+        <div className="eventos-container" style={{ paddingTop: '2rem' }}>
+          <h1 className="eventos-titulo" style={{ fontFamily: 'GroteskBold' }}>
+            Próximos Eventos
+          </h1>
+          <ListaEventos />
         </div>
-
       </Container>
-
-      {/* Lista de próximos eventos */}
-      <div className="eventos-container" style={{ paddingTop: '2rem' }}>
-        <h1 className="eventos-titulo" style={{ fontFamily: 'GroteskBold' }}>
-          Próximos Eventos
-        </h1>
-        <ListaEventos />
-      </div>
     </div>
   );
 };
