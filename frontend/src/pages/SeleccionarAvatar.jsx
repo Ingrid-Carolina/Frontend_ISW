@@ -1,10 +1,13 @@
+// src/components/SeleccionarAvatar.jsx
 import React from 'react';
-import { Box, Typography, Grid, IconButton } from '@mui/material';
-import { useNavigate } from 'react-router-dom';
+import {
+  Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, Grid, Box, Typography
+} from '@mui/material';
 
-// Array de avatares predefinidos (todos juntos)
-const avataresPredefinidos = [
-  // Avatares de béisbol
+const THUMB = 50;
+
+const AVATARES = [
   { id: 1, imagen: '../public/images/guante.jpg' },
   { id: 2, imagen: '../public/images/bate.jpg' },
   { id: 3, imagen: '../public/images/pelota.jpg' },
@@ -36,71 +39,94 @@ const avataresPredefinidos = [
   { id: 29, imagen: '../public/images/avatar21.jpg' },
   { id: 30, imagen: '../public/images/avatar22.png' },
 ];
-const SeleccionarAvatar = () => {
-  const navigate = useNavigate();
 
-  const handleSeleccionarAvatar = (imagenUrl) => {
-    console.log(`Avatar seleccionado: ${imagenUrl}`);
-    navigate(`/perfil?avatar=${encodeURIComponent(imagenUrl)}`);
+export default function SeleccionarAvatar({ open, current, onSelect, onClose }) {
+  const [selected, setSelected] = React.useState(current || '');
+
+  React.useEffect(() => {
+    setSelected(current || '');
+  }, [current, open]);
+
+  const handleChoose = () => {
+    if (selected && onSelect) onSelect(selected);
+    onClose?.();
   };
 
   return (
-    <Box
-      sx={{
-        p: 4,
-        pt: 2,
-        bgcolor: '#fff',
-        minHeight: '100vh',
-        color: '#000',
-        textAlign: 'center',
-        // Esto es lo que soluciona la superposición de la barra de navegación.
-        // Ajusta el valor para que sea un poco mayor que la altura de tu barra de navegación.
-        mt: { xs: '60px', sm: '80px' } 
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="sm" 
+      keepMounted
+      PaperProps={{
+        sx: {
+          borderRadius: 2,
+          width: 'min(560px, 92vw)',   // controla ancho máximo
+        },
       }}
     >
-      <Typography
-        variant="h2"
+      <DialogTitle sx={{ py: 1.5 }}>Elige tu avatar</DialogTitle>
+
+      <DialogContent
+        dividers
         sx={{
-          fontFamily: 'Varsity',
-          color: '#10045c',
-          mb: 4,
-          textAlign: 'center',
+          p: 2,
+          maxHeight: { xs: '60vh', sm: '68vh' }, // altura máx + scroll interno
+          overflowY: 'auto',
         }}
       >
-        Elige un avatar
-      </Typography>
-      <Grid container spacing={2} justifyContent="center">
-        {avataresPredefinidos.map((avatar) => (
-          <Grid item key={avatar.id} xs={4} sm={3} md={2} lg={1}>
-            <IconButton
-              onClick={() => handleSeleccionarAvatar(avatar.imagen)}
-              sx={{
-                p: 0,
-                '&:hover': {
-                  '& img': {
-                    border: '3px solid #1976d2',
-                    // Aumenta el tamaño de la imagen un 15%
-                    transform: 'scale(1.15)',
-                  },
-                },
-              }}
-            >
-              <img
-                src={avatar.imagen}
-                alt={`Avatar ${avatar.id}`}
-                style={{
-                  width: '100%',
-                  borderRadius: '50%',
-                  border: '3px solid transparent',
-                  transition: 'border 0.2s, transform 0.2s',
-                }}
-              />
-            </IconButton>
-          </Grid>
-        ))}
-      </Grid>
-    </Box>
-  );
-};
+        <Typography variant="body2" sx={{ mb: 2, color: 'text.secondary' }}>
+          Selecciona una imagen de la galería.
+        </Typography>
 
-export default SeleccionarAvatar;
+        <Grid container spacing={1.5} justifyContent="center">
+          {AVATARES.map(({ id, imagen }) => (
+            <Grid
+              item
+              key={id}
+              xs={3}    // 4 por fila en móviles
+              sm={2.4}  // 5 por fila (MUI acepta decimales)
+              md={2}    // 6 por fila en desktop
+            >
+              <Box
+                onClick={() => setSelected(imagen)}
+                sx={{
+                  width: THUMB + 8,
+                  height: THUMB + 8,
+                  m: '0 auto',
+                  display: 'grid',
+                  placeItems: 'center',
+                  border: selected === imagen ? '3px solid #1976d2' : '2px solid #e0e0e0',
+                  borderRadius: '9999px',
+                  overflow: 'hidden',
+                  cursor: 'pointer',
+                  transition: 'transform 0.12s, border-color 0.12s',
+                  '&:hover': { transform: 'scale(1.04)' },
+                }}
+              >
+                <img
+                  src={imagen}
+                  alt={`Avatar ${id}`}
+                  style={{
+                    width: THUMB,
+                    height: THUMB,
+                    objectFit: 'cover',
+                    display: 'block',
+                  }}
+                />
+              </Box>
+            </Grid>
+          ))}
+        </Grid>
+      </DialogContent>
+
+      <DialogActions sx={{ px: 2, py: 1.25 }}>
+        <Button onClick={onClose}>Cancelar</Button>
+        <Button onClick={handleChoose} variant="contained" disabled={!selected}>
+          ACEPTAR
+        </Button>
+      </DialogActions>
+    </Dialog>
+  );
+}

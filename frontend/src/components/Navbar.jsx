@@ -33,6 +33,7 @@ import axios from 'axios';
 axios.defaults.withCredentials = true; // <-- importante para logout y rutas protegidas
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
+import { api } from '../api/api';
 
 {
 	/* Items de la navbarbar*/
@@ -45,9 +46,22 @@ const baseMenuItems = [
 	{ text: 'Contacto', icon: <CallIcon />, path: '/Contacto' },
 ];
 
-const UserAvatarMenu = ({ user, onEditProfile, onLogout, drawerOpen }) => {
+const UserAvatarMenu = ({
+	user,
+	avatarVer,
+	onEditProfile,
+	onLogout,
+	drawerOpen,
+}) => {
 	const [anchorEl, setAnchorEl] = React.useState(null);
 	const open = Boolean(anchorEl);
+	const [imgError, setImgError] = React.useState(false);
+
+	// Generamos el src con cache-busting
+	const cacheBustedSrc =
+		user.avatar && !imgError
+			? `${user.avatar}${user.avatar.includes('?') ? '&' : '?'}v=${avatarVer}`
+			: undefined;
 
 	const handleClick = event => {
 		if (anchorEl) {
@@ -65,8 +79,11 @@ const UserAvatarMenu = ({ user, onEditProfile, onLogout, drawerOpen }) => {
 		<>
 			<IconButton onClick={handleClick} sx={{ ml: 1 }}>
 				<Avatar
+					src={cacheBustedSrc}
+					alt={user.name || 'Usuario'}
+					onError={() => setImgError(true)}
 					sx={{
-						bgcolor: user.color || '#3f51b5',
+						bgcolor: !cacheBustedSrc ? user.color || '#3f51b5' : 'transparent',
 						color: drawerOpen ? '#0c005a' : 'white',
 						width: 40,
 						height: 40,
@@ -76,7 +93,7 @@ const UserAvatarMenu = ({ user, onEditProfile, onLogout, drawerOpen }) => {
 						transition: 'all 0.3s ease',
 					}}
 				>
-					{user.name?.charAt(0).toUpperCase()}
+					{!cacheBustedSrc && user.name?.charAt(0).toUpperCase()}
 				</Avatar>
 			</IconButton>
 
@@ -164,7 +181,9 @@ UserAvatarMenu.propTypes = {
 	user: PropTypes.shape({
 		name: PropTypes.string.isRequired,
 		color: PropTypes.string,
+		avatar: PropTypes.string,
 	}).isRequired,
+	avatarVer: PropTypes.number.isRequired,
 	onEditProfile: PropTypes.func.isRequired,
 	onLogout: PropTypes.func.isRequired,
 	drawerOpen: PropTypes.bool.isRequired,
@@ -182,6 +201,11 @@ export default function CustomNavbar() {
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
+	const [avatarUrl, setAvatarUrl] = React.useState(
+		localStorage.getItem('userAvatar') || '',
+	);
+	const [avatarVer, setAvatarVer] = React.useState(0); // versión para cache-busting
+
 	const [userName, setUserName] = React.useState(
 		localStorage.getItem('userName') ?? '',
 	);
@@ -192,6 +216,51 @@ export default function CustomNavbar() {
 	// Derivados
 	const isLoggedIn = !!userName;
 	const avatarLetter = (userName || 'U').charAt(0).toUpperCase();
+
+	// Escuchar cuando el perfil se actualiza (misma pestaña)
+	React.useEffect(() => {
+		const onProfileUpdated = e => {
+			const url = e?.detail?.avatar || '';
+			localStorage.setItem('userAvatar', url);
+			setAvatarUrl(url);
+			setAvatarVer(Date.now()); // cambia la versión para forzar recarga
+		};
+		window.addEventListener('profile:updated', onProfileUpdated);
+
+		// También escuchar cambios en storage (otras pestañas)
+		const onStorage = () => {
+			const url = localStorage.getItem('userAvatar') || '';
+			setAvatarUrl(url);
+			setAvatarVer(Date.now());
+		};
+		window.addEventListener('storage', onStorage);
+
+		return () => {
+			window.removeEventListener('profile:updated', onProfileUpdated);
+			window.removeEventListener('storage', onStorage);
+		};
+	}, []);
+
+	React.useEffect(() => {
+		const cargarPerfil = async () => {
+			if (!isLoggedIn) {
+				setAvatarUrl('');
+				return;
+			}
+			try {
+				const res = await api.get('/auth/obtenerperfil');
+				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
+				if (perfil?.avatar) {
+					localStorage.setItem('userAvatar', perfil.avatar);
+					setAvatarUrl(perfil.avatar);
+					setAvatarVer(Date.now());
+				}
+			} catch {
+				setAvatarUrl('');
+			}
+		};
+		cargarPerfil();
+	}, [isLoggedIn]);
 
 	// Helper de color
 	const generateColorFromName = React.useCallback(name => {
@@ -209,7 +278,7 @@ export default function CustomNavbar() {
 			setUserRole(localStorage.getItem('userRole') ?? '');
 		};
 		window.addEventListener('storage', sync);
-		sync(); 
+		sync();
 		return () => window.removeEventListener('storage', sync);
 	}, []);
 
@@ -237,12 +306,12 @@ export default function CustomNavbar() {
 
 	const handleLogout = async () => {
 		try {
-			await axios.post('http://localhost:3000/auth/signout');
+			await api.post('/auth/signout');
 			localStorage.removeItem('userRole');
 			localStorage.removeItem('userName');
 			localStorage.removeItem('userEmail');
 			alert('Sesion cerrada correctamente.');
-			navigate('/'); 
+			navigate('/');
 			//Refrescar la página para limpiar el estado visual y memoria React
 			setTimeout(() => {
 				window.location.reload();
@@ -389,7 +458,12 @@ export default function CustomNavbar() {
 					<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
 						{isLoggedIn ? (
 							<UserAvatarMenu
-								user={{ name: avatarLetter, color: userColor }}
+								user={{
+									name: avatarLetter,
+									color: userColor,
+									avatar: avatarUrl,
+								}}
+								avatarVer={avatarVer}
 								onEditProfile={() => navigate('/perfil')}
 								onLogout={handleLogout}
 								drawerOpen={drawerOpen}
