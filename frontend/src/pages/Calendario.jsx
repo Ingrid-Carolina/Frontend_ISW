@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import './stylesCalendario.css';
-import { Padding } from '@mui/icons-material';
 //import axios from 'axios';
 import { api } from '../api/api';
 
@@ -298,6 +297,8 @@ const Calendario = () => {
 		setEventForm({
 			title: '',
 			time: '',
+			endTime: '',
+			endDate: '',
 			description: '',
 			type: 'event',
 			date: localDateString,
@@ -312,9 +313,12 @@ const Calendario = () => {
 		setEventForm({
 			title: '',
 			time: '',
+			endTime: '',
+			endDate: '',
 			description: '',
 			type: 'event',
 			date: '',
+			img_url: '',
 		});
 	};
 
@@ -361,7 +365,7 @@ const Calendario = () => {
 				img_url: eventoActualizado?.img_url ?? null, // <- null-safe
 			};
 
-			const res = await api.put(`/auth/evento/${id}`, body);
+			const res = await api.put(`/auth/evento/${Number(id)}`, body);
 			console.log('Evento actualizado:', res.data?.mensaje);
 			window.alert(res.data?.mensaje);
 		} catch (error) {
@@ -474,25 +478,28 @@ const Calendario = () => {
 		const body = {
 			nombre: eventForm.title,
 			fecha_inicio: date,
-			fecha_final: endDate,
+			fecha_final: endDate || null,
 			descripcion: eventForm.description,
 			img_url: eventForm.img_url || null,
 		};
 
 		try {
 			const res = await api.post('/auth/registrarevento', body);
-			console.log('response data: ', res.data.mensaje);
-			window.alert(res.data.mensaje);
-			return res.data;
+			// IMPORTANTE: asumimos que el backend devuelve { mensaje, id }
+			const nuevoId = res?.data?.id;
+			console.log('response data:', res.data);
+			window.alert(res.data?.mensaje || 'Evento creado');
+			return { id: nuevoId, ...res.data };
 		} catch (error) {
 			if (error.response) {
-				console.log('Error data:', error.response.data.mensaje);
-				window.alert(error.response.data.mensaje);
+				console.log('Error data:', error.response.data?.mensaje || error.message);
+				window.alert(error.response.data?.mensaje || 'Error al crear evento');
 			} else if (error.request) {
 				window.alert('Ninguna respuesta del servidor. Por favor verifique su red.');
 			} else {
 				window.alert('Error en la red.');
 			}
+			return null;
 		}
 	};
 
@@ -820,7 +827,7 @@ const Calendario = () => {
 									<div>
 
 										{/*Placeholder para subir imagen */}
-										<label className='form-label'>URL de imangen</label>
+										<label className='form-label'>URL de imagen</label>
 										<textarea
 											value={eventForm.img_url}
 											onChange={e =>
@@ -882,10 +889,9 @@ const Calendario = () => {
 													eventForm.date,
 													timeToUse,
 												);
-												const endEventDate = createDateFromInput(
-													endDateToUse,
-													endTimeToUse,
-												);
+												const endEventDate = endDateToUse && endTimeToUse
+													? createDateFromInput(endDateToUse, endTimeToUse)
+													: createDateFromInput(eventForm.date, timeToUse);
 
 												// Crear evento actualizado
 												const updatedEvent = {
@@ -900,6 +906,12 @@ const Calendario = () => {
 
 												// Guardar en backend
 												console.log('updatedEvent ->', updatedEvent);
+
+												if (updatedEvent.id > 2147483647) {
+													window.alert('Este evento aún no está sincronizado con el servidor. Vuelve a abrir la página.');
+													return;
+												}
+
 												await actualizarEvento(updatedEvent.id, updatedEvent);
 
 												// Rango original y nuevo
@@ -949,25 +961,29 @@ const Calendario = () => {
 													eventForm.date,
 													timeToUse,
 												);
-												const endEventDate = createDateFromInput(
-													endDateToUse,
-													endTimeToUse,
+												const endEventDate = endDateToUse && endTimeToUse
+													? createDateFromInput(endDateToUse, endTimeToUse)
+													: createDateFromInput(eventForm.date, timeToUse);
+
+												const data = await realizarPeticion(
+													eventDate.toISOString(),
+													(endDateToUse && endTimeToUse) ? endEventDate.toISOString() : null
 												);
+												//console.log(data);
+
+												if (!data || !data.id) {
+													window.alert('No se recibio el ID del backend');
+													return;
+												}
 
 												const newEvent = {
-													id: Date.now(),
+													id: data.id,
 													...eventForm,
 													time: timeToUse,
 													endTime: endTimeToUse,
 													endDate: endEventDate,
 													date: eventDate,
 												};
-
-												const data = await realizarPeticion(
-													newEvent.date.toISOString(),
-													newEvent.endDate.toISOString(),
-												);
-												console.log(data);
 
 												const allDates = datesBetween(eventDate, endEventDate);
 
@@ -1230,7 +1246,7 @@ const Calendario = () => {
 									if (eventToDelete) {
 										const { eventId } = eventToDelete;
 										try {
-											await api.delete(`/auth/evento/${eventId}`);
+											await api.delete(`/auth/evento/${Number(eventId)}`);
 
 											// Eliminar del estado local
 											setEvents(prev => {
