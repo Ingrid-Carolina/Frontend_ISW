@@ -19,6 +19,7 @@ import CloseIcon from '@mui/icons-material/Close';
 import EmojiEventsIcon from '@mui/icons-material/EmojiEvents';
 import EventIcon from '@mui/icons-material/Event';
 import CallIcon from '@mui/icons-material/Call';
+import AdminPanelSettingsIcon from '@mui/icons-material/AdminPanelSettings';
 import CalendarMonthIcon from '@mui/icons-material/CalendarMonth';
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import StorefrontIcon from '@mui/icons-material/Storefront';
@@ -217,6 +218,14 @@ export default function CustomNavbar() {
 	const isLoggedIn = !!userName;
 	const avatarLetter = (userName || 'U').charAt(0).toUpperCase();
 
+	//heradr colores de botones navbar movil
+	const drawerItemSx = {
+		textDecoration: 'none',
+		color: '#0c005a', // 🔵 texto azul
+		'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+		'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
+	};
+
 	// Escuchar cuando el perfil se actualiza (misma pestaña)
 	React.useEffect(() => {
 		const onProfileUpdated = e => {
@@ -354,8 +363,8 @@ export default function CustomNavbar() {
 
 						<Box
 							sx={{
-								display: { xs: 'none', md: 'flex' },
-								gap: 3,
+								display: { xs: 'none', lg: 'flex' }, // antes: md
+								gap: { lg: 3, xl: 4 },
 								position: 'relative',
 							}}
 						>
@@ -527,7 +536,8 @@ export default function CustomNavbar() {
 									ml: 1,
 									fontWeight: 'bold',
 									fontFamily: '"GroteskBold", sans-serif',
-									fontSize: '1.4rem',
+									fontSize: { xs: 0, md: '1.4rem' }, // oculto en xs/sm
+									display: { xs: 'none', md: 'inline' },
 									color: drawerOpen ? '#0c005a' : 'white',
 								}}
 							>
@@ -557,18 +567,37 @@ export default function CustomNavbar() {
 			>
 				<Box sx={{ width: '100%', p: 3 }}>
 					<List>
+						{/* Admin solo en móvil*/}
+						{isMobile && userRole === 'admin' && (
+							<ListItem
+								button
+								component={Link}
+								to='/admin'
+								onClick={() => setDrawerOpen(false)}
+								sx={drawerItemSx}
+							>
+								<ListItemIcon sx={{ color: 'inherit' }}>
+									<AdminPanelSettingsIcon />
+								</ListItemIcon>
+								<ListItemText
+									primary='Panel de Administrador'
+									primaryTypographyProps={{
+										fontFamily: '"Franklin Gothic Medium", sans-serif',
+										fontWeight: 'bold',
+										fontSize: '0.95rem',
+										color: 'inherit',
+									}}
+								/>
+							</ListItem>
+						)}
+
 						{/* SubMenú nuestra historia móvil*/}
 						{isMobile && (
 							<>
 								<ListItem
 									button
 									onClick={() => setMobileSubmenuOpen(prev => !prev)}
-									sx={{
-										textDecoration: 'none',
-										color: 'inherit',
-										'&:hover .MuiListItemText-primary': { color: '#e06c14' },
-										'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
-									}}
+									sx={drawerItemSx}
 								>
 									<ListItemIcon sx={{ color: 'inherit' }}>
 										<HistoryEduOutlinedIcon />
@@ -677,43 +706,12 @@ export default function CustomNavbar() {
 
 						{isMobile && (
 							<>
-								{/* Contáctanos solo en móvil */}
-								<ListItem
-									button
-									component={Link}
-									to='/contacto'
-									sx={{
-										textDecoration: 'none',
-										color: 'inherit',
-										'&:hover .MuiListItemText-primary': { color: '#e06c14' },
-										'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
-									}}
-								>
-									<ListItemIcon sx={{ color: 'inherit' }}>
-										<CallIcon />
-									</ListItemIcon>
-									<ListItemText
-										primary='Contáctanos'
-										primaryTypographyProps={{
-											fontFamily: '"Franklin Gothic Medium", sans-serif',
-											fontWeight: 'bold',
-											fontSize: '0.95rem',
-											color: 'inherit',
-										}}
-									/>
-								</ListItem>
-
 								{/* En Vivo solo en móvil*/}
 								<ListItem
 									button
 									component={Link}
 									to='/envivo'
-									sx={{
-										textDecoration: 'none',
-										color: 'inherit',
-										'&:hover .MuiListItemText-primary': { color: '#e06c14' },
-										'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
-									}}
+									sx={drawerItemSx}
 								>
 									<ListItemIcon sx={{ color: 'inherit' }}>
 										<LiveTvOutlinedIcon />{' '}
@@ -733,17 +731,7 @@ export default function CustomNavbar() {
 
 						{/* Tienda solo en móvil */}
 						{isMobile && (
-							<ListItem
-								button
-								component={Link}
-								to='/tienda'
-								sx={{
-									textDecoration: 'none',
-									color: 'inherit',
-									'&:hover .MuiListItemText-primary': { color: '#e06c14' },
-									'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
-								}}
-							>
+							<ListItem button component={Link} to='/tienda' sx={drawerItemSx}>
 								<ListItemIcon sx={{ color: 'inherit' }}>
 									<StorefrontIcon />
 								</ListItemIcon>
@@ -796,6 +784,9 @@ const navBtnStyle = drawerOpen => ({
 	fontSize: '1.4rem',
 	fontFamily: 'GroteskBold, sans-serif',
 	textTransform: 'none',
+	whiteSpace: 'nowrap', // 👈 evita el salto de línea
+	px: { lg: 2, xl: 2.5 }, // 👈 padding acorde
+	lineHeight: 1.2,
 	transition: 'color 0.3s ease',
 	'&:hover': {
 		color: '#e06c14',
