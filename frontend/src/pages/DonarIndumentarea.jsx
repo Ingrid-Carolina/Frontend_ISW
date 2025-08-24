@@ -1,15 +1,27 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import fondo from '/Images/TestimonioFondo1.jpg';`url(${fondo})`
-import guante from '/Images/guante.jpg';
-import bate from '/Images/bate.jpg';
-import pelota from '/Images/pelota.jpg';
-import casco from '/Images/casco.jpg';
-import uniforme from '/Images/uniforme.jpg';
-import guante2 from '/Images/receptor.jpeg';
-import mascara from '/Images/mask.jpg';
-import protector from '/Images/pechera.jpeg';
-import espinilleras from '/Images/espinilleras.jpg';
+import {
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Button,
+  Select,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import fondo from "/Images/TestimonioFondo1.jpg";
+import guante from "/Images/guante.jpg";
+import bate from "/Images/bate.jpg";
+import pelota from "/Images/pelota.jpg";
+import casco from "/Images/casco.jpg";
+import uniforme from "/Images/uniforme.jpg";
+import guante2 from "/Images/receptor.jpeg";
+import mascara from "/Images/mask.jpg";
+import protector from "/Images/pechera.jpeg";
+import espinilleras from "/Images/espinilleras.jpg";
 
 const indumentaria = [
   { id: 1, nombre: "Guante de béisbol", imagen: guante },
@@ -29,6 +41,18 @@ const DonarIndumentarea = () => {
     indumentaria.map((pieza) => ({ ...pieza, checked: false, cantidad: 0 }))
   );
 
+  // Estado modal y formulario
+  const [open, setOpen] = useState(false);
+  const [formData, setFormData] = useState({
+    nombre: "",
+    telefono: "",
+    correo: "",
+    dia: "",
+    horario: "",
+    descripcion: "",
+  });
+
+  // Manejo selección de indumentaria
   const handleCheckbox = (id) => {
     setSeleccion((prev) =>
       prev.map((item) =>
@@ -47,34 +71,72 @@ const DonarIndumentarea = () => {
     );
   };
 
+  // Confirmar donación → abre formulario
   const confirmarDonacion = () => {
     const donaciones = seleccion.filter((item) => item.checked && item.cantidad > 0);
     if (donaciones.length === 0) {
       alert("Por favor selecciona al menos una pieza de indumentaria para donar.");
       return;
     }
-    alert("¡Gracias por tu donación de indumentaria!");
-    navigate("/donaciones");
+    setOpen(true);
+  };
+
+  // Manejo del formulario
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    // Extraemos las piezas seleccionadas y sus cantidades
+    const donaciones = seleccion
+      .filter((item) => item.checked && item.cantidad > 0)
+      .map((item) => ({
+        nombre: item.nombre,
+        cantidad: item.cantidad,
+      }));
+
+    try {
+      await fetch("http://localhost:3000/auth/enviar-donacion", { // <-- tu endpoint
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          datos: formData,
+          donaciones: donaciones, // 👈 ahora se envían también las piezas
+        }),
+      });
+
+      alert("¡Gracias por tu donación! Te contactaremos pronto.");
+      setOpen(false);
+      navigate("/donaciones");
+    } catch (error) {
+      console.error("Error al enviar donación:", error);
+      alert("Hubo un error al enviar la donación. Intenta de nuevo.");
+    }
   };
 
   return (
     <div
   style={{
     minHeight: "100vh",
+    width: "100%",           // 🔹 asegura que nunca exceda el ancho de la pantalla
+    maxWidth: "100vw",       // 🔹 nunca más ancho que el viewport
     position: "relative",
     margin: 0,
-    paddingTop: "2rem", // 6rem para dejar espacio a la navbar
-    paddingBottom: "14rem", // 6rem para dejar espacio a la navbar
-    overflowX: "hidden",
+    paddingTop: "2rem",
+    paddingBottom: "14rem",
+    overflowX: "hidden",     // 🔹 evita el scroll horizontal
     color: "#fff",
     fontFamily: "GroteskRegular",
     backgroundImage: "linear-gradient(#10045c, #10045c, url('/Images/TestimonioFondo1.jpg')",
     backgroundSize: "cover",
     backgroundPosition: "center",
+    boxSizing: "border-box", // 🔹 evita que padding aumente el ancho real
   }}
 >
-
-      {/* Fondo completo */}
+      {/* Fondo */}
       <div
         style={{
           position: "absolute",
@@ -82,7 +144,6 @@ const DonarIndumentarea = () => {
           zIndex: 0,
         }}
       >
-        {/* Capa de color */}
         <div
           style={{
             backgroundColor: "#10045c",
@@ -91,7 +152,6 @@ const DonarIndumentarea = () => {
             zIndex: 0,
           }}
         ></div>
-        {/* Capa de imagen */}
         <div
           style={{
             backgroundImage: `url(${fondo})`,
@@ -111,23 +171,44 @@ const DonarIndumentarea = () => {
           position: "relative",
           zIndex: 2,
           padding: "2rem",
-          paddingTop: "6rem", // Ajusta según altura navbar
+          paddingTop: "6rem",
         }}
       >
-        <h1 style={{ fontFamily: "GroteskBold", fontSize: "4rem", marginBottom: "1rem" }}>
-          Donación de Indumentaria
-        </h1>
-        <p style={{ marginBottom: "2rem", fontSize: "2rem" }}>
-          Selecciona las piezas que deseas donar y la cantidad.
-        </p>
+        <h1
+  style={{
+    fontFamily: "GroteskBold",
+    fontSize: "clamp(2rem, 5vw, 4rem)", // min 2rem, máx 4rem, fluido en medio
+    marginBottom: "1rem",
+    color: "#fff", // tu color original
+    textAlign: "center", // centrado en pantallas pequeñas
+  }}
+>
+  Donación de Indumentaria
+</h1>
+
+<p
+  style={{
+    fontFamily: "GroteskRegular",
+    marginBottom: "2rem",
+    fontSize: "clamp(1rem, 3vw, 2rem)", // min 1rem, máx 2rem
+    color: "#fff",
+    textAlign: "center",
+  }}
+>
+  Selecciona las piezas que deseas donar y la cantidad.
+</p>
 
         <div
-          style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))",
-            gap: "1.5rem",
-          }}
-        >
+  style={{
+    display: "grid",
+    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // 🔹 más flexible
+    gap: "1rem",
+    width: "100%",       // 🔹 se ajusta al contenedor
+    maxWidth: "100%",    // 🔹 no se pasa del viewport
+    margin: "0 auto",    // 🔹 siempre centrado
+    boxSizing: "border-box",
+  }}
+>
           {seleccion.map((item) => (
             <div
               key={item.id}
@@ -190,6 +271,115 @@ const DonarIndumentarea = () => {
           </button>
         </div>
       </div>
+
+      {/* Modal con formulario */}
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        fullWidth
+        maxWidth="sm"
+        sx={{ mt: "80px" }} // mueve el modal más abajo
+      >
+        <DialogTitle sx={{ fontFamily: "GroteskBold", fontSize:'1.7rem',color:'#10045c' }}>
+          Completar información de la donación
+        </DialogTitle>
+        <DialogContent>
+          <form onSubmit={handleSubmit}>
+            <TextField
+              fullWidth
+              label="Nombre"
+              name="nombre"
+              value={formData.nombre}
+              onChange={handleChange}
+              margin="normal"
+              required
+              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
+              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+            />
+            <TextField
+              fullWidth
+              label="Telefono"
+              name="telefono"
+              value={formData.telefono}
+              onChange={handleChange}
+              margin="normal"
+              required
+              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
+              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+            />
+            <TextField
+              fullWidth
+              label="Correo electronico"
+              type="email"
+              name="correo"
+              value={formData.correo}
+              onChange={handleChange}
+              margin="normal"
+              required
+              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
+              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+            />
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel sx={{ fontFamily: "PeterMedium" }}>Día disponible</InputLabel>
+              <Select
+                name="dia"
+                value={formData.dia}
+                onChange={handleChange}
+                required
+                sx={{ fontFamily: "PeterMedium" }}
+              >
+                {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"].map(
+                  (dia) => (
+                    <MenuItem key={dia} value={dia} sx={{ fontFamily: "PeterMedium" }}>
+                      {dia}
+                    </MenuItem>
+                  )
+                )}
+              </Select>
+            </FormControl>
+
+            <FormControl fullWidth margin="normal">
+              <InputLabel sx={{ fontFamily: "PeterMedium" }}>Horario</InputLabel>
+              <Select
+                name="horario"
+                value={formData.horario}
+                onChange={handleChange}
+                required
+                sx={{ fontFamily: "PeterMedium" }}
+              >
+                {Array.from({ length: 10 }, (_, i) => 8 + i).map((h) => (
+                  <MenuItem key={h} value={`${h}:00`} sx={{ fontFamily: "PeterMedium" }}>
+                    {h}:00
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+
+            <TextField
+              fullWidth
+              label="Descripcion de lo donado"
+              name="descripcion"
+              value={formData.descripcion}
+              onChange={handleChange}
+              margin="normal"
+              multiline
+              rows={3}
+              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
+              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+            />
+
+            <DialogActions>
+              <Button onClick={() => setOpen(false)}  sx={{ color:"#e06c14",fontFamily: "PeterMedium" }}>
+                Cancelar
+              </Button>
+              <Button type="submit" variant="contained" backgroundColor="#e06c14" sx={{color:'white', fontFamily: "PeterMedium"}}>
+                Enviar Donación
+              </Button>
+            </DialogActions>
+          </form>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
