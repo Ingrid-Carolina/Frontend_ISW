@@ -232,7 +232,7 @@ export default function CustomNavbar() {
 	// colores para los subitems del drawer movil
 	const drawerSubItemSx = {
 		pl: 6, // indent para subitems
-		color: '#0c005a', // azul
+		color: '#0c005a',
 		'& .MuiListItemIcon-root': {
 			minWidth: 36,
 			color: 'inherit',
@@ -348,19 +348,30 @@ export default function CustomNavbar() {
 				sx={{
 					backgroundColor: drawerOpen ? '#ffffff' : 'rgba(12, 0, 90, 0.9)',
 					zIndex: 1301,
-					height: '90px',
+					height: { xs: 72, md: 90 },
 					transition: 'background-color 0.3s ease',
 				}}
 			>
 				<Toolbar
 					sx={{
 						display: 'flex',
-						justifyContent: 'space-between',
 						alignItems: 'center',
-						minHeight: '90px !important',
+						justifyContent: 'space-between',
+						minHeight: { xs: '72px !important', md: '90px !important' },
+						pt: { xs: 'max(8px, env(safe-area-inset-top))', md: 0 }, 
+						pb: { xs: 1, md: 0 },
+						px: { xs: 1.5, sm: 2, md: 4 },
 					}}
 				>
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+					<Box
+						sx={{
+							display: 'flex',
+							alignItems: 'center',
+							gap: { xs: 1.5, md: 4 },
+							flexGrow: 1, 
+							minWidth: 0,
+						}}
+					>
 						<Link to='/'>
 							<Box
 								component='img'
@@ -372,7 +383,7 @@ export default function CustomNavbar() {
 
 						<Box
 							sx={{
-								display: { xs: 'none', lg: 'flex' }, // antes: md
+								display: { xs: 'none', lg: 'flex' },
 								gap: { lg: 3, xl: 4 },
 								position: 'relative',
 							}}
@@ -469,7 +480,14 @@ export default function CustomNavbar() {
 						</Box>
 					</Box>
 
-					<Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+					<Box
+						sx={{
+							display: 'flex',
+							alignItems: 'center',
+							gap: { xs: 1, md: 2 },
+							flexShrink: 0,
+						}}
+					>
 						{isLoggedIn ? (
 							<UserAvatarMenu
 								user={{
@@ -492,13 +510,15 @@ export default function CustomNavbar() {
 									color: drawerOpen ? '#ffffff' : '#0c005a',
 									border: '2px solid #0c005a',
 									fontWeight: 'bold',
-									fontSize: '0.9rem',
 									fontFamily: '"GroteskBold", sans-serif',
 									textTransform: 'none',
-									height: '40px',
-									px: 2.5,
 									borderRadius: '6px',
 									transition: 'all 0.3s ease',
+									height: { xs: 36, md: 40 },
+									px: { xs: 1.5, md: 2.5 },
+									fontSize: { xs: '0.85rem', md: '0.9rem' }, 
+									whiteSpace: 'nowrap',
+									ml: { xs: 0.5, md: 1 },
 									'&:hover': {
 										color: '#e06c14',
 										borderColor: '#e06c14',
@@ -541,7 +561,7 @@ export default function CustomNavbar() {
 									ml: 1,
 									fontWeight: 'bold',
 									fontFamily: '"GroteskBold", sans-serif',
-									fontSize: { xs: 0, md: '1.4rem' }, // oculto en xs/sm
+									fontSize: { xs: 0, md: '1.4rem' }, 
 									display: { xs: 'none', md: 'inline' },
 									color: drawerOpen ? '#0c005a' : 'white',
 								}}
@@ -818,8 +838,8 @@ const navBtnStyle = drawerOpen => ({
 	fontSize: '1.4rem',
 	fontFamily: 'GroteskBold, sans-serif',
 	textTransform: 'none',
-	whiteSpace: 'nowrap', // 👈 evita el salto de línea
-	px: { lg: 2, xl: 2.5 }, // 👈 padding acorde
+	whiteSpace: 'nowrap',
+	px: { lg: 2, xl: 2.5 },
 	lineHeight: 1.2,
 	transition: 'color 0.3s ease',
 	'&:hover': {
