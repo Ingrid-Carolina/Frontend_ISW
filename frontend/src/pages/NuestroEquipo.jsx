@@ -1,120 +1,61 @@
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import { Box, Typography, Paper } from '@mui/material';
 import Imgjud from '/Images/Fondojugadores.png';
-import TarjetaTecnico from '../components/TarjetaTecnico.jsx';
-import OwlCarousel from 'react-owl-carousel';
-import 'owl.carousel/dist/assets/owl.carousel.css';
-import 'owl.carousel/dist/assets/owl.theme.default.css';
 
+// Datos del cuerpo técnico (junta directiva)
 export const cuerpoTecnico = [
-    {
-        nombre: 'Mauricio Chavarria',
-        rol: 'Presidente',
-        descripcion: 'Responsable de la toma de decisiones en la asociacion',
-        imagen: '/Images/EnzoMaresca.jpeg',
-    },
-    {
-        nombre: 'LEnard Rodriguez',
-        rol: 'Vicepresidente',
-        descripcion: 'Encargado del acondicionamiento físico y prevención de lesiones.',
-        imagen: '/Images/LuisEnrique2.jpg',
-    },
-    {
-        nombre: 'Karla Paz Reyes',
-        rol: 'Secretaria',
-        descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
-        imagen: '/Images/PepGuardiola.jpg',
-    },{
-        nombre: 'Ely Suyapa Lagos',
-        rol: 'Tesorera',
-        descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
-        imagen: '/Images/PepGuardiola.jpg',
-    },{
-        nombre: 'Norma Rivera',
-        rol: 'Fiscal',
-        descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
-        imagen: '/Images/PepGuardiola.jpg',
-    },{
-        nombre: 'Alex Espinal',
-        rol: 'Vocal I',
-        descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
-        imagen: '/Images/PepGuardiola.jpg',
-    },{
-        nombre: 'Elvin David Lagos',
-        rol: 'Vocal II',
-        descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
-        imagen: '/Images/PepGuardiola.jpg',
-    },{
-        nombre: 'Manuel Ponce',
-        rol: 'Vocal III',
-        descripcion: 'Trabaja con los lanzadores para mejorar su técnica y rendimiento.',
-        imagen: '/Images/PepGuardiola.jpg',
-    },
-    // Puedes añadir más miembros del cuerpo técnico aquí si lo deseas
-];
-
-const patrocinadores = [
-    { id: 1, logo: '/storage/patrocinadores/May2020/SPbDx6Bxsbxvc6RKoxks.jpg' },
-    { id: 2, logo: '/storage/patrocinadores/May2020/KdNBcOhgRN449B4cJG8E.jpg' },
-    { id: 3, logo: '/storage/patrocinadores/May2020/TxsPtkOdB0EavPdwF92z.jpg' },
-    { id: 4, logo: '/storage/patrocinadores/May2020/0OB519VMe0u7NTvtZy3a.jpg' },
-    { id: 5, logo: '/storage/patrocinadores/March2025/31uYqwQRcmU0KO2VZZUK.jpg' },
-    { id: 6, logo: '/storage/patrocinadores/March2025/bv7VZGDCB8ET7AFH6xgB.jpg' },
-    { id: 7, logo: '/storage/patrocinadores/March2025/kRZwuBLxnA9EVfauhepp.jpg' },
-    { id: 8, logo: '/storage/patrocinadores/March2025/9bWl4Prhsrsx8dlneoGE.jpg' },
-    { id: 9, logo: '/storage/patrocinadores/March2025/tqWZh68han2tgwxccsD3.jpg' },
-    { id: 10, logo: '/storage/patrocinadores/March2025/3oUh9A2PptjnzcNbgZc5.jpg' },
+    { nombre: 'Mauricio Chavarria', rol: 'Presidente' },
+    { nombre: 'LEnard Rodriguez', rol: 'Vicepresidente' },
+    { nombre: 'Karla Paz Reyes', rol: 'Secretaria' },
+    { nombre: 'Ely Suyapa Lagos', rol: 'Tesorera' },
+    { nombre: 'Norma Rivera', rol: 'Fiscal' },
+    { nombre: 'Alex Espinal', rol: 'Vocal I' },
+    { nombre: 'Elvin David Lagos', rol: 'Vocal II' },
+    { nombre: 'Manuel Ponce', rol: 'Vocal III' },
 ];
 
 const Jugadores = () => {
-    // Opciones para el carrusel de Patrocinadores
-    const patrocinadorCarouselOptions = {
-        loop: true,
-        margin: 10,
-        autoplay: true,
-        autoplayTimeout: 3000,
-        autoplayHoverPause: true,
-        responsive: {
-            0: {
-                items: 2,
-            },
-            600: {
-                items: 3,
-            },
-            1000: {
-                items: 5,
-            },
-        },
-    };
+    // Tarjeta de miembro
+    const MemberCard = ({ nombre, rol }) => (
+        <Paper
+            elevation={3}
+            sx={{
+                p: 2,
+                textAlign: 'center',
+                bgcolor: 'white',
+                borderRadius: 2,
+                minWidth: 180,
+                border: '2px solid #10045c',
+            }}
+        >
+            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#10045c' }}>
+                {rol}
+            </Typography>
+            <Typography variant="body2" sx={{ color: 'gray' }}>
+                {nombre}
+            </Typography>
+        </Paper>
+    );
 
-    // Opciones para el carrusel del Cuerpo Técnico
-    const cuerpoTecnicoCarouselOptions = {
-        loop: true,
-        margin: 20, // Margen entre las tarjetas
-        autoplay: true, // Puedes ponerlo en true si quieres que se mueva automáticamente
-        autoplayTimeout: 4000,
-        autoplayHoverPause: true,
-        nav: false, // Muestra los botones de navegación (flechas)
-        dots: false, // Muestra los puntos de navegación
-        responsive: {
-            0: {
-                items: 1, // 1 tarjeta en pantallas muy pequeñas
-            },
-            600: {
-                items: 2, // 2 tarjetas en pantallas medianas
-            },
-            900: {
-                items: 3, // 3 tarjetas en pantallas más grandes
-            },
-            1200: {
-                items: 4, // 4 tarjetas en pantallas de escritorio
-            },
-        },
-    };
+    // Línea vertical (pegada)
+    const VerticalLine = ({ height = 30 }) => (
+        <Box sx={{ width: '2px', height: `${height}px`, bgcolor: '#10045c' }} />
+    );
+
+    // Contenedor con línea horizontal conectando hijos (pegada)
+    const HorizontalConnector = ({ children }) => (
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+            {/* Línea horizontal arriba de los hijos */}
+            <Box sx={{ width: '100%', height: '2px', bgcolor: '#10045c', position: 'relative', top: '10px' }} />
+            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
+                {children}
+            </Box>
+        </Box>
+    );
 
     return (
         <>
-            {/* HEADER SECTION */}
+            {/* HEADER */}
             <Box
                 sx={{
                     position: 'relative',
@@ -129,39 +70,13 @@ const Jugadores = () => {
                     py: { xs: 6, md: 8 },
                 }}
             >
-                {/* Overlay */}
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        //backgroundColor: 'rgba(0, 0, 80, 0.75)', // Puedes descomentar si quieres un overlay
-                        zIndex: 1,
-                    }}
-                />
-
-                {/* Texto centrado */}
-                <Box
-                    sx={{
-                        position: 'relative',
-                        zIndex: 2,
-                        textAlign: 'center',
-                        height: '100%',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                    }}
-                >
+                <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', color: 'white' }}>
                     <Typography
-                        variant='h2'
+                        variant="h2"
                         sx={{
                             fontWeight: 'bold',
                             fontSize: { xs: '4rem', md: '7rem' },
                             fontFamily: '"Varsity", cursive',
-                            color: 'white',
-                            textAlign: 'center',
                         }}
                     >
                         NUESTRO EQUIPO
@@ -169,6 +84,7 @@ const Jugadores = () => {
                 </Box>
             </Box>
 
+            {/* SECCIÓN JUGADORES */}
             <Box
                 sx={{
                     display: 'flex',
@@ -178,11 +94,12 @@ const Jugadores = () => {
                     px: { xs: 3, md: 10 },
                     py: 6,
                     bgcolor: '#e6691d',
+                    color: 'white',
                 }}
             >
-                <Box sx={{ flex: 1, color: 'white' }}>
+                <Box sx={{ flex: 1 }}>
                     <Typography
-                        variant='h3'
+                        variant="h3"
                         sx={{
                             fontFamily: '"Varsity", cursive',
                             fontWeight: 'bold',
@@ -192,21 +109,10 @@ const Jugadores = () => {
                     >
                         LOS JUGADORES
                     </Typography>
-
-                    <Typography
-                        variant='body1'
-                        sx={{
-                            fontFamily: '"PeterMedium", sans-serif',
-                            fontSize: '1.5rem',
-                            lineHeight: 1.8,
-                        }}
-                    >
-                        {/* Aquí puedes añadir contenido sobre los jugadores */}
-                    </Typography>
                 </Box>
             </Box>
 
-            {/* Sección del Cuerpo Técnico con Owl Carousel */}
+            {/* ORGANIGRAMA */}
             <Box sx={{ px: { xs: 3, md: 10 }, py: 6, bgcolor: '#f1f1f1' }}>
                 <Typography
                     variant="h3"
@@ -214,32 +120,49 @@ const Jugadores = () => {
                         fontFamily: '"Varsity", cursive',
                         fontWeight: 'bold',
                         textAlign: 'center',
-                        mb: 4,
+                        mb: 6,
                         fontSize: { xs: '3rem', md: '4rem' },
-                        color: '#10045c'
+                        color: '#10045c',
                     }}
                 >
                     Junta Directiva
                 </Typography>
 
-                <Box sx={{ maxWidth: '1400px', margin: '0 auto' }}> {/* Contenedor para el carrusel */}
-                    <OwlCarousel className='owl-theme' {...cuerpoTecnicoCarouselOptions}>
-                        {cuerpoTecnico.map((persona, index) => (
-                            <Box key={index} className='item' sx={{ display: 'flex', justifyContent: 'center', p: 1 }}>
-                                <TarjetaTecnico
-                                    nombre={persona.nombre}
-                                    rol={persona.rol}
-                                    descripcion={persona.descripcion}
-                                    imagen={persona.imagen}
-                                />
-                            </Box>
-                        ))}
-                    </OwlCarousel>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                    
+                    {/* PRESIDENTE */}
+                    <MemberCard {...cuerpoTecnico.find(m => m.rol === 'Presidente')} />
+
+                    {/* Conexión hacia Vice, Secretaria y Tesorera */}
+                    <VerticalLine />
+                    <HorizontalConnector>
+                        {cuerpoTecnico
+                            .filter(m => ['Vicepresidente', 'Secretaria', 'Tesorera'].includes(m.rol))
+                            .map((persona, idx) => (
+                                <Box key={idx} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <VerticalLine height={20} />
+                                    <MemberCard {...persona} />
+                                </Box>
+                            ))}
+                    </HorizontalConnector>
+
+                    {/* Conexión hacia Fiscal */}
+                    <VerticalLine />
+                    <MemberCard {...cuerpoTecnico.find(m => m.rol === 'Fiscal')} />
+
+                    {/* Conexión hacia Vocales */}
+                    <VerticalLine />
+                    <HorizontalConnector>
+                        {cuerpoTecnico
+                            .filter(m => m.rol.includes('Vocal'))
+                            .map((persona, idx) => (
+                                <Box key={idx} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+                                    <VerticalLine height={20} />
+                                    <MemberCard {...persona} />
+                                </Box>
+                            ))}
+                    </HorizontalConnector>
                 </Box>
-            </Box>
-            {/* Sección de Patrocinadores */}
-            <Box sx={{ py: 6, bgcolor: '#ffffff', textAlign: 'center' }}>
-                
             </Box>
         </>
     );
