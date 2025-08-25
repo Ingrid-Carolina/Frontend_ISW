@@ -104,7 +104,7 @@ class Tienda extends React.Component {
       id: 5,
       nombre: "Camiseta Conmemorativa Fundación Angelitos",
       descripcion: "Edición especial para apoyar a la Fundación Angelitos, con diseño único.",
-      precio: 350.50,
+      precio: 350.00,
       imagen: camisaAngelito
     },
     {
@@ -125,35 +125,35 @@ class Tienda extends React.Component {
       id: 8,
       nombre: "Gorra",
       descripcion: "Gorra de diseño clásico, cómoda y con protección solar.",
-      precio: 300.00,
+      precio: 200.00,
       imagen: gorra1
     },
     {
       id: 9,
       nombre: "Gorras 2",
       descripcion: "Nueva colección de gorras con bordados premium y ajuste perfecto.",
-      precio: 300.00,
+      precio: 200.00,
       imagen: gorra2
     },
     {
       id: 10,
       nombre: "Gorras 3",
       descripcion: "Gorras de edición limitada con materiales reciclados y un estilo moderno.",
-      precio: 300.00,
+      precio: 350.00,
       imagen: gorra3
     },
     {
       id: 11,
       nombre: "Gorras 4",
       descripcion: "Diseño urbano para las gorras 4, con visera plana y logotipos discretos.",
-      precio: 300.00,
+      precio: 350.00,
       imagen: gorra4
     },
     {
       id: 12,
       nombre: "Gorras 5",
       descripcion: "Gorras 5: Máximo confort y estilo deportivo, ideales para el día a día.",
-      precio: 300.00,
+      precio: 350.00,
       imagen: gorra5
     },
 
