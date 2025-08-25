@@ -232,7 +232,7 @@ export default function CustomNavbar() {
 	// colores para los subitems del drawer movil
 	const drawerSubItemSx = {
 		pl: 6, // indent para subitems
-		color: '#0c005a',
+		color: '#0c005a', 
 		'& .MuiListItemIcon-root': {
 			minWidth: 36,
 			color: 'inherit',
@@ -348,7 +348,7 @@ export default function CustomNavbar() {
 				sx={{
 					backgroundColor: drawerOpen ? '#ffffff' : 'rgba(12, 0, 90, 0.9)',
 					zIndex: 1301,
-					height: { xs: 72, md: 90 },
+					height: '90px',
 					transition: 'background-color 0.3s ease',
 				}}
 			>
@@ -357,8 +357,8 @@ export default function CustomNavbar() {
 						display: 'flex',
 						alignItems: 'center',
 						justifyContent: 'space-between',
-						minHeight: { xs: '72px !important', md: '90px !important' },
-						pt: { xs: 'max(8px, env(safe-area-inset-top))', md: 0 }, 
+						minHeight: { xs: '74px !important', md: '90px !important' },
+						pt: { xs: 'max(15px, env(safe-area-inset-top))', md: 0 }, 
 						pb: { xs: 1, md: 0 },
 						px: { xs: 1.5, sm: 2, md: 4 },
 					}}
@@ -377,13 +377,13 @@ export default function CustomNavbar() {
 								component='img'
 								src={logo}
 								alt='Logo Pilotos'
-								sx={{ height: 50, cursor: 'pointer' }}
+								sx={{ height: { xs: 46, md: 50 }, cursor: 'pointer' }}
 							/>
 						</Link>
 
 						<Box
 							sx={{
-								display: { xs: 'none', lg: 'flex' },
+								display: { xs: 'none', lg: 'flex' }, 
 								gap: { lg: 3, xl: 4 },
 								position: 'relative',
 							}}
@@ -514,11 +514,11 @@ export default function CustomNavbar() {
 									textTransform: 'none',
 									borderRadius: '6px',
 									transition: 'all 0.3s ease',
-									height: { xs: 36, md: 40 },
-									px: { xs: 1.5, md: 2.5 },
+									height: { xs: 36, md: 40 }, 
+									px: { xs: 1.5, md: 2.5 }, 
 									fontSize: { xs: '0.85rem', md: '0.9rem' }, 
-									whiteSpace: 'nowrap',
-									ml: { xs: 0.5, md: 1 },
+									whiteSpace: 'nowrap', 
+									ml: { xs: 0.5, md: 1 }, 
 									'&:hover': {
 										color: '#e06c14',
 										borderColor: '#e06c14',
@@ -838,8 +838,8 @@ const navBtnStyle = drawerOpen => ({
 	fontSize: '1.4rem',
 	fontFamily: 'GroteskBold, sans-serif',
 	textTransform: 'none',
-	whiteSpace: 'nowrap',
-	px: { lg: 2, xl: 2.5 },
+	whiteSpace: 'nowrap', 
+	px: { lg: 2, xl: 2.5 }, 
 	lineHeight: 1.2,
 	transition: 'color 0.3s ease',
 	'&:hover': {
