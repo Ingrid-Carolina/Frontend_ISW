@@ -90,7 +90,8 @@ const ListaEventos = () => {
                   <Card
                     sx={{
                       borderRadius: 3,
-                      width: 350,
+                      width: 340,
+                      minHeight: 450,
                       boxShadow: 3,
                       transition: '0.3s',
                       '&:hover': { boxShadow: 6 },
@@ -193,6 +194,7 @@ const ListaEventos = () => {
                         <Grid item key={e.id} md={3}>
                           <Card
                             sx={{
+                              width: 350,
                               height: 380, // alinea botones
                               display: 'flex',
                               flexDirection: 'column',
@@ -375,8 +377,6 @@ const Eventos = () => {
     <div style={{ paddingTop: '90px' }}>
 
       {/*Encabezado*/}
-
-
       <Box
         sx={{
           position: 'relative',
@@ -385,7 +385,7 @@ const Eventos = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundImage: 'url(https://scontent.ftgu2-3.fna.fbcdn.net/v/t39.30808-6/473273115_1067940641803858_2235185049279648708_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeFHW3J5TNPCrkMQgDaCzelGvlJfLYtzJu2-Ul8ti3Mm7UBiBwdgHcZMeHZi6fdkWpscjAWuMGwt-vJNq6S0swHG&_nc_ohc=BtV5Z3-M1FAQ7kNvwHxvQj_&_nc_oc=AdlvyixySDeERA22IKz7T1uS-svzMDXGb0u__JKr3bWR3E-lTaLpHqgTRwc2cIEI2ec&_nc_zt=23&_nc_ht=scontent.ftgu2-3.fna&_nc_gid=mdAwa0H1shhD2vRKbrSTBQ&oh=00_AfUQjjZw6obYLb1qRQRl1qJh3jTX6MZbx6pkFmaCoIjcfA&oe=68B01B02)', 
+          backgroundImage: 'url(https://scontent.ftgu2-3.fna.fbcdn.net/v/t39.30808-6/473273115_1067940641803858_2235185049279648708_n.jpg?_nc_cat=109&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeFHW3J5TNPCrkMQgDaCzelGvlJfLYtzJu2-Ul8ti3Mm7UBiBwdgHcZMeHZi6fdkWpscjAWuMGwt-vJNq6S0swHG&_nc_ohc=BtV5Z3-M1FAQ7kNvwHxvQj_&_nc_oc=AdlvyixySDeERA22IKz7T1uS-svzMDXGb0u__JKr3bWR3E-lTaLpHqgTRwc2cIEI2ec&_nc_zt=23&_nc_ht=scontent.ftgu2-3.fna&_nc_gid=mdAwa0H1shhD2vRKbrSTBQ&oh=00_AfUQjjZw6obYLb1qRQRl1qJh3jTX6MZbx6pkFmaCoIjcfA&oe=68B01B02)',
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           py: { xs: 6, md: 8 },
