@@ -147,3 +147,23 @@ label {
 .popup-content button:hover {
   background-color: #2d2d81;
 }
+
+/* Hover naranja en el texto de los botones */
+.avatar-button,
+.guardar-btn,
+.cancelar-btn {
+  transition: color .2s ease; 
+  cursor: pointer;
+}
+
+.avatar-button:hover,
+.guardar-btn:hover,
+.cancelar-btn:hover {
+  color: #e06c14 !important; 
+}
+
+.guardar-btn:disabled:hover,
+.cancelar-btn:disabled:hover {
+  color: inherit !important;
+  cursor: not-allowed;
+}

@@ -118,12 +118,10 @@ function EditarPerfil() {
 	const handleCancelar = () => {
 		setNombre('');
 		setDescripcion('');
-		setAvatar('/Images/AvatarBboy.jpeg');
 	};
 
 	return (
 		<div className='perfil-container'>
-			<h1>Editar Perfil</h1>
 			<div className='perfil-content'>
 				<div className='avatar-section'>
 					<img src={avatar} alt='Avatar' className='avatar-img' />
@@ -136,17 +134,6 @@ function EditarPerfil() {
 					>
 						Cambiar Avatar
 					</button>
-
-					{/*opción para subir archivo */}
-					<label className='avatar-button'>
-						Subir Avatar
-						<input
-							type='file'
-							accept='image/*'
-							onChange={handleAvatarChange}
-							hidden
-						/>
-					</label>
 				</div>
 
 				<div className='info-section'>

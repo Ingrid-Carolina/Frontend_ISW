@@ -229,6 +229,7 @@ export default function CustomNavbar() {
 		'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
 	};
 
+	// colores para los subitems del drawer movil
 	const drawerSubItemSx = {
 		pl: 6, // indent para subitems
 		color: '#0c005a', // azul
@@ -311,6 +312,9 @@ export default function CustomNavbar() {
 		clearTimeout(submenuTimer.current);
 		setSubmenuOpen(true);
 	};
+
+	//funcion para cerrar el drawer movil
+	const handleCloseDrawer = React.useCallback(() => setDrawerOpen(false), []);
 
 	const handleSubmenuLeave = () => {
 		submenuTimer.current = setTimeout(() => setSubmenuOpen(false), 200);
@@ -435,9 +439,7 @@ export default function CustomNavbar() {
 								Tienda
 							</Button>
 							{/* Boton donar*/}
-							<Box
-								sx={{ position: 'relative' }}
-							>
+							<Box sx={{ position: 'relative' }}>
 								<Button
 									sx={navBtnStyle(drawerOpen)}
 									component={Link}
@@ -576,7 +578,7 @@ export default function CustomNavbar() {
 								button
 								component={Link}
 								to='/admin'
-								onClick={() => setDrawerOpen(false)}
+								onClick={handleCloseDrawer}
 								sx={drawerItemSx}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
@@ -622,6 +624,7 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/historia'
+											onClick={handleCloseDrawer}
 											sx={drawerSubItemSx}
 										>
 											<ListItemIcon>
@@ -637,6 +640,7 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/Testimonio'
+											onClick={handleCloseDrawer}
 											sx={drawerSubItemSx}
 										>
 											<ListItemIcon>
@@ -651,6 +655,7 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/aliados'
+											onClick={handleCloseDrawer}
 											sx={drawerSubItemSx}
 										>
 											<ListItemIcon>
@@ -665,6 +670,7 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/NuestroEquipo'
+											onClick={handleCloseDrawer}
 											sx={drawerSubItemSx}
 										>
 											<ListItemIcon>
@@ -679,6 +685,7 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/categoria'
+											onClick={handleCloseDrawer}
 											sx={drawerSubItemSx}
 										>
 											<ListItemIcon>
@@ -730,6 +737,7 @@ export default function CustomNavbar() {
 									button
 									component={Link}
 									to='/envivo'
+									onClick={handleCloseDrawer}
 									sx={drawerItemSx}
 								>
 									<ListItemIcon sx={{ color: 'inherit' }}>
@@ -750,7 +758,13 @@ export default function CustomNavbar() {
 
 						{/* Tienda solo en móvil */}
 						{isMobile && (
-							<ListItem button component={Link} to='/tienda' sx={drawerItemSx}>
+							<ListItem
+								button
+								component={Link}
+								to='/tienda'
+								onClick={handleCloseDrawer}
+								sx={drawerItemSx}
+							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
 									<StorefrontIcon />
 								</ListItemIcon>
@@ -773,6 +787,7 @@ export default function CustomNavbar() {
 							<Button
 								component={Link}
 								to='/donaciones'
+								onClick={handleCloseDrawer}
 								fullWidth
 								sx={{
 									backgroundColor: '#c62828',
