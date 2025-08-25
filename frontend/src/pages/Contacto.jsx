@@ -167,18 +167,24 @@ const Contacto = () => {
 						px: 2,
 						display: 'flex',
 						flexDirection: { xs: 'column', md: 'row' },
-						gap: 4,
+						gap: { xs: 3, md: 4 },
+						alignItems: { xs: 'center', md: 'flex-start' }, //centra en móvil
 					}}
 				>
 					{/* INFO DE CONTACTO */}
 					<Box
 						sx={{
-							width: 280,
+							width: { xs: 'min(560px, 92vw)', md: 320, lg: 360 }, // fluido en móvil, fijo en desktop
+							mx: { xs: 'auto', md: 0 }, // centrado en móvil
 							backgroundColor: '#fff',
 							border: '1px solid #ccc',
 							boxShadow: 2,
+							borderRadius: 1.5,
+							overflow: 'hidden',
 							flexShrink: 0,
-							alignSelf: 'flex-start',
+							alignSelf: { xs: 'center', md: 'flex-start' },
+							position: { md: 'static' },
+							top: { md: '96px' },
 						}}
 					>
 						<Box
@@ -186,9 +192,11 @@ const Contacto = () => {
 								backgroundColor: '#002c6c',
 								color: 'white',
 								fontFamily: 'Varsity, sans-serif',
-								fontSize: '1.5rem',
 								textAlign: 'center',
-								py: 1,
+								py: { xs: 1.25, md: 1.5 },
+								px: 2,
+								fontSize: { xs: 'clamp(18px, 4.8vw, 22px)', md: '1.4rem' },
+								lineHeight: 1.2,
 							}}
 						>
 							Organización de Béisbol PILOTOS - FAH
@@ -245,8 +253,9 @@ const Contacto = () => {
 						sx={{
 							backgroundColor: '#fff',
 							flex: 1,
-							px: 3,
-							py: 4,
+							px: { xs: 2, md: 3 },
+							py: { xs: 2.5, md: 4 },
+							width: { xs: 'min(560px, 92vw)', md: 'auto' },
 						}}
 					>
 						<Grid container spacing={2}>

@@ -18,13 +18,23 @@ function EditarPerfil() {
 	});
 	const [searchParams] = useSearchParams();
 
+	const normalizeAvatar = url => {
+		if (!url) return '';
+		// quita "public/" si llega así y fuerza la carpeta correcta
+		return url
+			.replace(/^\.?\.?\/?public\//i, '/')
+			.replace(/^\/images\//, '/Images/')
+			.replace(/^images\//, '/Images/')
+			.replace(/^\/?\/?Images\//, '/Images/'); // asegura formato final
+	};
+
 	const fetchPerfil = async () => {
 		try {
 			const res = await api.get('/auth/obtenerperfil');
 			const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
 			setNombre(perfil?.nombre ?? '');
 			setDescripcion(perfil?.descripcion ?? '');
-			if (perfil?.avatar) setAvatar(perfil.avatar);
+			if (perfil?.avatar) setAvatar(normalizeAvatar(perfil.avatar));
 		} catch (err) {
 			console.error('Error al obtener el perfil:', err);
 		}
@@ -70,7 +80,7 @@ function EditarPerfil() {
 			const response = await api.put('/auth/editarperfil', {
 				nombre,
 				descripcion,
-				avatar,
+				avatar: normalizeAvatar(avatar),
 			});
 			const data = response.data || {};
 			mostrarPopup(
@@ -171,7 +181,7 @@ function EditarPerfil() {
 				open={pickerOpen}
 				current={avatar}
 				onSelect={url => {
-					setAvatar(url); 
+					setAvatar(url);
 					setPickerOpen(false); // cierra el modal al seleccionar
 				}}
 				onClose={() => setPickerOpen(false)}

@@ -25,11 +25,16 @@ import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import StorefrontIcon from '@mui/icons-material/Storefront';
 import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
 import LiveTvOutlinedIcon from '@mui/icons-material/LiveTvOutlined';
+import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
 import { useNavigate } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PropTypes from 'prop-types';
 import Avatar from '@mui/material/Avatar';
+import AutoStoriesOutlinedIcon from '@mui/icons-material/AutoStoriesOutlined';
+import FormatQuoteOutlinedIcon from '@mui/icons-material/FormatQuoteOutlined';
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
+import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import axios from 'axios';
 axios.defaults.withCredentials = true; // <-- importante para logout y rutas protegidas
 import logo from '/Images/Logo-pilotos.png';
@@ -194,10 +199,8 @@ UserAvatarMenu.propTypes = {
 export default function CustomNavbar() {
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 	const [submenuOpen, setSubmenuOpen] = React.useState(false);
-	const [donarOpen, setDonarOpen] = React.useState(false);
 	const [mobileSubmenuOpen, setMobileSubmenuOpen] = React.useState(false);
 	const submenuTimer = React.useRef(null);
-	const donarTimer = React.useRef(null);
 
 	const theme = useTheme();
 	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
@@ -222,6 +225,17 @@ export default function CustomNavbar() {
 	const drawerItemSx = {
 		textDecoration: 'none',
 		color: '#0c005a', // 🔵 texto azul
+		'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+		'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
+	};
+
+	const drawerSubItemSx = {
+		pl: 6, // indent para subitems
+		color: '#0c005a', // azul
+		'& .MuiListItemIcon-root': {
+			minWidth: 36,
+			color: 'inherit',
+		},
 		'&:hover .MuiListItemText-primary': { color: '#e06c14' },
 		'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
 	};
@@ -300,15 +314,6 @@ export default function CustomNavbar() {
 
 	const handleSubmenuLeave = () => {
 		submenuTimer.current = setTimeout(() => setSubmenuOpen(false), 200);
-	};
-
-	const handleDonarEnter = () => {
-		clearTimeout(donarTimer.current);
-		setDonarOpen(true);
-	};
-
-	const handleDonarLeave = () => {
-		donarTimer.current = setTimeout(() => setDonarOpen(false), 200);
 	};
 
 	const navigate = useNavigate();
@@ -431,8 +436,6 @@ export default function CustomNavbar() {
 							</Button>
 							{/* Boton donar*/}
 							<Box
-								onMouseEnter={handleDonarEnter}
-								onMouseLeave={handleDonarLeave}
 								sx={{ position: 'relative' }}
 							>
 								<Button
@@ -619,19 +622,26 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/historia'
-											sx={mobileSubItem}
+											sx={drawerSubItemSx}
 										>
+											<ListItemIcon>
+												<AutoStoriesOutlinedIcon />
+											</ListItemIcon>
 											<ListItemText
 												primary='Historia'
 												primaryTypographyProps={mobileTypography}
 											/>
 										</ListItem>
+
 										<ListItem
 											button
 											component={Link}
 											to='/Testimonio'
-											sx={mobileSubItem}
+											sx={drawerSubItemSx}
 										>
+											<ListItemIcon>
+												<FormatQuoteOutlinedIcon />
+											</ListItemIcon>
 											<ListItemText
 												primary='Testimonios'
 												primaryTypographyProps={mobileTypography}
@@ -641,8 +651,11 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/aliados'
-											sx={mobileSubItem}
+											sx={drawerSubItemSx}
 										>
+											<ListItemIcon>
+												<HandshakeOutlinedIcon />
+											</ListItemIcon>
 											<ListItemText
 												primary='Aliados'
 												primaryTypographyProps={mobileTypography}
@@ -652,8 +665,11 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/NuestroEquipo'
-											sx={mobileSubItem}
+											sx={drawerSubItemSx}
 										>
+											<ListItemIcon>
+												<SportsBaseballIcon />
+											</ListItemIcon>
 											<ListItemText
 												primary='Nuestro Equipo'
 												primaryTypographyProps={mobileTypography}
@@ -663,8 +679,11 @@ export default function CustomNavbar() {
 											button
 											component={Link}
 											to='/categoria'
-											sx={mobileSubItem}
+											sx={drawerSubItemSx}
 										>
+											<ListItemIcon>
+												<CategoryOutlinedIcon />
+											</ListItemIcon>
 											<ListItemText
 												primary='Categorías'
 												primaryTypographyProps={mobileTypography}
