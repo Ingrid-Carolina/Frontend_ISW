@@ -17,7 +17,7 @@ const AboutUs = () => (
 		</h3>
 	</section>
 );
-
+ 
 const Mision = () => (
 	<SeccionInfo
 		titulo='Nuestra Mision'

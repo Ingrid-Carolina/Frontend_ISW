@@ -58,7 +58,7 @@ return (
         const invertir = index % 2 === 1;
         const superponer = index !== 0;
         const invertirDiagonal = index % 2 === 0;
-        const zIndex = 6 - (index % 6);
+        const zIndex = 9 - (index % 9);
         const rol = roles[Math.floor(Math.random() * roles.length)];
 
         return (
@@ -78,7 +78,7 @@ return (
       <section className="testimonios-titulo">
         <h1>Testimonios en Video</h1>
       </section>
-      <div style={{ marginTop: '50px', marginBottom:'50px' }}>
+      <div style={{marginBottom:'50px' }}>
       <VidCarousel videos={videos} />
       </div>
     </div>

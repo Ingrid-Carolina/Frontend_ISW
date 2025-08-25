@@ -2,7 +2,7 @@
   background-image: url('/Images/HeaderBeisbol.png');
   background-size: cover;
   background-position: center;
-  height: 450px;
+  height: 470px;
   position: relative;
   display: flex;
   align-items: center;
@@ -10,10 +10,10 @@
   padding-right: 20px;
   box-sizing: border-box;
 }
-
+ 
 .header-title {
   color: white;
-  font-size: 4.8vw; /* Escala según el ancho de pantalla */
+  font-size: 4.9vw; /* Escala según el ancho de pantalla */
   font-weight: bold;
   text-align: left;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
@@ -22,11 +22,21 @@
   margin-right: 5%;
 }
 
-@media (max-width: 768px) {
+@media (max-width: 830px) {
   .header-title {
-    font-size: 6vw;  /* Más grande pero aún proporcional */
-    line-height: 0.3;
+    font-size: 6.3vw;  /* Más grande pero aún proporcional */
+    line-height: 1.2;
     text-align: left;
+    margin-right: 0;
+    padding: 0 10px;
+  }
+}
+
+@media (max-width: 480px) {
+  .header-title {
+    font-size: 10vw;  /* Más grande pero aún proporcional */
+    line-height: 1.2;
+    text-align: center;
     margin-right: 0;
     padding: 0 10px;
   }
@@ -49,70 +59,134 @@
     background-color: #e6b800;
 }
 
+
 .about-us {
   background-color: #10045c; /* Azul oscuro */
-  color: white; /* Para que el texto contraste */
-  padding: 20px 60px 40px 60px;
-  margin: 0; /* Sin margenes laterales */
-  width: 100%; /* Ancho total de la ventana */
-  box-sizing: border-box; /* Para que el padding no haga overflow */
+  color: white;
+  padding: 40px 60px; /* espacio amplio en escritorio */
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
   font-family: 'Varsity', sans-serif;
-  font-size: larger;
-  text-align: left; /* Texto alineado a la izquierda */
+  font-size: 1.2rem; /* base legible en pantallas grandes */
+  text-align: left;
 }
 
 .about-us h2 {
-  font-size: 4.5vw; /* Escala según el ancho de pantalla */
+  font-size: 4rem; /* escalable en desktop */
   color: white;
   text-align: left;
   font-family: 'Varsity', sans-serif;
-  margin-top: 0px;
-  margin-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: 15px;
 }
 
 .about-us h3 {
   font-family: 'GroteskBold', sans-serif;
-  line-height: 1;
+  line-height: 1.4;
   margin: 0;
+  font-size: 1.5rem;
+}
+
+/* Ajustes para tablet y móviles */
+@media (max-width: 768px) {
+  .about-us {
+    padding: 30px 25px; /* menos padding lateral */
+    text-align: center; /* centra el texto en móviles */
+    font-size: 1rem;
+  }
+
+  .about-us h2 {
+    font-size: 6vw; /* título más grande pero legible */
+    text-align: center;
+  }
+
+  .about-us h3 {
+    font-size: 1.4rem; /* descripción más pequeña en tablet */
+    line-height: 1.6;
+  }
+}
+
+@media (max-width: 480px) {
+  .about-us {
+    padding: 20px 15px;
+    font-size: 0.95rem;
+  }
+
+  .about-us h2 {
+    font-size: 7.5vw; /* aún más adaptable en móvil */
+  }
+
+  .about-us h3 {
+    font-size: 0.95rem;
+  }
 }
 
 
+
+.values, .noteve {
+  background-color: white;
+  padding: 40px 20px; /* más aire en desktop */
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box;
+  font-family: 'Varsity', sans-serif;
+  text-align: center;
+}
 
 .values {
-  background-color: white; /* Azul oscuro */
-  color:#e06c14; /* Para que el texto contraste */
-  padding: 20px 60px 40px 60px;
-  margin: 0; /* Sin margenes laterales */
-  width: 100%; /* Ancho total de la ventana */
-  box-sizing: border-box; /* Para que el padding no haga overflow */
-  font-family: 'Varsity', sans-serif;
-  font-size: larger;
-  text-align: center; /* Texto alineado a la izquierda */
+  color: #e06c14; /* Naranja */
 }
 
-.values h2, .noteve h2{
-  font-size: 4.5vw; /* Escala según el ancho de pantalla */
+.noteve {
+  color: #10045c; /* Azul oscuro */
+}
+
+.values h2, .noteve h2 {
+  font-size: 3.7rem; /* Escalable en desktop */
   font-family: 'Varsity', sans-serif;
-  margin-top: 0px;
-  margin-bottom: 10px;
+  margin-top: 0;
+  margin-bottom: 15px;
 }
 
 .values h3, .noteve h3 {
   font-family: 'GroteskBold', sans-serif;
-  line-height: 1;
-  margin: 0;
+  line-height: 1.4;
+  margin: 0 auto;
+  max-width: 800px; /* para no extenderse demasiado en pantallas grandes */
+  font-size: 1.6rem;
 }
 
-.noteve {
-  background-color: white; /* Azul oscuro */
-  color: #10045c; /* Para que el texto contraste */
-  padding: 20px 60px 40px 60px;
-  margin: 0; /* Sin margenes laterales */
-  width: 100%; /* Ancho total de la ventana */
-  box-sizing: border-box; /* Para que el padding no haga overflow */
-  font-family: 'Varsity', sans-serif;
-  font-size: larger;
-  text-align: center; /* Texto alineado a la izquierda */
+/*  Ajustes para tablets */
+@media (max-width: 768px) {
+  .values, .noteve {
+    padding: 30px 25px;
+  }
+
+  .values h2, .noteve h2 {
+    font-size: 3.5rem; /* más grande en tablet */
+  }
+
+  .values h3, .noteve h3 {
+    font-size: 1.3rem;
+    line-height: 1.6;
+  }
+}
+
+/*  Ajustes para móviles */
+@media (max-width: 480px) {
+  .values, .noteve {
+    padding: 20px 15px;
+    font-size: 1.05rem;
+  }
+
+  .values h2, .noteve h2 {
+    font-size: 9vw; /* fluido en móvil */
+  }
+
+  .values h3, .noteve h3 {
+    font-size: 1.05rem;
+  }
 }
 
 

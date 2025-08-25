@@ -7,13 +7,13 @@
 
 .acordeon .content {
   width: 100%;
-  max-width: 1200px;
+  max-width: 1400px;
   margin: 0 auto;
 }
 
 .acordeon span {
   font-family: 'Varsity', sans-serif;
-  font-size: 3.5rem; /* antes x-large, ahora más grande */
+  font-size: 3.4rem; /* grande en escritorio */
   color: black;
   transition: 0.3s ease-in-out;
 }
@@ -27,7 +27,7 @@
 .MuiAccordion-root {
   background-color: transparent !important;
   box-shadow: none !important;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1); /* ajustado para fondo blanco */
 }
 
 .MuiAccordion-root:last-child {
@@ -45,8 +45,8 @@
 }
 
 .MuiAccordionDetails-root p {
-  font-family: 'GroteskBold', serif; /* otra fuente para el texto descriptivo */
-  font-size: 1.3rem;
+  font-family: 'GroteskBold', serif;
+  font-size: 1.5rem;
   line-height: 1.5;
 }
 
@@ -54,16 +54,42 @@
   display: none !important;
 }
 
-.MuiAccordionSummary-root {
-  outline: none !important;
-}
-
-.MuiAccordionSummary-root:focus {
-  outline: none !important;
-  box-shadow: none !important;
-}
-
+.MuiAccordionSummary-root,
+.MuiAccordionSummary-root:focus,
 .MuiButtonBase-root:focus {
   outline: none !important;
   box-shadow: none !important;
+}
+
+
+/* Tablet */
+@media (max-width: 768px) {
+  .acordeon {
+    padding: 30px 25px;
+  }
+
+  .acordeon span {
+    font-size: 2.6rem; /* más pequeño en tablets */
+  }
+
+  .MuiAccordionDetails-root p {
+    font-size: 1.15rem;
+    line-height: 1.6;
+  }
+}
+
+/* Móvil */
+@media (max-width: 480px) {
+  .acordeon {
+    padding: 20px 15px;
+  }
+
+  .acordeon span {
+    font-size: 2rem; /* título más compacto */
+  }
+
+  .MuiAccordionDetails-root p {
+    font-size: 1.1rem;
+    line-height: 1.5;
+  }
 }

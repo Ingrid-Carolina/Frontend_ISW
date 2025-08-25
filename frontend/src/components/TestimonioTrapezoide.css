@@ -35,13 +35,13 @@
 }
 
 .testimonio-texto .cita {
-  font-size: 1.7vw;
+  font-size: 2vw;
   font-style: italic;
   margin-bottom: 10px;
 }
 
 .testimonio-texto .rol {
-  font-size: 1.4vw;
+  font-size: 1.7vw;
 }
 
 .testimonio-imagen {
@@ -59,8 +59,8 @@
 }
 
 .testimonio-container.superpuesto {
-  margin-top: -50px; /* se solapa con el anterior */
-  padding-top: 100px; /* compensa para que el contenido no se corte */
+  margin-top: -52px; /* se solapa con el anterior */
+  padding-top: 104px; /* compensa para que el contenido no se corte */
   position: relative;
 }
 
@@ -71,43 +71,62 @@
 .testimonios-titulo {
   text-align: center;
   padding: 60px 20px 60px;
-  background-color: #f0eeee; /* o el color que prefieras */
+  background-color: #f0eeee; 
 }
 
 .testimonios-titulo h1 {
- /* background-image: url('/Images/Entrevista.jpg');
-    background-size: cover;
-    background-position: center;
-    height: 450px;
-    position: relative;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;*/
   font-family: 'Bulletto', cursive;
   font-size: 6vw;
-  color: #044c94; /* o el color que prefieras */
+  color: #044c94; 
   margin: 0;
   
+}
+
+@media (max-width: 820px) {
+  .testimonios-titulo h1 {
+    font-size: 8vw; /* Ajusta el tamaño del título en pantallas más pequeñas */
+  }
+}
+
+@media (max-width: 1200px) {
+  .testimonio-texto h2 {
+    font-size: 5vw;
+  }
+
+  .testimonio-texto .cita {
+    font-size: 2.3vw;
+  }
+
+  .testimonio-texto .rol {
+    font-size: 1.9vw;
+  }
 }
 
 @media (max-width: 768px) {
   .testimonio-container,
   .testimonio-container.invertir {
     flex-direction: column;
-    padding: 40px 20px;
+    padding: 60px 20px;
     text-align: center;
   }
 
   .testimonio-texto h2 {
-    font-size: 7vw;
+    font-size: 10vw;
   }
 
   .testimonio-texto .cita {
-    font-size: 3.5vw;
+    font-size: 4vw;
   }
 
   .testimonio-texto .rol {
-    font-size: 3vw;
+    font-size: 2.8vw;
   }
+
+  .testimonio-imagen img {
+    max-width: 67%;
+    border-radius: 12px;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+    transition: transform 0.3s ease;
+  }
+
 }

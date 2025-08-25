@@ -106,7 +106,7 @@ function PartnerSection({ name, img, links, reverse = false }) {
     <Box
       component="section"
       sx={{
-        my: { xs: 6, md: 10 }
+        my: { xs: 6, md: 10 } 
       }}
     >
       <Grid
