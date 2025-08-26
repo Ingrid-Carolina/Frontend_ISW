@@ -3,8 +3,12 @@ import CustomNavbar from '../../components/Navbar';
 import { Outlet, Link, useLocation } from 'react-router-dom';
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography } from '@mui/material';
 import '../../components/styles.css';
+import { useTheme, useMediaQuery, IconButton } from '@mui/material';
+import { useState } from 'react';
+
 
 const drawerWidth = 240; // Ancho del Drawer lateral
+
 
 const menuItems = [
   { text: 'Estadisticas del Sitio', path: 'dashboard' },
@@ -52,6 +56,8 @@ export default function AdminLayout() {
                   textAlign: 'center',
                   letterSpacing: 1,
                   paddingTop: 4,
+                  pt: { xs: 2, md: 4 },
+                 fontSize: { xs: '1.2rem', md: '1.5rem' }
                 }}
               >Panel de Administrador</Typography>
             </Box>
@@ -72,7 +78,7 @@ export default function AdminLayout() {
         </Drawer>
 
         {/* Contenido renderizado */}
-        <Box component="main" sx={{ flexGrow: 1, p: 3 }}>
+        <Box component="main" sx={{ flexGrow: 1, p: { xs: 1, sm: 2, md: 3 },  marginLeft:0 }}>
           <Toolbar />
           <Outlet />
         </Box>

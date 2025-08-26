@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import TestimonioCapsula from '../../components/TestimonioCapsula';
 //import axios from 'axios';
 import { api } from '../../api/api';
+import { Grid } from '@mui/material';
 
 import {
   Box,
@@ -166,14 +167,15 @@ const ManageTestimonios = () => {
 
 
   return (
-    <Box sx={{ p: 4, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
+    <Box sx={{  p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
       <Typography
         variant="h3"
         sx={{
           fontFamily: 'GroteskBold',
           color: '#10045c',
           mb: 4,
-          textAlign: 'center'
+          textAlign: 'center',
+           fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
         }}
       >
         Gestión de Testimonios
@@ -270,6 +272,7 @@ const ManageTestimonios = () => {
             No hay testimonios guardados todavía.
           </Typography>
         )}
+        
         {testimonios.map((t, index) => (
           <Box key={index}>
             <TestimonioCapsula

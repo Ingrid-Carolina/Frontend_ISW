@@ -1,6 +1,7 @@
 .noticias-admin-container {
   padding: 20px;
   width: 100%; /* que ocupe todo el ancho disponible */
+  box-sizing: border-box; /*cubrimos toda la pagina*/
 }
 
 .titulo-seccion {
@@ -166,3 +167,50 @@
   font-family: "ManropeEB", sans-serif;
   margin: 5px 0;
 }
+
+@media (max-width: 900px) {
+  /*Para tablets y abajo (computadoras, desktop, etc)*/
+  .noticia-item {
+    flex-direction: column; /*apilar una tras de la otra*/
+    align-items: center;
+  }
+  
+  .noticia-contenido {
+    width: 100%;
+  }
+  
+  .noticia-imagen {
+    width: 100%;
+    max-width: 100%;
+    margin-top: 15px;
+  }
+  
+  .botones {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 600px) {
+  /* Para celulares */
+
+  .form-noticia button {
+    width: 100%;
+  
+  }
+  .vista-previa { /*Tomar todo el ancho para la imagen*/
+    max-width: 100%;
+    height: auto;
+  }
+
+  .noticias-admin-container {
+    padding: 15px 10px;
+  }
+
+  .titulo-seccion,
+.lista-noticias h2 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: clamp(2rem, 5vw, 2.25rem); /* fluid scaling minimo 2rem, 5 viewport ideal, 2,25 rem maximo. Para ajustar texto */
+}
+}
+

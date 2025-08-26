@@ -4,7 +4,7 @@ import { api } from "../../api/api";
 import {
   Box, Typography, Card, CardContent, CardMedia,
   Button, Grid, Dialog, DialogContent, IconButton,
-  Menu, MenuItem, Checkbox, FormControlLabel
+  Menu, MenuItem, Checkbox, FormControlLabel, Stack
 } from "@mui/material";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
 
@@ -213,40 +213,118 @@ export default function StatsJugadores() {
       <Typography variant="h2" sx={{ fontFamily: "GroteskBold", color: "#10045c", mb: 4, textAlign: "center" }}>Estadísticas de Jugadores</Typography>
 
       <Box sx={{ textAlign: "center", mb: 3 }}>
-        <Button variant="contained" component="label" sx={{ backgroundColor: "#10045c" }}>
+        <Button variant="contained" component="label"  fullWidth={{ xs: true, sm: false }} sx={{ backgroundColor: "#10045c",   px: 2, py: 1.5,
+      fontSize: { xs: '0.9rem', sm: '1rem' } }}>
           Importar Excel con Estadísticas
           <input type="file" accept=".xlsx, .xls" hidden onChange={handleImportExcel} />
         </Button>
       </Box>
 
-      <Box sx={{ display: "flex", justifyContent: "center", mb: 4 }}>
-        <input type="text" placeholder="Buscar jugador..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ width: "100%", maxWidth: "960px", padding: "12px", borderRadius: "20px", border: "1px solid #ccc", fontSize: "16px" }} />
+      <Box sx={{ display: "flex", justifyContent: "center", mb: 4,  px: { xs: 1, sm: 0 } }}>
+        <input type="text" placeholder="Buscar jugador..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} style={{ width: "100%", maxWidth: "960px", padding: "12px", borderRadius: "20px", border: "1px solid #ccc", fontSize: "16px" }}  />
       </Box>
 
-      <Grid container spacing={2} justifyContent="center">
-        {jugadoresFiltrados.map(jugador => (
-          <Grid item xs={12} sm={6} md={4} key={jugador.ID}>
-            <Card sx={{ borderRadius: 3, boxShadow: 3, textAlign: "center", p: 2, position: "relative" }}>
-              <IconButton sx={{ position: "absolute", top: 8, right: 8 }} onClick={(e) => { setAnchorEl(e.currentTarget); setJugadorMenu(jugador); }}>
-                <MoreVertIcon />
-              </IconButton>
-              <CardMedia component="img" image={jugador.foto} alt={jugador.name} sx={{ objectFit: "cover", borderRadius: 3, maxWidth: "300px", mx: "auto", mb: 2 }} />
-              <CardContent>
-                <Typography variant="h6" sx={{ fontFamily: "GroteskBold", mb: 1 }}>{jugador.name}</Typography>
-                <Button variant="contained" sx={{ mr: 1, backgroundColor: "#10045c" }} onClick={() => { setJugadorSeleccionado(jugador); setModoDetalle("detallado"); setOpen(true); }}>Ver Estadísticas Detalladas</Button>
-                <Button variant="outlined" onClick={() => { setJugadorSeleccionado(jugador); setModoDetalle("resumido"); setOpen(true); }}>Ver Estadísticas Resumidas</Button>
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
+     <Grid container spacing={{ xs: 1, sm: 2, md: 3 }} justifyContent="center">
+  {jugadoresFiltrados.map(jugador => (
+    <Grid item xs={12} sm={6} md={4} key={jugador.ID}> 
+      <Card
+        sx={{
+          borderRadius: { xs: 2, sm: 3 },
+          boxShadow: 3,
+          p: { xs: 1.5, sm: 2 },
+          textAlign: "center",
+          position: "relative",
+          height: '100%',            
+          display: 'flex',
+          flexDirection: 'column'
+        }}
+      >
+        {/* icon button */}
+        <IconButton
+          sx={{ position: "absolute", top: 8, right: 8 }}
+          onClick={(e) => {
+            setAnchorEl(e.currentTarget);
+            setJugadorMenu(jugador);
+          }}
+        >
+          <MoreVertIcon />
+        </IconButton>
 
-      {/* --- Menú acciones jugador --- */}
-      <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => { setAnchorEl(null); setJugadorMenu(null); }}>
+        {/* image */}
+        <CardMedia
+          component="img"
+          image={jugador.foto}
+          alt={jugador.name}
+          sx={{
+            width: '100%',
+            maxWidth: { xs: '100%', sm: 300 },
+            height: 'auto',
+            borderRadius: 2,
+            objectFit: "cover",
+            mx: "auto",
+            mb: 2
+          }}
+        />
+
+       
+        <CardContent sx={{ flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            sx={{ fontFamily: "GroteskBold", mb: 1, fontSize: { xs: '1rem', sm: '1.1rem' } }}
+          >
+            {jugador.name}
+          </Typography>
+
+          <Stack
+            direction="row"
+            spacing={1}
+            justifyContent={{ xs: 'center', sm: 'space-around' }}
+            flexWrap="wrap"
+          >
+            <Button
+              variant="contained"
+              sx={{
+                backgroundColor: "#10045c",
+                fontSize: { xs: '0.75rem', sm: '0.9rem' },
+                width: { xs: '100%', sm: 'auto' }
+              }}
+              onClick={() => {
+                setJugadorSeleccionado(jugador);
+                setModoDetalle("detallado");
+                setOpen(true);
+              }}
+            >
+              Estadísticas Detalladas
+            </Button>
+
+            <Button
+              variant="outlined"
+              sx={{
+                fontSize: { xs: '0.75rem', sm: '0.9rem' },
+                width: { xs: '100%', sm: 'auto' }
+              }}
+              onClick={() => {
+                setJugadorSeleccionado(jugador);
+                setModoDetalle("resumido");
+                setOpen(true);
+              }}
+            >
+              Resumidas
+            </Button>
+            <Menu anchorEl={anchorEl} open={Boolean(anchorEl)} onClose={() => { setAnchorEl(null); setJugadorMenu(null); }}>
         <MenuItem onClick={() => { if (jugadorMenu) { setJugadorBase(jugadorMenu); setOpenComparar(true); setAnchorEl(null); setJugadorMenu(null); } }}>
           Comparar jugador
         </MenuItem>
       </Menu>
+          </Stack>
+        </CardContent>
+      </Card>
+    </Grid>
+  ))}
+</Grid>
+
+
+      
 
       {/* --- Popup conflictos --- */}
       <Dialog open={openConflicto} onClose={() => setOpenConflicto(false)} maxWidth="sm" fullWidth>
@@ -396,6 +474,7 @@ export default function StatsJugadores() {
                           textAlign: "center",
                           p: 2,
                           cursor: "pointer",
+                          width: "100%", /*ajustarlo a cellphone viewport*/
                           maxWidth: "220px",
                           transition: "all 0.3s ease",
                           background: "linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)",
