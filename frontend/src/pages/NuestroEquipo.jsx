@@ -20,34 +20,53 @@ const Jugadores = () => {
         <Paper
             elevation={3}
             sx={{
-                p: 2,
+                p: { xs: 1.5, md: 2 },
                 textAlign: 'center',
                 bgcolor: 'white',
                 borderRadius: 2,
-                minWidth: 180,
+                minWidth: { xs: 140, md: 180 },
                 border: '2px solid #10045c',
             }}
         >
-            <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#10045c' }}>
+            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#10045c', fontSize: { xs: '0.9rem', md: '1rem' } }}>
                 {rol}
             </Typography>
-            <Typography variant="body2" sx={{ color: 'gray' }}>
+            <Typography variant="body2" sx={{ color: 'gray', fontSize: { xs: '0.8rem', md: '0.9rem' } }}>
                 {nombre}
             </Typography>
         </Paper>
     );
 
-    // Línea vertical (pegada)
+    // Línea vertical
     const VerticalLine = ({ height = 30 }) => (
-        <Box sx={{ width: '2px', height: `${height}px`, bgcolor: '#10045c' }} />
+        <Box sx={{ width: '2px', height: { xs: height / 2, md: height }, bgcolor: '#10045c', mx: 'auto' }} />
     );
 
-    // Contenedor con línea horizontal conectando hijos (pegada)
+    // Contenedor con línea horizontal conectando hijos
     const HorizontalConnector = ({ children }) => (
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            {/* Línea horizontal arriba de los hijos */}
-            <Box sx={{ width: '100%', height: '2px', bgcolor: '#10045c', position: 'relative', top: '10px' }} />
-            <Box sx={{ display: 'flex', justifyContent: 'center', gap: 6 }}>
+        <Box sx={{
+            display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
+            alignItems: 'center',
+            justifyContent: 'center',
+            position: 'relative',
+            width: '100%'
+        }}>
+            <Box sx={{
+                position: 'absolute',
+                top: { xs: '0', md: '20px' },
+                left: 0,
+                right: 0,
+                height: '2px',
+                bgcolor: '#10045c'
+            }} />
+            <Box sx={{
+                display: 'flex',
+                flexDirection: { xs: 'column', md: 'row' },
+                justifyContent: 'center',
+                gap: { xs: 4, md: 6 },
+                width: '100%'
+            }}>
                 {children}
             </Box>
         </Box>
@@ -60,7 +79,7 @@ const Jugadores = () => {
                 sx={{
                     position: 'relative',
                     width: '100%',
-                    minHeight: { xs: '75vh', md: '90vh' },
+                    minHeight: { xs: '60vh', md: '90vh' },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
@@ -75,7 +94,7 @@ const Jugadores = () => {
                         variant="h2"
                         sx={{
                             fontWeight: 'bold',
-                            fontSize: { xs: '4rem', md: '7rem' },
+                            fontSize: { xs: '3rem', md: '7rem' },
                             fontFamily: '"Varsity", cursive',
                         }}
                     >
@@ -104,7 +123,7 @@ const Jugadores = () => {
                             fontFamily: '"Varsity", cursive',
                             fontWeight: 'bold',
                             mb: 2,
-                            fontSize: { xs: '3rem', md: '4rem' },
+                            fontSize: { xs: '2.5rem', md: '4rem' },
                         }}
                     >
                         LOS JUGADORES
@@ -121,14 +140,14 @@ const Jugadores = () => {
                         fontWeight: 'bold',
                         textAlign: 'center',
                         mb: 6,
-                        fontSize: { xs: '3rem', md: '4rem' },
+                        fontSize: { xs: '2.5rem', md: '4rem' },
                         color: '#10045c',
                     }}
                 >
                     Junta Directiva
                 </Typography>
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2 }}>
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
                     
                     {/* PRESIDENTE */}
                     <MemberCard {...cuerpoTecnico.find(m => m.rol === 'Presidente')} />
