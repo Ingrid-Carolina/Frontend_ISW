@@ -40,22 +40,22 @@ axios.defaults.withCredentials = true; // <-- importante para logout y rutas pro
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 import { api } from '../api/api';
-import { Global } from "@emotion/react";
+import { Global } from '@emotion/react';
 
 {
 	/* Items de la navbarbar*/
 }
-const isLive = true; // 
+const isLive = true; //
 const pulseAnimation = (
-  <Global
-    styles={`
+	<Global
+		styles={`
       @keyframes pulse {
         0% { transform: scale(0.8); opacity: .4; }
         50% { transform: scale(1.15); opacity: 1; }
         100% { transform: scale(0.8); opacity: .4; }
       }
     `}
-  />
+	/>
 );
 const baseMenuItems = [
 	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
@@ -245,7 +245,7 @@ export default function CustomNavbar() {
 	// colores para los subitems del drawer movil
 	const drawerSubItemSx = {
 		pl: 6, // indent para subitems
-		color: '#0c005a', 
+		color: '#0c005a',
 		'& .MuiListItemIcon-root': {
 			minWidth: 36,
 			color: 'inherit',
@@ -355,7 +355,7 @@ export default function CustomNavbar() {
 
 	return (
 		<>
-		{pulseAnimation}
+			{pulseAnimation}
 			<AppBar
 				position='fixed'
 				elevation={0}
@@ -372,7 +372,7 @@ export default function CustomNavbar() {
 						alignItems: 'center',
 						justifyContent: 'space-between',
 						minHeight: { xs: '74px !important', md: '90px !important' },
-						pt: { xs: 'max(15px, env(safe-area-inset-top))', md: 0 }, 
+						pt: { xs: 'max(15px, env(safe-area-inset-top))', md: 0 },
 						pb: { xs: 1, md: 0 },
 						px: { xs: 1.5, sm: 2, md: 4 },
 					}}
@@ -382,7 +382,7 @@ export default function CustomNavbar() {
 							display: 'flex',
 							alignItems: 'center',
 							gap: { xs: 1.5, md: 4 },
-							flexGrow: 1, 
+							flexGrow: 1,
 							minWidth: 0,
 						}}
 					>
@@ -398,7 +398,7 @@ export default function CustomNavbar() {
 
 						<Box
 							sx={{
-								display: { xs: 'none', lg: 'flex' }, 
+								display: { xs: 'none', lg: 'flex' },
 								gap: { lg: 3, xl: 4 },
 								position: 'relative',
 							}}
@@ -474,24 +474,28 @@ export default function CustomNavbar() {
 									Donar
 								</Button>
 							</Box>
-							
-							<Button component={Link} to="/envivo" sx={navBtnStyle(drawerOpen)}>
-  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-  {isLive && (
-    <Box
-      component="span"
-      sx={{
-        width: 10,
-        height: 10,
-        borderRadius: "50%",
-        bgcolor: "#ff1744",
-        animation: "pulse 1s ease-in-out infinite",
-      }}
-    />
-  )}
-  <span>En Vivo</span>
-</Box>
-</Button>
+
+							<Button
+								component={Link}
+								to='/envivo'
+								sx={navBtnStyle(drawerOpen)}
+							>
+								<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+									{isLive && (
+										<Box
+											component='span'
+											sx={{
+												width: 10,
+												height: 10,
+												borderRadius: '50%',
+												bgcolor: '#ff1744',
+												animation: 'pulse 1s ease-in-out infinite',
+											}}
+										/>
+									)}
+									<span>En Vivo</span>
+								</Box>
+							</Button>
 							{userRole === 'admin' && (
 								<Button
 									component={Link}
@@ -539,11 +543,11 @@ export default function CustomNavbar() {
 									textTransform: 'none',
 									borderRadius: '6px',
 									transition: 'all 0.3s ease',
-									height: { xs: 36, md: 40 }, 
-									px: { xs: 1.5, md: 2.5 }, 
-									fontSize: { xs: '0.85rem', md: '0.9rem' }, 
-									whiteSpace: 'nowrap', 
-									ml: { xs: 0.5, md: 1 }, 
+									height: { xs: 36, md: 40 },
+									px: { xs: 1.5, md: 2.5 },
+									fontSize: { xs: '0.85rem', md: '0.9rem' },
+									whiteSpace: 'nowrap',
+									ml: { xs: 0.5, md: 1 },
 									'&:hover': {
 										color: '#e06c14',
 										borderColor: '#e06c14',
@@ -586,7 +590,7 @@ export default function CustomNavbar() {
 									ml: 1,
 									fontWeight: 'bold',
 									fontFamily: '"GroteskBold", sans-serif',
-									fontSize: { xs: 0, md: '1.4rem' }, 
+									fontSize: { xs: 0, md: '1.4rem' },
 									display: { xs: 'none', md: 'inline' },
 									color: drawerOpen ? '#0c005a' : 'white',
 								}}
@@ -606,7 +610,7 @@ export default function CustomNavbar() {
 				ModalProps={{ keepMounted: true }}
 				PaperProps={{
 					sx: {
-						mt: { xs: '74px', md: '90px' },  
+						mt: { xs: '74px', md: '90px' },
 						zIndex: 1200,
 						maxHeight: 'calc(100vh - 64px)',
 						overflowY: 'auto',
@@ -775,38 +779,52 @@ export default function CustomNavbar() {
 							</ListItem>
 						))}
 
+						{/* En vivo solo en móvil */}
 						{isCompactNav && (
 							<>
-								{/* En Vivo solo en móvil*/}
 								<ListItem
 									button
 									component={Link}
 									to='/envivo'
 									onClick={handleCloseDrawer}
-									sx={drawerItemSx}
+									sx={{
+										...drawerItemSx,
+										pr: 6, 
+										'& .MuiListItemSecondaryAction-root': {
+											right: 220, 
+										},
+									}}
+									secondaryAction={
+										isLive && (
+											<Box
+												sx={{
+													width: 8,
+													height: 8,
+													borderRadius: '50%',
+													bgcolor: '#ff1744',
+													animation: 'mui-pulse 1.1s ease-in-out infinite',
+													'@keyframes mui-pulse': {
+														'0%': { transform: 'scale(1)', opacity: 1 },
+														'50%': { transform: 'scale(1.35)', opacity: 0.6 },
+														'100%': { transform: 'scale(1)', opacity: 1 },
+													},
+												}}
+											/>
+										)
+									}
 								>
 									<ListItemIcon sx={{ color: 'inherit' }}>
-										<LiveTvOutlinedIcon />{' '}
+										<LiveTvOutlinedIcon />
 									</ListItemIcon>
 									<ListItemText
-  primary={
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      {isLive && (
-        <Box
-          component="span"
-          sx={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            bgcolor: "#ff1744",
-            animation: "pulse 1s ease-in-out infinite",
-          }}
-        />
-      )}
-      <span>En Vivo</span>
-    </Box>
-  }
-/>
+										primary='En Vivo'
+										primaryTypographyProps={{
+											fontFamily: '"Franklin Gothic Medium", sans-serif',
+											fontWeight: 'bold',
+											fontSize: '0.95rem',
+											color: 'inherit',
+										}}
+									/>
 								</ListItem>
 							</>
 						)}
@@ -873,8 +891,8 @@ const navBtnStyle = drawerOpen => ({
 	fontSize: '1.4rem',
 	fontFamily: 'GroteskBold, sans-serif',
 	textTransform: 'none',
-	whiteSpace: 'nowrap', 
-	px: { lg: 2, xl: 2.5 }, 
+	whiteSpace: 'nowrap',
+	px: { lg: 2, xl: 2.5 },
 	lineHeight: 1.2,
 	transition: 'color 0.3s ease',
 	'&:hover': {
