@@ -162,9 +162,7 @@ const [showBanner, setShowBanner] = useState(false);
 
   const eliminacionNoticia = async (id) => {
     try {
-      const res=await axios.delete(`http://localhost:3000/auth/eliminarnoticia/${id}`, {
-        withCredentials: true,
-      });
+      const res = await api.delete(`/auth/eliminarnoticia/${id}`);
       setNoticias((prev) => prev.filter((n) => n.id !== id));
       //alert("Noticia eliminada correctamente");
         setBannerMsg(res.data.mensaje)
