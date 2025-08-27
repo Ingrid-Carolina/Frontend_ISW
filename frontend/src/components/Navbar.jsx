@@ -40,10 +40,23 @@ axios.defaults.withCredentials = true; // <-- importante para logout y rutas pro
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 import { api } from '../api/api';
+import { Global } from "@emotion/react";
 
 {
 	/* Items de la navbarbar*/
 }
+const isLive = true; // 
+const pulseAnimation = (
+  <Global
+    styles={`
+      @keyframes pulse {
+        0% { transform: scale(0.8); opacity: .4; }
+        50% { transform: scale(1.15); opacity: 1; }
+        100% { transform: scale(0.8); opacity: .4; }
+      }
+    `}
+  />
+);
 const baseMenuItems = [
 	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
 	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
@@ -342,6 +355,7 @@ export default function CustomNavbar() {
 
 	return (
 		<>
+		{pulseAnimation}
 			<AppBar
 				position='fixed'
 				elevation={0}
@@ -460,14 +474,24 @@ export default function CustomNavbar() {
 									Donar
 								</Button>
 							</Box>
-							<Button
-								component={Link}
-								to='/envivo'
-								onClick={() => setDrawerOpen(false)}
-								sx={navBtnStyle(drawerOpen)}
-							>
-								En Vivo
-							</Button>
+							
+							<Button component={Link} to="/envivo" sx={navBtnStyle(drawerOpen)}>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+  {isLive && (
+    <Box
+      component="span"
+      sx={{
+        width: 10,
+        height: 10,
+        borderRadius: "50%",
+        bgcolor: "#ff1744",
+        animation: "pulse 1s ease-in-out infinite",
+      }}
+    />
+  )}
+  <span>En Vivo</span>
+</Box>
+</Button>
 							{userRole === 'admin' && (
 								<Button
 									component={Link}
@@ -765,14 +789,24 @@ export default function CustomNavbar() {
 										<LiveTvOutlinedIcon />{' '}
 									</ListItemIcon>
 									<ListItemText
-										primary='En Vivo'
-										primaryTypographyProps={{
-											fontFamily: '"Franklin Gothic Medium", sans-serif',
-											fontWeight: 'bold',
-											fontSize: '0.95rem',
-											color: 'inherit',
-										}}
-									/>
+  primary={
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {isLive && (
+        <Box
+          component="span"
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            bgcolor: "#ff1744",
+            animation: "pulse 1s ease-in-out infinite",
+          }}
+        />
+      )}
+      <span>En Vivo</span>
+    </Box>
+  }
+/>
 								</ListItem>
 							</>
 						)}
