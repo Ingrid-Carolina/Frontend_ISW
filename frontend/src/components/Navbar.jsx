@@ -203,7 +203,7 @@ export default function CustomNavbar() {
 	const submenuTimer = React.useRef(null);
 
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+	const isCompactNav = useMediaQuery(theme.breakpoints.down('lg')); // <= 1200px
 
 	const [avatarUrl, setAvatarUrl] = React.useState(
 		localStorage.getItem('userAvatar') || '',
@@ -377,6 +377,7 @@ export default function CustomNavbar() {
 								component='img'
 								src={logo}
 								alt='Logo Pilotos'
+								onClick={handleCloseDrawer}
 								sx={{ height: { xs: 46, md: 50 }, cursor: 'pointer' }}
 							/>
 						</Link>
@@ -581,7 +582,7 @@ export default function CustomNavbar() {
 				ModalProps={{ keepMounted: true }}
 				PaperProps={{
 					sx: {
-						mt: '64px',
+						mt: { xs: '74px', md: '90px' },  
 						zIndex: 1200,
 						maxHeight: 'calc(100vh - 64px)',
 						overflowY: 'auto',
@@ -593,7 +594,7 @@ export default function CustomNavbar() {
 				<Box sx={{ width: '100%', p: 3 }}>
 					<List>
 						{/* Admin solo en móvil*/}
-						{isMobile && userRole === 'admin' && (
+						{isCompactNav && userRole === 'admin' && (
 							<ListItem
 								button
 								component={Link}
@@ -617,7 +618,7 @@ export default function CustomNavbar() {
 						)}
 
 						{/* SubMenú nuestra historia móvil*/}
-						{isMobile && (
+						{isCompactNav && (
 							<>
 								<ListItem
 									button
@@ -750,7 +751,7 @@ export default function CustomNavbar() {
 							</ListItem>
 						))}
 
-						{isMobile && (
+						{isCompactNav && (
 							<>
 								{/* En Vivo solo en móvil*/}
 								<ListItem
@@ -777,7 +778,7 @@ export default function CustomNavbar() {
 						)}
 
 						{/* Tienda solo en móvil */}
-						{isMobile && (
+						{isCompactNav && (
 							<ListItem
 								button
 								component={Link}
@@ -886,15 +887,6 @@ const submenuBoxStyle = {
 		borderLeft: '10px solid transparent',
 		borderRight: '10px solid transparent',
 		borderBottom: '10px solid #e06c14',
-	},
-};
-
-const mobileSubItem = {
-	pl: 7,
-	py: 0.5,
-	width: '100%',
-	'&:hover .MuiListItemText-primary': {
-		color: '#e06c14',
 	},
 };
 
