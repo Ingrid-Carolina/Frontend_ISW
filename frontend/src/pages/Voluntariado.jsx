@@ -179,9 +179,10 @@ const Voluntariado = () => {
         <Box
           sx={{
             display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
             flexWrap: 'wrap',
             alignItems: 'center',
-            justifyContent: 'flex-end',
+            justifyContent: 'center',
             gap: '1rem',
             backgroundColor: '#ff914d',
             padding: '4rem 2rem',
@@ -202,7 +203,7 @@ const Voluntariado = () => {
               padding: '20px',
               color: '#fff',
               textAlign: 'center',
-              maxWidth: '50%',
+              marginTop: '20px',
             }}
           >
             <Typography
@@ -248,7 +249,7 @@ const Voluntariado = () => {
                 fontWeight: '500',
               }}
             >
-            No importa tu edad o nivel de experiencia en el béisbol, en Pilotos FAH, damos la bienvenida a cualquier persona que desee trabajar como voluntario. Hay una oportunidad para todos de tener un impacto positivo y significativo.
+              No importa tu edad o nivel de experiencia en el béisbol, en Pilotos FAH, damos la bienvenida a cualquier persona que desee trabajar como voluntario. Hay una oportunidad para todos de tener un impacto positivo y significativo.
             </Typography>
             <Box sx={{ marginTop: '1rem' }}>
               <Link
@@ -285,7 +286,7 @@ const Voluntariado = () => {
               src="https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg"
               alt=""
               sx={{
-                width: '90%',
+                width: { xs: '50%', md: '90%' },
                 height: 'auto',
                 display: 'block',
                 borderRadius: '8px',
