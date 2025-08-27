@@ -203,7 +203,7 @@ const Voluntariado = () => {
               padding: '20px',
               color: '#fff',
               textAlign: 'center',
-              marginTop: '20px',
+              marginTop: { xs: '60px', md: '20px' },
             }}
           >
             <Typography
@@ -286,7 +286,7 @@ const Voluntariado = () => {
               src="https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg"
               alt=""
               sx={{
-                width: { xs: '50%', md: '90%' },
+                width: `90%`,
                 height: 'auto',
                 display: 'block',
                 borderRadius: '8px',
