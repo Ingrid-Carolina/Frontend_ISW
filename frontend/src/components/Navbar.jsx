@@ -40,10 +40,23 @@ axios.defaults.withCredentials = true; // <-- importante para logout y rutas pro
 import logo from '/Images/Logo-pilotos.png';
 import { Link } from 'react-router-dom';
 import { api } from '../api/api';
+import { Global } from "@emotion/react";
 
 {
 	/* Items de la navbarbar*/
 }
+const isLive = true; // 
+const pulseAnimation = (
+  <Global
+    styles={`
+      @keyframes pulse {
+        0% { transform: scale(0.8); opacity: .4; }
+        50% { transform: scale(1.15); opacity: 1; }
+        100% { transform: scale(0.8); opacity: .4; }
+      }
+    `}
+  />
+);
 const baseMenuItems = [
 	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
 	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
@@ -203,7 +216,7 @@ export default function CustomNavbar() {
 	const submenuTimer = React.useRef(null);
 
 	const theme = useTheme();
-	const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+	const isCompactNav = useMediaQuery(theme.breakpoints.down('lg')); // <= 1200px
 
 	const [avatarUrl, setAvatarUrl] = React.useState(
 		localStorage.getItem('userAvatar') || '',
@@ -328,7 +341,7 @@ export default function CustomNavbar() {
 			localStorage.removeItem('userRole');
 			localStorage.removeItem('userName');
 			localStorage.removeItem('userEmail');
-			alert('Sesion cerrada correctamente.');
+
 			navigate('/');
 			//Refrescar la página para limpiar el estado visual y memoria React
 			setTimeout(() => {
@@ -342,6 +355,7 @@ export default function CustomNavbar() {
 
 	return (
 		<>
+		{pulseAnimation}
 			<AppBar
 				position='fixed'
 				elevation={0}
@@ -377,6 +391,7 @@ export default function CustomNavbar() {
 								component='img'
 								src={logo}
 								alt='Logo Pilotos'
+								onClick={handleCloseDrawer}
 								sx={{ height: { xs: 46, md: 50 }, cursor: 'pointer' }}
 							/>
 						</Link>
@@ -459,14 +474,24 @@ export default function CustomNavbar() {
 									Donar
 								</Button>
 							</Box>
-							<Button
-								component={Link}
-								to='/envivo'
-								onClick={() => setDrawerOpen(false)}
-								sx={navBtnStyle(drawerOpen)}
-							>
-								En Vivo
-							</Button>
+							
+							<Button component={Link} to="/envivo" sx={navBtnStyle(drawerOpen)}>
+  <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+  {isLive && (
+    <Box
+      component="span"
+      sx={{
+        width: 10,
+        height: 10,
+        borderRadius: "50%",
+        bgcolor: "#ff1744",
+        animation: "pulse 1s ease-in-out infinite",
+      }}
+    />
+  )}
+  <span>En Vivo</span>
+</Box>
+</Button>
 							{userRole === 'admin' && (
 								<Button
 									component={Link}
@@ -581,7 +606,7 @@ export default function CustomNavbar() {
 				ModalProps={{ keepMounted: true }}
 				PaperProps={{
 					sx: {
-						mt: '64px',
+						mt: { xs: '74px', md: '90px' },  
 						zIndex: 1200,
 						maxHeight: 'calc(100vh - 64px)',
 						overflowY: 'auto',
@@ -593,7 +618,7 @@ export default function CustomNavbar() {
 				<Box sx={{ width: '100%', p: 3 }}>
 					<List>
 						{/* Admin solo en móvil*/}
-						{isMobile && userRole === 'admin' && (
+						{isCompactNav && userRole === 'admin' && (
 							<ListItem
 								button
 								component={Link}
@@ -617,7 +642,7 @@ export default function CustomNavbar() {
 						)}
 
 						{/* SubMenú nuestra historia móvil*/}
-						{isMobile && (
+						{isCompactNav && (
 							<>
 								<ListItem
 									button
@@ -750,7 +775,7 @@ export default function CustomNavbar() {
 							</ListItem>
 						))}
 
-						{isMobile && (
+						{isCompactNav && (
 							<>
 								{/* En Vivo solo en móvil*/}
 								<ListItem
@@ -764,20 +789,30 @@ export default function CustomNavbar() {
 										<LiveTvOutlinedIcon />{' '}
 									</ListItemIcon>
 									<ListItemText
-										primary='En Vivo'
-										primaryTypographyProps={{
-											fontFamily: '"Franklin Gothic Medium", sans-serif',
-											fontWeight: 'bold',
-											fontSize: '0.95rem',
-											color: 'inherit',
-										}}
-									/>
+  primary={
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {isLive && (
+        <Box
+          component="span"
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            bgcolor: "#ff1744",
+            animation: "pulse 1s ease-in-out infinite",
+          }}
+        />
+      )}
+      <span>En Vivo</span>
+    </Box>
+  }
+/>
 								</ListItem>
 							</>
 						)}
 
 						{/* Tienda solo en móvil */}
-						{isMobile && (
+						{isCompactNav && (
 							<ListItem
 								button
 								component={Link}
@@ -886,15 +921,6 @@ const submenuBoxStyle = {
 		borderLeft: '10px solid transparent',
 		borderRight: '10px solid transparent',
 		borderBottom: '10px solid #e06c14',
-	},
-};
-
-const mobileSubItem = {
-	pl: 7,
-	py: 0.5,
-	width: '100%',
-	'&:hover .MuiListItemText-primary': {
-		color: '#e06c14',
 	},
 };
 

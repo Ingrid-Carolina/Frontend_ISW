@@ -20,6 +20,10 @@ const ManageTestimonios = () => {
   const [testimonios, setTestimonios] = useState([]);
   const [modoEdicion, setModoEdicion] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [bannerMsg, setBannerMsg] = useState('');
+const [bannerType, setBannerType] = useState('success'); // or 'error'
+const [showBanner, setShowBanner] = useState(false);
+
 
   const realizarPeticion = async () => {
     const url = `/auth/registrartestimonio`;
@@ -34,15 +38,27 @@ const ManageTestimonios = () => {
       const res = await api.post(url, body, {
         headers: { "Content-Type": "application/json" }
       });
-      window.alert(res.data?.mensaje || "Testimonio registrado");
+      setBannerMsg(res.data.mensaje)
+            setBannerType('success');
+            setShowBanner(true);
+
+        
+        setTimeout(() => setShowBanner(false), 4000); 
+
+        return res.data;
+
     } catch (error) {
       // Compatible con interceptor (error.message) y con respuestas crudas (error.response)
-      const msg =
-        error?.response?.data?.mensaje ||
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error en la red.";
-      window.alert(msg);
+     const msg =
+    error?.data?.mensaje|| error?.message|| 'Error en la Red'; 
+   
+            setBannerMsg(msg);
+            setBannerType('error');
+            setShowBanner(true);
+            setTimeout(() => setShowBanner(false), 4000);
+            throw error;
+            
+
     }
   };
 
@@ -85,7 +101,7 @@ const ManageTestimonios = () => {
 
     setTimeout(() => {
       window.location.reload();
-    }, 100);
+    }, 1000);
   };
 
   const handleEliminar = async (index) => {
@@ -96,7 +112,12 @@ const ManageTestimonios = () => {
       const res = await api.delete(url);
       console.log(id);
 
-      window.alert(res.data.mensaje);
+       setBannerMsg(res.data.mensaje)
+            setBannerType('success');
+            setShowBanner(true);
+            setTimeout(() => setShowBanner(false), 4000);
+
+            window.scrollTo(0,0);
 
 
       const nuevaLista = [...testimonios];
@@ -104,11 +125,12 @@ const ManageTestimonios = () => {
       setTestimonios(nuevaLista);
     } catch (error) {
       const msg =
-        error?.response?.data?.mensaje ||
-        error?.response?.data?.message ||
-        error?.message ||
-        "Error eliminando testimonio";
-      window.alert(msg);
+        error?.data?.mensaje|| error?.message|| 'Error en la Red'
+    
+                setBannerMsg(msg)
+            setBannerType('error');
+            setShowBanner(true);
+setTimeout(() => setShowBanner(false), 4000);
       console.error("Error eliminando testimonio:", error);
     }
 
@@ -147,11 +169,24 @@ const ManageTestimonios = () => {
 
       console.log(id);
 
-      window.alert(res.data.mensaje);
+    setBannerMsg(res.data.mensaje)
+            setBannerType('success');
+            setShowBanner(true);
+
+        setTimeout(() => setShowBanner(false), 4000); 
+
 
     } catch (error) {
+
+      const mensaje= error?.data?.mensaje|| error?.message|| 'Error en la Red'
       console.log(error);
       console.error("Error modificando testimonio:", error);
+         setBannerMsg(mensaje)
+            setBannerType('error');
+            setShowBanner(true);
+       setTimeout(() => setShowBanner(false), 4000); 
+        throw error;
+
     }
     setNombre('');
     setContenido('');
@@ -159,7 +194,7 @@ const ManageTestimonios = () => {
 
     setTimeout(() => {
       window.location.reload();
-    }, 100);
+    }, 1000);
 
 
 
@@ -226,6 +261,25 @@ const ManageTestimonios = () => {
           {modoEdicion ? 'Modificar Testimonio' : 'Agregar Testimonio'}
         </Button>
       </Stack>
+
+      {showBanner && (
+    <Box
+        sx={{
+            position: 'relative',
+            width: '100%',
+            mb: 2,
+            animation: 'slideDown 0.3s ease-in-out',
+            backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
+            color: '#fff',
+            borderRadius: 1,
+            p: 1,
+            boxShadow: 2,
+        }}
+    >
+        <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
+    </Box>
+)}
+
 
       <Divider sx={{ mb: 3 }} />
 

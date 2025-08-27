@@ -1,4 +1,4 @@
-import React from 'react';
+import React, {useState} from 'react';
 //import axios from 'axios';
 import { api } from '../api/api';
 import {
@@ -52,7 +52,10 @@ import banderin from '/Images/Banderines.jpg';
 import Login from './Login';
 import Registro from './Registro';
 
+
+
 class Tienda extends React.Component {
+
   constructor(props) {
     super(props);
     this.state = {
@@ -64,10 +67,17 @@ class Tienda extends React.Component {
       userMenuAnchor: null,
       currentView: 'tienda', // 'tienda', 'login', 'registro'
       isLoggedIn: false,
-      userData: null
+      userData: null,
+       bannerMsg: '',
+  bannerType: 'success', // or 'error'
+  showBanner: false
     };
+    
+  
     console.log('Tienda inicializada');
+    
   }
+
 
 
   // Datos de productos con diferentes descripciones y precios
@@ -195,6 +205,17 @@ class Tienda extends React.Component {
   handleUserMenuClick = (event) => {
     this.setState({ userMenuAnchor: event.currentTarget });
   }
+  setBannerMsg = (msg) => {
+  this.setState({ bannerMsg: msg });
+};
+
+setBannerType = (type) => {
+  this.setState({ bannerType: type });
+};
+
+setShowBanner = (visible) => {
+  this.setState({ showBanner: visible });
+};
 
   handleUserMenuClose = () => {
     this.setState({ userMenuAnchor: null });
@@ -582,15 +603,20 @@ class Tienda extends React.Component {
       };
       const res = await api.post('/auth/comprar', body); 
       console.log('response data: ', res.data.mensaje);
+      this.setBannerMsg(res.data.mensaje);
+    this.setBannerType('success');
+    this.setShowBanner(true);
+    setTimeout(() => this.setShowBanner(false), 4000); 
       return res.data;
     } catch (error) {
-      if (error.response) {
-        window.alert(error.response.data.mensaje);
-      } else if (error.request) {
-        window.alert('Ninguna respuesta del servidor.Por favor verifique su red.');
-      } else {
-        window.alert('Error en la red.');
-      }
+      const mensaje = error?.data?.mensaje|| error?.message|| 'Error en la Red';
+              this.setBannerMsg(mensaje)
+            this.setBannerType('error');
+           this.setShowBanner(true);
+        setTimeout(() => this.setShowBanner(false), 4000); 
+
+            
+
     }
   };
 
@@ -781,6 +807,27 @@ class Tienda extends React.Component {
             </IconButton>
           </Box>
 
+           {/* ✅ Banner should go here */}
+  {this.state.showBanner && (
+    <Box
+      sx={{
+        width: '100%',
+        mb: 2,
+        animation: 'slideDown 0.3s ease-in-out',
+        backgroundColor: this.state.bannerType === 'error' ? '#f44336' : '#4caf50',
+        color: '#fff',
+        borderRadius: 1,
+        p: 1,
+        boxShadow: 2,
+      }}
+    >
+      
+      <Typography sx={{ fontWeight: 'bold' }}>{this.state.bannerMsg}</Typography>
+    </Box>
+
+  )}
+
+
           {/* Contenido del carrito */}
           {this.state.cartItems.length === 0 ? (
             <Box
@@ -896,19 +943,28 @@ class Tienda extends React.Component {
                     '&:hover': { bgcolor: '#28a428' }
                   }}
                   onClick={() => {
-                    this.realizarPeticion();
-                    alert('¡Gracias por tu compra!');
+                      this.realizarPeticion();
+                      
+
                     this.setState({
-                      cartItems: [],
-                      totalItems: 0,
-                      cartModalOpen: false,
-                      selectedSizes: {} // Limpiar tallas seleccionadas
-                    });
+  cartItems: [],
+  totalItems: 0,
+  selectedSizes: {} // Limpiar tallas seleccionadas
+});
+
+// Delay closing the modal
+setTimeout(() => {
+  this.setState({ cartModalOpen: false });
+}, 3500); // Delay of 3.5 seconds
+        
                   }}
                 >
                   Proceder al Pago
                 </Button>
+                
+                
               </Box>
+
             </>
           )}
         </Box>

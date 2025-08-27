@@ -43,50 +43,7 @@ import CompareArrowsIcon from '@mui/icons-material/CompareArrows';
 
 // --- Estadísticas ordenadas ---
 const orderStats = [
-	'ID',
-	'name',
-	'G',
-	'PA',
-	'AB',
-	'R',
-	'H',
-	'B',
-	'1B',
-	'2B',
-	'3B',
-	'HR',
-	'XBH',
-	'TB',
-	'OB',
-	'RC',
-	'RBI',
-	'AVG',
-	'BB',
-	'BBi',
-	'Xc',
-	'Ks',
-	'SO',
-	'BB/K',
-	'BB/PA',
-	'HBP',
-	'SB',
-	'CS',
-	'PK',
-	'SCB',
-	'SF',
-	'SAC',
-	'RPA',
-	'OBP',
-	'OBPE',
-	'SLG',
-	'OPS',
-	'GPA',
-	'LOBi',
-	'LOB',
-	'ROE',
-	'FC',
-	'CH',
-	'IMG',
+	'ID', 'name', 'G', 'PA', 'AB', 'R', 'H', 'B', '1B', '2B', '3B', 'HR', 'XBH', 'TB', 'OB', 'RC', 'RBI', 'AVG', 'BB', 'BBi', 'Xc', 'Ks', 'SO', 'BB/K', 'BB/PA', 'HBP', 'SB', 'CS', 'PK', 'SCB', 'SF', 'SAC', 'RPA', 'OBP', 'OBPE', 'SLG', 'OPS', 'GPA', 'LOBi', 'LOB', 'ROE', 'FC', 'CH', 'IMG',
 ];
 
 // --- Estadísticas resumidas ---
@@ -105,70 +62,18 @@ const resumenStats = {
 
 // --- Configuraciones para gráficos radar ---
 const radarConfigs = {
-	ofensivo: {
-		title: 'Rendimiento Ofensivo',
-		stats: ['AVG', 'HR', 'RBI', 'SLG', 'OPS', 'OBP'],
-		maxValues: { AVG: 0.4, HR: 50, RBI: 150, SLG: 0.7, OPS: 1.2, OBP: 0.5 },
-	},
-	defensivo: {
-		title: 'Estadísticas de Contacto',
-		stats: ['H', '2B', '3B', 'BB', 'SO', 'SB'],
-		maxValues: { H: 200, '2B': 50, '3B': 15, BB: 100, SO: 200, SB: 50 },
-	},
-	avanzado: {
-		title: 'Métricas Avanzadas',
-		stats: ['GPA', 'RC', 'TB', 'XBH', 'BB/K', 'OBP'],
-		maxValues: { GPA: 0.35, RC: 120, TB: 350, XBH: 80, 'BB/K': 2.0, OBP: 0.5 },
-	},
+	ofensivo: { title: 'Rendimiento Ofensivo', stats: ['AVG', 'HR', 'RBI', 'SLG', 'OPS', 'OBP'], maxValues: { AVG: 0.4, HR: 50, RBI: 150, SLG: 0.7, OPS: 1.2, OBP: 0.5 } },
+	defensivo: { title: 'Estadísticas de Contacto', stats: ['H', '2B', '3B', 'BB', 'SO', 'SB'], maxValues: { H: 200, '2B': 50, '3B': 15, BB: 100, SO: 200, SB: 50 } },
+	avanzado: { title: 'Métricas Avanzadas', stats: ['GPA', 'RC', 'TB', 'XBH', 'BB/K', 'OBP'], maxValues: { GPA: 0.35, RC: 120, TB: 350, XBH: 80, 'BB/K': 2.0, OBP: 0.5 } },
 };
 
 // --- Mapeo columnas BD -> frontend ---
 const mappingBDtoFront = {
-	juegos_jugados: 'G',
-	apar_Plato: 'PA',
-	turnos_Bate: 'AB',
-	carreras_Anotadas: 'R',
-	hits: 'H',
-	bases_Alcanzadas: 'B',
-	sencillos: '1B',
-	dobles: '2B',
-	triples: '3B',
-	jonron: 'HR',
-	extrabases: 'XBH',
-	total_Bases: 'TB',
-	veces_base: 'OB',
-	carreras_creadas: 'RC',
-	carreras_impulsadas: 'RBI',
-	promedio_bateo: 'AVG',
-	bases_bola: 'BB',
-	bases_bola_int: 'BBi',
-	extra_contados: 'Xc',
-	ponches_tirandole: 'Ks',
-	ponches_totales: 'SO',
-	boletos_ponche: 'BB/K',
-	porcentaje_boletos_apa: 'BB/PA',
-	golpeado_lanzamiento: 'HBP',
-	bases_robadas: 'SB',
-	atrapado_robando: 'CS',
-	pickoffs: 'PK',
-	sacrificio_bateo: 'SCB',
-	flies_sacrificio: 'SF',
-	toques_sacrificio: 'SAC',
-	carrera_apari_plato: 'RPA',
-	porcentaje_embasado: 'OBP',
-	obp_estimado: 'OBPE',
-	slugging: 'SLG',
-	obp_mas_slug: 'OPS',
-	promedio_poder: 'GPA',
-	corredores_dejados_base_ind: 'LOBi',
-	corredores_dejados_base_equi: 'LOB',
-	llegadas_por_error: 'ROE',
-	jugada_de_seleccion: 'FC',
-	opor_fildeo: 'CH',
-	img: 'IMG',
+	juegos_jugados: 'G', apar_Plato: 'PA', turnos_Bate: 'AB', carreras_Anotadas: 'R', hits: 'H', bases_Alcanzadas: 'B', sencillos: '1B', dobles: '2B', triples: '3B', jonron: 'HR', extrabases: 'XBH', total_Bases: 'TB', veces_base: 'OB', carreras_creadas: 'RC', carreras_impulsadas: 'RBI', promedio_bateo: 'AVG', bases_bola: 'BB', bases_bola_int: 'BBi', extra_contados: 'Xc', ponches_tirandole: 'Ks', ponches_totales: 'SO', boletos_ponche: 'BB/K', porcentaje_boletos_apa: 'BB/PA', golpeado_lanzamiento: 'HBP', bases_robadas: 'SB', atrapado_robando: 'CS', pickoffs: 'PK', sacrificio_bateo: 'SCB', flies_sacrificio: 'SF', toques_sacrificio: 'SAC', carrera_apari_plato: 'RPA', porcentaje_embasado: 'OBP', obp_estimado: 'OBPE', slugging: 'SLG', obp_mas_slug: 'OPS', promedio_poder: 'GPA', corredores_dejados_base_ind: 'LOBi', corredores_dejados_base_equi: 'LOB', llegadas_por_error: 'ROE', jugada_de_seleccion: 'FC', opor_fildeo: 'CH', img: 'IMG',
 };
 
 export default function StatsJugadores() {
+	const [jugadoresExcel, setJugadoresExcel] = useState([]);
 	const [jugadores, setJugadores] = useState([]);
 	const [open, setOpen] = useState(false);
 	const [jugadorSeleccionado, setJugadorSeleccionado] = useState(null);
@@ -190,135 +95,41 @@ export default function StatsJugadores() {
 	const [openConflicto, setOpenConflicto] = useState(false);
 	const [seleccionConflictos, setSeleccionConflictos] = useState({});
 
-	const [openConfirmarSinSeleccion, setOpenConfirmarSinSeleccion] =
-		useState(false);
+	const [openConfirmarSinSeleccion, setOpenConfirmarSinSeleccion] = useState(false);
 	const [jugadoresSinSeleccion, setJugadoresSinSeleccion] = useState([]);
 
-	const [snack, setSnack] = useState({
-		open: false,
-		severity: 'success', // 'success' | 'error' | 'info' | 'warning'
-		text: '',
-	});
-	const openSnack = (severity, text) =>
-		setSnack({ open: true, severity, text });
+	const [snack, setSnack] = useState({ open: false, severity: 'success', text: '' });
+	const openSnack = (severity, text) => setSnack({ open: true, severity, text });
 
 	// --- Cargar jugadores desde API al montar componente ---
-	useEffect(() => {
-		fetchJugadores();
-	}, []);
+	useEffect(() => { fetchJugadores() }, []);
 
-	// --- Función para obtener jugadores desde la API ---
+	// --- Obtener jugadores (solo GET) ---
 	const fetchJugadores = async () => {
 		try {
 			setLoading(true);
 			setError(null);
-
 			const res = await api.get('/auth/jugadores');
 			const data = res.data?.jugadores || [];
-
 			const jugadoresConvertidos = data.map(row => {
-				const jugador = {
-					ID: row.id,
-					name: row.nombre || row.name,
-					foto: row.foto || '/Images/jugador.jpg',
-				};
-
-				// Mapear todas las estadísticas desde la BD al formato frontend
+				const jugador = { ID: row.id, name: row.nombre || row.name, foto: row.foto || '/Images/jugador.jpg' };
 				for (const [colBD, colFront] of Object.entries(mappingBDtoFront)) {
 					jugador[colFront] = row[colBD] !== undefined ? row[colBD] : null;
 				}
-
 				return jugador;
 			});
-
 			setJugadores(jugadoresConvertidos);
-			return true;
 		} catch (err) {
 			console.error('Error al obtener jugadores:', err);
-			return false;
-			// setError("Error al cargar los jugadores. Por favor, intenta nuevamente.");
+			setError("Error al cargar los jugadores. Por favor, intenta nuevamente.");
 		} finally {
 			setLoading(false);
 		}
 	};
 
-	// --- Función para actualizar jugador en la API ---
-	const actualizarJugadorAPI = async jugador => {
-		try {
-			// Convertir de formato frontend a BD
-			const jugadorBD = {
-				id: jugador.ID,
-				nombre: jugador.name,
-				foto: jugador.foto,
-			};
+	const obtenerSiguienteID = listaJugadores => listaJugadores.length ? Math.max(...listaJugadores.map(j => j.ID)) + 1 : 1;
 
-			// Mapear estadísticas de vuelta al formato BD
-			for (const [colBD, colFront] of Object.entries(mappingBDtoFront)) {
-				if (jugador[colFront] !== undefined) {
-					jugadorBD[colBD] = jugador[colFront];
-				}
-			}
-
-			await api.put(`/auth/jugadores/${jugador.ID}`, jugadorBD);
-			return true;
-		} catch (err) {
-			console.error('Error al actualizar jugador:', err);
-			return false;
-		}
-	};
-
-	// --- Función para crear jugador en la API ---
-	const crearJugadorAPI = async jugador => {
-		try {
-			const jugadorBD = {
-				nombre: jugador.name,
-				foto: jugador.foto || '/Images/jugador.jpg',
-			};
-
-			for (const [colBD, colFront] of Object.entries(mappingBDtoFront)) {
-				if (jugador[colFront] !== undefined) {
-					jugadorBD[colBD] = jugador[colFront];
-				}
-			}
-
-			const res = await api.post('/auth/jugadores', jugadorBD);
-			return res.data?.jugador || null;
-		} catch (err) {
-			console.error('Error al crear jugador:', err);
-			return null;
-		}
-	};
-
-	// --- Preparar datos para gráfico radar individual ---
-	const prepararDatosRadar = (jugador, configKey) => {
-		const config = radarConfigs[configKey];
-		return config.stats.map(stat => ({
-			stat,
-			value: parseFloat(jugador[stat]) || 0,
-			fullMark: config.maxValues[stat] || 100,
-		}));
-	};
-
-	// --- Preparar datos para comparación de jugadores ---
-	const prepararDatosComparacion = (jugador1, jugador2, configKey) => {
-		const config = radarConfigs[configKey];
-		return config.stats.map(stat => ({
-			stat,
-			[jugador1.name]: parseFloat(jugador1[stat]) || 0,
-			[jugador2.name]: parseFloat(jugador2[stat]) || 0,
-			fullMark: config.maxValues[stat] || 100,
-		}));
-	};
-
-	// --- Obtener siguiente ID disponible ---
-	const obtenerSiguienteID = listaJugadores => {
-		return listaJugadores.length
-			? Math.max(...listaJugadores.map(j => j.ID)) + 1
-			: 1;
-	};
-
-	// --- Manejar importación de Excel ---
-	const handleImportExcel = async e => {
+	const handleImportExcel = e => {
 		const file = e.target.files[0];
 		if (!file) {
 			openSnack('info', 'No seleccionaste ningún archivo.');
@@ -326,38 +137,41 @@ export default function StatsJugadores() {
 		}
 
 		const reader = new FileReader();
-		reader.onload = async evt => {
+		reader.onload = evt => {
 			try {
 				const bstr = evt.target.result;
 				const workbook = XLSX.read(bstr, { type: 'binary' });
 				const sheetName = workbook.SheetNames[0];
 				const worksheet = workbook.Sheets[sheetName];
 				const data = XLSX.utils.sheet_to_json(worksheet, { defval: '' });
+				setJugadoresExcel(data);
 
-				let jugadoresTemp = [...jugadores];
+				let jugadoresTemp = [...jugadores]; // estado actual
 				const conflictos = [];
 
 				data.forEach(row => {
 					const nuevoJugador = {
 						...row,
 						ID: row.ID || obtenerSiguienteID(jugadoresTemp),
-						name: row.Name || row.name,
+						name: row.Name || row.name || "",
 						foto: row.foto || '/Images/jugador.jpg',
 					};
 
-					const conflictosNombre = jugadoresTemp.filter(
-						j => j.name.toLowerCase() === nuevoJugador.name.toLowerCase(),
-					);
+					if (!nuevoJugador.name) {
+						console.warn("Jugador ignorado (sin nombre válido):", nuevoJugador);
+						return;
+					}
+
+					const nombreNuevo = nuevoJugador.name.toLowerCase();
+
+					const conflictosNombre = jugadoresTemp.filter(j => j.name && j.name.toLowerCase() === nombreNuevo);
 
 					if (conflictosNombre.length > 0) {
-						conflictos.push({
-							nuevoJugador,
-							conflictosExistentes: conflictosNombre,
-						});
-					} else if (jugadoresTemp.find(j => j.ID === nuevoJugador.ID)) {
-						nuevoJugador.ID = obtenerSiguienteID(jugadoresTemp);
-						jugadoresTemp.push(nuevoJugador);
+						// Si hay conflicto de nombre → lo guardamos para resolución
+						conflictos.push({ nuevoJugador, conflictosExistentes: conflictosNombre });
 					} else {
+						// Sin conflicto → agregamos con ID correcto
+						nuevoJugador.ID = obtenerSiguienteID(jugadoresTemp);
 						jugadoresTemp.push(nuevoJugador);
 					}
 				});
@@ -367,120 +181,126 @@ export default function StatsJugadores() {
 				if (conflictos.length > 0) {
 					setJugadorEnConflicto(conflictos);
 					setOpenConflicto(true);
-					openSnack(
-						'warning',
-						`Importado con observaciones: ${conflictos.length} conflicto(s) por nombre.`,
-					);
+					openSnack('warning', `Importado con observaciones: ${conflictos.length} conflicto(s) por nombre.`);
 				} else {
-					openSnack(
-						'success',
-						'¡Importación exitosa! Los jugadores se cargaron correctamente.',
-					);
+					openSnack('success', '¡Importación exitosa! Los jugadores se cargaron correctamente.');
 				}
-			} catch (error) {
-				console.error('Error al procesar Excel:', error);
+			} catch (err) {
+				console.error('Error al procesar Excel:', err);
 				setError('Error al procesar el archivo Excel. Verifica el formato.');
-				openSnack(
-					'error',
-					'No se pudo procesar el Excel. Revisa el formato e inténtalo nuevamente.',
-				);
+				openSnack('error', 'No se pudo procesar el Excel. Revisa el formato e inténtalo nuevamente.');
 			}
 		};
-
 		reader.readAsBinaryString(file);
 	};
 
-	// --- Aplicar cambios de conflictos con API ---
-	const aplicarCambios = async () => {
-		try {
-			setLoading(true);
-			let jugadoresTemp = [...jugadores];
-			let nextID = obtenerSiguienteID(jugadoresTemp);
+	const aplicarCambios = React.useCallback(() => {
+		let jugadoresTemp = [...jugadores];
+		let nextID = obtenerSiguienteID(jugadoresTemp);
 
-			for (const conflicto of jugadorEnConflicto) {
-				const sel = seleccionConflictos[conflicto.nuevoJugador.ID] || {};
+		// Jugadores sin conflicto y que NO existen ya por name
+		const jugadoresSinConflicto = (jugadoresExcel || []).filter(nuevo => {
+			const nombreNuevo = (nuevo.name || nuevo.Name || "").trim();
+			if (!nombreNuevo) return false; // Ignorar jugadores sin nombre
 
-				if (sel.actualizar) {
-					// Actualizar jugador existente en API
-					const jugadorActualizado = {
+			// Revisar si ya existe por name
+			const yaExiste = jugadoresTemp.some(j => {
+				const nombreExistente = (j.name || j.Name || "").trim();
+				return nombreExistente.toLowerCase() === nombreNuevo.toLowerCase();
+			});
+			return !yaExiste; // solo los que no existen
+		});
+
+		// Agregar nuevos sin conflicto
+		for (const nuevoJugador of jugadoresSinConflicto) {
+			const nombreNuevo = nuevoJugador.name || nuevoJugador.Name || "";
+			jugadoresTemp.push({
+				...nuevoJugador,
+				ID: nextID,
+				name: nombreNuevo,
+				foto: nuevoJugador.foto || '/Images/jugador.jpg'
+			});
+			nextID++;
+		}
+
+		// Resolver conflictos
+		for (const conflicto of jugadorEnConflicto) {
+			const sel = seleccionConflictos[conflicto.nuevoJugador.ID];
+			if (!sel) continue;
+
+			if (sel.actualizar) {
+				const jugadorExistenteID = conflicto.conflictosExistentes[0].ID;
+				const jugadorActualizado = {
+					...conflicto.nuevoJugador,
+					ID: jugadorExistenteID
+				};
+				jugadoresTemp = jugadoresTemp.map(j =>
+					j.ID === jugadorExistenteID ? jugadorActualizado : j
+				);
+			} else if (sel.agregar) {
+				const nombreNuevo = conflicto.nuevoJugador.name || conflicto.nuevoJugador.Name || "";
+				if (nombreNuevo) {
+					const nuevoJugador = {
 						...conflicto.nuevoJugador,
-						ID: conflicto.conflictosExistentes[0].ID,
+						ID: nextID,
+						name: nombreNuevo,
+						foto: conflicto.nuevoJugador.foto || '/Images/jugador.jpg'
 					};
-
-					const exito = await actualizarJugadorAPI(jugadorActualizado);
-					if (exito) {
-						jugadoresTemp = jugadoresTemp.map(j =>
-							j.ID === conflicto.conflictosExistentes[0].ID
-								? jugadorActualizado
-								: j,
-						);
-					}
-				} else if (sel.agregar) {
-					// Crear nuevo jugador en API
-					const nuevoJugador = { ...conflicto.nuevoJugador, ID: nextID };
-					const jugadorCreado = await crearJugadorAPI(nuevoJugador);
-
-					if (jugadorCreado) {
-						jugadoresTemp.push({ ...nuevoJugador, ID: jugadorCreado.id });
-						nextID++;
-					}
+					jugadoresTemp.push(nuevoJugador);
+					nextID++;
 				}
 			}
-
-			setJugadores(jugadoresTemp);
-			setOpenConflicto(false);
-			setJugadorEnConflicto([]);
-			setSeleccionConflictos({});
-			setOpenConfirmarSinSeleccion(false);
-			setJugadoresSinSeleccion([]);
-
-			// Refrescar datos desde la API
-			await fetchJugadores();
-		} catch (error) {
-			console.error('Error al aplicar cambios:', error);
-			setError('Error al guardar los cambios. Intenta nuevamente.');
-		} finally {
-			setLoading(false);
 		}
-	};
+
+		// Ordenar por ID
+		jugadoresTemp.sort((a, b) => a.ID - b.ID);
+
+		console.log("Jugadores después de aplicar conflictos:");
+		console.table(jugadoresTemp);
+
+		// Actualizar estado
+		setJugadores(jugadoresTemp);
+		setOpenConflicto(false);
+		setJugadorEnConflicto([]);
+		setSeleccionConflictos({});
+		setJugadoresExcel([]);
+
+		openSnack("success", "Importación completada correctamente");
+	}, [jugadores, jugadoresExcel, jugadorEnConflicto, seleccionConflictos]);
 
 	const handleAplicarConflictos = () => {
 		const sinSeleccion = jugadorEnConflicto.filter(conflicto => {
 			const sel = seleccionConflictos[conflicto.nuevoJugador.ID];
 			return !sel?.actualizar && !sel?.agregar;
 		});
-
 		if (sinSeleccion.length > 0) {
 			setJugadoresSinSeleccion(sinSeleccion);
 			setOpenConfirmarSinSeleccion(true);
 			return;
 		}
-
 		aplicarCambios();
 	};
 
-	const jugadoresFiltrados = jugadores.filter(j =>
-		j.name?.toLowerCase().includes(busqueda.toLowerCase()),
-	);
+	const jugadoresFiltrados = jugadores.filter(j => j.name?.toLowerCase().includes(busqueda.toLowerCase()));
 
-	// --- Mostrar loading mientras carga ---
 	if (loading && jugadores.length === 0) {
 		return (
-			<Box
-				sx={{
-					display: 'flex',
-					justifyContent: 'center',
-					alignItems: 'center',
-					height: '50vh',
-				}}
-			>
+			<Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '50vh' }}>
 				<CircularProgress size={60} sx={{ color: '#10045c' }} />
-				<Typography sx={{ ml: 2, color: '#10045c' }}>
-					Cargando estadísticas...
-				</Typography>
+				<Typography sx={{ ml: 2, color: '#10045c' }}>Cargando estadísticas...</Typography>
 			</Box>
 		);
 	}
+
+	// --- Preparar datos radar ---
+	const prepararDatosRadar = (jugador, configKey) => {
+		const config = radarConfigs[configKey];
+		return config.stats.map(stat => ({ stat, value: parseFloat(jugador[stat]) || 0, fullMark: config.maxValues[stat] || 100 }));
+	};
+	const prepararDatosComparacion = (jugador1, jugador2, configKey) => {
+		const config = radarConfigs[configKey];
+		return config.stats.map(stat => ({ stat, [jugador1.name]: parseFloat(jugador1[stat]) || 0, [jugador2.name]: parseFloat(jugador2[stat]) || 0, fullMark: config.maxValues[stat] || 100 }));
+	};
 
 	return (
 		<Box sx={{ width: '100%', pt: 2 }}>
@@ -519,21 +339,6 @@ export default function StatsJugadores() {
 						onChange={handleImportExcel}
 					/>
 				</Button>
-				<Button
-					variant='outlined'
-					onClick={async () => {
-						const ok = await fetchJugadores();
-						openSnack(
-							ok ? 'success' : 'error',
-							ok
-								? 'Datos actualizados correctamente.'
-								: 'No se pudo actualizar los datos.',
-						);
-					}}
-					disabled={loading}
-				>
-					{loading ? <CircularProgress size={20} /> : 'Actualizar Datos'}
-				</Button>
 			</Box>
 
 			<Box sx={{ display: 'flex', justifyContent: 'center', mb: 4 }}>
@@ -554,85 +359,89 @@ export default function StatsJugadores() {
 			</Box>
 
 			<Grid container spacing={2} justifyContent='center'>
-				{jugadoresFiltrados.map(jugador => (
-					<Grid item xs={12} sm={6} md={4} key={jugador.ID}>
-						<Card
-							sx={{
-								borderRadius: 3,
-								boxShadow: 3,
-								textAlign: 'center',
-								p: 2,
-								position: 'relative',
-							}}
-						>
-							<IconButton
-								sx={{ position: 'absolute', top: 8, right: 8 }}
-								onClick={e => {
-									setAnchorEl(e.currentTarget);
-									setJugadorMenu(jugador);
+				{jugadoresFiltrados
+					.filter(jugador => jugador.name && jugador.name.trim() !== "") // 👈 filtra jugadores sin nombre
+					.map(jugador => (
+						<Grid item xs={12} sm={6} md={4} key={jugador.ID}>
+							<Card
+								sx={{
+									borderRadius: 3,
+									boxShadow: 3,
+									textAlign: 'center',
+									p: 2,
+									position: 'relative',
 								}}
 							>
-								<MoreVertIcon />
-							</IconButton>
-							<CardMedia
-								component='img'
-								image={jugador.foto}
-								alt={jugador.name}
-								sx={{
-									objectFit: 'cover',
-									borderRadius: 3,
-									maxWidth: '300px',
-									mx: 'auto',
-									mb: 2,
-								}}
-							/>
-							<CardContent>
-								<Typography
-									variant='h6'
-									sx={{ fontFamily: 'GroteskBold', mb: 1 }}
+								<IconButton
+									sx={{ position: 'absolute', top: 8, right: 8 }}
+									onClick={e => {
+										setAnchorEl(e.currentTarget);
+										setJugadorMenu(jugador);
+									}}
 								>
-									{jugador.name}
-								</Typography>
-								<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
-									<Button
-										variant='contained'
-										sx={{ backgroundColor: '#10045c' }}
-										startIcon={<BarChartIcon />}
-										onClick={() => {
-											setJugadorSeleccionado(jugador);
-											setModoDetalle('detallado');
-											setOpen(true);
-										}}
+									<MoreVertIcon />
+								</IconButton>
+								<CardMedia
+									component='img'
+									image={jugador.foto}
+									alt={jugador.name}
+									sx={{
+										objectFit: 'cover',
+										borderRadius: 3,
+										width: '260px',   // antes era 300px
+										height: '200px',  // fijar altura para que no sea gigante
+										mx: 'auto',
+										mb: 2,
+									}}
+								/>
+								<CardContent>
+									<Typography
+										variant='h6'
+										sx={{ fontFamily: 'GroteskBold', mb: 1 }}
 									>
-										Ver Estadísticas Detalladas
-									</Button>
-									<Button
-										variant='outlined'
-										startIcon={<RadarIcon />}
-										onClick={() => {
-											setJugadorSeleccionado(jugador);
-											setModoDetalle('graficos');
-											setOpen(true);
-										}}
-									>
-										Ver Gráficos
-									</Button>
-									<Button
-										variant='text'
-										size='small'
-										onClick={() => {
-											setJugadorSeleccionado(jugador);
-											setModoDetalle('resumido');
-											setOpen(true);
-										}}
-									>
-										Vista Resumida
-									</Button>
-								</Box>
-							</CardContent>
-						</Card>
-					</Grid>
-				))}
+										{jugador.name}
+									</Typography>
+									<Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+										
+										<Button
+											variant='contained'
+											sx={{ backgroundColor: '#10045c' }}
+											startIcon={<BarChartIcon />}
+											onClick={() => {
+												setJugadorSeleccionado(jugador);
+												setModoDetalle('detallado');
+												setOpen(true);
+											}}
+										>
+											Ver Estadísticas Detalladas
+										</Button>
+										<Button
+											variant='outlined'
+											startIcon={<RadarIcon />}
+											onClick={() => {
+												setJugadorSeleccionado(jugador);
+												setModoDetalle('graficos');
+												setOpen(true);
+											}}
+										>
+											Ver Gráficos
+										</Button>
+										<Button
+											variant='text'
+											size='small'
+											onClick={() => {
+												setJugadorSeleccionado(jugador);
+												setModoDetalle('resumido');
+												setOpen(true);
+											}}
+										>
+											Vista Resumida
+										</Button>
+									</Box>
+								</CardContent>
+							</Card>
+						</Grid>
+					))}
 			</Grid>
 
 			{/* --- Menú acciones jugador --- */}
@@ -668,7 +477,7 @@ export default function StatsJugadores() {
 			>
 				<DialogContent sx={{ textAlign: 'center', p: 3 }}>
 					<Typography variant='h6' sx={{ mb: 2 }}>
-						¡Conflictos de jugadores!
+						¡Hay Jugadores Repetidos!
 					</Typography>
 					<Typography sx={{ mb: 3 }}>
 						Selecciona qué acción tomar para cada jugador:
@@ -806,9 +615,9 @@ export default function StatsJugadores() {
 					setOpen(false);
 					setJugadorSeleccionado(null);
 				}}
-				maxWidth='lg'
+				maxWidth='md'
 				fullWidth
-				sx={{ '& .MuiDialog-paper': { mt: 5 } }}
+				sx={{ '& .MuiDialog-paper': { mt: 15} }}
 			>
 				<DialogContent>
 					{jugadorSeleccionado && (
@@ -1006,76 +815,76 @@ export default function StatsJugadores() {
 					setJugadorBase(null);
 					setJugadorComparado(null);
 				}}
-				maxWidth='lg'
+				maxWidth="lg"       // antes era lg
 				fullWidth
 				sx={{
-					'& .MuiDialog-paper': {
+					"& .MuiDialog-paper": {
 						borderRadius: 4,
 						boxShadow: 8,
-						background: 'linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)',
+						background: "linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%)",
 						mt: 5,
+						maxHeight: "80vh",      // limita la altura del modal
 					},
 				}}
 			>
-				<DialogContent>
+				<DialogContent
+					sx={{
+						overflowY: "auto",      // scroll si hay muchos jugadores
+						p: 2,
+					}}
+				>
 					{!jugadorComparado ? (
-						<Box sx={{ textAlign: 'center', p: 2 }}>
+						<Box sx={{ textAlign: "center", p: 2 }}>
 							<Typography
-								variant='h6'
-								sx={{ mb: 4, fontFamily: 'GroteskBold', color: '#10045c' }}
+								variant="h6"
+								sx={{ mb: 4, fontFamily: "GroteskBold", color: "#10045c" }}
 							>
 								Selecciona un Jugador Para Comparar con {jugadorBase?.name}
 							</Typography>
 
-							<Grid
-								container
-								spacing={3}
-								justifyContent='center'
-								alignItems='center'
-							>
+							<Grid container spacing={2} justifyContent="center">
 								{jugadores
 									.filter(j => j.ID !== jugadorBase?.ID)
 									.map((j, i) => (
 										<Grid
 											item
-											xs={12}
-											sm={6}
-											md={4}
+											xs={6}       // ficha más compacta
+											sm={4}
+											md={3}
 											key={i}
-											sx={{ display: 'flex', justifyContent: 'center' }}
+											sx={{ display: "flex", justifyContent: "center" }}
 										>
 											<Card
 												sx={{
-													borderRadius: 4,
-													boxShadow: 6,
-													textAlign: 'center',
-													p: 2,
-													cursor: 'pointer',
-													maxWidth: '220px',
-													transition: 'all 0.3s ease',
-													background:
-														'linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)',
-													'&:hover': {
-														transform: 'scale(1.05)',
-														boxShadow: 10,
+													borderRadius: 3,
+													boxShadow: 4,
+													textAlign: "center",
+													p: 1,
+													cursor: "pointer",
+													maxWidth: "160px",    // ancho más pequeño
+													transition: "all 0.3s ease",
+													background: "linear-gradient(135deg, #ffffff 0%, #f0f4ff 100%)",
+													"&:hover": {
+														transform: "scale(1.05)",
+														boxShadow: 8,
 													},
 												}}
 												onClick={() => setJugadorComparado(j)}
 											>
 												<CardMedia
-													component='img'
+													component="img"
 													image={j.foto}
 													alt={j.name}
 													sx={{
-														objectFit: 'cover',
-														borderRadius: 3,
-														height: 180,
-														mb: 2,
+														objectFit: "cover",
+														borderRadius: 2,
+														height: 120,      // altura más pequeña
+														mb: 1,
 													}}
 												/>
 												<Typography
-													variant='h6'
-													sx={{ fontFamily: 'GroteskBold', color: '#10045c' }}
+													variant="subtitle2"
+													sx={{ fontFamily: "GroteskBold", color: "#10045c", fontSize: 14 }}
 												>
 													{j.name}
 												</Typography>
@@ -1258,9 +1067,9 @@ export default function StatsJugadores() {
 									{/* Estadísticas comparadas */}
 									{orderStats.map((statKey, index) =>
 										jugadorBase[statKey] !== undefined &&
-										jugadorBase[statKey] !== null &&
-										jugadorComparado[statKey] !== undefined &&
-										jugadorComparado[statKey] !== null ? (
+											jugadorBase[statKey] !== null &&
+											jugadorComparado[statKey] !== undefined &&
+											jugadorComparado[statKey] !== null ? (
 											<React.Fragment key={statKey}>
 												<Typography
 													sx={{
@@ -1268,12 +1077,12 @@ export default function StatsJugadores() {
 														background: index % 2 === 0 ? '#f9f9f9' : 'white',
 														fontWeight:
 															parseFloat(jugadorBase[statKey]) >
-															parseFloat(jugadorComparado[statKey])
+																parseFloat(jugadorComparado[statKey])
 																? 'bold'
 																: 'normal',
 														color:
 															parseFloat(jugadorBase[statKey]) >
-															parseFloat(jugadorComparado[statKey])
+																parseFloat(jugadorComparado[statKey])
 																? '#10045c'
 																: 'inherit',
 													}}
@@ -1296,12 +1105,12 @@ export default function StatsJugadores() {
 														background: index % 2 === 0 ? '#f9f9f9' : 'white',
 														fontWeight:
 															parseFloat(jugadorComparado[statKey]) >
-															parseFloat(jugadorBase[statKey])
+																parseFloat(jugadorBase[statKey])
 																? 'bold'
 																: 'normal',
 														color:
 															parseFloat(jugadorComparado[statKey]) >
-															parseFloat(jugadorBase[statKey])
+																parseFloat(jugadorBase[statKey])
 																? '#10045c'
 																: 'inherit',
 													}}

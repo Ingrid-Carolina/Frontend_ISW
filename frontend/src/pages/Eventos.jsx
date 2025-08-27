@@ -23,6 +23,7 @@ import { obtenerEventosProximos } from '../pages/eventService';
 import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import fond from '/Images/pilotos.c.jpg';
+import { Link } from "react-router-dom";
 //import axios from 'axios';
 import { api } from '../api/api';
 
@@ -535,6 +536,8 @@ const Eventos = () => {
                       <Button
                         fullWidth
                         variant="contained"
+                        component={Link}
+                        to={`/noticia/${n.id}`}   // 🔹 Enlaza al detalle dinámico
                         sx={{
                           backgroundColor: "#0c005a",
                           color: "white",

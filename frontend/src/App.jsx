@@ -18,6 +18,7 @@ import Contacto from './pages/Contacto.jsx';
 import Tienda from './pages/Tienda.jsx';
 import Aliados from './pages/Aliados.jsx';
 import MostrarLoginyRegistro from './pages/MostrarLoginyRegistro';
+import NoticiaDetalle from './pages/NoticiaDetalle.jsx';
 import Noticia1 from './pages/Noticia1.jsx';
 import Noticia2 from './pages/Noticia2.jsx';
 import Noticia3 from './pages/Noticia3.jsx';
@@ -25,6 +26,7 @@ import NewsTest from './pages/NewsTest.jsx';
 import PaginaTestimonios from './pages/Testimonio.jsx';
 import EditarPerfil from './pages/EditarPerfil.jsx';
 import Donaciones from './pages/Donaciones.jsx';
+import EnVivo from './pages/EnVivo.jsx';
 import SeleccionarAvatar from './pages/SeleccionarAvatar.jsx';
 
 function App() {
@@ -43,6 +45,7 @@ function App() {
 						<Route path='/voluntariado' element={<Voluntariado />} />
 						<Route path='/calendario' element={<Calendario />} />
 						<Route path='/eventos' element={<Eventos />} />
+						<Route path="/noticia/:id" element={<NoticiaDetalle />} />
 						<Route path='/Contacto' element={<Contacto />} />
 						<Route path='/tienda' element={<Tienda />} />
 						<Route path='/aliados' element={<Aliados />} />
@@ -53,6 +56,7 @@ function App() {
 						<Route path='/Noticia3' element={<Noticia3 />}/>
 						<Route path='/Testimonio' element={<PaginaTestimonios/>}/>
 						<Route path='/Donaciones' element={<Donaciones/>}/>
+						<Route path='/EnVivo' element={<EnVivo/>}/>
 						<Route path='/Avatars' element={<SeleccionarAvatar />} />
 					</Routes>
 				</main>
