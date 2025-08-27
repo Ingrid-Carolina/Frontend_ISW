@@ -18,6 +18,7 @@ import Contacto from './pages/Contacto.jsx';
 import Tienda from './pages/Tienda.jsx';
 import Aliados from './pages/Aliados.jsx';
 import MostrarLoginyRegistro from './pages/MostrarLoginyRegistro';
+import NoticiaDetalle from './pages/NoticiaDetalle.jsx';
 import Noticia1 from './pages/Noticia1.jsx';
 import Noticia2 from './pages/Noticia2.jsx';
 import Noticia3 from './pages/Noticia3.jsx';
@@ -44,6 +45,7 @@ function App() {
 						<Route path='/voluntariado' element={<Voluntariado />} />
 						<Route path='/calendario' element={<Calendario />} />
 						<Route path='/eventos' element={<Eventos />} />
+						<Route path="/noticia/:id" element={<NoticiaDetalle />} />
 						<Route path='/Contacto' element={<Contacto />} />
 						<Route path='/tienda' element={<Tienda />} />
 						<Route path='/aliados' element={<Aliados />} />
