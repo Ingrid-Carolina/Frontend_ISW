@@ -26,16 +26,17 @@ export default function Dashboard() {
           fontFamily: 'GroteskBold',
           color: '#10045c',
           mb: 4,
-          textAlign: 'center'
+          textAlign: 'center',
+          fontSize: { xs: '3rem', sm: '3.5rem', md: '4rem' }
         }}
       >
         Estadisticas del Sitio
       </Typography>
 
       {/* Contenedor centrado y controlado */}
-      <Box sx={{ maxWidth: 1200, mx: "auto", width: "100%" }}>
+      <Box sx={{ maxWidth: 1200, mx: "auto", px:{ xs: 2, sm: 3, md: 4 }, width: "100%" }}>
         {/* Tarjetas de resumen */}
-        <Grid container spacing={2} justifyContent="center">
+        <Grid container spacing={{xs: 2, sm: 3, md: 4}} justifyContent="center"> {/*Spacing entre las cartas de estadistica*/}
           <Grid item xs={12} sm={6} md={4}>
             <Paper sx={{ p: 2, textAlign: "center"  }}>
               <Typography variant="h6" fontFamily="ManropeEB">Visitas</Typography>
@@ -61,7 +62,7 @@ export default function Dashboard() {
           <Typography variant="h4" gutterBottom fontFamily="Varsity" color="#10045c" textAlign="center">
             Visitas por mes
           </Typography>
-          <Paper sx={{ p: 2 }}>
+          <Paper sx={{ p: { xs: 1.5, sm: 2 }, overflowX: 'auto' }}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={visitData}>
                 <CartesianGrid strokeDasharray="3 3" />

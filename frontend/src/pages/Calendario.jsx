@@ -168,16 +168,16 @@ const Calendario = () => {
 		return new Date(year, month - 1, day, hours, minutes);
 	}
 
-	useEffect(() => {
-		// Si cualquiera de los dos modales está abierto, bloquea el scroll de fondo
-		if (!showMonthEvents && !selectedDate) return;
+	// useEffect(() => {
+	// 	// Si cualquiera de los dos modales está abierto, bloquea el scroll de fondo
+	// 	if (!showMonthEvents && !selectedDate) return;
 
-		const prev = document.body.style.overflow;
-		document.body.style.overflow = 'hidden';
-		return () => {
-			document.body.style.overflow = prev;
-		};
-	}, [showMonthEvents, selectedDate]);
+	// 	const prev = document.body.style.overflow;
+	// 	document.body.style.overflow = 'hidden';
+	// 	return () => {
+	// 		document.body.style.overflow = prev;
+	// 	};
+	// }, [showMonthEvents, selectedDate]);
 
 	useEffect(() => {
 		const userRole = localStorage.getItem('userRole');
