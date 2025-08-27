@@ -38,6 +38,10 @@ const Login = ({ onRegistroClick }) => {
 	const [failedAttempts, setFailedAttempts] = useState(0);
 	const [failedBlock, setFailedBlock] = useState(0);
 	const [countdown, setCountdown] = useState(null);
+	const [bannerMsg, setBannerMsg] = useState('');
+const [bannerType, setBannerType] = useState('success'); // or 'error'
+const [showBanner, setShowBanner] = useState(false);
+
 
 	const MAX_ATTEMPTS = 3;
 
@@ -80,10 +84,7 @@ const Login = ({ onRegistroClick }) => {
 			setSubmitError(
 				'Has excedido el número máximo de intentos. Tienes que esperar un momento.',
 			);
-		} else {
-			// Still have attempts left
-			setSubmitError(`Correo o contraseña incorrecta.`);
-		}
+		} 
 	};
 
 	const validateForm = () => {
@@ -144,7 +145,10 @@ const Login = ({ onRegistroClick }) => {
 				window.dispatchEvent(new Event('storage'));
 
 				// Navegar a home
-				navigate('/');
+				setTimeout(() => {
+ 					 navigate('/');
+						}, 1500);
+
 
 				setTimeout(() => {
 					if (window.location.pathname === '/') {
@@ -155,9 +159,7 @@ const Login = ({ onRegistroClick }) => {
 				setSubmitError('');
 				setFailedAttempts(0);
 				setFailedBlock(0);
-			} else {
-				setSubmitError('Respuesta inesperada del servidor.');
-			}
+			} 
 		} catch (error) {
 			handleFailedAttempt(error);
 		} finally {
@@ -176,16 +178,21 @@ const Login = ({ onRegistroClick }) => {
 				email: formData.email,
 				password: formData.password,
 			});
-			window.alert(res.data.mensaje);
+			  setBannerMsg(res.data.mensaje)
+            setBannerType('success');
+            setShowBanner(true);
+
+        
+        setTimeout(() => setShowBanner(false), 3000); 
+
 			return res.data;
 		} catch (error) {
-			if (error.response) {
-				window.alert(error.response.data.mensaje);
-			} else if (error.request) {
-				window.alert('Ninguna respuesta del servidor. Por favor verifique su red.');
-			} else {
-				window.alert('Error en la red.');
-			}
+			const mensaje = error.response?.data?.mensaje || 'Correo o Contraseña Incorrecta';
+                setBannerMsg(mensaje)
+            setBannerType('error');
+            setShowBanner(true);
+			 setTimeout(() => setShowBanner(false), 3000); 
+
 			throw error;
 		}
 	};
@@ -252,6 +259,25 @@ const Login = ({ onRegistroClick }) => {
 				>
 					INICIAR SESIÓN
 				</Typography>
+				{showBanner && (
+    <Box
+        sx={{
+            position: 'relative',
+            width: '100%',
+            mb: 2,
+            animation: 'slideDown 0.3s ease-in-out',
+            backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
+            color: '#fff',
+            borderRadius: 1,
+            p: 1,
+            boxShadow: 2,
+        }}
+    >
+        <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
+    </Box>
+)}
+
+
 
 				{submitError && (
 					<Alert

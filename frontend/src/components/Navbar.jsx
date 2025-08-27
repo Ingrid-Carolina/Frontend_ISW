@@ -328,7 +328,7 @@ export default function CustomNavbar() {
 			localStorage.removeItem('userRole');
 			localStorage.removeItem('userName');
 			localStorage.removeItem('userEmail');
-			alert('Sesion cerrada correctamente.');
+
 			navigate('/');
 			//Refrescar la página para limpiar el estado visual y memoria React
 			setTimeout(() => {

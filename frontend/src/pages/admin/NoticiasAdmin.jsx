@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import "./NoticiasAdmin.css";
 import axios from "axios";
 import { api } from "../../api/api";
+import {Box, Typography} from '@mui/material';
 
 function NoticiasAdmin() {
   const [titulo, setTitulo] = useState("");
@@ -12,6 +13,12 @@ function NoticiasAdmin() {
   const [vistaPrevia, setVistaPrevia] = useState(null);
   const [noticias, setNoticias] = useState([]);
   const [editando, setEditando] = useState(null);
+
+  //Declaracion
+
+  const [bannerMsg, setBannerMsg] = useState('');
+const [bannerType, setBannerType] = useState('success'); // or 'error'
+const [showBanner, setShowBanner] = useState(false);
 
   const AUTOR_ID = "cbq1s3VNeMXEdjTJQmpNJEA0Vsk2";
 
@@ -45,14 +52,20 @@ function NoticiasAdmin() {
     e.preventDefault();
 
     if (!titulo || !fecha || !cuerpo || !imagenUrl) {
-      alert("Todos los campos son obligatorios");
+        setBannerMsg("Todos los campos son obligatorios")
+            setBannerType('error');
+            setShowBanner(true);
+
+        
+        setTimeout(() => setShowBanner(false), 4000); 
+
       return;
     }
 
     try {
       if (editando) {
         // PUT para modificar
-        await api.put(
+       const res= await api.put(
           `/auth/modificarnoticia/${editando}/${AUTOR_ID}`,
           {
             titulo,
@@ -62,7 +75,13 @@ function NoticiasAdmin() {
           }
         );
 
-        alert("Noticia actualizada correctamente");
+       // alert("Noticia actualizada correctamente");
+
+       setBannerMsg(res.data.mensaje)
+            setBannerType('success');
+            setShowBanner(true);
+        setTimeout(() => setShowBanner(false), 4000); 
+
 
         // Actualizar lista de noticias en el estado
         setNoticias((prev) =>
@@ -80,6 +99,9 @@ function NoticiasAdmin() {
         setCuerpo("");
         setImagenUrl("");
         setVistaPrevia(null);
+        setTimeout(() => {
+      window.location.reload();
+    }, 1000);
 
       } else {
         // POST para crear
@@ -93,19 +115,33 @@ function NoticiasAdmin() {
           }
         );
 
+          setBannerMsg(res.data.mensaje)
+            setBannerType('success');
+            setShowBanner(true);
+            setTimeout(() => setShowBanner(false), 4000); 
+           
 
-        alert("Noticia creada con éxito");
         setNoticias((prev) => [...prev, res.data]);
         setTitulo("");
         setFecha("");
         setCuerpo("");
         setImagenUrl("");
         setVistaPrevia(null);
+        setTimeout(() => {
+      window.location.reload();
+    }, 1000);
+         return res.data;
       }
 
-    } catch (err) {
-      console.error("Error al guardar noticia:", err);
-      alert("Hubo un error al guardar la noticia");
+    } catch (error) {
+      const mensaje = error?.data?.mensaje|| error?.message|| 'Error en la Red';
+              setBannerMsg(mensaje)
+            setBannerType('error');
+            setShowBanner(true);
+        setTimeout(() => setShowBanner(false), 3000); 
+        throw error;
+
+
     }
   };
 
@@ -126,14 +162,30 @@ function NoticiasAdmin() {
 
   const eliminacionNoticia = async (id) => {
     try {
-      await axios.delete(`http://localhost:3000/auth/eliminarnoticia/${id}`, {
+      const res=await axios.delete(`http://localhost:3000/auth/eliminarnoticia/${id}`, {
         withCredentials: true,
       });
       setNoticias((prev) => prev.filter((n) => n.id !== id));
-      alert("Noticia eliminada correctamente");
-    } catch (err) {
-      console.error("Error al eliminar noticia:", err);
-      alert("Hubo un error al eliminar la noticia");
+      //alert("Noticia eliminada correctamente");
+        setBannerMsg(res.data.mensaje)
+            setBannerType('success');
+            setShowBanner(true);
+
+        
+        setTimeout(() => setShowBanner(false), 4000); 
+         window.scrollTo(0,0);
+
+
+    } catch (error) {
+      console.error("Error al eliminar noticia:", error);
+      //alert("Hubo un error al eliminar la noticia");
+
+      const mensaje =   error?.data?.mensaje|| error?.message|| 'Error en la Red';
+                setBannerMsg(mensaje)
+            setBannerType('error');
+            setShowBanner(true);
+        setTimeout(() => setShowBanner(false), 4000); 
+
     }
   }
 
@@ -189,6 +241,27 @@ function NoticiasAdmin() {
           value={imagenUrl}
           onChange={handleImagenUrlChange}
         />
+        
+{showBanner && (
+    <Box
+        sx={{
+            position: 'relative',
+            width: '100%',
+            mb: 2,
+            animation: 'slideDown 0.3s ease-in-out',
+            backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
+            color: '#fff',
+            borderRadius: 1,
+            p: 1,
+            boxShadow: 2,
+        }}
+    >
+        <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
+    </Box>
+)}
+
+
+        
 
         {vistaPrevia && (
           <img className="vista-previa" src={vistaPrevia} alt="Vista previa" />

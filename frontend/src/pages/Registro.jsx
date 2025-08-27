@@ -98,44 +98,45 @@ const Registro = ({ onLoginClick }) => {
 
   // Repeticion de logica aqui.
   const realizarPeticion = async () => {
-    try {
-      const res = await api.post('/auth/signup', {
-        nombre: formData.nombre,
-        email: formData.email,
-        password: formData.password
-      });
-      return res.data;
-    } catch (error) {
-      if (error.response) {
-        window.alert(error.response.data.mensaje);
-      } else if (error.request) {
-        window.alert('Ninguna respuesta del servidor. Por favor verifique su red.');
-      } else {
-        window.alert('Error en la red.');
-      }
-    }
-  };
+  try {
+    const res = await api.post('/auth/signup', {
+      nombre: formData.nombre,
+      email: formData.email,
+      password: formData.password
+    });
+    return res; // Return full response to handleSubmit
+  } catch (error) {
+    
+    const mensaje =   error?.data?.mensaje|| error?.message|| 'Error en la Red';
+     setSubmitMessage({ success: '', error: mensaje });
+  }
+};
 
   const handleSubmit = async () => {
-    if (!validateForm()) return;
+  if (!validateForm()) return;
 
-    const respuesta = await realizarPeticion(); // Espera la respuesta
-    if (respuesta && respuesta.mensaje) {
-      setSubmitMessage({ success: '¡Registro exitoso!', error: '' });
-      setFormData({
-        nombre: '',
-        email: '',
-        password: '',
-        confirmarPassword: ''
-      });
-      setTimeout(() => {
-        onLoginClick();
-      }, 2000);
+  const respuesta = await realizarPeticion();
+  console.log("Respuesta:", respuesta);
 
-    } else {
-      setSubmitMessage({ success: '', error: 'Registro fallido. Vuelva a intentarlo' });
-    }
-  };
+  if (respuesta.status) {
+    setSubmitMessage({ success: respuesta.data?.mensaje, error: '' });
+    setFormData({
+      nombre: '',
+      email: '',
+      password: '',
+      confirmarPassword: ''
+    });
+    setTimeout(() => {
+      onLoginClick();
+    }, 2000);
+  }
+  
+};
+
+
+
+
+
 
   return (
     <Box
