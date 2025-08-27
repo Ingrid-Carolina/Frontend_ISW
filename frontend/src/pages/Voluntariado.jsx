@@ -209,7 +209,7 @@ const Voluntariado = () => {
             <Typography
               variant="h2"
               sx={{
-                fontFamily: 'Forte Forward, sans-serif',
+                fontFamily: 'Varsity, sans-serif',
                 fontSize: '3rem',
                 margin: '0 0 1rem',
                 fontStyle: 'italic',
