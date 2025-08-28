@@ -45,7 +45,7 @@ const Voluntariado = () => {
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           py: { xs: 6, md: 8 },
-          clipPath: 'polygon(0 0, 100% 0, 100% 85%, 0 100%)',
+          clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
           marginTop: '90px',
         }}
       >
@@ -59,7 +59,7 @@ const Voluntariado = () => {
             height: '100%',
             backgroundColor: 'rgba(0, 0, 80, 0.75)',
             zIndex: 1,
-            clipPath: 'polygon(0 0, 100% 0, 100% 85%, 0 100%)',
+            clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
           }}
         />
         {/* Contenido del encabezado (títulos y SVG) */}
@@ -160,7 +160,7 @@ const Voluntariado = () => {
       </Box>
 
       {/* SECCIÓN DE TEXTO Y CONTENIDO */}
-      <Box sx={{ padding: '40px 0', marginTop: '100px' }}>
+      <Box sx={{ padding: '40px 0', marginTop: '1rem' }}>
         <Typography
           variant="body1"
           sx={{
@@ -185,12 +185,11 @@ const Voluntariado = () => {
             justifyContent: 'center',
             gap: '1rem',
             backgroundColor: '#ff914d',
-            padding: '4rem 2rem',
+            padding: { xs: '3rem 2rem', md: '4rem 2rem' }, // Adjusted padding for mobile
             width: '100%',
             maxWidth: 'none',
-            margin: '0 auto',
-            clipPath: 'polygon(0 15%, 100% 0, 100% 100%, 0 100%)',
-            marginTop: '100px',
+            marginTop: '3rem',
+            clipPath: 'polygon(0 8%, 100% 0, 100% 100%, 0 100%)',
           }}
         >
           {/* Contenedor del texto (con animación) */}
@@ -203,7 +202,6 @@ const Voluntariado = () => {
               padding: '20px',
               color: '#fff',
               textAlign: 'center',
-              marginTop: { xs: '60px', md: '20px' },
             }}
           >
             <Typography
@@ -238,7 +236,7 @@ const Voluntariado = () => {
                 fontWeight: '500',
               }}
             >
-              El voluntariado con Pilotos FAH es una oportunidad única para combinar tu pasión por el béisbol con un impacto real en la vida de los demás. Al unirte a nosotros, aprenderás valiosas habilidades de liderazgo, harás amigos y te convertirás en parte de algo más grande, contribuyendo a la formación de la juventud y a un cambio positivo en nuestra comunidad.
+              El voluntariado con Pilotos FAH es una oportunidad única para combinar tu pasión por el béisbol con un impacto real en la vida de los demás. Al unirte a nosotros, aprenderás valiosas habilidades de liderazgo, harás amigos y te convertirás en parte de algo más grande, contribuyendo a un cambio positivo en nuestra comunidad.
             </Typography>
             <Typography
               variant="body1"
@@ -286,7 +284,7 @@ const Voluntariado = () => {
               src="https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg"
               alt=""
               sx={{
-                width: `90%`,
+                width: '90%',
                 height: 'auto',
                 display: 'block',
                 borderRadius: '8px',
