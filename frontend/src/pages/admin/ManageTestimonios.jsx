@@ -203,18 +203,20 @@ setTimeout(() => setShowBanner(false), 4000);
 
   return (
     <Box sx={{  p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
-      <Typography
-        variant="h3"
-        sx={{
-          fontFamily: 'GroteskBold',
-          color: '#10045c',
-          mb: 4,
-          textAlign: 'center',
-           fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
-        }}
-      >
-        Gestión de Testimonios
-      </Typography>
+      <Box sx={{ pt: 8}}>
+             <Typography
+               variant="h3"
+               sx={{
+                 fontFamily: 'GroteskBold',
+                 color: '#10045c',
+                 mb: 4,
+                 textAlign: 'center',
+                 fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' }
+               }}
+             >
+                  Gestión de Testimonios
+             </Typography>
+             </Box>
 
       {/* Formulario */}
       <Stack spacing={2} sx={{ mb: 4 }}>

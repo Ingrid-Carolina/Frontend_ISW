@@ -1,4 +1,5 @@
-import { Box, Grid, Paper, Typography } from "@mui/material";
+import { Box, Grid, Paper, Typography, Toolbar } from "@mui/material";
+
 import {
   BarChart,
   Bar,
@@ -19,19 +20,22 @@ const visitData = [
 
 export default function Dashboard() {
   return (
-    <Box sx={{ width: '100%', pt: 2 }}>
-      <Typography
-        variant="h2"
-        sx={{
-          fontFamily: 'GroteskBold',
-          color: '#10045c',
-          mb: 4,
-          textAlign: 'center',
-          fontSize: { xs: '3rem', sm: '3.5rem', md: '4rem' }
-        }}
-      >
-        Estadisticas del Sitio
-      </Typography>
+      <Box sx={{ width: '100%' }}>
+      <Toolbar /> {/* Spacer for fixed navbar */}
+      <Box sx={{ pt: 3 }}>
+        <Typography
+          variant="h2"
+          sx={{
+            fontFamily: 'GroteskBold',
+            color: '#10045c',
+            mb: 3,
+            textAlign: 'center',
+            fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' }
+          }}
+        >
+          Estadísticas del Sitio
+        </Typography>
+        </Box>
 
       {/* Contenedor centrado y controlado */}
       <Box sx={{ maxWidth: 1200, mx: "auto", px:{ xs: 2, sm: 3, md: 4 }, width: "100%" }}>
