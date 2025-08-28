@@ -342,6 +342,7 @@ export default function Aliados() {
                 color: 'rgba(255,255,255,0.9)',
                 textShadow: '1px 1px 4px rgba(0,0,0,0.6)',
                 fontWeight: 300,
+                fontFamily: 'ManropeEB, sans-serif',
               }}
             >
               Gracias a nuestros patrocinadores por impulsar el desarrollo deportivo de nuestros jóvenes atletas y fortalecer el espíritu del béisbol en nuestra comunidad.
@@ -420,12 +421,13 @@ export default function Aliados() {
         </Typography>
 
         <Typography
-          variant="body1"
+          variant="h6"
           sx={{
             maxWidth: { xs: "95vw", md: "75vw" },
             mx: "auto",
             mb: { xs: 6, md: 10 },
             color: "text.secondary",
+            fontFamily: "ManropeEB",
           }}
           className="section-text"
         >
