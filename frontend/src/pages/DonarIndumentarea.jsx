@@ -119,23 +119,23 @@ const DonarIndumentarea = () => {
 
   return (
     <div
-  style={{
-    minHeight: "100vh",
-    width: "100%",           // 🔹 asegura que nunca exceda el ancho de la pantalla
-    maxWidth: "100vw",       // 🔹 nunca más ancho que el viewport
-    position: "relative",
-    margin: 0,
-    paddingTop: "2rem",
-    paddingBottom: "14rem",
-    overflowX: "hidden",     // 🔹 evita el scroll horizontal
-    color: "#fff",
-    fontFamily: "GroteskRegular",
-    backgroundImage: "linear-gradient(#10045c, #10045c, url('/Images/TestimonioFondo1.jpg')",
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-    boxSizing: "border-box", // 🔹 evita que padding aumente el ancho real
-  }}
->
+      style={{
+        minHeight: "100vh",
+        width: "100%",           // 🔹 asegura que nunca exceda el ancho de la pantalla
+        maxWidth: "100vw",       // 🔹 nunca más ancho que el viewport
+        position: "relative",
+        margin: 0,
+        paddingTop: "2rem",
+        paddingBottom: "14rem",
+        overflowX: "hidden",     // 🔹 evita el scroll horizontal
+        color: "#fff",
+        fontFamily: "GroteskRegular",
+        backgroundImage: "linear-gradient(#10045c, #10045c, url('/Images/TestimonioFondo1.jpg')",
+        backgroundSize: "cover",
+        backgroundPosition: "center",
+        boxSizing: "border-box", // 🔹 evita que padding aumente el ancho real
+      }}
+    >
       {/* Fondo */}
       <div
         style={{
@@ -175,40 +175,40 @@ const DonarIndumentarea = () => {
         }}
       >
         <h1
-  style={{
-    fontFamily: "GroteskBold",
-    fontSize: "clamp(2rem, 5vw, 4rem)", // min 2rem, máx 4rem, fluido en medio
-    marginBottom: "1rem",
-    color: "#fff", // tu color original
-    textAlign: "center", // centrado en pantallas pequeñas
-  }}
->
-  Donación de Indumentaria
-</h1>
+          style={{
+            fontFamily: "GroteskBold",
+            fontSize: "clamp(2rem, 5vw, 4rem)", // min 2rem, máx 4rem, fluido en medio
+            marginBottom: "1rem",
+            color: "#fff", // tu color original
+            textAlign: "center", // centrado en pantallas pequeñas
+          }}
+        >
+          Donación de Indumentaria
+        </h1>
 
-<p
-  style={{
-    fontFamily: "GroteskRegular",
-    marginBottom: "2rem",
-    fontSize: "clamp(1rem, 3vw, 2rem)", // min 1rem, máx 2rem
-    color: "#fff",
-    textAlign: "center",
-  }}
->
-  Selecciona las piezas que deseas donar y la cantidad.
-</p>
+        <p
+          style={{
+            fontFamily: "GroteskRegular",
+            marginBottom: "2rem",
+            fontSize: "clamp(1rem, 3vw, 2rem)", // min 1rem, máx 2rem
+            color: "#fff",
+            textAlign: "center",
+          }}
+        >
+          Selecciona las piezas que deseas donar y la cantidad.
+        </p>
 
         <div
-  style={{
-    display: "grid",
-    gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // 🔹 más flexible
-    gap: "1rem",
-    width: "100%",       // 🔹 se ajusta al contenedor
-    maxWidth: "100%",    // 🔹 no se pasa del viewport
-    margin: "0 auto",    // 🔹 siempre centrado
-    boxSizing: "border-box",
-  }}
->
+          style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // 🔹 más flexible
+            gap: "1rem",
+            width: "100%",       // 🔹 se ajusta al contenedor
+            maxWidth: "100%",    // 🔹 no se pasa del viewport
+            margin: "0 auto",    // 🔹 siempre centrado
+            boxSizing: "border-box",
+          }}
+        >
           {seleccion.map((item) => (
             <div
               key={item.id}
@@ -280,7 +280,7 @@ const DonarIndumentarea = () => {
         maxWidth="sm"
         sx={{ mt: "80px" }} // mueve el modal más abajo
       >
-        <DialogTitle sx={{ fontFamily: "GroteskBold", fontSize:'1.7rem',color:'#10045c' }}>
+        <DialogTitle sx={{ fontFamily: "GroteskBold", fontSize: '1.7rem', color: '#10045c' }}>
           Completar información de la donación
         </DialogTitle>
         <DialogContent>
@@ -320,27 +320,21 @@ const DonarIndumentarea = () => {
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
             />
 
-            <FormControl fullWidth margin="normal">
-              <InputLabel sx={{ fontFamily: "PeterMedium" }}>Día disponible</InputLabel>
-              <Select
-                name="dia"
-                value={formData.dia}
-                onChange={handleChange}
-                required
-                sx={{ fontFamily: "PeterMedium" }}
-              >
-                {["Lunes", "Martes", "Miércoles", "Jueves", "Viernes", "Sábado"].map(
-                  (dia) => (
-                    <MenuItem key={dia} value={dia} sx={{ fontFamily: "PeterMedium" }}>
-                      {dia}
-                    </MenuItem>
-                  )
-                )}
-              </Select>
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Día disponible"
+              type="date"
+              name="dia"
+              value={formData.dia}
+              onChange={handleChange}
+              margin="normal"
+              required
+              InputLabelProps={{ shrink: true, style: { fontFamily: "PeterMedium" } }}
+              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+            />
 
             <FormControl fullWidth margin="normal">
-              <InputLabel sx={{ fontFamily: "PeterMedium" }}>Horario</InputLabel>
+              <InputLabel sx={{ fontFamily: "PeterMedium" }}>Hora Disponible</InputLabel>
               <Select
                 name="horario"
                 value={formData.horario}
@@ -370,10 +364,10 @@ const DonarIndumentarea = () => {
             />
 
             <DialogActions>
-              <Button onClick={() => setOpen(false)}  sx={{ color:"#e06c14",fontFamily: "PeterMedium" }}>
+              <Button onClick={() => setOpen(false)} sx={{ color: "#e06c14", fontFamily: "PeterMedium" }}>
                 Cancelar
               </Button>
-              <Button type="submit" variant="contained" backgroundColor="#e06c14" sx={{color:'white', fontFamily: "PeterMedium"}}>
+              <Button type="submit" variant="contained" backgroundColor="#e06c14" sx={{ color: 'white', fontFamily: "PeterMedium" }}>
                 Enviar Donación
               </Button>
             </DialogActions>
