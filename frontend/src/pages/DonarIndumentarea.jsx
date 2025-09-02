@@ -333,22 +333,18 @@ const DonarIndumentarea = () => {
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
             />
 
-            <FormControl fullWidth margin="normal">
-              <InputLabel sx={{ fontFamily: "PeterMedium" }}>Hora Disponible</InputLabel>
-              <Select
-                name="horario"
-                value={formData.horario}
-                onChange={handleChange}
-                required
-                sx={{ fontFamily: "PeterMedium" }}
-              >
-                {Array.from({ length: 10 }, (_, i) => 8 + i).map((h) => (
-                  <MenuItem key={h} value={`${h}:00`} sx={{ fontFamily: "PeterMedium" }}>
-                    {h}:00
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <TextField
+              fullWidth
+              label="Hora disponible"
+              type="time"
+              name="horario"
+              value={formData.horario}
+              onChange={handleChange}
+              margin="normal"
+              required
+              InputLabelProps={{ shrink: true, style: { fontFamily: "PeterMedium" } }}
+              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+            />
 
             <TextField
               fullWidth
