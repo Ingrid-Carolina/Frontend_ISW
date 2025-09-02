@@ -47,7 +47,7 @@ const partners = [
 
 const strategicAllies = [
   {
-    name: "Fundacion Angelitos",
+    name: "Fundación Angelitos",
     img: angelitos,
     links: [
       { label: "Visita Fundación", href: "http://www.fundacionangelitos.org" },

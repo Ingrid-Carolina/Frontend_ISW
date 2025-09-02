@@ -11,7 +11,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
 const valores = [
   {
-    titulo: 'Pasion por el Juego',
+    titulo: 'Pasión por el Juego',
     descripcion: 'Inculcamos el amor y la alegría por el béisbol en cada práctica y partido, celebrando cada esfuerzo y cada logro.'
   },
   {

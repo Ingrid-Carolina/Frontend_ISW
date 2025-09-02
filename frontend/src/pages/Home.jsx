@@ -16,15 +16,15 @@ const AboutUs = () => (
   <section className='about-us'>
     <h2>Sobre Nosotros</h2>
     <h3>
-      Somos una organizacion que fomenta la recreacion del beisbol. Formamos
-      Vidas a a traves del Beisbol en Honduras!
+      Somos una organización que fomenta la recreación del beisbol. 
+      Formamos Vidas a través del Beisbol en Honduras!
     </h3>
   </section>
 );
 
 const Mision = () => (
   <SeccionInfo
-    titulo='Nuestra Mision'
+    titulo='Nuestra Misión'
     descripcion='Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego.'
     imagen='/Images/Mision1.jpg'
     bgColor='#e06c14'
@@ -34,7 +34,7 @@ const Mision = () => (
 
 const Vision = () => (
   <SeccionInfo
-    titulo='Nuestra Vision'
+    titulo='Nuestra Visión'
     descripcion='Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida.'
     imagen='/Images/Vision1.jpg'
     invertir
@@ -46,7 +46,7 @@ const Vision = () => (
 const Valores = () => (
   <section className='values'>
     <h2>Nuestros Valores</h2>
-    <h3>Nuestros Valores definen lo que nosotros somos en el area de juego.</h3>
+    <h3>Nuestros Valores definen lo que nosotros somos en el área de juego.</h3>
   </section>
 );
 

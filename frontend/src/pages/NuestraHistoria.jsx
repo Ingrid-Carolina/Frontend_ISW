@@ -198,7 +198,7 @@ const NuestraHistoria = () => {
 							color: '#333',
 						}}
 					>
-						(Texto Placeholder) Desde nuestros humildes comienzos en 1948,
+						Desde nuestros humildes comienzos en 1948,
 						nuestro enfoque ha sido brindar oportunidades para jóvenes atletas
 						en comunidades rurales. A través del béisbol, construimos
 						disciplina, valores y comunidad.
@@ -266,7 +266,7 @@ const NuestraHistoria = () => {
 							color: '#333',
 						}}
 					>
-						(Texto Placeholder) A lo largo de las décadas, hemos trabajado con
+						A lo largo de las décadas, hemos trabajado con
 						más de 10,000 niños, formando no solo jugadores sino líderes.
 						Nuestras iniciativas incluyen clínicas deportivas, programas de
 						mentoría y eventos familiares.
@@ -334,7 +334,7 @@ const NuestraHistoria = () => {
 							color: '#333',
 						}}
 					>
-						(Texto Placeholder) Solidaridad, compromiso, respeto y pasión por el
+						Solidaridad, compromiso, respeto y pasión por el
 						deporte. Estos valores son la base de cada entrenamiento, partido y
 						actividad que realizamos como asociación.
 					</Typography>
