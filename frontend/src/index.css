@@ -71,6 +71,8 @@ button:focus-visible {
 
 html, body {
   overflow-x: hidden;
+  margin: 0;
+  padding-right: 0 !important;
 }
 
 .live-dot {

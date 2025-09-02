@@ -33,6 +33,7 @@ import {
 	InputLabel,
 	Chip,
 	CircularProgress,
+	Toolbar,
 	Alert,
 	Snackbar,
 } from '@mui/material';
@@ -303,18 +304,22 @@ export default function StatsJugadores() {
 	};
 
 	return (
-		<Box sx={{ width: '100%', pt: 2 }}>
-			<Typography
-				variant='h2'
-				sx={{
-					fontFamily: 'GroteskBold',
-					color: '#10045c',
-					mb: 4,
-					textAlign: 'center',
-				}}
-			>
-				Estadísticas de Jugadores
-			</Typography>
+		<Box sx={{ width: '100%'}}>
+			<Toolbar /> {/* Spacer for fixed navbar */}
+      <Box sx={{ pt: 3}}>
+        <Typography
+          variant="h2"
+          sx={{
+            fontFamily: 'GroteskBold',
+            color: '#10045c',
+            mb: 4,
+            textAlign: 'center',
+            fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' }
+          }}
+        >
+     Estadísticas de Jugadores
+        </Typography>
+        </Box>
 
 			{error && (
 				<Alert severity='error' sx={{ mb: 3, maxWidth: 600, mx: 'auto' }}>

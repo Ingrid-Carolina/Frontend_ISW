@@ -5,9 +5,9 @@ import { Box, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typ
 import '../../components/styles.css';
 import { useTheme, useMediaQuery, IconButton } from '@mui/material';
 import { useState } from 'react';
+import MenuIcon from '@mui/icons-material/Menu';
 
 
-const drawerWidth = 240; // Ancho del Drawer lateral
 
 
 const menuItems = [
@@ -19,6 +19,16 @@ const menuItems = [
 
 export default function AdminLayout() {
   const location = useLocation();
+  const theme = useTheme();
+const isXsScreen = useMediaQuery(theme.breakpoints.down('sm'));  //para dispositos super chiquitos
+  
+const drawerWidth = 240; // Shrinks on mobile
+const [mobileOpen, setMobileOpen] = useState(false);
+
+const handleDrawerToggle = () => {
+  setMobileOpen(!mobileOpen);
+};
+
 
   return (
     <Box>
@@ -28,24 +38,74 @@ export default function AdminLayout() {
       {/* Layout principal: Drawer + contenido */}
       <Box sx={{ display: 'flex'}}>
         {/* Drawer lateral */}
-        <Drawer
-          variant="permanent"
-          anchor="left"
-          sx={{
-            width: drawerWidth,
-            flexShrink: 0,
-            [`& .MuiDrawer-paper`]: { 
-              width: drawerWidth,
-              boxSizing: 'border-box',
-              backgroundColor: '#10045c',
-              color: '#FFFFFF',           
-              top: '90px', 
-              height: 'calc(100% - 90px)', 
-              position: 'fixed', 
-            },
-          }}
-        >
-          <Box sx={{ overflow: 'auto' }}>
+       {isXsScreen ? (
+    <Drawer
+    variant="temporary"
+    open={mobileOpen}
+    onClose={handleDrawerToggle}
+    ModalProps={{ keepMounted: true }}
+    sx={{
+      [`& .MuiDrawer-paper`]: {
+        width: 200,
+        backgroundColor: '#10045c',
+        color: '#FFFFFF',
+      },
+    }}
+  >
+    {/* Drawer content here */}
+     <Box sx={{ overflow: 'auto',  placeItems: 'stretch', mt: { xs: 8, md: 10 } }}>
+            {/* Título agregado */}
+            <Box sx={{ mb: 2 }}>
+              <Typography
+                variant="h5"
+                sx={{
+                  fontFamily: 'GroteskBold',
+                  color: '#ffffff',
+                  textAlign: 'center',
+                  letterSpacing: 1,
+                  paddingTop: 1,
+                  pt: { xs: 2, md: 4 },
+                 fontSize: { xs: '1.5rem', md: '3.5rem' }
+                }}
+              >Panel de Administrador</Typography>
+            </Box>
+            <List>
+              {menuItems.map((item) => (
+                <ListItem key={item.text} disablePadding>
+                  <ListItemButton
+                    component={Link}
+                    to={`/admin/${item.path}`}
+                    selected={location.pathname.endsWith(item.path)}
+                  >
+                    <ListItemText primary={item.text} primaryTypographyProps={{ fontFamily: 'PeterMedium', textAlign: 'center'}} />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          </Box>
+  </Drawer>
+) : (
+  <Drawer
+    variant="permanent"
+    sx={{
+      width: drawerWidth,
+      flexShrink: 0,
+      [`& .MuiDrawer-paper`]: {
+        width: drawerWidth,
+        boxSizing: 'border-box',
+        backgroundColor: '#10045c',
+        color: '#FFFFFF',
+        top: '90px',
+        height: 'calc(100% - 90px)',
+        position: 'fixed',
+        overflowX: 'hidden',
+        transition: 'width 0.3s ease-in-out',
+      },
+    }}
+  
+  >
+       
+          <Box sx={{ overflow: 'auto', placeItems: 'stretch', mt: { xs: 8, md: 5 } }}>
             {/* Título agregado */}
             <Box sx={{ mb: 2 }}>
               <Typography
@@ -57,7 +117,7 @@ export default function AdminLayout() {
                   letterSpacing: 1,
                   paddingTop: 4,
                   pt: { xs: 2, md: 4 },
-                 fontSize: { xs: '1.2rem', md: '1.5rem' }
+                 fontSize: { xs: '0.8rem', md: '1.5rem' }
                 }}
               >Panel de Administrador</Typography>
             </Box>
@@ -76,13 +136,29 @@ export default function AdminLayout() {
             </List>
           </Box>
         </Drawer>
+)
+}
 
         {/* Contenido renderizado */}
-        <Box component="main" sx={{ flexGrow: 1, p: { xs: 1, sm: 2, md: 3 },  marginLeft:0 }}>
-          <Toolbar />
+        <Box component="main" sx={{ flexGrow:1, p: { xs: 1, sm: 2, md: 3 } ,placeItems: 'stretch'}}>
+  
           <Outlet />
+      <Toolbar>
+  {isXsScreen && (
+    <IconButton
+      color="inherit"
+      aria-label="open drawer"
+      edge="start"
+      onClick={handleDrawerToggle}
+      sx={{ mr: 2 }}
+    >
+      <MenuIcon />
+    </IconButton>
+  )}
+</Toolbar>
         </Box>
       </Box>
     </Box>
-  );
+  )
+
 }
