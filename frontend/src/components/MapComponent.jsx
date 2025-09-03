@@ -25,6 +25,10 @@ const MapComponent = ({ isInteractive = true }) => {
      iconUrl: markerIcon,
      iconRetinaUrl: markerIcon2x,
      shadowUrl: markerShadow,
+	 iconSize: [25, 41],      // tamaño del icono
+   iconAnchor: [12, 41],    // punto exacto de la coordenada (abajo en el centro)
+   popupAnchor: [1, -34],   // dónde aparece el popup relativo al icono
+   shadowSize: [41, 41],    // tamaño de la sombra
    });
    L.Marker.prototype.options.icon = DefaultIcon;
 
