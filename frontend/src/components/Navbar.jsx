@@ -480,21 +480,21 @@ export default function CustomNavbar() {
 								to='/envivo'
 								sx={navBtnStyle(drawerOpen)}
 							>
-								<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-									{isLive && (
-										<Box
-											component='span'
-											sx={{
-												width: 10,
-												height: 10,
-												borderRadius: '50%',
-												bgcolor: '#ff1744',
-												animation: 'pulse 1s ease-in-out infinite',
-											}}
-										/>
-									)}
-									<span>En Vivo</span>
-								</Box>
+								<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+  {isLive && (
+    <Box
+      component="span"
+      sx={{
+        width: 10,
+        height: 10,
+        borderRadius: "50%",
+        bgcolor: "#ff1744",
+        animation: "pulse 1s ease-in-out infinite",
+      }}
+    />
+  )}
+  <span>En Vivo</span>
+</Box>
 							</Button>
 							{userRole === 'admin' && (
 								<Button
@@ -794,37 +794,40 @@ export default function CustomNavbar() {
 											right: 220, 
 										},
 									}}
-									secondaryAction={
-										isLive && (
-											<Box
-												sx={{
-													width: 8,
-													height: 8,
-													borderRadius: '50%',
-													bgcolor: '#ff1744',
-													animation: 'mui-pulse 1.1s ease-in-out infinite',
-													'@keyframes mui-pulse': {
-														'0%': { transform: 'scale(1)', opacity: 1 },
-														'50%': { transform: 'scale(1.35)', opacity: 0.6 },
-														'100%': { transform: 'scale(1)', opacity: 1 },
-													},
-												}}
-											/>
-										)
-									}
+									
 								>
 									<ListItemIcon sx={{ color: 'inherit' }}>
 										<LiveTvOutlinedIcon />
 									</ListItemIcon>
 									<ListItemText
-										primary='En Vivo'
-										primaryTypographyProps={{
-											fontFamily: '"Franklin Gothic Medium", sans-serif',
-											fontWeight: 'bold',
-											fontSize: '0.95rem',
-											color: 'inherit',
-										}}
-									/>
+  primary={
+    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+      {isLive && (
+        <Box
+          component="span"
+          sx={{
+            width: 8,
+            height: 8,
+            borderRadius: "50%",
+            bgcolor: "#ff1744",
+            animation: "pulse 1s ease-in-out infinite",
+          }}
+        />
+      )}
+      <span
+        style={{
+          fontFamily: '"Franklin Gothic Medium", sans-serif',
+          fontWeight: "bold",
+          fontSize: "0.95rem",
+          color: "inherit",
+        }}
+      >
+        En Vivo
+      </span>
+    </Box>
+  }
+/>
+
 								</ListItem>
 							</>
 						)}

@@ -3,6 +3,9 @@ import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './MapComponent.css';
 import PropTypes from 'prop-types';
+import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
+import markerIcon from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 const MapComponent = ({ isInteractive = true }) => {
 	const mapRef = useRef(null);
@@ -18,6 +21,14 @@ const MapComponent = ({ isInteractive = true }) => {
 			attribution:
 				'&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
 		}).addTo(mapRef.current);
+
+		// Configurar ícono por defecto
+   const DefaultIcon = L.icon({
+     iconUrl: markerIcon,
+     iconRetinaUrl: markerIcon2x,
+     shadowUrl: markerShadow,
+   });
+   L.Marker.prototype.options.icon = DefaultIcon;
 
 		const marker = L.marker(coord).addTo(mapRef.current);
 		marker
