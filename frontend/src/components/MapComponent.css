@@ -9,7 +9,7 @@ body {
 }
 
 .map-container {
-  height: 100vh;
+  height: 360px;
   display: flex;
   justify-content: center;
   align-items: center;

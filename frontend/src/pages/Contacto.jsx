@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import MapComponent from '../components/MapComponent'; // adjust path if needed
+import MapComponent from '../components/MapComponent';
 
 import {
 	Box,
