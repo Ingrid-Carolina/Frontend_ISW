@@ -13,6 +13,7 @@ import Dashboard from './pages/admin/Dashboard.jsx';
 import NoticiasAdmin from './pages/admin/NoticiasAdmin.jsx';
 import StatsJugadores from './pages/admin/StatsJugadores.jsx';
 import ManageTestimonios from './pages/admin/ManageTestimonios.jsx';
+import ManageOrders from './pages/admin/ManageOrders.jsx';
 
 
 createRoot(document.getElementById('root')).render(
@@ -30,6 +31,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="newsadm" element={<NoticiasAdmin/>} />
           <Route path="players" element={<StatsJugadores/>} />
           <Route path="mngtestimonios" element={<ManageTestimonios/>} />
+          <Route path="mngordenes" element={<ManageOrders/>} />
         </Route>
       </Routes>
     </BrowserRouter>
