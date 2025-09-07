@@ -15,7 +15,8 @@ const menuItems = [
   { text: 'Noticias', path: 'newsadm' },
   { text: 'Control de Jugadores', path: 'players' },
   { text: 'Testimonios', path: 'mngtestimonios' },
-  { text: 'Administrar Ordenes', path: 'mngordenes' }, // ✅ ya está
+  { text: 'Administrar Ordenes', path: 'mngordenes' }, 
+  { text: 'Administrar Productos de Donaciones', path: 'mngproddonaciones' }, 
 ];
 
 export default function AdminLayout() {
