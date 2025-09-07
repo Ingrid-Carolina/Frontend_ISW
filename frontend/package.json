@@ -21,6 +21,7 @@
 		"framer-motion": "^12.23.12",
 		"jquery": "^3.7.1",
 		"leaflet": "^1.9.4",
+		"libphonenumber-js": "^1.12.15",
 		"lucide-react": "^0.522.0",
 		"owl.carousel": "^2.3.4",
 		"path": "^0.12.7",
