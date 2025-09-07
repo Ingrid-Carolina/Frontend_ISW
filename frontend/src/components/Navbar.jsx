@@ -13,6 +13,7 @@ import ListItemText from '@mui/material/ListItemText';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import useMediaQuery from '@mui/material/useMediaQuery';
+import CircularProgress from '@mui/material/CircularProgress';
 import { useTheme } from '@mui/material';
 import MenuIcon from '@mui/icons-material/Menu';
 import CloseIcon from '@mui/icons-material/Close';
@@ -26,7 +27,7 @@ import StorefrontIcon from '@mui/icons-material/Storefront';
 import HistoryEduOutlinedIcon from '@mui/icons-material/HistoryEduOutlined';
 import LiveTvOutlinedIcon from '@mui/icons-material/LiveTvOutlined';
 import SportsBaseballIcon from '@mui/icons-material/SportsBaseball';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import EditIcon from '@mui/icons-material/Edit';
 import LogoutIcon from '@mui/icons-material/Logout';
 import PropTypes from 'prop-types';
@@ -36,27 +37,12 @@ import FormatQuoteOutlinedIcon from '@mui/icons-material/FormatQuoteOutlined';
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined';
 import CategoryOutlinedIcon from '@mui/icons-material/CategoryOutlined';
 import axios from 'axios';
-axios.defaults.withCredentials = true; // <-- importante para logout y rutas protegidas
-import logo from '/Images/Logo-pilotos.png';
-import { Link } from 'react-router-dom';
-import { api } from '../api/api';
+axios.defaults.withCredentials = true; // importante para cookies HttpOnly
 import { Global } from '@emotion/react';
+import logo from '/Images/Logo-pilotos.png';
+import { api } from '../api/api';
 
-{
-	/* Items de la navbarbar*/
-}
-const isLive = true; //
-const pulseAnimation = (
-	<Global
-		styles={`
-      @keyframes pulse {
-        0% { transform: scale(0.8); opacity: .4; }
-        50% { transform: scale(1.15); opacity: 1; }
-        100% { transform: scale(0.8); opacity: .4; }
-      }
-    `}
-	/>
-);
+// Items base del menú
 const baseMenuItems = [
 	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
 	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
@@ -64,6 +50,20 @@ const baseMenuItems = [
 	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
 	{ text: 'Contacto', icon: <CallIcon />, path: '/Contacto' },
 ];
+
+const isLive = true;
+
+const pulseAnimation = (
+	<Global
+		styles={`
+    @keyframes pulse {
+      0% { transform: scale(0.8); opacity: .4; }
+      50% { transform: scale(1.15); opacity: 1; }
+      100% { transform: scale(0.8); opacity: .4; }
+    }
+  `}
+	/>
+);
 
 const UserAvatarMenu = ({
 	user,
@@ -76,23 +76,14 @@ const UserAvatarMenu = ({
 	const open = Boolean(anchorEl);
 	const [imgError, setImgError] = React.useState(false);
 
-	// Generamos el src con cache-busting
 	const cacheBustedSrc =
 		user.avatar && !imgError
 			? `${user.avatar}${user.avatar.includes('?') ? '&' : '?'}v=${avatarVer}`
 			: undefined;
 
-	const handleClick = event => {
-		if (anchorEl) {
-			setAnchorEl(null);
-		} else {
-			setAnchorEl(event.currentTarget);
-		}
-	};
-
-	const handleClose = () => {
-		setAnchorEl(null);
-	};
+	const handleClick = event =>
+		setAnchorEl(prev => (prev ? null : event.currentTarget));
+	const handleClose = () => setAnchorEl(null);
 
 	return (
 		<>
@@ -112,7 +103,7 @@ const UserAvatarMenu = ({
 						transition: 'all 0.3s ease',
 					}}
 				>
-					{!cacheBustedSrc && user.name?.charAt(0).toUpperCase()}
+					{!cacheBustedSrc && (user.name?.charAt(0)?.toUpperCase() || 'U')}
 				</Avatar>
 			</IconButton>
 
@@ -126,7 +117,7 @@ const UserAvatarMenu = ({
 				PaperProps={{
 					elevation: 3,
 					sx: {
-						mt: 1.0,
+						mt: 1,
 						borderRadius: 2,
 						bgcolor: 'rgb(16, 4, 92)',
 						color: 'white',
@@ -159,17 +150,14 @@ const UserAvatarMenu = ({
 						py: 1,
 						color: 'white',
 						fontFamily: '"GroteskBold", sans-serif',
-						'&:hover': {
-							color: '#e06c14',
-						},
-						'& svg': {
-							color: 'inherit',
-						},
+						'&:hover': { color: '#e06c14' },
+						'& svg': { color: 'inherit' },
 					}}
 				>
 					<EditIcon fontSize='small' />
 					Editar perfil
 				</MenuItem>
+
 				<MenuItem
 					onClick={() => {
 						handleClose();
@@ -180,12 +168,8 @@ const UserAvatarMenu = ({
 						py: 1,
 						color: 'white',
 						fontFamily: '"GroteskBold", sans-serif',
-						'&:hover': {
-							color: '#e06c14',
-						},
-						'& svg': {
-							color: 'inherit',
-						},
+						'&:hover': { color: '#e06c14' },
+						'& svg': { color: 'inherit' },
 					}}
 				>
 					<LogoutIcon fontSize='small' />
@@ -208,96 +192,105 @@ UserAvatarMenu.propTypes = {
 	drawerOpen: PropTypes.bool.isRequired,
 };
 
-//exports funciones navbar
+// ----------------------------------------------------------------------
+
 export default function CustomNavbar() {
 	const [drawerOpen, setDrawerOpen] = React.useState(false);
 	const [submenuOpen, setSubmenuOpen] = React.useState(false);
 	const [mobileSubmenuOpen, setMobileSubmenuOpen] = React.useState(false);
 	const submenuTimer = React.useRef(null);
+	// dentro de CustomNavbar()
+	const [loadingUser, setLoadingUser] = React.useState(true);
 
 	const theme = useTheme();
 	const isCompactNav = useMediaQuery(theme.breakpoints.down('lg')); // <= 1200px
 
-	const [avatarUrl, setAvatarUrl] = React.useState(
-		localStorage.getItem('userAvatar') || '',
-	);
-	const [avatarVer, setAvatarVer] = React.useState(0); // versión para cache-busting
+	// AVATAR solo en memoria
+	const [avatarUrl, setAvatarUrl] = React.useState('');
+	const [avatarVer, setAvatarVer] = React.useState(0);
 
-	const [userName, setUserName] = React.useState(
-		localStorage.getItem('userName') ?? '',
-	);
-	const [userRole, setUserRole] = React.useState(
-		localStorage.getItem('userRole') ?? '',
-	);
+	// >>>>>>>>>>>>>>>>  NOMBRE Y ROL SOLO EN ESTADO (no storage)  <<<<<<<<<<<<<<<<<
+	const [userName, setUserName] = React.useState('');
+	const [userRole, setUserRole] = React.useState('');
 
-	// Derivados
 	const isLoggedIn = !!userName;
 	const avatarLetter = (userName || 'U').charAt(0).toUpperCase();
 
-	//heradr colores de botones navbar movil
+	// estilos drawer
 	const drawerItemSx = {
 		textDecoration: 'none',
-		color: '#0c005a', // 🔵 texto azul
-		'&:hover .MuiListItemText-primary': { color: '#e06c14' },
-		'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
-	};
-
-	// colores para los subitems del drawer movil
-	const drawerSubItemSx = {
-		pl: 6, // indent para subitems
 		color: '#0c005a',
-		'& .MuiListItemIcon-root': {
-			minWidth: 36,
-			color: 'inherit',
-		},
+		'&:hover .MuiListItemText-primary': { color: '#e06c14' },
+		'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
+	};
+	const drawerSubItemSx = {
+		pl: 6,
+		color: '#0c005a',
+		'& .MuiListItemIcon-root': { minWidth: 36, color: 'inherit' },
 		'&:hover .MuiListItemText-primary': { color: '#e06c14' },
 		'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
 	};
 
-	// Escuchar cuando el perfil se actualiza (misma pestaña)
+	// Evento de actualización de perfil
 	React.useEffect(() => {
 		const onProfileUpdated = e => {
 			const url = e?.detail?.avatar || '';
-			localStorage.setItem('userAvatar', url);
-			setAvatarUrl(url);
-			setAvatarVer(Date.now()); // cambia la versión para forzar recarga
-		};
-		window.addEventListener('profile:updated', onProfileUpdated);
-
-		// También escuchar cambios en storage (otras pestañas)
-		const onStorage = () => {
-			const url = localStorage.getItem('userAvatar') || '';
 			setAvatarUrl(url);
 			setAvatarVer(Date.now());
 		};
-		window.addEventListener('storage', onStorage);
-
-		return () => {
+		window.addEventListener('profile:updated', onProfileUpdated);
+		return () =>
 			window.removeEventListener('profile:updated', onProfileUpdated);
-			window.removeEventListener('storage', onStorage);
-		};
 	}, []);
 
+	// Cargar perfil desde backend usando cookie HttpOnly
+
 	React.useEffect(() => {
-		const cargarPerfil = async () => {
-			if (!isLoggedIn) {
-				setAvatarUrl('');
-				return;
-			}
+		const fetchProfile = async () => {
+			setLoadingUser(true); // arrancamos cargando
 			try {
-				const res = await api.get('/auth/obtenerperfil');
+				const res = await api.get('/auth/obtenerperfil', {
+					withCredentials: true,
+				});
 				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
+
+				// nombre
+				const nombre = perfil?.nombre ?? perfil?.name ?? '';
+				setUserName(nombre);
+
+				// rol: soporta string o array y normaliza a lowercase
+				const rolesArr = Array.isArray(perfil?.roles)
+					? perfil.roles.map(r => String(r).toLowerCase())
+					: [];
+				const roleStr = String(perfil?.rol ?? perfil?.role ?? '').toLowerCase();
+
+				let effectiveRole =
+					roleStr || (rolesArr.includes('admin') ? 'admin' : rolesArr[0] || '');
+				setUserRole(effectiveRole);
+
+				// avatar
 				if (perfil?.avatar) {
-					localStorage.setItem('userAvatar', perfil.avatar);
 					setAvatarUrl(perfil.avatar);
 					setAvatarVer(Date.now());
+				} else {
+					setAvatarUrl('');
 				}
-			} catch {
+			} catch (e) {
+				setUserName('');
+				setUserRole('');
 				setAvatarUrl('');
+			} finally {
+				setLoadingUser(false); // ya terminó
 			}
 		};
-		cargarPerfil();
-	}, [isLoggedIn]);
+
+		fetchProfile();
+
+		// escucha refrescos de auth para re-consultar el perfil tras login
+		const onAuthRefresh = () => fetchProfile();
+		window.addEventListener('auth:refresh', onAuthRefresh);
+		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
+	}, []);
 
 	// Helper de color
 	const generateColorFromName = React.useCallback(name => {
@@ -305,48 +298,28 @@ export default function CustomNavbar() {
 		const ch = name?.charCodeAt(0) ?? 'U'.charCodeAt(0);
 		return colors[ch % colors.length];
 	}, []);
-
 	const userColor = generateColorFromName(avatarLetter);
 
-	// Mantener la navbar sincronizada con cambios en localStorage
-	React.useEffect(() => {
-		const sync = () => {
-			setUserName(localStorage.getItem('userName') ?? '');
-			setUserRole(localStorage.getItem('userRole') ?? '');
-		};
-		window.addEventListener('storage', sync);
-		sync();
-		return () => window.removeEventListener('storage', sync);
-	}, []);
-
 	const toggleDrawer = () => setDrawerOpen(prev => !prev);
-
 	const handleSubmenuEnter = () => {
 		clearTimeout(submenuTimer.current);
 		setSubmenuOpen(true);
 	};
-
-	//funcion para cerrar el drawer movil
 	const handleCloseDrawer = React.useCallback(() => setDrawerOpen(false), []);
-
 	const handleSubmenuLeave = () => {
 		submenuTimer.current = setTimeout(() => setSubmenuOpen(false), 200);
 	};
-
 	const navigate = useNavigate();
 
 	const handleLogout = async () => {
 		try {
 			await api.post('/auth/signout');
-			localStorage.removeItem('userRole');
-			localStorage.removeItem('userName');
-			localStorage.removeItem('userEmail');
-
+			// limpiar estado en memoria
+			setUserName('');
+			setUserRole('');
+			setAvatarUrl('');
 			navigate('/');
-			//Refrescar la página para limpiar el estado visual y memoria React
-			setTimeout(() => {
-				window.location.reload();
-			}, 100);
+			setTimeout(() => window.location.reload(), 100);
 		} catch (error) {
 			console.error('Error al cerrar sesión:', error);
 			alert('Error al cerrar sesión. Inténtalo de nuevo.');
@@ -403,7 +376,7 @@ export default function CustomNavbar() {
 								position: 'relative',
 							}}
 						>
-							{/* Nuestra Historia Submenu */}
+							{/* Submenú Sobre Nosotros */}
 							<Box
 								onMouseEnter={handleSubmenuEnter}
 								onMouseLeave={handleSubmenuLeave}
@@ -464,7 +437,7 @@ export default function CustomNavbar() {
 							>
 								Tienda
 							</Button>
-							{/* Boton donar*/}
+
 							<Box sx={{ position: 'relative' }}>
 								<Button
 									sx={navBtnStyle(drawerOpen)}
@@ -480,22 +453,23 @@ export default function CustomNavbar() {
 								to='/envivo'
 								sx={navBtnStyle(drawerOpen)}
 							>
-								<Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-  {isLive && (
-    <Box
-      component="span"
-      sx={{
-        width: 10,
-        height: 10,
-        borderRadius: "50%",
-        bgcolor: "#ff1744",
-        animation: "pulse 1s ease-in-out infinite",
-      }}
-    />
-  )}
-  <span>En Vivo</span>
-</Box>
+								<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+									{isLive && (
+										<Box
+											component='span'
+											sx={{
+												width: 10,
+												height: 10,
+												borderRadius: '50%',
+												bgcolor: '#ff1744',
+												animation: 'pulse 1s ease-in-out infinite',
+											}}
+										/>
+									)}
+									<span>En Vivo</span>
+								</Box>
 							</Button>
+
 							{userRole === 'admin' && (
 								<Button
 									component={Link}
@@ -517,47 +491,61 @@ export default function CustomNavbar() {
 							flexShrink: 0,
 						}}
 					>
-						{isLoggedIn ? (
-							<UserAvatarMenu
-								user={{
-									name: avatarLetter,
-									color: userColor,
-									avatar: avatarUrl,
-								}}
-								avatarVer={avatarVer}
-								onEditProfile={() => navigate('/perfil')}
-								onLogout={handleLogout}
-								drawerOpen={drawerOpen}
-							/>
-						) : (
-							<Button
-								component={Link}
-								to='/login'
-								onClick={() => setDrawerOpen(false)}
-								sx={{
-									backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
-									color: drawerOpen ? '#ffffff' : '#0c005a',
-									border: '2px solid #0c005a',
-									fontWeight: 'bold',
-									fontFamily: '"GroteskBold", sans-serif',
-									textTransform: 'none',
-									borderRadius: '6px',
-									transition: 'all 0.3s ease',
-									height: { xs: 36, md: 40 },
-									px: { xs: 1.5, md: 2.5 },
-									fontSize: { xs: '0.85rem', md: '0.9rem' },
-									whiteSpace: 'nowrap',
-									ml: { xs: 0.5, md: 1 },
-									'&:hover': {
-										color: '#e06c14',
-										borderColor: '#e06c14',
+						<Box
+							sx={{
+								display: 'flex',
+								alignItems: 'center',
+								gap: { xs: 1, md: 2 },
+								flexShrink: 0,
+							}}
+						>
+							{loadingUser ? (
+								<CircularProgress
+									size={28}
+									sx={{ color: drawerOpen ? '#0c005a' : 'white' }}
+								/>
+							) : isLoggedIn ? (
+								<UserAvatarMenu
+									user={{
+										name: avatarLetter,
+										color: userColor,
+										avatar: avatarUrl,
+									}}
+									avatarVer={avatarVer}
+									onEditProfile={() => navigate('/perfil')}
+									onLogout={handleLogout}
+									drawerOpen={drawerOpen}
+								/>
+							) : (
+								<Button
+									component={Link}
+									to='/login'
+									onClick={() => setDrawerOpen(false)}
+									sx={{
 										backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
-									},
-								}}
-							>
-								Iniciar Sesión
-							</Button>
-						)}
+										color: drawerOpen ? '#ffffff' : '#0c005a',
+										border: '2px solid #0c005a',
+										fontWeight: 'bold',
+										fontFamily: '"GroteskBold", sans-serif',
+										textTransform: 'none',
+										borderRadius: '6px',
+										transition: 'all 0.3s ease',
+										height: { xs: 36, md: 40 },
+										px: { xs: 1.5, md: 2.5 },
+										fontSize: { xs: '0.85rem', md: '0.9rem' },
+										whiteSpace: 'nowrap',
+										ml: { xs: 0.5, md: 1 },
+										'&:hover': {
+											color: '#e06c14',
+											borderColor: '#e06c14',
+											backgroundColor: drawerOpen ? '#0c005a' : '#ffffff',
+										},
+									}}
+								>
+									Iniciar Sesión
+								</Button>
+							)}
+						</Box>
 
 						<IconButton
 							onClick={toggleDrawer}
@@ -566,9 +554,7 @@ export default function CustomNavbar() {
 								alignItems: 'center',
 								color: drawerOpen ? '#0c005a' : 'white',
 								outline: 'none',
-								'&:hover': {
-									color: drawerOpen ? '#0c005a' : '#e06c14',
-								},
+								'&:hover': { color: drawerOpen ? '#0c005a' : '#e06c14' },
 								'&:hover .menu-text': {
 									color: drawerOpen ? '#0c005a' : '#e06c14',
 								},
@@ -602,7 +588,7 @@ export default function CustomNavbar() {
 				</Toolbar>
 			</AppBar>
 
-			{/* Drawer*/}
+			{/* Drawer superior */}
 			<Drawer
 				anchor='top'
 				open={drawerOpen}
@@ -621,7 +607,7 @@ export default function CustomNavbar() {
 			>
 				<Box sx={{ width: '100%', p: 3 }}>
 					<List>
-						{/* Admin solo en móvil*/}
+						{/* Admin solo móvil */}
 						{isCompactNav && userRole === 'admin' && (
 							<ListItem
 								button
@@ -645,7 +631,7 @@ export default function CustomNavbar() {
 							</ListItem>
 						)}
 
-						{/* SubMenú nuestra historia móvil*/}
+						{/* Sobre nosotros (móvil) */}
 						{isCompactNav && (
 							<>
 								<ListItem
@@ -684,7 +670,6 @@ export default function CustomNavbar() {
 												primaryTypographyProps={mobileTypography}
 											/>
 										</ListItem>
-
 										<ListItem
 											button
 											component={Link}
@@ -749,7 +734,8 @@ export default function CustomNavbar() {
 								)}
 							</>
 						)}
-						{/*items del drawr estilos o acciones*/}
+
+						{/* Ítems base */}
 						{baseMenuItems.map(item => (
 							<ListItem
 								key={item.text}
@@ -757,12 +743,7 @@ export default function CustomNavbar() {
 								component={Link}
 								to={item.path}
 								onClick={() => setDrawerOpen(false)}
-								sx={{
-									textDecoration: 'none',
-									color: '#0c005a',
-									'&:hover .MuiListItemText-primary': { color: '#e06c14' },
-									'&:hover .MuiListItemIcon-root': { color: '#e06c14' },
-								}}
+								sx={drawerItemSx}
 							>
 								<ListItemIcon sx={{ color: 'inherit' }}>
 									{item.icon}
@@ -779,60 +760,50 @@ export default function CustomNavbar() {
 							</ListItem>
 						))}
 
-						{/* En vivo solo en móvil */}
+						{/* En vivo móvil */}
 						{isCompactNav && (
-							<>
-								<ListItem
-									button
-									component={Link}
-									to='/envivo'
-									onClick={handleCloseDrawer}
-									sx={{
-										...drawerItemSx,
-										pr: 6, 
-										'& .MuiListItemSecondaryAction-root': {
-											right: 220, 
-										},
-									}}
-									
-								>
-									<ListItemIcon sx={{ color: 'inherit' }}>
-										<LiveTvOutlinedIcon />
-									</ListItemIcon>
-									<ListItemText
-  primary={
-    <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-      {isLive && (
-        <Box
-          component="span"
-          sx={{
-            width: 8,
-            height: 8,
-            borderRadius: "50%",
-            bgcolor: "#ff1744",
-            animation: "pulse 1s ease-in-out infinite",
-          }}
-        />
-      )}
-      <span
-        style={{
-          fontFamily: '"Franklin Gothic Medium", sans-serif',
-          fontWeight: "bold",
-          fontSize: "0.95rem",
-          color: "inherit",
-        }}
-      >
-        En Vivo
-      </span>
-    </Box>
-  }
-/>
-
-								</ListItem>
-							</>
+							<ListItem
+								button
+								component={Link}
+								to='/envivo'
+								onClick={handleCloseDrawer}
+								sx={{ ...drawerItemSx, pr: 6 }}
+							>
+								<ListItemIcon sx={{ color: 'inherit' }}>
+									<LiveTvOutlinedIcon />
+								</ListItemIcon>
+								<ListItemText
+									primary={
+										<Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+											{isLive && (
+												<Box
+													component='span'
+													sx={{
+														width: 8,
+														height: 8,
+														borderRadius: '50%',
+														bgcolor: '#ff1744',
+														animation: 'pulse 1s ease-in-out infinite',
+													}}
+												/>
+											)}
+											<span
+												style={{
+													fontFamily: '"Franklin Gothic Medium", sans-serif',
+													fontWeight: 'bold',
+													fontSize: '0.95rem',
+													color: 'inherit',
+												}}
+											>
+												En Vivo
+											</span>
+										</Box>
+									}
+								/>
+							</ListItem>
 						)}
 
-						{/* Tienda solo en móvil */}
+						{/* Tienda móvil */}
 						{isCompactNav && (
 							<ListItem
 								button
@@ -856,7 +827,7 @@ export default function CustomNavbar() {
 							</ListItem>
 						)}
 
-						{/* Donar button móvil */}
+						{/* Donar móvil */}
 						<ListItem
 							sx={{ justifyContent: 'center', mt: 3, display: { md: 'none' } }}
 						>
