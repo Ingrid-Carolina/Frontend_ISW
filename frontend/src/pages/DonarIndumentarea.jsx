@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import parsePhoneNumberFromString, { isValidPhoneNumber, parsePhoneNumberWithError } from 'libphonenumber-js';
+
 import {
   Dialog,
   DialogTitle,
@@ -41,6 +45,46 @@ const DonarIndumentarea = () => {
     indumentaria.map((pieza) => ({ ...pieza, checked: false, cantidad: 0 }))
   );
 
+  const[errores, seterrores]= useState({});
+  const[displayPhone, setdisplayPhone]= useState("");
+
+
+  const ValidarErrores=()=>{
+    
+   
+    const errors={}
+     //const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;// para validar el formato correcto del email
+
+    if(!formData.nombre||formData.nombre.trim().length<3)
+      errors.nombre= 'El nombre deber tener por lo menos 3 caracteres';
+    
+    if (!formData.nombre.trim()) 
+      errors.nombre = 'El nombre es obligatorio';
+
+   if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(formData.nombre.trim())) { //Psra validar los acentos
+  errors.nombre = 'El nombre solo debe contener letras, espacios y caracteres válidos';
+}
+
+  if (!formData.correo.trim()) {
+      errors.email = 'El correo electrónico es obligatorio';
+    } else if (!/@(gmail\.com|outlook\.com|hotmail\.com|yahoo\.com)$/i.test(formData.correo)) {
+      errors.email ='Solo se permiten correos de Gmail, Outlook o Hotmail';
+    }
+
+
+    if(formData.descripcion.trim().length<15){
+
+      errors.descripcion='Escribe al menos 15 caracteres';
+    }
+
+
+    
+
+    seterrores(errors);
+     return Object.keys(errores).length===0;// retornamos el error para ser displayed
+
+  }
+
   // Estado modal y formulario
   const [open, setOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -49,6 +93,7 @@ const DonarIndumentarea = () => {
     correo: "",
     dia: "",
     horario: "",
+    pais:"",
     descripcion: "",
   });
 
@@ -82,39 +127,62 @@ const DonarIndumentarea = () => {
   };
 
   // Manejo del formulario
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
-  };
+ const handleChange = (e) => {
+  const { name, value } = e.target;
+  setFormData(prev => ({ ...prev, [name]: value }));
+
+ 
+    seterrores(prev => ({
+      ...prev,
+      [name]: ''
+    }));
+  
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+if (!ValidarErrores()) return;
 
-    // Extraemos las piezas seleccionadas y sus cantidades
-    const donaciones = seleccion
-      .filter((item) => item.checked && item.cantidad > 0)
-      .map((item) => ({
-        nombre: item.nombre,
-        cantidad: item.cantidad,
-      }));
+const donaciones = seleccion
+  .filter((item) => item.checked && item.cantidad > 0)
+  .map((item) => ({
+    nombre: item.nombre,
+    cantidad: item.cantidad,
+  }));
 
-    try {
-      await fetch("http://localhost:3000/auth/enviar-donacion", { // <-- tu endpoint
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          datos: formData,
-          donaciones: donaciones, // 👈 ahora se envían también las piezas
-        }),
-      });
+ 
 
-      alert("¡Gracias por tu donación! Te contactaremos pronto.");
-      setOpen(false);
-      navigate("/donaciones");
-    } catch (error) {
-      console.error("Error al enviar donación:", error);
-      alert("Hubo un error al enviar la donación. Intenta de nuevo.");
-    }
+
+  const rawPhone = formData.telefono?.replace(/\s+/g, ''); //quitar espacioes
+  const countryCode = formData.pais?.toUpperCase();
+
+  if (!rawPhone || typeof rawPhone !== 'string') {
+    seterrores((prev) => ({
+      ...prev,
+      telefono: 'Número de teléfono no válido',
+    }));
+    return;
+  }
+
+  const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
+
+  formData.telefono = parsedPhone?.formatInternational?.() || formData.telefono;
+
+    setFormData({
+  nombre: '',
+  correo: '',
+  telefono: '',
+  pais: '',
+  dia: '',
+  horario: '',
+  descripcion: ''
+});
+
+
+
+console.log(formData.telefono);
+console.log(formData);
+
   };
 
   return (
@@ -292,11 +360,35 @@ const DonarIndumentarea = () => {
               value={formData.nombre}
               onChange={handleChange}
               margin="normal"
-              required
+              required='El nombre es obligatorio'
+              error={errores.nombre}
+              helperText={errores.nombre}
               InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
             />
-            <TextField
+
+            <PhoneInput
+  country={'us'}
+  name="telefono"
+   fullWidth
+  required='El numero de telefono es obligatorio'
+  value={formData.telefono|| ''}
+   onChange={(value, country) => { //extraemos el telefono con la extension del codigo del pais( 'hn', 'us', etc)
+    const sanitized = value.replace(new RegExp(`^\\+?${country.dialCode}`), ''); // remove manual country code
+  const finalValue = `+${country.dialCode}${sanitized}`; //separamos del dialCode al numero de telefono normal
+    setFormData({ ...formData, telefono: finalValue , pais:country.countryCode });
+    seterrores((prev) => ({ ...prev, telefono: '' })); // clear error on change
+  }}
+  onBlur={()=>{setdisplayPhone(formData.telefono)}}
+  inputProps={{
+    name: 'telefono',
+    required: true,
+    style: errores.telefono ? { borderColor: 'red' } : {},
+  }}
+    InputLabelProps={{ style: { fontFamily: "PeterMedium" }}}
+/>
+          
+        {/*<TextField
               fullWidth
               label="Telefono"
               name="telefono"
@@ -306,7 +398,9 @@ const DonarIndumentarea = () => {
               required
               InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
-            />
+            />*/}
+
+           
             <TextField
               fullWidth
               label="Correo electronico"
@@ -315,7 +409,9 @@ const DonarIndumentarea = () => {
               value={formData.correo}
               onChange={handleChange}
               margin="normal"
-              required
+              required='El correo electronico es requerido'
+               error={errores.email}
+              helperText={errores.email}
               InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
             />
@@ -328,9 +424,10 @@ const DonarIndumentarea = () => {
               value={formData.dia}
               onChange={handleChange}
               margin="normal"
-              required
+              required='La dia es obligatoria'
               InputLabelProps={{ shrink: true, style: { fontFamily: "PeterMedium" } }}
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
+              inputProps={{ min: new Date().toISOString().split("T")[0] }} //desahabilitar dias que ya pasaron
             />
 
             <TextField
@@ -341,20 +438,28 @@ const DonarIndumentarea = () => {
               value={formData.horario}
               onChange={handleChange}
               margin="normal"
-              required
+              required='La hora de obligatoria'
               InputLabelProps={{ shrink: true, style: { fontFamily: "PeterMedium" } }}
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
+               inputProps={{
+          step: 60, // intervalo de 1 minuto
+          min: "00:00",
+         max: "23:59"
+        }}
             />
 
             <TextField
               fullWidth
               label="Descripcion de lo donado"
               name="descripcion"
+              required='La descripcion es obligatoria'
               value={formData.descripcion}
               onChange={handleChange}
               margin="normal"
               multiline
               rows={3}
+               error={errores.descripcion}
+              helperText={errores.descripcion}
               InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
               InputProps={{ style: { fontFamily: "PeterMedium" } }}
             />

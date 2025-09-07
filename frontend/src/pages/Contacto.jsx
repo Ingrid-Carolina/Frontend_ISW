@@ -44,26 +44,26 @@ const Contacto = () => {
 		// Valida que el input no esté vacío ni contenga solo espacios. Se aplica a varios campos del formulario.
 		value.trim() !== '' || 'No puede contener solo espacios';
 
-	const onSubmit = async (data, e) => {
-		e.preventDefault();
+	const onSubmit = async (data) => {
 
-		// const token = await captcha.current.executeAsync();
-		// captcha.current.reset();
-		// if (!token) {
-		// 	window.alert('Por favor, valida el CAPTCHA.');
-		// 	return;
-		// }
 
-		// Verificar token con el backend
+		 const token = await captcha.current.executeAsync();
+		 captcha.current.reset();
+	 if (!token) {
+	 	window.alert('Por favor, valida el CAPTCHA.');
+		 	return;
+		 }
+
+	// Verificar token con el backend
 		try {
-			// const res = await api.post('/auth/verificar', { token });
+			 const res = await api.post('/auth/verificar', { token });
 
-			// if (!res.data.success) {
-			// 	setSnackbarType('error');
-			// 	setSnackbarMsg('Verificación del CAPTCHA fallida.');
-			// 	setOpenSnackbar(true);
-			// 	return;
-			// }
+		 if (!res.data.success) {
+			 	setSnackbarType('error');
+			 	setSnackbarMsg('Verificación del CAPTCHA fallida.');
+			 	setOpenSnackbar(true);
+			 	return;
+			 }
 
 			// Procede con el envío del formulario
 			const body = {
@@ -478,11 +478,11 @@ const Contacto = () => {
 						</Box>
 
 						{/* BOTÓN ENVIAR MENSAJE*/}
-						{/* <ReCAPTCHA
+						 <ReCAPTCHA
 							ref={captcha}
 							sitekey='6LeoJWErAAAAAL6RcLtqe59DOJyUGdkQO1gc3Nvm'
 							size='invisible'
-						/> */}
+						/> 
 
 						<Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-start' }}>
 							<Button
