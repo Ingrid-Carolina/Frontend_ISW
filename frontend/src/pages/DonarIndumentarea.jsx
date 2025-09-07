@@ -131,18 +131,6 @@ const DonarIndumentarea = () => {
     const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
     formData.telefono = parsedPhone?.formatInternational?.() || formData.telefono;
 
-    try {
-      await api.post("/auth/enviar-donacion", {
-        datos: formData,
-        donaciones,
-      });
-      alert("¡Gracias por tu donación! Te contactaremos pronto.");
-      setOpen(false);
-      navigate("/donaciones");
-    } catch (error) {
-      console.error("Error al enviar donación:", error);
-      alert("Hubo un error al enviar la donación. Intenta de nuevo.");
-    }
   };
 
   return (
