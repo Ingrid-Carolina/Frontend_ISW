@@ -18,7 +18,7 @@ export default function Footer() {
 					<nav>
 						<Link to='/Contacto'>Contacto</Link>
 						<span> | </span>
-						<a href='#privacidad'>Política de Privacidad</a>
+						<Link to = '/PoliticaPrivacidad'>Política de Privacidad</Link>
 					</nav>
 				</Box>
 
