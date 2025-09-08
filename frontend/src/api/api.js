@@ -16,13 +16,23 @@ export const api = axios.create({
 api.interceptors.response.use(
   (res) => res,
   (err) => {
+    const status = err?.response?.status;
+
+    if (status === 401) {
+      // Evitar bucle si ya estamos en login
+      if (window.location.pathname !== "/login") {
+        localStorage.removeItem("usuario"); // o lo que uses
+        window.location.href = "/login";
+      }
+    }
+
     const msg =
-      err?.response?.data?.message ||
+      err?.response?.data?.mensaje ||
       err?.response?.data?.error ||
       err?.message ||
       "Request error";
     const e = new Error(msg);
-    e.status = err?.response?.status;
+    e.status = status;
     e.data = err?.response?.data;
     return Promise.reject(e);
   }
