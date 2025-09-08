@@ -2,6 +2,7 @@
 
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
+import YoutubeIcon from '@mui/icons-material/YouTube';
 import EmailIcon from '@mui/icons-material/Email';
 import logo from '/Images/Logo-pilotos.png';
 import Box from '@mui/material/Box';
@@ -33,6 +34,14 @@ export default function Footer() {
 						>
 							<FacebookIcon className='social-icon' />
 						</a>
+						<a 
+							href='https://www.youtube.com/@marcoamaya26/shorts'
+							target='_blank'
+							rel='noopener noreferrer'
+							> 
+							<YoutubeIcon className = 'social-icon'/>
+
+							</a>
 
 						<a
 							href='https://www.instagram.com/beisbolfahn/'
