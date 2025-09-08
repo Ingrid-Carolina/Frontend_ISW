@@ -14,6 +14,8 @@ import {
   IconButton,
   Typography,
   Box,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
 import fondo from "/Images/TestimonioFondo1.jpg";
@@ -35,6 +37,9 @@ const DonarIndumentarea = () => {
     descripcion: "",
   });
 
+  // ✅ Estado para notificaciones
+  const [notificacion, setNotificacion] = useState({ open: false, mensaje: "", tipo: "info" });
+
   // 🔹 Modal para ficha completa
   const [modalFicha, setModalFicha] = useState({ open: false, producto: null });
 
@@ -42,6 +47,8 @@ const DonarIndumentarea = () => {
     if (!imagen) return "/Images/producto_defecto.png";
     return imagen.startsWith("/Images/") ? imagen : "/Images/producto_defecto.png";
   };
+
+  
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -54,7 +61,8 @@ const DonarIndumentarea = () => {
         setSeleccion(productosActivos);
       } catch (err) {
         console.error("Error al cargar productos:", err);
-        alert("No se pudieron cargar los productos.");
+        // ❌ Antes: alert()
+        setNotificacion({ open: true, mensaje: "No se pudieron cargar los productos.", tipo: "error" });
       }
     };
     fetchProductos();
@@ -81,7 +89,8 @@ const DonarIndumentarea = () => {
   const confirmarDonacion = () => {
     const donaciones = seleccion.filter((item) => item.checked && item.cantidad > 0);
     if (donaciones.length === 0) {
-      alert("Por favor selecciona al menos una pieza de indumentaria para donar.");
+      // ❌ Antes: alert()
+      setNotificacion({ open: true, mensaje: "Selecciona al menos una pieza de indumentaria.", tipo: "warning" });
       return;
     }
     setOpen(true);
@@ -131,12 +140,45 @@ const DonarIndumentarea = () => {
     const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
     formData.telefono = parsedPhone?.formatInternational?.() || formData.telefono;
 
+    // ✅ Éxito al enviar
+    setNotificacion({ open: true, mensaje: "Donación enviada correctamente. ¡Gracias!", tipo: "success" });
+    setOpen(false);
   };
 
   return (
-    <div style={{ minHeight: "100vh", paddingTop: "2rem", paddingBottom: "14rem", position: "relative" }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        paddingTop: "2rem",
+        paddingBottom: "14rem",
+        position: "relative",
+      }}
+    >
+      {/* ✅ Notificación flotante */}
+      <Snackbar
+        open={notificacion.open}
+        autoHideDuration={4000}
+        onClose={() => setNotificacion({ ...notificacion, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={notificacion.tipo}
+          onClose={() => setNotificacion({ ...notificacion, open: false })}
+          sx={{ width: "100%" }}
+        >
+          {notificacion.mensaje}
+        </Alert>
+      </Snackbar>
+
       {/* Fondo */}
-      <div style={{ position: "absolute", inset: 0, zIndex: 0, backgroundColor: "#10045c" }} />
+      <div
+        style={{
+          position: "absolute",
+          inset: 0,
+          zIndex: 0,
+          backgroundColor: "#10045c",
+        }}
+      />
       <div
         style={{
           backgroundImage: `url(${fondo})`,
@@ -148,9 +190,24 @@ const DonarIndumentarea = () => {
           zIndex: 1,
         }}
       />
+
       {/* Contenido */}
-      <div style={{ position: "relative", zIndex: 2, padding: "2rem", paddingTop: "6rem" }}>
-        <h1 style={{ textAlign: "center", marginBottom: "1rem", fontFamily: "GroteskBold", color: "#fff" }}>
+      <div
+        style={{
+          position: "relative",
+          zIndex: 2,
+          padding: "2rem",
+          paddingTop: "6rem",
+        }}
+      >
+        <h1
+          style={{
+            textAlign: "center",
+            marginBottom: "1rem",
+            fontFamily: "GroteskBold",
+            color: "#fff",
+          }}
+        >
           Donación de Indumentaria
         </h1>
 
@@ -177,17 +234,48 @@ const DonarIndumentarea = () => {
               <img
                 src={getImagen(item.imagen)}
                 alt={item.nombre}
-                onError={(e) => (e.target.src = "/Images/producto_defecto.png")}
-                style={{ width: "70%", height: "50%", objectFit: "cover", borderRadius: "8px" }}
+                onError={(e) =>
+                  (e.target.src = "/Images/producto_defecto.png")
+                }
+                style={{
+                  width: "70%",
+                  height: "50%",
+                  objectFit: "cover",
+                  borderRadius: "8px",
+                }}
               />
-              <h3 style={{ fontFamily: "GroteskBold", margin: "1rem 0", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <h3
+                style={{
+                  fontFamily: "GroteskBold",
+                  margin: "1rem 0",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
                 {item.nombre}
               </h3>
-              <p style={{ fontFamily: "GroteskRegular", fontSize: "0.9rem", marginBottom: "1rem", display: "-webkit-box", WebkitLineClamp: 3, WebkitBoxOrient: "vertical", overflow: "hidden", textOverflow: "ellipsis" }}>
+              <p
+                style={{
+                  fontFamily: "GroteskRegular",
+                  fontSize: "0.9rem",
+                  marginBottom: "1rem",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
                 {item.descripcion}
               </p>
               <div style={{ marginBottom: "1rem" }}>
-                <input type="checkbox" checked={item.checked} onChange={() => handleCheckbox(item.id)} /> Seleccionar
+                <input
+                  type="checkbox"
+                  checked={item.checked}
+                  onChange={() => handleCheckbox(item.id)}
+                />{" "}
+                Seleccionar
               </div>
               <input
                 type="number"
@@ -198,7 +286,17 @@ const DonarIndumentarea = () => {
                 onChange={(e) => handleCantidad(item.id, e.target.value)}
                 style={{ width: "60px", textAlign: "center" }}
               />
-              <IconButton onClick={() => setModalFicha({ open: true, producto: item })} style={{ position: "absolute", top: "10px", right: "10px", color: "#10045c" }}>
+              <IconButton
+                onClick={() =>
+                  setModalFicha({ open: true, producto: item })
+                }
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  color: "#10045c",
+                }}
+              >
                 <Visibility />
               </IconButton>
             </div>
@@ -245,9 +343,16 @@ const DonarIndumentarea = () => {
               name="telefono"
               value={formData.telefono || ""}
               onChange={(value, country) => {
-                const sanitized = value.replace(new RegExp(`^\\+?${country.dialCode}`), "");
+                const sanitized = value.replace(
+                  new RegExp(`^\\+?${country.dialCode}`),
+                  ""
+                );
                 const finalValue = `+${country.dialCode}${sanitized}`;
-                setFormData({ ...formData, telefono: finalValue, pais: country.countryCode });
+                setFormData({
+                  ...formData,
+                  telefono: finalValue,
+                  pais: country.countryCode,
+                });
                 setErrores((prev) => ({ ...prev, telefono: "" }));
               }}
               onBlur={() => setDisplayPhone(formData.telefono)}
@@ -317,9 +422,18 @@ const DonarIndumentarea = () => {
       </Dialog>
 
       {/* Modal ficha completa */}
-      <Dialog open={modalFicha.open} onClose={() => setModalFicha({ open: false, producto: null })} fullWidth maxWidth="sm">
+      <Dialog
+        open={modalFicha.open}
+        onClose={() => setModalFicha({ open: false, producto: null })}
+        fullWidth
+        maxWidth="sm"
+      >
         <DialogTitle>
-          <Typography variant="h4" align="center" sx={{ fontFamily: "GroteskBold", fontSize: "2rem" }}>
+          <Typography
+            variant="h4"
+            align="center"
+            sx={{ fontFamily: "GroteskBold", fontSize: "2rem" }}
+          >
             {modalFicha.producto?.nombre}
           </Typography>
         </DialogTitle>
@@ -344,17 +458,29 @@ const DonarIndumentarea = () => {
                 marginBottom: "1rem",
               }}
             />
-            <Typography align="center" sx={{ fontSize: "1.2rem", fontFamily: "GroteskRegular", mt: 1 }}>
+            <Typography
+              align="center"
+              sx={{
+                fontSize: "1.2rem",
+                fontFamily: "GroteskRegular",
+                mt: 1,
+              }}
+            >
               {modalFicha.producto?.descripcion}
             </Typography>
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setModalFicha({ open: false, producto: null })}>Cerrar</Button>
+          <Button
+            onClick={() => setModalFicha({ open: false, producto: null })}
+          >
+            Cerrar
+          </Button>
         </DialogActions>
       </Dialog>
     </div>
   );
 };
+
 
 export default DonarIndumentarea;

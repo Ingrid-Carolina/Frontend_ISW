@@ -11,6 +11,8 @@ const DonarcionSubpagina = ({ onClose }) => {
     const [selectedAmount, setSelectedAmount] = useState(null);
     const [customAmount, setCustomAmount] = useState('');
     const [isCustomSelected, setIsCustomSelected] = useState(false);
+    const [screenSize, setScreenSize] = useState("xl");
+    const [notification, setNotification] = useState({ message: "", type: "" });
 
     // Enhanced responsive system with more breakpoints
     const getScreenSize = () => {
@@ -24,7 +26,6 @@ const DonarcionSubpagina = ({ onClose }) => {
         return 'xxl';                      // Large desktop (1536px+)
     };
 
-    const [screenSize, setScreenSize] = useState(getScreenSize());
 
     useEffect(() => {
         const handleResize = () => setScreenSize(getScreenSize());
@@ -354,20 +355,17 @@ const DonarcionSubpagina = ({ onClose }) => {
 
     const handleContinue = () => {
         const amount = getSelectedAmountValue();
-        console.log(`Donación de L.${amount} confirmada.`);
-        
-        // Add haptic feedback for mobile
-        if (screenSize === 'xs' && 'vibrate' in navigator) {
-            navigator.vibrate([100, 50, 100]);
+
+        if (amount === "0.00") {
+            setNotification({ message: "Debes seleccionar o ingresar una cantidad válida.", type: "error" });
+            return;
         }
-        
-        if (screenSize === 'xs') {
-            if (window.confirm(`¿Confirmas tu donación de L.${amount}?`)) {
-                alert(`¡Gracias por tu donación de L.${amount}!`);
-            }
-        } else {
-            alert(`¡Gracias por tu donación de L.${amount}!`);
-        }
+
+        // ✅ Mostrar notificación en lugar de alert()
+        setNotification({ message: `¡Gracias por tu donación de L.${amount}!`, type: "success" });
+
+        // Limpieza después de 4s
+        setTimeout(() => setNotification({ message: "", type: "" }), 4000);
     };
 
     const handleCardTouch = (e, amount) => {
@@ -384,6 +382,28 @@ const DonarcionSubpagina = ({ onClose }) => {
 
     return (
         <>
+        {/* Notificación flotante */}
+            {notification.message && (
+                <div
+                    style={{
+                        position: "fixed",
+                        top: "20px",
+                        right: "20px",
+                        backgroundColor: notification.type === "success" ? "#16a34a" : "#dc2626",
+                        color: "white",
+                        padding: "12px 20px",
+                        borderRadius: "12px",
+                        boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
+                        zIndex: 2000,
+                        fontSize: "0.95rem",
+                        fontWeight: "500",
+                        transition: "opacity 0.3s ease-in-out"
+                    }}
+                >
+                    {notification.message}
+                </div>
+            )}
+            
             <style>{pulseKeyframes}</style>
             <div style={rootStyles}>
                 <div style={containerStyles}>
