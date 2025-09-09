@@ -190,6 +190,7 @@ const Calendario = () => {
 			try {
 				const res = await api.get('/auth/obtenerperfil', {
 					withCredentials: true,
+					 skipAuthRedirect: true,
 				});
 				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
 
