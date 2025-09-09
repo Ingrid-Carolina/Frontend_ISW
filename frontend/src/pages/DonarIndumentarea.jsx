@@ -26,6 +26,8 @@ const DonarIndumentarea = () => {
   const [seleccion, setSeleccion] = useState([]);
   const [open, setOpen] = useState(false);
   const [errores, setErrores] = useState({});
+  const [producto, setproducto]= useState("");
+  const [cantidad, setcantidad]= useState("");
   const [displayPhone, setDisplayPhone] = useState("");
   const [formData, setFormData] = useState({
     nombre: "",
@@ -35,6 +37,8 @@ const DonarIndumentarea = () => {
     horario: "",
     pais: "",
     descripcion: "",
+    nombre_producto: "",
+    cantidad: "",
   });
 
   // ✅ Estado para notificaciones
@@ -57,7 +61,9 @@ const DonarIndumentarea = () => {
         const productos = res.data.productos || [];
         const productosActivos = productos
           .filter((p) => p.estado === true)
-          .map((p) => ({ ...p, checked: false, cantidad: 0 }));
+          .map((p) => ({ ...p, checked: false, cantidad:0}));
+
+          console.log(productosActivos);
         setSeleccion(productosActivos);
       } catch (err) {
         console.error("Error al cargar productos:", err);
@@ -68,15 +74,19 @@ const DonarIndumentarea = () => {
     fetchProductos();
   }, []);
 
-  const handleCheckbox = (id) => {
-    setSeleccion((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? { ...item, checked: !item.checked, cantidad: !item.checked ? 1 : 0 }
-          : item
-      )
+ const handleCheckbox = (id) => {
+  setSeleccion((prev) => {
+    const updated = prev.map((item) =>
+      item.id === id
+        ? { ...item, checked: !item.checked, cantidad: !item.checked ? 1 : 0 }
+        : item
     );
-  };
+
+     const seleccionados = updated.filter((item) => item.checked);
+    console.log("Productos seleccionados:", seleccionados);
+    return updated;
+  });
+};
 
   const handleCantidad = (id, cantidad) => {
     setSeleccion((prev) =>
@@ -131,14 +141,30 @@ const DonarIndumentarea = () => {
     if (!ValidarErrores()) return;
 
     const donaciones = seleccion
+
       .filter((item) => item.checked && item.cantidad > 0)
       .map((item) => ({ nombre: item.nombre, cantidad: item.cantidad }));
-
+    
     // Validar teléfono
     const rawPhone = formData.telefono?.replace(/\s+/g, "");
     const countryCode = formData.pais?.toUpperCase();
     const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
     formData.telefono = parsedPhone?.formatInternational?.() || formData.telefono;
+
+    setFormData({
+  nombre: '',
+  correo: '',
+  telefono: '',
+  pais: '',
+  dia: '',
+  horario: '',
+  descripcion: ''
+});
+
+console.log(formData)
+console.log("Nombre del producto:"+ donaciones.nombre )
+console("Cantidad"+ donaciones.cantidad)
+
 
     // ✅ Éxito al enviar
     setNotificacion({ open: true, mensaje: "Donación enviada correctamente. ¡Gracias!", tipo: "success" });
@@ -218,9 +244,9 @@ const DonarIndumentarea = () => {
             gap: "1rem",
           }}
         >
-          {seleccion.map((item) => (
+          {seleccion.map((p) => (
             <div
-              key={item.id}
+              key={p.id}
               style={{
                 border: "1px solid #ccc",
                 borderRadius: "10px",
@@ -232,8 +258,8 @@ const DonarIndumentarea = () => {
               }}
             >
               <img
-                src={getImagen(item.imagen)}
-                alt={item.nombre}
+                src={getImagen(p.imagen)}
+                alt={p.nombre}
                 onError={(e) =>
                   (e.target.src = "/Images/producto_defecto.png")
                 }
@@ -253,7 +279,7 @@ const DonarIndumentarea = () => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {item.nombre}
+                {p.nombre}
               </h3>
               <p
                 style={{
@@ -267,13 +293,13 @@ const DonarIndumentarea = () => {
                   textOverflow: "ellipsis",
                 }}
               >
-                {item.descripcion}
+                {p.descripcion}
               </p>
               <div style={{ marginBottom: "1rem" }}>
                 <input
                   type="checkbox"
-                  checked={item.checked}
-                  onChange={() => handleCheckbox(item.id)}
+                  checked={p.checked}
+                  onChange={() => handleCheckbox(p.id)}
                 />{" "}
                 Seleccionar
               </div>
@@ -281,14 +307,14 @@ const DonarIndumentarea = () => {
                 type="number"
                 min="1"
                 max="100"
-                value={item.cantidad}
-                disabled={!item.checked}
-                onChange={(e) => handleCantidad(item.id, e.target.value)}
+                value={p.cantidad}
+                disabled={!p.checked}
+                onChange={(e) => handleCantidad(p.id, e.target.value)}
                 style={{ width: "60px", textAlign: "center" }}
               />
               <IconButton
                 onClick={() =>
-                  setModalFicha({ open: true, producto: item })
+                  setModalFicha({ open: true, producto: p })
                 }
                 style={{
                   position: "absolute",

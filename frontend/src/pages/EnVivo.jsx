@@ -39,9 +39,8 @@ const EnVivo = () => {
 	const [videos, setVideos] = useState([]);
 	const [selectedIndex, setSelectedIndex] = useState(null);
 	const [urlData, setUrlData] = useState({
-		videoUrl:
-			'https://www.youtube.com/embed/gMm3EODDb6w?si=iS7QnVSDgYpJZVGn&autoplay=1&mute=1',
-		channelUrl: 'https://www.youtube.com/@BaseballSport.',
+		videoUrl: '',
+		channelUrl: '',
 	});
 	const [formData, setFormData] = useState({
 		videoUrl: '',
@@ -54,7 +53,41 @@ const EnVivo = () => {
 	const [showBanner, setShowBanner] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [checkingAuth, setCheckingAuth] = useState(true); // Estado para verificación de autenticación
+	const fetchUrls = async () => {
+		setLoading(true);
+		try {
+			const res = await api.get('/auth/obtenerenvivo', { //hacemos fetch de los videos
+				skipAuthRedirect: true,
+			});
 
+			const hola= res.data; //encapsulamos el resultado para luego iterar sobre el
+			
+				const videosActualizados = hola.videos.map(video => ({
+  					id: video.id_envivo,
+  					video_url: video.video_url,
+  					channel_url: video.channel_url,
+  					descripcion: video.descripcion,
+ 					 activo: video.activo,
+					}));
+				setVideos(videosActualizados);
+				console.log(videosActualizados[0]); 
+				
+				// CORRECCIÓN: Usar setUrlData y verificar que existe el primer elemento
+
+				if(videosActualizados.length>0){
+					setUrlData({
+						videoUrl: convertToEmbedUrl(videosActualizados[0].video_url),
+						channelUrl: videosActualizados[0].channel_url,
+					});
+				}
+			
+		} catch (fetchError) {
+			console.warn('Error al recargar videos:', fetchError);
+		} finally {
+			setLoading(false);
+			
+		}
+	};
 	// Check if user is admin - No bloquea el acceso si falla
 	useEffect(() => {
 		const fetchRole = async () => {
@@ -89,9 +122,12 @@ const EnVivo = () => {
 			} finally {
 				setCheckingAuth(false); // Terminar verificación de autenticación
 			}
+
+			
 		};
 
 		fetchRole();
+
 
 		// Listen for auth refresh events
 		const onAuthRefresh = () => {
@@ -100,80 +136,21 @@ const EnVivo = () => {
 		};
 		window.addEventListener('auth:refresh', onAuthRefresh);
 		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
+
+		
+
+		
 	}, []);
 
-	// Load URLs from backend - Funciona sin autenticación
+	//Useffect sin autenticacion
+
 	useEffect(() => {
-		const fetchUrls = async () => {
-			// No esperar a que termine la verificación de autenticación
-			try {
-				setLoading(true);
-				// Intentar usar el endpoint autenticado primero
-				let res;
-				try {
-					res = await api.get('/auth/obtenerenvivo', {
-						skipAuthRedirect: true, 
-					});
-				} catch (authError) {
-					// Si falla por autenticación, intentar endpoint público (si existe)
-					console.log('Endpoint autenticado falló, usando valores por defecto');
-					setLoading(false);
-					return;
-				}
-
-				const videosData = res.data;
-
-				if (!Array.isArray(videosData) || videosData.length === 0) {
-					console.log('No hay videos disponibles, usando valores por defecto');
-					return;
-				}
-
-				const videosLista = videosData.map(video => ({
-					id: video.id_envivo,
-					video_url: video.video_url,
-					channel_url: video.channel_url,
-					descripcion: video.descripcion,
-					activo: video.activo,
-				}));
-
-				setVideos(videosLista);
-				console.log('Videos cargados:', videosLista);
-
-				// Buscar video activo con múltiples comparaciones
-				const videoActivo = videosLista.find(video => {
-					const activo = String(video.activo).toLowerCase().trim();
-					return (
-						activo === 's' ||
-						activo === '1' ||
-						activo === 'true' ||
-						activo === 'si'
-					);
-				});
-
-				if (videoActivo) {
-					setUrlData({
-						videoUrl: videoActivo.video_url,
-						channelUrl: videoActivo.channel_url,
-					});
-					console.log('Video activo encontrado:', videoActivo);
-				} else {
-					console.log(
-						'No se encontró video activo, usando valores por defecto',
-					);
-				}
-			} catch (error) {
-				console.log(
-					'Error cargando URLs, usando configuración por defecto:',
-					error.message,
-				);
-				// No mostrar mensaje de error al usuario, usar valores por defecto silenciosamente
-			} finally {
-				setLoading(false);
-			}
-		};
-
+		
 		fetchUrls();
-	}, []); // Ejecutar independientemente del estado de autenticación
+
+		
+	}, []);
+
 
 	const openModal = () => {
 		// Verificar si está logueado Y es admin
@@ -321,7 +298,7 @@ const EnVivo = () => {
 			});
 
 			// Recargar los videos para mostrar los cambios
-			try {
+			/*try {
 				const resVideos = await api.get('/auth/obtenerenvivo', {
 					skipAuthRedirect: true,
 				});
@@ -334,10 +311,13 @@ const EnVivo = () => {
 						activo: video.activo,
 					}));
 					setVideos(videosActualizados);
+					urlData.videoUrl= videosActualizados[0].video_url;
+					urlData.channelUrl= videosActualizados[0].channel_url;
+					
 				}
 			} catch (fetchError) {
 				console.warn('Error al recargar videos:', fetchError);
-			}
+			}*/
 
 			const mensaje = res.data?.mensaje || 'URLs actualizadas correctamente';
 			showMessage(mensaje, 'success');
