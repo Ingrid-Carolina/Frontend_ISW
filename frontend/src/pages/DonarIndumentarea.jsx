@@ -1,5 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import PhoneInput from "react-phone-input-2";
+import "react-phone-input-2/lib/style.css";
+import parsePhoneNumberFromString from "libphonenumber-js";
+
 import {
   Dialog,
   DialogTitle,
@@ -7,52 +11,63 @@ import {
   DialogActions,
   TextField,
   Button,
-  Select,
-  MenuItem,
-  InputLabel,
-  FormControl,
+  IconButton,
+  Typography,
+  Box,
+  Snackbar,
+  Alert,
 } from "@mui/material";
+import { Visibility } from "@mui/icons-material";
 import fondo from "/Images/TestimonioFondo1.jpg";
-import guante from "/Images/guante.jpg";
-import bate from "/Images/bate.jpg";
-import pelota from "/Images/pelota.jpg";
-import casco from "/Images/casco.jpg";
-import uniforme from "/Images/uniforme.jpg";
-import guante2 from "/Images/receptor.jpeg";
-import mascara from "/Images/mask.jpg";
-import protector from "/Images/pechera.jpeg";
-import espinilleras from "/Images/espinilleras.jpg";
-
-const indumentaria = [
-  { id: 1, nombre: "Guante de béisbol", imagen: guante },
-  { id: 2, nombre: "Bate", imagen: bate },
-  { id: 3, nombre: "Pelota", imagen: pelota },
-  { id: 4, nombre: "Casco de bateo", imagen: casco },
-  { id: 5, nombre: "Uniforme (camiseta, pantalón, gorra,zapatos, guantes)", imagen: uniforme },
-  { id: 6, nombre: "Guante de receptor (catcher’s mitt)", imagen: guante2 },
-  { id: 7, nombre: "Máscara de receptor", imagen: mascara },
-  { id: 8, nombre: "Protector de pecho", imagen: protector },
-  { id: 9, nombre: "Espinilleras de receptor", imagen: espinilleras },
-];
+import { api } from "../api/api";
 
 const DonarIndumentarea = () => {
   const navigate = useNavigate();
-  const [seleccion, setSeleccion] = useState(
-    indumentaria.map((pieza) => ({ ...pieza, checked: false, cantidad: 0 }))
-  );
-
-  // Estado modal y formulario
+  const [seleccion, setSeleccion] = useState([]);
   const [open, setOpen] = useState(false);
+  const [errores, setErrores] = useState({});
+  const [displayPhone, setDisplayPhone] = useState("");
   const [formData, setFormData] = useState({
     nombre: "",
     telefono: "",
     correo: "",
     dia: "",
     horario: "",
+    pais: "",
     descripcion: "",
   });
 
-  // Manejo selección de indumentaria
+  // ✅ Estado para notificaciones
+  const [notificacion, setNotificacion] = useState({ open: false, mensaje: "", tipo: "info" });
+
+  // 🔹 Modal para ficha completa
+  const [modalFicha, setModalFicha] = useState({ open: false, producto: null });
+
+  const getImagen = (imagen) => {
+    if (!imagen) return "/Images/producto_defecto.png";
+    return imagen.startsWith("/Images/") ? imagen : "/Images/producto_defecto.png";
+  };
+
+  
+
+  useEffect(() => {
+    const fetchProductos = async () => {
+      try {
+        const res = await api.get("/auth/productos");
+        const productos = res.data.productos || [];
+        const productosActivos = productos
+          .filter((p) => p.estado === true)
+          .map((p) => ({ ...p, checked: false, cantidad: 0 }));
+        setSeleccion(productosActivos);
+      } catch (err) {
+        console.error("Error al cargar productos:", err);
+        // ❌ Antes: alert()
+        setNotificacion({ open: true, mensaje: "No se pudieron cargar los productos.", tipo: "error" });
+      }
+    };
+    fetchProductos();
+  }, []);
+
   const handleCheckbox = (id) => {
     setSeleccion((prev) =>
       prev.map((item) =>
@@ -71,99 +86,110 @@ const DonarIndumentarea = () => {
     );
   };
 
-  // Confirmar donación → abre formulario
   const confirmarDonacion = () => {
     const donaciones = seleccion.filter((item) => item.checked && item.cantidad > 0);
     if (donaciones.length === 0) {
-      alert("Por favor selecciona al menos una pieza de indumentaria para donar.");
+      // ❌ Antes: alert()
+      setNotificacion({ open: true, mensaje: "Selecciona al menos una pieza de indumentaria.", tipo: "warning" });
       return;
     }
     setOpen(true);
   };
 
-  // Manejo del formulario
+  // 🔹 Validaciones
+  const ValidarErrores = () => {
+    const errors = {};
+    if (!formData.nombre || formData.nombre.trim().length < 3) {
+      errors.nombre = "El nombre debe tener por lo menos 3 caracteres";
+    }
+    if (!formData.nombre.trim()) {
+      errors.nombre = "El nombre es obligatorio";
+    }
+    if (!/^[a-zA-ZáéíóúÁÉÍÓÚñÑüÜ\s]+$/.test(formData.nombre.trim())) {
+      errors.nombre = "El nombre solo debe contener letras y espacios válidos";
+    }
+    if (!formData.correo.trim()) {
+      errors.email = "El correo electrónico es obligatorio";
+    } else if (!/@(gmail\.com|outlook\.com|hotmail\.com|yahoo\.com)$/i.test(formData.correo)) {
+      errors.email = "Solo se permiten correos de Gmail, Outlook, Hotmail o Yahoo";
+    }
+    if (formData.descripcion.trim().length < 15) {
+      errors.descripcion = "Escribe al menos 15 caracteres";
+    }
+    setErrores(errors);
+    return Object.keys(errors).length === 0;
+  };
+
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData({ ...formData, [name]: value });
+    setFormData((prev) => ({ ...prev, [name]: value }));
+    setErrores((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!ValidarErrores()) return;
 
-    // Extraemos las piezas seleccionadas y sus cantidades
     const donaciones = seleccion
       .filter((item) => item.checked && item.cantidad > 0)
-      .map((item) => ({
-        nombre: item.nombre,
-        cantidad: item.cantidad,
-      }));
+      .map((item) => ({ nombre: item.nombre, cantidad: item.cantidad }));
 
-    try {
-      await fetch("http://localhost:3000/auth/enviar-donacion", { // <-- tu endpoint
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          datos: formData,
-          donaciones: donaciones, // 👈 ahora se envían también las piezas
-        }),
-      });
+    // Validar teléfono
+    const rawPhone = formData.telefono?.replace(/\s+/g, "");
+    const countryCode = formData.pais?.toUpperCase();
+    const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
+    formData.telefono = parsedPhone?.formatInternational?.() || formData.telefono;
 
-      alert("¡Gracias por tu donación! Te contactaremos pronto.");
-      setOpen(false);
-      navigate("/donaciones");
-    } catch (error) {
-      console.error("Error al enviar donación:", error);
-      alert("Hubo un error al enviar la donación. Intenta de nuevo.");
-    }
+    // ✅ Éxito al enviar
+    setNotificacion({ open: true, mensaje: "Donación enviada correctamente. ¡Gracias!", tipo: "success" });
+    setOpen(false);
   };
 
   return (
     <div
       style={{
         minHeight: "100vh",
-        width: "100%",           // 🔹 asegura que nunca exceda el ancho de la pantalla
-        maxWidth: "100vw",       // 🔹 nunca más ancho que el viewport
-        position: "relative",
-        margin: 0,
         paddingTop: "2rem",
         paddingBottom: "14rem",
-        overflowX: "hidden",     // 🔹 evita el scroll horizontal
-        color: "#fff",
-        fontFamily: "GroteskRegular",
-        backgroundImage: "linear-gradient(#10045c, #10045c, url('/Images/TestimonioFondo1.jpg')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        boxSizing: "border-box", // 🔹 evita que padding aumente el ancho real
+        position: "relative",
       }}
     >
+      {/* ✅ Notificación flotante */}
+      <Snackbar
+        open={notificacion.open}
+        autoHideDuration={4000}
+        onClose={() => setNotificacion({ ...notificacion, open: false })}
+        anchorOrigin={{ vertical: "top", horizontal: "right" }}
+      >
+        <Alert
+          severity={notificacion.tipo}
+          onClose={() => setNotificacion({ ...notificacion, open: false })}
+          sx={{ width: "100%" }}
+        >
+          {notificacion.mensaje}
+        </Alert>
+      </Snackbar>
+
       {/* Fondo */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           zIndex: 0,
+          backgroundColor: "#10045c",
         }}
-      >
-        <div
-          style={{
-            backgroundColor: "#10045c",
-            position: "absolute",
-            inset: 0,
-            zIndex: 0,
-          }}
-        ></div>
-        <div
-          style={{
-            backgroundImage: `url(${fondo})`,
-            backgroundSize: "cover",
-            backgroundPosition: "center",
-            opacity: 0.3,
-            position: "absolute",
-            inset: 0,
-            zIndex: 1,
-          }}
-        ></div>
-      </div>
+      />
+      <div
+        style={{
+          backgroundImage: `url(${fondo})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+          opacity: 0.3,
+          position: "absolute",
+          inset: 0,
+          zIndex: 1,
+        }}
+      />
 
       {/* Contenido */}
       <div
@@ -176,37 +202,20 @@ const DonarIndumentarea = () => {
       >
         <h1
           style={{
-            fontFamily: "GroteskBold",
-            fontSize: "clamp(2rem, 5vw, 4rem)", // min 2rem, máx 4rem, fluido en medio
+            textAlign: "center",
             marginBottom: "1rem",
-            color: "#fff", // tu color original
-            textAlign: "center", // centrado en pantallas pequeñas
+            fontFamily: "GroteskBold",
+            color: "#fff",
           }}
         >
           Donación de Indumentaria
         </h1>
 
-        <p
-          style={{
-            fontFamily: "GroteskRegular",
-            marginBottom: "2rem",
-            fontSize: "clamp(1rem, 3vw, 2rem)", // min 1rem, máx 2rem
-            color: "#fff",
-            textAlign: "center",
-          }}
-        >
-          Selecciona las piezas que deseas donar y la cantidad.
-        </p>
-
         <div
           style={{
             display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", // 🔹 más flexible
+            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
             gap: "1rem",
-            width: "100%",       // 🔹 se ajusta al contenedor
-            maxWidth: "100%",    // 🔹 no se pasa del viewport
-            margin: "0 auto",    // 🔹 siempre centrado
-            boxSizing: "border-box",
           }}
         >
           {seleccion.map((item) => (
@@ -219,19 +228,47 @@ const DonarIndumentarea = () => {
                 textAlign: "center",
                 backgroundColor: "rgba(255, 255, 255, 0.9)",
                 color: "#000",
+                position: "relative",
               }}
             >
               <img
-                src={item.imagen}
+                src={getImagen(item.imagen)}
                 alt={item.nombre}
+                onError={(e) =>
+                  (e.target.src = "/Images/producto_defecto.png")
+                }
                 style={{
-                  width: "100%",
-                  height: "150px",
+                  width: "70%",
+                  height: "50%",
                   objectFit: "cover",
                   borderRadius: "8px",
                 }}
               />
-              <h3 style={{ fontFamily: "GroteskBold", margin: "1rem 0" }}>{item.nombre}</h3>
+              <h3
+                style={{
+                  fontFamily: "GroteskBold",
+                  margin: "1rem 0",
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {item.nombre}
+              </h3>
+              <p
+                style={{
+                  fontFamily: "GroteskRegular",
+                  fontSize: "0.9rem",
+                  marginBottom: "1rem",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: "vertical",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                }}
+              >
+                {item.descripcion}
+              </p>
               <div style={{ marginBottom: "1rem" }}>
                 <input
                   type="checkbox"
@@ -249,6 +286,19 @@ const DonarIndumentarea = () => {
                 onChange={(e) => handleCantidad(item.id, e.target.value)}
                 style={{ width: "60px", textAlign: "center" }}
               />
+              <IconButton
+                onClick={() =>
+                  setModalFicha({ open: true, producto: item })
+                }
+                style={{
+                  position: "absolute",
+                  top: "10px",
+                  right: "10px",
+                  color: "#10045c",
+                }}
+              >
+                <Visibility />
+              </IconButton>
             </div>
           ))}
         </div>
@@ -272,17 +322,9 @@ const DonarIndumentarea = () => {
         </div>
       </div>
 
-      {/* Modal con formulario */}
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        fullWidth
-        maxWidth="sm"
-        sx={{ mt: "80px" }} // mueve el modal más abajo
-      >
-        <DialogTitle sx={{ fontFamily: "GroteskBold", fontSize: '1.7rem', color: '#10045c' }}>
-          Completar información de la donación
-        </DialogTitle>
+      {/* Modal formulario con validaciones */}
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+        <DialogTitle>Completar información de la donación</DialogTitle>
         <DialogContent>
           <form onSubmit={handleSubmit}>
             <TextField
@@ -293,33 +335,45 @@ const DonarIndumentarea = () => {
               onChange={handleChange}
               margin="normal"
               required
-              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
-              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+              error={!!errores.nombre}
+              helperText={errores.nombre}
             />
-            <TextField
-              fullWidth
-              label="Telefono"
+            <PhoneInput
+              country={"us"}
               name="telefono"
-              value={formData.telefono}
-              onChange={handleChange}
-              margin="normal"
-              required
-              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
-              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+              value={formData.telefono || ""}
+              onChange={(value, country) => {
+                const sanitized = value.replace(
+                  new RegExp(`^\\+?${country.dialCode}`),
+                  ""
+                );
+                const finalValue = `+${country.dialCode}${sanitized}`;
+                setFormData({
+                  ...formData,
+                  telefono: finalValue,
+                  pais: country.countryCode,
+                });
+                setErrores((prev) => ({ ...prev, telefono: "" }));
+              }}
+              onBlur={() => setDisplayPhone(formData.telefono)}
+              inputProps={{
+                name: "telefono",
+                required: true,
+                style: errores.telefono ? { borderColor: "red" } : {},
+              }}
             />
             <TextField
               fullWidth
-              label="Correo electronico"
+              label="Correo electrónico"
               type="email"
               name="correo"
               value={formData.correo}
               onChange={handleChange}
               margin="normal"
               required
-              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
-              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+              error={!!errores.email}
+              helperText={errores.email}
             />
-
             <TextField
               fullWidth
               label="Día disponible"
@@ -329,10 +383,9 @@ const DonarIndumentarea = () => {
               onChange={handleChange}
               margin="normal"
               required
-              InputLabelProps={{ shrink: true, style: { fontFamily: "PeterMedium" } }}
-              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ min: new Date().toISOString().split("T")[0] }}
             />
-
             <TextField
               fullWidth
               label="Hora disponible"
@@ -342,36 +395,92 @@ const DonarIndumentarea = () => {
               onChange={handleChange}
               margin="normal"
               required
-              InputLabelProps={{ shrink: true, style: { fontFamily: "PeterMedium" } }}
-              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+              InputLabelProps={{ shrink: true }}
+              inputProps={{ step: 60, min: "00:00", max: "23:59" }}
             />
-
             <TextField
               fullWidth
-              label="Descripcion de lo donado"
+              label="Descripción de lo donado"
               name="descripcion"
               value={formData.descripcion}
               onChange={handleChange}
               margin="normal"
               multiline
               rows={3}
-              InputLabelProps={{ style: { fontFamily: "PeterMedium" } }}
-              InputProps={{ style: { fontFamily: "PeterMedium" } }}
+              required
+              error={!!errores.descripcion}
+              helperText={errores.descripcion}
             />
-
             <DialogActions>
-              <Button onClick={() => setOpen(false)} sx={{ color: "#e06c14", fontFamily: "PeterMedium" }}>
-                Cancelar
-              </Button>
-              <Button type="submit" variant="contained" backgroundColor="#e06c14" sx={{ color: 'white', fontFamily: "PeterMedium" }}>
+              <Button onClick={() => setOpen(false)}>Cancelar</Button>
+              <Button type="submit" variant="contained">
                 Enviar Donación
               </Button>
             </DialogActions>
           </form>
         </DialogContent>
       </Dialog>
+
+      {/* Modal ficha completa */}
+      <Dialog
+        open={modalFicha.open}
+        onClose={() => setModalFicha({ open: false, producto: null })}
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle>
+          <Typography
+            variant="h4"
+            align="center"
+            sx={{ fontFamily: "GroteskBold", fontSize: "2rem" }}
+          >
+            {modalFicha.producto?.nombre}
+          </Typography>
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ textAlign: "center" }}>
+            <img
+              src={
+                modalFicha.producto?.imagen
+                  ? `${window.location.origin}${modalFicha.producto.imagen}`
+                  : "/Images/producto_defecto.png"
+              }
+              alt={modalFicha.producto?.nombre}
+              onError={(e) => {
+                e.target.onerror = null;
+                e.target.src = "/Images/producto_defecto.png";
+              }}
+              style={{
+                width: "50%",
+                height: "50%",
+                objectFit: "contain",
+                borderRadius: "8px",
+                marginBottom: "1rem",
+              }}
+            />
+            <Typography
+              align="center"
+              sx={{
+                fontSize: "1.2rem",
+                fontFamily: "GroteskRegular",
+                mt: 1,
+              }}
+            >
+              {modalFicha.producto?.descripcion}
+            </Typography>
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={() => setModalFicha({ open: false, producto: null })}
+          >
+            Cerrar
+          </Button>
+        </DialogActions>
+      </Dialog>
     </div>
   );
 };
+
 
 export default DonarIndumentarea;

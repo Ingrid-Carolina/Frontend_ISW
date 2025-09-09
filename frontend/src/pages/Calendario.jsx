@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import './stylesCalendario.css';
 //import axios from 'axios';
 import { api } from '../api/api';
-import {Box, Typography} from '@mui/material';
+import { Box, Typography } from '@mui/material';
 
 // Componentes de iconos SVG simples
 const ChevronLeft = () => (
@@ -166,7 +166,6 @@ const Calendario = () => {
 	const [bannerType, setBannerType] = useState('success'); // or 'error'
 	const [showBanner, setShowBanner] = useState(false);
 
-
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 	function createDateFromInput(dateStr, timeStr = '00:00') {
@@ -187,8 +186,29 @@ const Calendario = () => {
 	// }, [showMonthEvents, selectedDate]);
 
 	useEffect(() => {
-		const userRole = localStorage.getItem('userRole');
-		setIsLoggedIn(userRole === 'admin-calendario' || userRole === 'admin');
+		const fetchRole = async () => {
+			try {
+				const res = await api.get('/auth/obtenerperfil', {
+					withCredentials: true,
+					 skipAuthRedirect: true,
+				});
+				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
+
+				const role = String(perfil?.rol || '')
+					.toLowerCase()
+					.trim();
+				setIsLoggedIn(role === 'admin' || role === 'admin-calendario');
+			} catch (error) {
+				setIsLoggedIn(false);
+			}
+		};
+
+		fetchRole();
+
+		// refrescar después de login/logout
+		const onAuthRefresh = () => fetchRole();
+		window.addEventListener('auth:refresh', onAuthRefresh);
+		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
 	}, []);
 
 	const months = [
@@ -359,7 +379,7 @@ const Calendario = () => {
 
 	const actualizarEvento = async (id, eventoActualizado) => {
 		try {
-			const toISO = (d) => {
+			const toISO = d => {
 				if (!d) return null;
 				return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
 			};
@@ -374,20 +394,19 @@ const Calendario = () => {
 
 			const res = await api.put(`/auth/evento/${Number(id)}`, body);
 			console.log('Evento actualizado:', res.data?.mensaje);
-			  setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
+			setBannerMsg(res.data.mensaje);
+			setBannerType('success');
+			setShowBanner(true);
 
-        setTimeout(() => setShowBanner(false), 4000); 
-
+			setTimeout(() => setShowBanner(false), 4000);
 		} catch (error) {
 			console.error('Error al actualizar evento:', error);
-			const mensaje = error?.data?.mensaje|| error?.message|| 'Error en la Red';
-                setBannerMsg(mensaje)
-            setBannerType('error');
-            setShowBanner(true);
-        setTimeout(() => setShowBanner(false), 4000); 
-
+			const mensaje =
+				error?.data?.mensaje || error?.message || 'Error en la Red';
+			setBannerMsg(mensaje);
+			setBannerType('error');
+			setShowBanner(true);
+			setTimeout(() => setShowBanner(false), 4000);
 		}
 	};
 
@@ -505,19 +524,20 @@ const Calendario = () => {
 			// IMPORTANTE: asumimos que el backend devuelve { mensaje, id }
 			const nuevoId = res?.data?.id;
 			console.log('response data:', res.data);
-			  setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
+			setBannerMsg(res.data.mensaje);
+			setBannerType('success');
+			setShowBanner(true);
 
-        setTimeout(() => setShowBanner(false), 4000); 
+			setTimeout(() => setShowBanner(false), 4000);
 
 			return { id: nuevoId, ...res.data };
 		} catch (error) {
-			const mensaje =   error?.data?.mensaje|| error?.message|| 'Error en la Red';
-                setBannerMsg(mensaje)
-            setBannerType('error');
-            setShowBanner(true);
-        setTimeout(() => setShowBanner(false), 4000); 
+			const mensaje =
+				error?.data?.mensaje || error?.message || 'Error en la Red';
+			setBannerMsg(mensaje);
+			setBannerType('error');
+			setShowBanner(true);
+			setTimeout(() => setShowBanner(false), 4000);
 
 			throw error;
 		}
@@ -845,7 +865,6 @@ const Calendario = () => {
 									</div>
 
 									<div>
-
 										{/*Placeholder para subir imagen */}
 										<label className='form-label'>URL de imagen</label>
 										<textarea
@@ -867,23 +886,23 @@ const Calendario = () => {
 						)}
 
 						{showBanner && (
-    <Box
-        sx={{
-            position: 'relative',
-            width: '100%',
-            mb: 2,
-            animation: 'slideDown 0.3s ease-in-out',
-            backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
-            color: '#fff',
-            borderRadius: 1,
-            p: 1,
-            boxShadow: 2,
-        }}
-    >
-        <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
-    </Box>
-)}
-
+							<Box
+								sx={{
+									position: 'relative',
+									width: '100%',
+									mb: 2,
+									animation: 'slideDown 0.3s ease-in-out',
+									backgroundColor:
+										bannerType === 'error' ? '#f44336' : '#4caf50',
+									color: '#fff',
+									borderRadius: 1,
+									p: 1,
+									boxShadow: 2,
+								}}
+							>
+								<Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
+							</Box>
+						)}
 
 						{isLoggedIn && (
 							<>
@@ -893,7 +912,7 @@ const Calendario = () => {
 										className='cancel-button'
 										onClick={() => {
 											setEditingIndex(null);
-										setTimeout(() => closeModal(), 1500); 
+											setTimeout(() => closeModal(), 1500);
 										}}
 									>
 										Cancelar
@@ -928,9 +947,10 @@ const Calendario = () => {
 													eventForm.date,
 													timeToUse,
 												);
-												const endEventDate = endDateToUse && endTimeToUse
-													? createDateFromInput(endDateToUse, endTimeToUse)
-													: createDateFromInput(eventForm.date, timeToUse);
+												const endEventDate =
+													endDateToUse && endTimeToUse
+														? createDateFromInput(endDateToUse, endTimeToUse)
+														: createDateFromInput(eventForm.date, timeToUse);
 
 												// Crear evento actualizado
 												const updatedEvent = {
@@ -947,7 +967,9 @@ const Calendario = () => {
 												console.log('updatedEvent ->', updatedEvent);
 
 												if (updatedEvent.id > 2147483647) {
-													window.alert('Este evento aún no está sincronizado con el servidor. Vuelve a abrir la página.');
+													window.alert(
+														'Este evento aún no está sincronizado con el servidor. Vuelve a abrir la página.',
+													);
 													return;
 												}
 
@@ -1000,13 +1022,16 @@ const Calendario = () => {
 													eventForm.date,
 													timeToUse,
 												);
-												const endEventDate = endDateToUse && endTimeToUse
-													? createDateFromInput(endDateToUse, endTimeToUse)
-													: createDateFromInput(eventForm.date, timeToUse);
+												const endEventDate =
+													endDateToUse && endTimeToUse
+														? createDateFromInput(endDateToUse, endTimeToUse)
+														: createDateFromInput(eventForm.date, timeToUse);
 
 												const data = await realizarPeticion(
 													eventDate.toISOString(),
-													(endDateToUse && endTimeToUse) ? endEventDate.toISOString() : null
+													endDateToUse && endTimeToUse
+														? endEventDate.toISOString()
+														: null,
 												);
 												//console.log(data);
 
@@ -1285,14 +1310,14 @@ const Calendario = () => {
 									if (eventToDelete) {
 										const { eventId } = eventToDelete;
 										try {
-											const res= await api.delete(`/auth/evento/${Number(eventId)}`);
-											  setBannerMsg(res.data.mensaje)
-          									  setBannerType('success');
-          									  setShowBanner(true);
+											const res = await api.delete(
+												`/auth/evento/${Number(eventId)}`,
+											);
+											setBannerMsg(res.data.mensaje);
+											setBannerType('success');
+											setShowBanner(true);
 
-        
-       										 setTimeout(() => setShowBanner(false), 4000); 
-
+											setTimeout(() => setShowBanner(false), 4000);
 
 											// Eliminar del estado local
 											setEvents(prev => {
@@ -1305,12 +1330,14 @@ const Calendario = () => {
 												return updated;
 											});
 										} catch (error) {
-											const mensaje =   error?.data?.mensaje|| error?.message|| 'Error en la Red';
-               								 setBannerMsg(mensaje)
-            								setBannerType('error');
-           									 setShowBanner(true);
-        									setTimeout(() => setShowBanner(false), 4000); 
-
+											const mensaje =
+												error?.data?.mensaje ||
+												error?.message ||
+												'Error en la Red';
+											setBannerMsg(mensaje);
+											setBannerType('error');
+											setShowBanner(true);
+											setTimeout(() => setShowBanner(false), 4000);
 										}
 									}
 									setShowConfirmModal(false);

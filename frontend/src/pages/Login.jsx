@@ -12,21 +12,13 @@ import {
 	Link,
 } from '@mui/material';
 import logo from '/Images/Logo-pilotos.png';
-import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from './firebaseConfig';
-//import axios from 'axios';
-//axios.defaults.withCredentials = true;
+
 import ResetPasswordModal from './ResetPasswordModal';
 import { api } from '../api/api';
 
 const Login = ({ onRegistroClick }) => {
-	const [formData, setFormData] = useState({
-		email: '',
-		password: '',
-	});
-
+	const [formData, setFormData] = useState({ email: '', password: '' });
 	const [openResetModal, setOpenResetModal] = useState(false);
-
 	const [showPassword, setShowPassword] = useState(false);
 	const [errors, setErrors] = useState({});
 	const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,10 +30,10 @@ const Login = ({ onRegistroClick }) => {
 	const [failedAttempts, setFailedAttempts] = useState(0);
 	const [failedBlock, setFailedBlock] = useState(0);
 	const [countdown, setCountdown] = useState(null);
-	const [bannerMsg, setBannerMsg] = useState('');
-const [bannerType, setBannerType] = useState('success'); // or 'error'
-const [showBanner, setShowBanner] = useState(false);
 
+	const [bannerMsg, setBannerMsg] = useState('');
+	const [bannerType, setBannerType] = useState('success');
+	const [showBanner, setShowBanner] = useState(false);
 
 	const MAX_ATTEMPTS = 3;
 
@@ -54,121 +46,75 @@ const [showBanner, setShowBanner] = useState(false);
 	};
 
 	const countFailBlocks = () => {
-		const durations = {
-			1: 30000, // 30 seconds
-			2: 60000, // 1 minute
-			3: 180000, // 3 minutes
-			4: 300000, // 5 minutes
-		};
-
-		let fb = failedBlock + 1;
+		const durations = { 1: 30000, 2: 60000, 3: 180000, 4: 300000 };
+		const fb = failedBlock + 1;
 		setFailedAttempts(0);
 		setFailedBlock(fb);
-
-		const timeToWait = durations[fb] || 300000; // Default to 5 minutes
-		setCountdown(timeToWait / 1000); // Convert to seconds
+		const timeToWait = durations[fb] || 300000;
+		setCountdown(timeToWait / 1000);
 		setIsDisabled(true);
-
 		resetDisable(timeToWait);
 	};
 
-	const handleFailedAttempt = error => {
+	const handleFailedAttempt = () => {
 		const nuevoIntento = failedAttempts + 1;
 		setFailedAttempts(nuevoIntento);
-
-		const restante = MAX_ATTEMPTS - nuevoIntento;
-
 		if (nuevoIntento === MAX_ATTEMPTS) {
-			// User has reached max attempts, trigger lockout
 			countFailBlocks();
 			setSubmitError(
 				'Has excedido el número máximo de intentos. Tienes que esperar un momento.',
 			);
-		} 
+		}
 	};
 
 	const validateForm = () => {
 		const newErrors = {};
-
-		if (!formData.email.trim()) {
+		if (!formData.email.trim())
 			newErrors.email = 'El correo electrónico es obligatorio';
-		} else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+		else if (!/\S+@\S+\.\S+/.test(formData.email))
 			newErrors.email = 'Correo electrónico inválido';
-		}
-
-		if (!formData.password) {
-			newErrors.password = 'La contraseña es obligatoria';
-		}
-
+		if (!formData.password) newErrors.password = 'La contraseña es obligatoria';
 		setErrors(newErrors);
 		return Object.keys(newErrors).length === 0;
 	};
 
 	const handleInputChange = e => {
 		const { name, value } = e.target;
-
-		setFormData(prev => ({
-			...prev,
-			[name]: value,
-		}));
-
-		if (errors[name]) {
-			setErrors(prev => ({
-				...prev,
-				[name]: '',
-			}));
-		}
-
+		setFormData(prev => ({ ...prev, [name]: value }));
+		if (errors[name]) setErrors(prev => ({ ...prev, [name]: '' }));
 		setSubmitError('');
 		setRecoveryMessage('');
 	};
 
 	const handleLogin = async () => {
 		if (!validateForm()) return;
-
 		setIsSubmitting(true);
-
 		try {
-			const data = await realizarPeticion();
+			// 1) Login: backend setea cookie HttpOnly
+			await realizarPeticion();
 
-			// Ahora NO esperamos data.token (el token va en cookie HttpOnly desde el backend)
-			if (data?.usuario) {
-				// Puedes guardar datos NO sensibles para la UI (opcional)
-				if (data.usuario.rol) {
-					localStorage.setItem('userRole', data.usuario.rol);
-				}
-				if (data.usuario.nombre) {
-					localStorage.setItem('userName', data.usuario.nombre);
-				}
+			try {
+				await api.get('/auth/obtenerperfil', { withCredentials: true });
+			} catch {console.error();
+			}
 
-				// Forzar re-render de navbar si tu app lo usa
-				window.dispatchEvent(new Event('storage'));
+			// 3) Avisar a la Navbar que refresque el perfil
+			window.dispatchEvent(new Event('auth:refresh'));
 
-				// Navegar a home
-				setTimeout(() => {
- 					 navigate('/');
-						}, 1500);
+			// 4) Navegar/refresh ligero
+			setTimeout(() => navigate('/'), 300);
+			setTimeout(() => {
+				if (window.location.pathname === '/') window.location.reload();
+			}, 700);
 
-
-				setTimeout(() => {
-					if (window.location.pathname === '/') {
-						window.location.reload(); // solo recarga si ya estás en home
-					}
-				}, 100);
-
-				setSubmitError('');
-				setFailedAttempts(0);
-				setFailedBlock(0);
-			} 
+			setSubmitError('');
+			setFailedAttempts(0);
+			setFailedBlock(0);
 		} catch (error) {
-			handleFailedAttempt(error);
+			handleFailedAttempt();
 		} finally {
 			setIsSubmitting(false);
-
-			setFormData({
-				email: '',
-				password: '',
-			});
+			setFormData({ email: '', password: '' });
 		}
 	};
 
@@ -178,47 +124,36 @@ const [showBanner, setShowBanner] = useState(false);
 				email: formData.email,
 				password: formData.password,
 			});
-			  setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
-
-        
-        setTimeout(() => setShowBanner(false), 3000); 
-
+			setBannerMsg(res.data?.mensaje || 'Inicio de sesión correcto');
+			setBannerType('success');
+			setShowBanner(true);
+			setTimeout(() => setShowBanner(false), 3000);
 			return res.data;
 		} catch (error) {
-			const mensaje = error.response?.data?.mensaje || 'Correo o Contraseña Incorrecta';
-                setBannerMsg(mensaje)
-            setBannerType('error');
-            setShowBanner(true);
-			 setTimeout(() => setShowBanner(false), 3000); 
-
+			const mensaje =
+				error.response?.data?.mensaje || 'Correo o Contraseña Incorrecta';
+			setBannerMsg(mensaje);
+			setBannerType('error');
+			setShowBanner(true);
+			setTimeout(() => setShowBanner(false), 3000);
 			throw error;
 		}
 	};
 
-	const handleForgotPassword = () => {
-		setOpenResetModal(true);
-	};
+	const handleForgotPassword = () => setOpenResetModal(true);
 
-	// Format countdown time
 	const formatCountdown = seconds => {
 		const minutes = Math.floor(seconds / 60);
 		const remainingSeconds = seconds % 60;
-
-		if (minutes > 0) {
+		if (minutes > 0)
 			return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
-		}
 		return `${remainingSeconds}`;
 	};
 
-	// Countdown effect
 	useEffect(() => {
 		let interval;
 		if (countdown > 0) {
-			interval = setInterval(() => {
-				setCountdown(prev => prev - 1);
-			}, 1000);
+			interval = setInterval(() => setCountdown(prev => prev - 1), 1000);
 		} else if (countdown === 0) {
 			setCountdown(null);
 			setIsDisabled(false);
@@ -259,25 +194,24 @@ const [showBanner, setShowBanner] = useState(false);
 				>
 					INICIAR SESIÓN
 				</Typography>
+
 				{showBanner && (
-    <Box
-        sx={{
-            position: 'relative',
-            width: '100%',
-            mb: 2,
-            animation: 'slideDown 0.3s ease-in-out',
-            backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
-            color: '#fff',
-            borderRadius: 1,
-            p: 1,
-            boxShadow: 2,
-        }}
-    >
-        <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
-    </Box>
-)}
-
-
+					<Box
+						sx={{
+							position: 'relative',
+							width: '100%',
+							mb: 2,
+							animation: 'slideDown 0.3s ease-in-out',
+							backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
+							color: '#fff',
+							borderRadius: 1,
+							p: 1,
+							boxShadow: 2,
+						}}
+					>
+						<Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
+					</Box>
+				)}
 
 				{submitError && (
 					<Alert
@@ -366,12 +300,8 @@ const [showBanner, setShowBanner] = useState(false);
 					sx={{
 						mt: 2,
 						backgroundColor: '#fa7600',
-						'&:hover': {
-							backgroundColor: '#e56700',
-						},
-						'&:disabled': {
-							backgroundColor: '#ccc',
-						},
+						'&:hover': { backgroundColor: '#e56700' },
+						'&:disabled': { backgroundColor: '#ccc' },
 					}}
 				>
 					{isSubmitting

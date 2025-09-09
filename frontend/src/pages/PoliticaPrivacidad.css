@@ -1,0 +1,75 @@
+.privacidad-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 2rem;
+  padding-top: 100px;
+  background-color: #ffffff;
+  color: #000000;
+  font-family: "PeterMedium", sans-serif;
+  line-height: 1.6;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.privacidad-title {
+  font-family: "Varsity", sans-serif;
+  font-size: 2.5rem;
+  color: #10045c;
+  text-align: center;
+  margin-bottom: 2rem;
+  border-bottom: 3px solid #e06c14;
+  display: inline-block;
+  padding-bottom: 0.5rem;
+}
+
+
+section h2 {
+  font-family: "GroteskBold", sans-serif;
+  font-size: 1.3rem;
+  color: #e06c14;
+  margin-bottom: 0.5rem;
+}
+
+section p {
+  font-size: 1rem;
+  color: #000000;
+  margin-left: 0.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .privacidad-container {
+    padding: 1.5rem;
+  }
+
+  .privacidad-title {
+    font-size: 2rem;
+  }
+
+  section h2 {
+    font-size: 1.2rem;
+  }
+
+  section p {
+    font-size: 0.95rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .privacidad-container {
+    padding: 1rem;
+    border-radius: 8px;
+  }
+
+  .privacidad-title {
+    font-size: 1.6rem;
+  }
+
+  section h2 {
+    font-size: 1.1rem;
+  }
+
+  section p {
+    font-size: 0.9rem;
+  }
+}

@@ -14,24 +14,25 @@ import NoticiasAdmin from './pages/admin/NoticiasAdmin.jsx';
 import StatsJugadores from './pages/admin/StatsJugadores.jsx';
 import ManageTestimonios from './pages/admin/ManageTestimonios.jsx';
 import ManageOrders from './pages/admin/ManageOrders.jsx';
-
+import ProdDonaciones from './pages/admin/ProdDonaciones.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
-    
+
     <BrowserRouter>
       <Routes>
         {/* Todas tus rutas actuales viven dentro de App */}
         <Route path="/*" element={<App />} />
 
         {/* Rutas específicas del panel admin */}
-        <Route path="/admin" element={<AdminLayout/>}>
-          <Route index element={<Dashboard/>} />
-          <Route path="dashboard" element={<Dashboard/>} />
-          <Route path="newsadm" element={<NoticiasAdmin/>} />
-          <Route path="players" element={<StatsJugadores/>} />
-          <Route path="mngtestimonios" element={<ManageTestimonios/>} />
-          <Route path="mngordenes" element={<ManageOrders/>} />
+        <Route path="/admin" element={<AdminLayout />}>
+          <Route index element={<Dashboard />} />
+          <Route path="dashboard" element={<Dashboard />} />
+          <Route path="newsadm" element={<NoticiasAdmin />} />
+          <Route path="players" element={<StatsJugadores />} />
+          <Route path="mngtestimonios" element={<ManageTestimonios />} />
+          <Route path="mngordenes" element={<ManageOrders />} />
+          <Route path="mngproddonaciones" element={<ProdDonaciones />} />
         </Route>
       </Routes>
     </BrowserRouter>
