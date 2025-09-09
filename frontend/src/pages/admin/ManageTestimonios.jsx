@@ -202,23 +202,6 @@ const ManageTestimonios = () => {
 
 
   return (
-<<<<<<< Updated upstream
-    <Box sx={{  p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
-      <Box sx={{ pt: 8}}>
-             <Typography
-               variant="h3"
-               sx={{
-                 fontFamily: 'GroteskBold',
-                 color: '#10045c',
-                 mb: 4,
-                 textAlign: 'center',
-                 fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' }
-               }}
-             >
-                  Gestión de Testimonios
-             </Typography>
-             </Box>
-=======
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
       <Typography
         variant="h3"
@@ -232,7 +215,6 @@ const ManageTestimonios = () => {
       >
         Gestión de Testimonios
       </Typography>
->>>>>>> Stashed changes
 
       {/* Formulario */}
       <Stack spacing={2} sx={{ mb: 4 }}>

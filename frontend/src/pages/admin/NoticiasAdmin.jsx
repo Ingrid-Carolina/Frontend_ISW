@@ -13,8 +13,8 @@ function NoticiasAdmin() {
 
   //imagen logica
   const [error, setError] = useState("");
-  const [image, setImage] = useState("");
-  const [imagenUrl, setImagenUrl] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagenUrl, setImagenUrl] = useState(null);
 
 
   const [vistaPrevia, setVistaPrevia] = useState(null);
@@ -61,8 +61,8 @@ function NoticiasAdmin() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // validación
-    if (!titulo || !fecha || !cuerpo || (!editando && !image && !imagenUrl)) {
+    const needsImage = !editando && !image && !imagenUrl;
+    if (!titulo || !fecha || !cuerpo || needsImage) {
       setBannerMsg("Todos los campos son obligatorios");
       setBannerType("error");
       setShowBanner(true);
@@ -71,39 +71,35 @@ function NoticiasAdmin() {
     }
 
     try {
-
       let finalUrl = imagenUrl || null;
 
       if (image) {
         const form = new FormData();
         form.append("file", image);
-
         const uploadRes = await api.post("/auth/upload", form, {
-          headers: { "Content-Type": "multipart/form-data" }
+          headers: { "Content-Type": "multipart/form-data" },
         });
-
-        finalUrl = uploadRes.data.url; // 👈 usar variable local
-        setImagenUrl(finalUrl); // para que quede en el estado también
+        finalUrl = uploadRes.data.url;
+        setImagenUrl(finalUrl);
       }
 
-      // 2) Crear o actualizar
-      if (editando) {
-        const res = await api.put(
-          `/auth/modificarnoticia/${editando}/${AUTOR_ID}`,
-          {
-            titulo,
-            contenido: cuerpo,
-            imagen_url: finalUrl, // 👈 usar la variable, NO el estado
-            fecha,
-          }
-        );
+      // ⚠️ Usa nombres que tu backend realmente espera:
+      const payload = {
+        titulo,
+        contenido: cuerpo,
+        imagen_url: finalUrl,
+        fecha, 
+      };
 
-        setBannerMsg(res.data.mensaje);
+      if (editando) {
+        const res = await api.put(`/auth/modificarnoticia/${editando}/${AUTOR_ID}`, payload);
+
+        setBannerMsg(res.data.mensaje || "Noticia actualizada");
         setBannerType("success");
         setShowBanner(true);
         setTimeout(() => setShowBanner(false), 4000);
 
-        // reflejar cambios en el estado
+        // Reflejar cambios en el estado local (sin duplicar)
         setNoticias((prev) =>
           prev.map((n) =>
             n.id === editando
@@ -112,41 +108,34 @@ function NoticiasAdmin() {
           )
         );
 
-        // limpiar
+        // Limpiar
         setEditando(null);
         setTitulo("");
         setFecha("");
         setCuerpo("");
-        setImagenUrl("");
+        setImagenUrl(null);
         setVistaPrevia(null);
         setImage(null);
       } else {
-        const res = await api.post(`/auth/agregarnoticia/${AUTOR_ID}`, {
-          titulo,
-          contenido: cuerpo,
-          imagen_url: finalUrl, // 👈 usar la variable
-          fecha,
-        });
+        const res = await api.post(`/auth/agregarnoticia/${AUTOR_ID}`, payload);
 
-        setBannerMsg(res.data.mensaje);
+        setBannerMsg(res.data.mensaje || "Noticia creada");
         setBannerType("success");
         setShowBanner(true);
         setTimeout(() => setShowBanner(false), 4000);
 
-        // opcional: si tu API devuelve la noticia creada, úsala
-        setNoticias((prev) => [...prev, {
-          id: res.data.id,
-          titulo,
-          fecha,
-          cuerpo,
-          imagenUrl: finalUrl
-        }]);
+        // Agregar al listado local, usando id devuelto o un fallback
+        const newId = res?.data?.id || crypto.randomUUID();
+        setNoticias((prev) => [
+          ...prev,
+          { id: newId, titulo, fecha, cuerpo, imagenUrl: finalUrl },
+        ]);
 
-        // limpiar
+        // Limpiar
         setTitulo("");
         setFecha("");
         setCuerpo("");
-        setImagenUrl("");
+        setImagenUrl(null);
         setVistaPrevia(null);
         setImage(null);
       }
@@ -160,6 +149,7 @@ function NoticiasAdmin() {
   };
 
 
+
   const handleImagenUrlChange = (e) => {
     const url = e.target.value;
     setImagenUrl(url);
@@ -170,9 +160,11 @@ function NoticiasAdmin() {
     setTitulo(noticia.titulo);
     setFecha(noticia.fecha);
     setCuerpo(noticia.cuerpo);
-    setImagenUrl(noticia.imagenUrl);
-    setVistaPrevia(noticia.imagenUrl);
+    setImagenUrl(noticia.imagenUrl || null);
+    setVistaPrevia(noticia.imagenUrl || null);
+    setImage(null);
     setEditando(noticia.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const eliminacionNoticia = async (id) => {
@@ -207,7 +199,7 @@ function NoticiasAdmin() {
   };
 
   const handleChange = (e) => {
-    const f = e.target.files[0];
+    const f = e.target.files?.[0];
     if (!f) return;
 
     const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
@@ -215,11 +207,11 @@ function NoticiasAdmin() {
       setError("Tipo de archivo inválido. Solo se permiten imágenes (JPG, PNG, WEBP, AVIF)");
       setImage(null);
       setVistaPrevia(null);
-    } else {
-      setError("");
-      setImage(f);
-      setVistaPrevia(URL.createObjectURL(f)); 
-    }
+      return;
+    } 
+    setError("");
+    setImage(f);
+    setVistaPrevia(URL.createObjectURL(f));
   };
 
   return (

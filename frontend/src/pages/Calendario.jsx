@@ -168,6 +168,10 @@ const Calendario = () => {
 
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+	const [eventImage, setEventImage] = useState(null);
+	const [errorImg, setErrorImg] = useState("");
+	const [previewImg, setPreviewImg] = useState(null);
+
 	function createDateFromInput(dateStr, timeStr = '00:00') {
 		const [year, month, day] = dateStr.split('-').map(Number);
 		const [hours, minutes] = timeStr.split(':').map(Number);
@@ -190,7 +194,7 @@ const Calendario = () => {
 			try {
 				const res = await api.get('/auth/obtenerperfil', {
 					withCredentials: true,
-					 skipAuthRedirect: true,
+					skipAuthRedirect: true,
 				});
 				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
 
@@ -347,6 +351,9 @@ const Calendario = () => {
 			date: '',
 			img_url: '',
 		});
+		setEventImage(null);
+		setPreviewImg(null);
+		setErrorImg("");
 	};
 
 	const editEvent = index => {
@@ -379,32 +386,38 @@ const Calendario = () => {
 
 	const actualizarEvento = async (id, eventoActualizado) => {
 		try {
-			const toISO = d => {
-				if (!d) return null;
-				return d instanceof Date ? d.toISOString() : new Date(d).toISOString();
-			};
+			let body;
 
-			const body = {
-				nombre: eventoActualizado.title ?? '',
-				fecha_inicio: toISO(eventoActualizado.date),
-				fecha_final: toISO(eventoActualizado.endDate),
-				descripcion: eventoActualizado.description ?? '',
-				img_url: eventoActualizado?.img_url ?? null, // <- null-safe
-			};
+			if (eventImage) {
+				body = new FormData();
+				body.append("nombre", eventoActualizado.title);
+				body.append("fecha_inicio", eventoActualizado.date.toISOString());
+				body.append("fecha_final", eventoActualizado.endDate ? eventoActualizado.endDate.toISOString() : null);
+				body.append("descripcion", eventoActualizado.description);
+				if (eventoActualizado.img_url) body.append("img_url", eventoActualizado.img_url);
+				body.append("file", eventImage);
+			} else {
+				body = {
+					nombre: eventoActualizado.title,
+					fecha_inicio: eventoActualizado.date.toISOString(),
+					fecha_final: eventoActualizado.endDate ? eventoActualizado.endDate.toISOString() : null,
+					descripcion: eventoActualizado.description,
+					img_url: eventoActualizado.img_url || null,
+				};
+			}
 
-			const res = await api.put(`/auth/evento/${Number(id)}`, body);
-			console.log('Evento actualizado:', res.data?.mensaje);
+			const res = await api.put(`/auth/evento/${Number(id)}`, body, {
+				headers: eventImage ? { "Content-Type": "multipart/form-data" } : undefined,
+			});
+
 			setBannerMsg(res.data.mensaje);
-			setBannerType('success');
+			setBannerType("success");
 			setShowBanner(true);
-
 			setTimeout(() => setShowBanner(false), 4000);
 		} catch (error) {
-			console.error('Error al actualizar evento:', error);
-			const mensaje =
-				error?.data?.mensaje || error?.message || 'Error en la Red';
+			const mensaje = error?.data?.mensaje || error?.message || "Error en la Red";
 			setBannerMsg(mensaje);
-			setBannerType('error');
+			setBannerType("error");
 			setShowBanner(true);
 			setTimeout(() => setShowBanner(false), 4000);
 		}
@@ -511,34 +524,44 @@ const Calendario = () => {
 	};
 
 	const realizarPeticion = async (date, endDate) => {
-		const body = {
-			nombre: eventForm.title,
-			fecha_inicio: date,
-			fecha_final: endDate || null,
-			descripcion: eventForm.description,
-			img_url: eventForm.img_url || null,
-		};
-
 		try {
-			const res = await api.post('/auth/registrarevento', body);
-			// IMPORTANTE: asumimos que el backend devuelve { mensaje, id }
-			const nuevoId = res?.data?.id;
-			console.log('response data:', res.data);
-			setBannerMsg(res.data.mensaje);
-			setBannerType('success');
-			setShowBanner(true);
+			let body;
 
+			if (eventImage) {
+				body = new FormData();
+				body.append("nombre", eventForm.title);
+				body.append("fecha_inicio", date);
+				if (endDate) body.append("fecha_final", endDate);
+				body.append("descripcion", eventForm.description);
+				if (eventForm.img_url) body.append("img_url", eventForm.img_url); // URL opcional
+				body.append("file", eventImage); // 👈 archivo real
+			} else {
+				body = {
+					nombre: eventForm.title,
+					fecha_inicio: date,
+					fecha_final: endDate || null,
+					descripcion: eventForm.description,
+					img_url: eventForm.img_url || null,
+				};
+			}
+
+			const res = await api.post('/auth/registrarevento', body, {
+				headers: eventImage ? { "Content-Type": "multipart/form-data" } : undefined,
+			});
+
+			const nuevoId = res?.data?.id;
+			setBannerMsg(res.data.mensaje);
+			setBannerType("success");
+			setShowBanner(true);
 			setTimeout(() => setShowBanner(false), 4000);
 
 			return { id: nuevoId, ...res.data };
 		} catch (error) {
-			const mensaje =
-				error?.data?.mensaje || error?.message || 'Error en la Red';
+			const mensaje = error?.data?.mensaje || error?.message || "Error en la Red";
 			setBannerMsg(mensaje);
-			setBannerType('error');
+			setBannerType("error");
 			setShowBanner(true);
 			setTimeout(() => setShowBanner(false), 4000);
-
 			throw error;
 		}
 	};
@@ -619,6 +642,23 @@ const Calendario = () => {
 		}
 
 		openModal(targetDate);
+	};
+
+	const handleImageChange = (e) => {
+		const file = e.target.files?.[0];
+		if (!file) return;
+
+		const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+		if (!allowed.includes(file.type)) {
+			setErrorImg("Tipo inválido. Usa JPG, PNG, WEBP o AVIF");
+			setEventImage(null);
+			setPreviewImg(null);
+			return;
+		}
+
+		setErrorImg("");
+		setEventImage(file);
+		setPreviewImg(URL.createObjectURL(file));
 	};
 
 	const days =
@@ -865,21 +905,21 @@ const Calendario = () => {
 									</div>
 
 									<div>
-										{/*Placeholder para subir imagen */}
-										<label className='form-label'>URL de imagen</label>
-										<textarea
-											value={eventForm.img_url}
-											onChange={e =>
-												isLoggedIn &&
-												setEventForm({
-													...eventForm,
-													img_url: e.target.value,
-												})
-											}
-											className='form-textarea'
-											placeholder='URL de la imagen'
+										<label className='form-label'>Imagen del evento</label>
+										<input
+											type='file'
+											accept='image/jpeg,image/png,image/webp,image/avif'
+											onChange={handleImageChange}
 											disabled={!isLoggedIn}
 										/>
+										{errorImg && <p style={{ color: "red", fontSize: "12px" }}>{errorImg}</p>}
+										{previewImg && (
+											<img
+												src={previewImg}
+												alt='Vista previa'
+												style={{ maxWidth: "120px", marginTop: "6px", borderRadius: "6px" }}
+											/>
+										)}
 									</div>
 								</div>
 							</>
