@@ -20,6 +20,7 @@ import {
 import { Visibility } from "@mui/icons-material";
 import fondo from "/Images/TestimonioFondo1.jpg";
 import { api } from "../api/api";
+import { red } from "@mui/material/colors";
 
 const DonarIndumentarea = () => {
   const navigate = useNavigate();
@@ -151,6 +152,40 @@ const DonarIndumentarea = () => {
     const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
     formData.telefono = parsedPhone?.formatInternational?.() || formData.telefono;
 
+    const body={
+      nombre: formData.nombre,
+      telefono: formData.telefono,
+      correo: formData.correo,
+      dia: formData.dia,
+      horario: formData.horario,
+      descripcion: formData.descripcion,
+    }
+
+
+    try {
+
+       const res= await api.post('/auth/registrardonacion', body, {
+        headers: { "Content-Type": "application/json" }
+      })
+
+      const donaciondata= res.data;
+
+      console.log(donaciondata);
+
+      
+    } catch (error) {
+
+         const msg =
+        error?.data?.mensaje || error?.message || 'Error en la Red';
+        console.log(msg);
+
+    setNotificacion({ open: true, mensaje: msg, tipo: "error" });
+    setOpen(false);
+      
+      
+    }
+    
+
     setFormData({
   nombre: '',
   correo: '',
@@ -162,9 +197,6 @@ const DonarIndumentarea = () => {
 });
 
 console.log(formData)
-console.log("Nombre del producto:"+ donaciones.nombre )
-console("Cantidad"+ donaciones.cantidad)
-
 
     // ✅ Éxito al enviar
     setNotificacion({ open: true, mensaje: "Donación enviada correctamente. ¡Gracias!", tipo: "success" });
