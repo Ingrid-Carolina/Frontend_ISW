@@ -21,8 +21,8 @@ const ManageTestimonios = () => {
   const [modoEdicion, setModoEdicion] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
   const [bannerMsg, setBannerMsg] = useState('');
-const [bannerType, setBannerType] = useState('success'); // or 'error'
-const [showBanner, setShowBanner] = useState(false);
+  const [bannerType, setBannerType] = useState('success'); // or 'error'
+  const [showBanner, setShowBanner] = useState(false);
 
 
   const realizarPeticion = async () => {
@@ -39,25 +39,25 @@ const [showBanner, setShowBanner] = useState(false);
         headers: { "Content-Type": "application/json" }
       });
       setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
+      setBannerType('success');
+      setShowBanner(true);
 
-        
-        setTimeout(() => setShowBanner(false), 4000); 
 
-        return res.data;
+      setTimeout(() => setShowBanner(false), 4000);
+
+      return res.data;
 
     } catch (error) {
       // Compatible con interceptor (error.message) y con respuestas crudas (error.response)
-     const msg =
-    error?.data?.mensaje|| error?.message|| 'Error en la Red'; 
-   
-            setBannerMsg(msg);
-            setBannerType('error');
-            setShowBanner(true);
-            setTimeout(() => setShowBanner(false), 4000);
-            throw error;
-            
+      const msg =
+        error?.data?.mensaje || error?.message || 'Error en la Red';
+
+      setBannerMsg(msg);
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+      throw error;
+
 
     }
   };
@@ -112,12 +112,12 @@ const [showBanner, setShowBanner] = useState(false);
       const res = await api.delete(url);
       console.log(id);
 
-       setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
-            setTimeout(() => setShowBanner(false), 4000);
+      setBannerMsg(res.data.mensaje)
+      setBannerType('success');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
 
-            window.scrollTo(0,0);
+      window.scrollTo(0, 0);
 
 
       const nuevaLista = [...testimonios];
@@ -125,12 +125,12 @@ const [showBanner, setShowBanner] = useState(false);
       setTestimonios(nuevaLista);
     } catch (error) {
       const msg =
-        error?.data?.mensaje|| error?.message|| 'Error en la Red'
-    
-                setBannerMsg(msg)
-            setBannerType('error');
-            setShowBanner(true);
-setTimeout(() => setShowBanner(false), 4000);
+        error?.data?.mensaje || error?.message || 'Error en la Red'
+
+      setBannerMsg(msg)
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
       console.error("Error eliminando testimonio:", error);
     }
 
@@ -169,23 +169,23 @@ setTimeout(() => setShowBanner(false), 4000);
 
       console.log(id);
 
-    setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
+      setBannerMsg(res.data.mensaje)
+      setBannerType('success');
+      setShowBanner(true);
 
-        setTimeout(() => setShowBanner(false), 4000); 
+      setTimeout(() => setShowBanner(false), 4000);
 
 
     } catch (error) {
 
-      const mensaje= error?.data?.mensaje|| error?.message|| 'Error en la Red'
+      const mensaje = error?.data?.mensaje || error?.message || 'Error en la Red'
       console.log(error);
       console.error("Error modificando testimonio:", error);
-         setBannerMsg(mensaje)
-            setBannerType('error');
-            setShowBanner(true);
-       setTimeout(() => setShowBanner(false), 4000); 
-        throw error;
+      setBannerMsg(mensaje)
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+      throw error;
 
     }
     setNombre('');
@@ -202,21 +202,19 @@ setTimeout(() => setShowBanner(false), 4000);
 
 
   return (
-    <Box sx={{  p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
-      <Box sx={{ pt: 8}}>
-             <Typography
-               variant="h3"
-               sx={{
-                 fontFamily: 'GroteskBold',
-                 color: '#10045c',
-                 mb: 4,
-                 textAlign: 'center',
-                 fontSize: { xs: '2.5rem', sm: '3rem', md: '4rem' }
-               }}
-             >
-                  Gestión de Testimonios
-             </Typography>
-             </Box>
+    <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
+      <Typography
+        variant="h3"
+        sx={{
+          fontFamily: 'GroteskBold',
+          color: '#10045c',
+          mb: 4,
+          textAlign: 'center',
+          fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
+        }}
+      >
+        Gestión de Testimonios
+      </Typography>
 
       {/* Formulario */}
       <Stack spacing={2} sx={{ mb: 4 }}>
@@ -265,8 +263,8 @@ setTimeout(() => setShowBanner(false), 4000);
       </Stack>
 
       {showBanner && (
-    <Box
-        sx={{
+        <Box
+          sx={{
             position: 'relative',
             width: '100%',
             mb: 2,
@@ -276,11 +274,11 @@ setTimeout(() => setShowBanner(false), 4000);
             borderRadius: 1,
             p: 1,
             boxShadow: 2,
-        }}
-    >
-        <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
-    </Box>
-)}
+          }}
+        >
+          <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
+        </Box>
+      )}
 
 
       <Divider sx={{ mb: 3 }} />
@@ -328,7 +326,7 @@ setTimeout(() => setShowBanner(false), 4000);
             No hay testimonios guardados todavía.
           </Typography>
         )}
-        
+
         {testimonios.map((t, index) => (
           <Box key={index}>
             <TestimonioCapsula

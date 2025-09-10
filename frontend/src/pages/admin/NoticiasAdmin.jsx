@@ -3,22 +3,32 @@ import { useState, useEffect } from "react";
 import "./NoticiasAdmin.css";
 import axios from "axios";
 import { api } from "../../api/api";
-import {Box, Typography} from '@mui/material';
+import { Box, Typography } from '@mui/material';
+import upload from '../../../public/Images/upload.svg'
 
 function NoticiasAdmin() {
   const [titulo, setTitulo] = useState("");
   const [fecha, setFecha] = useState("");
   const [cuerpo, setCuerpo] = useState("");
-  const [imagenUrl, setImagenUrl] = useState("");
+
+  //imagen logica
+  const [error, setError] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagenUrl, setImagenUrl] = useState(null);
+
+
   const [vistaPrevia, setVistaPrevia] = useState(null);
   const [noticias, setNoticias] = useState([]);
   const [editando, setEditando] = useState(null);
 
+  // subir imagen estados
+
+
   //Declaracion
 
   const [bannerMsg, setBannerMsg] = useState('');
-const [bannerType, setBannerType] = useState('success'); // or 'error'
-const [showBanner, setShowBanner] = useState(false);
+  const [bannerType, setBannerType] = useState('success'); // or 'error'
+  const [showBanner, setShowBanner] = useState(false);
 
   const AUTOR_ID = "cbq1s3VNeMXEdjTJQmpNJEA0Vsk2";
 
@@ -51,99 +61,94 @@ const [showBanner, setShowBanner] = useState(false);
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    if (!titulo || !fecha || !cuerpo || !imagenUrl) {
-        setBannerMsg("Todos los campos son obligatorios")
-            setBannerType('error');
-            setShowBanner(true);
-
-        
-        setTimeout(() => setShowBanner(false), 4000); 
-
+    const needsImage = !editando && !image && !imagenUrl;
+    if (!titulo || !fecha || !cuerpo || needsImage) {
+      setBannerMsg("Todos los campos son obligatorios");
+      setBannerType("error");
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
       return;
     }
 
     try {
+      let finalUrl = imagenUrl || null;
+
+      if (image) {
+        const form = new FormData();
+        form.append("file", image);
+        const uploadRes = await api.post("/auth/upload", form, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+        finalUrl = uploadRes.data.url;
+        setImagenUrl(finalUrl);
+      }
+
+      // ⚠️ Usa nombres que tu backend realmente espera:
+      const payload = {
+        titulo,
+        contenido: cuerpo,
+        imagen_url: finalUrl,
+        fecha, 
+      };
+
       if (editando) {
-        // PUT para modificar
-       const res= await api.put(
-          `/auth/modificarnoticia/${editando}/${AUTOR_ID}`,
-          {
-            titulo,
-            contenido: cuerpo,
-            imagen_url: imagenUrl,
-            fecha,
-          }
-        );
+        const res = await api.put(`/auth/modificarnoticia/${editando}/${AUTOR_ID}`, payload);
 
-       // alert("Noticia actualizada correctamente");
+        setBannerMsg(res.data.mensaje || "Noticia actualizada");
+        setBannerType("success");
+        setShowBanner(true);
+        setTimeout(() => setShowBanner(false), 4000);
 
-       setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
-        setTimeout(() => setShowBanner(false), 4000); 
-
-
-        // Actualizar lista de noticias en el estado
+        // Reflejar cambios en el estado local (sin duplicar)
         setNoticias((prev) =>
           prev.map((n) =>
             n.id === editando
-              ? { ...n, titulo, fecha, cuerpo, imagenUrl }
+              ? { ...n, titulo, fecha, cuerpo, imagenUrl: finalUrl }
               : n
           )
         );
 
-        // Resetear formulario
+        // Limpiar
         setEditando(null);
         setTitulo("");
         setFecha("");
         setCuerpo("");
-        setImagenUrl("");
+        setImagenUrl(null);
         setVistaPrevia(null);
-        setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-
+        setImage(null);
       } else {
-        // POST para crear
-        const res = await api.post(
-          `/auth/agregarnoticia/${AUTOR_ID}`,
-          {
-            titulo,
-            contenido: cuerpo,
-            imagen_url: imagenUrl,
-            fecha,
-          }
-        );
+        const res = await api.post(`/auth/agregarnoticia/${AUTOR_ID}`, payload);
 
-          setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
-            setTimeout(() => setShowBanner(false), 4000); 
-           
+        setBannerMsg(res.data.mensaje || "Noticia creada");
+        setBannerType("success");
+        setShowBanner(true);
+        setTimeout(() => setShowBanner(false), 4000);
 
-        setNoticias((prev) => [...prev, res.data]);
+        // Agregar al listado local, usando id devuelto o un fallback
+        const newId = res?.data?.id || crypto.randomUUID();
+        setNoticias((prev) => [
+          ...prev,
+          { id: newId, titulo, fecha, cuerpo, imagenUrl: finalUrl },
+        ]);
+
+        // Limpiar
         setTitulo("");
         setFecha("");
         setCuerpo("");
-        setImagenUrl("");
+        setImagenUrl(null);
         setVistaPrevia(null);
-        setTimeout(() => {
-      window.location.reload();
-    }, 1000);
-         return res.data;
+        setImage(null);
       }
-
     } catch (error) {
-      const mensaje = error?.data?.mensaje|| error?.message|| 'Error en la Red';
-              setBannerMsg(mensaje)
-            setBannerType('error');
-            setShowBanner(true);
-        setTimeout(() => setShowBanner(false), 3000); 
-        throw error;
-
-
+      const mensaje = error?.response?.data?.mensaje || error?.message || "Error en la Red";
+      setBannerMsg(mensaje);
+      setBannerType("error");
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 3000);
     }
   };
+
+
 
   const handleImagenUrlChange = (e) => {
     const url = e.target.value;
@@ -155,9 +160,11 @@ const [showBanner, setShowBanner] = useState(false);
     setTitulo(noticia.titulo);
     setFecha(noticia.fecha);
     setCuerpo(noticia.cuerpo);
-    setImagenUrl(noticia.imagenUrl);
-    setVistaPrevia(noticia.imagenUrl);
+    setImagenUrl(noticia.imagenUrl || null);
+    setVistaPrevia(noticia.imagenUrl || null);
+    setImage(null);
     setEditando(noticia.id);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   const eliminacionNoticia = async (id) => {
@@ -165,43 +172,46 @@ const [showBanner, setShowBanner] = useState(false);
       const res = await api.delete(`/auth/eliminarnoticia/${id}`);
       setNoticias((prev) => prev.filter((n) => n.id !== id));
       //alert("Noticia eliminada correctamente");
-        setBannerMsg(res.data.mensaje)
-            setBannerType('success');
-            setShowBanner(true);
+      setBannerMsg(res.data.mensaje)
+      setBannerType('success');
+      setShowBanner(true);
 
-        
-        setTimeout(() => setShowBanner(false), 4000); 
-         window.scrollTo(0,0);
+
+      setTimeout(() => setShowBanner(false), 4000);
+      window.scrollTo(0, 0);
 
 
     } catch (error) {
       console.error("Error al eliminar noticia:", error);
       //alert("Hubo un error al eliminar la noticia");
 
-      const mensaje =   error?.data?.mensaje|| error?.message|| 'Error en la Red';
-                setBannerMsg(mensaje)
-            setBannerType('error');
-            setShowBanner(true);
-        setTimeout(() => setShowBanner(false), 4000); 
+      const mensaje = error?.data?.mensaje || error?.message || 'Error en la Red';
+      setBannerMsg(mensaje)
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
 
     }
   }
 
   const handleEliminar = async (id) => {
     await eliminacionNoticia(id);
+  };
 
-    /*
-    if (window.confirm("¿Seguro que quieres eliminar esta noticia?")) {
-      fetch(${API_BASE}/auth/eliminarnoticia/${id}, { method: "DELETE", withCredentials: true })
-        .then(() => {
-          alert("Noticia eliminada");
-          setNoticias((prev) => prev.filter((n) => n.id !== id));
-        })
-        .catch((err) => {
-          console.error("Error al eliminar noticia:", err);
-          alert("Hubo un error al eliminar la noticia");
-        });
-    }*/
+  const handleChange = (e) => {
+    const f = e.target.files?.[0];
+    if (!f) return;
+
+    const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+    if (!allowed.includes(f.type)) {
+      setError("Tipo de archivo inválido. Solo se permiten imágenes (JPG, PNG, WEBP, AVIF)");
+      setImage(null);
+      setVistaPrevia(null);
+      return;
+    } 
+    setError("");
+    setImage(f);
+    setVistaPrevia(URL.createObjectURL(f));
   };
 
   return (
@@ -233,33 +243,49 @@ const [showBanner, setShowBanner] = useState(false);
           onChange={(e) => setCuerpo(e.target.value)}
         />
 
-        <input
-          type="text"
-          placeholder="URL de la imagen"
-          value={imagenUrl}
-          onChange={handleImagenUrlChange}
-        />
-        
-{showBanner && (
-    <Box
-        sx={{
-            position: 'relative',
-            width: '100%',
-            mb: 2,
-            animation: 'slideDown 0.3s ease-in-out',
-            backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
-            color: '#fff',
-            borderRadius: 1,
-            p: 1,
-            boxShadow: 2,
-        }}
-    >
-        <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
-    </Box>
-)}
+        <div className={`input-box ${error ? "error" : ""}`}>
+          <label className="file-label">
+            <img src={upload} alt="upload" className="icon" />
+            <p className="title">Elija una imagen para cargar</p>
+            <p className="subtitle">Permitidos: JPG, PNG, WEBP, AVIF</p>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp,image/avif"
+              onChange={handleChange}
+              hidden
+            />
+          </label>
+
+          {error && <p className="error-text">{error}</p>}
+          {image && (
+            <div className="preview">
+              <img src={URL.createObjectURL(image)} alt="preview" />
+              <p>{image.name}</p>
+            </div>
+          )}
+        </div>
 
 
-        
+        {showBanner && (
+          <Box
+            sx={{
+              position: 'relative',
+              width: '100%',
+              mb: 2,
+              animation: 'slideDown 0.3s ease-in-out',
+              backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
+              color: '#fff',
+              borderRadius: 1,
+              p: 1,
+              boxShadow: 2,
+            }}
+          >
+            <Typography sx={{ fontWeight: 'bold' }}>{bannerMsg}</Typography>
+          </Box>
+        )}
+
+
+
 
         {vistaPrevia && (
           <img className="vista-previa" src={vistaPrevia} alt="Vista previa" />

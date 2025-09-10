@@ -285,6 +285,11 @@ export default function CustomNavbar() {
 		};
 
 		fetchProfile();
+		/*
+		// refrescar cada hora (opcional)
+		const interval = setInterval(fetchProfile, 60 * 60 * 1000); 
+  		return () => clearInterval(interval);
+		*/
 
 		// escucha refrescos de auth para re-consultar el perfil tras login
 		const onAuthRefresh = () => fetchProfile();

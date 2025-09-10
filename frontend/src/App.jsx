@@ -12,6 +12,7 @@ import Logros from './pages/Logros';
 import Voluntariado from './pages/Voluntariado';
 import Categorias from './pages/Categorias';
 import NuestroEquipo from './pages/NuestroEquipo.jsx';
+import PoliticaPrivacidad from './pages/PoliticaPrivacidad.jsx';
 import Calendario from './pages/Calendario.jsx';
 import Eventos from './pages/Eventos.jsx';
 import Contacto from './pages/Contacto.jsx';
@@ -47,6 +48,7 @@ function App() {
 						<Route path='/eventos' element={<Eventos />} />
 						<Route path="/noticia/:id" element={<NoticiaDetalle />} />
 						<Route path='/Contacto' element={<Contacto />} />
+						<Route path='/PoliticaPrivacidad' element={<PoliticaPrivacidad />} />
 						<Route path='/tienda' element={<Tienda />} />
 						<Route path='/aliados' element={<Aliados />} />
 						<Route path='/perfil' element={<EditarPerfil />} />
