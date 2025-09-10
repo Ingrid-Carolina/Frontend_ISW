@@ -11,6 +11,8 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { api } from '../api/api';
 import { Box, CircularProgress, Alert } from '@mui/material';
+import EditableImage from '../components/EditableImage';
+
 
 const AboutUs = () => (
   <section className='about-us'>
@@ -22,26 +24,66 @@ const AboutUs = () => (
   </section>
 );
 
-const Mision = () => (
-  <SeccionInfo
-    titulo='Nuestra Misión'
-    descripcion='Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego.'
-    imagen='/Images/Mision1.jpg'
-    bgColor='#e06c14'
-    textAlign='left'
-  />
-);
+const initialImageState = {
+  mision: '/Images/Mision1.jpg',
+  vision: '/Images/Vision1.jpg',
+};
 
-const Vision = () => (
-  <SeccionInfo
-    titulo='Nuestra Visión'
-    descripcion='Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida.'
-    imagen='/Images/Vision1.jpg'
-    invertir
-    bgColor='#10045c'
-    textAlign='right'
-  />
-);
+const Mision = ({ onImageChange }) => { // Recibe una prop para notificar el cambio
+  const [misionImageUrl, setMisionImageUrl] = useState(initialImageState.mision);
+
+  const handleMisionImageUpload = (newUrl) => {
+    setMisionImageUrl(newUrl);
+    if (onImageChange) {
+      onImageChange('mision', newUrl); // Notifica al padre con el tipo y la nueva URL
+    }
+  };
+
+  return (
+    
+    <SeccionInfo
+      titulo='Nuestra Misión'
+      descripcion='Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego.'
+      imagenComponent={<EditableImage
+         src={misionImageUrl}
+         
+         alt="Imagen de Misión"
+         onImageUpload={handleMisionImageUpload}
+        />}
+        
+      bgColor='#e06c14'
+      textAlign='left'
+    />
+    
+  );
+};
+
+const Vision = ({ onImageChange }) => { // Recibe una prop para notificar el cambio
+  const [visionImageUrl, setVisionImageUrl] = useState(initialImageState.vision);
+
+  const handleVisionImageUpload = (newUrl) => {
+    setVisionImageUrl(newUrl);
+    if (onImageChange) {
+      onImageChange('vision', newUrl); // Notifica al padre con el tipo y la nueva URL
+    }
+  };
+
+  return (
+    <SeccionInfo
+      titulo='Nuestra Visión'
+      descripcion='Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida.'
+      
+      imagenComponent={<EditableImage
+         src={visionImageUrl}
+         alt="Imagen de Visión"
+         onImageUpload={handleVisionImageUpload}
+        />}
+      invertir
+      bgColor='#10045c'
+      textAlign='right'
+    />
+  );
+};
 
 const Valores = () => (
   <section className='values'>
@@ -132,6 +174,17 @@ function HomeNewsCards() {
 }
 
 function Home() {
+
+  const [images, setImages] = useState(initialImageState);
+
+  const handleImageChange = (type, newUrl) => {
+    setImages(prevImages => ({
+      ...prevImages,
+      [type]: newUrl
+    }));
+    
+  };
+  
   const navigate = useNavigate();
 
   const onClick = () => {
@@ -140,6 +193,7 @@ function Home() {
   };
 
   return (
+    
     <div style={{ paddingTop: '90px' }}>
       <div className='header'>
         <div className='header-title'>
@@ -150,8 +204,8 @@ function Home() {
       </div>
 
       <AboutUs />
-      <Mision />
-      <Vision />
+      <Mision onImageChange={handleImageChange}/>
+      <Vision onImageChange={handleImageChange}/>
       <Valores />
       <Acordeon />
       <Noticias_Eventos />

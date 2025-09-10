@@ -1,0 +1,56 @@
+/* src/components/EditableImage.css */
+.editable-image-container {
+  position: relative;
+  display: inline-block; /* O ajusta según el layout */
+  overflow: hidden; /* Para que el botón no se salga */
+}
+
+.editable-image {
+  display: block; /* Elimina el espacio extra debajo de la imagen */
+  width: 100%;
+  height: auto; /* Mantiene la proporción */
+  transition: filter 0.3s ease;
+}
+
+.editable-image-container:hover .editable-image {
+  filter: brightness(80%); /* Oscurece ligeramente al pasar el ratón */
+}
+
+.change-image-button {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1.2em;
+  opacity: 0; /* Oculto por defecto */
+  transition: opacity 0.3s ease;
+  z-index: 10; /* Asegura que esté sobre la imagen */
+}
+
+.editable-image-container:hover .change-image-button {
+  opacity: 1; /* Muestra el botón al pasar el ratón */
+}
+
+.change-image-button:disabled {
+  cursor: not-allowed;
+  background-color: rgba(0, 0, 0, 0.3);
+}
+
+.image-upload-error {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: rgba(255, 0, 0, 0.7);
+  color: white;
+  padding: 5px 10px;
+  border-radius: 3px;
+  font-size: 0.8em;
+  z-index: 11;
+}
