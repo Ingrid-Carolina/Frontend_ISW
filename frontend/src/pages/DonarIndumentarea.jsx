@@ -273,10 +273,13 @@ const DonarIndumentarea = () => {
 
         <div
           style={{
-            display: "flex",
-            flexWrap: "wrap",        // permite varias filas
-            justifyContent: "center", // centra todas las filas, incluida la última
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
             gap: "1rem",
+            justifyContent: "center",  // centra toda la grid, incluida la última fila
+            justifyItems: "center",    // centra cada tarjeta dentro de su celda
+            alignItems: "start",
+            width: "100%",
           }}
         >
           {seleccion.map((p) => (
@@ -289,10 +292,12 @@ const DonarIndumentarea = () => {
                 textAlign: "center",
                 backgroundColor: "rgba(255, 255, 255, 0.9)",
                 color: "#000",
-                width: "calc(16.6667% - 1rem)", // 6 columnas menos el gap
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
+                width: "100%",       // se ajusta al minmax
+                maxWidth: "300px",   // ancho uniforme de las tarjetas
+                minHeight: "400px",  // altura uniforme
                 position: "relative",
               }}
             >
@@ -301,17 +306,18 @@ const DonarIndumentarea = () => {
                 alt={p.nombre}
                 onError={(e) => (e.target.src = "/Images/producto_defecto.png")}
                 style={{
-                  width: "200px",
+                  width: "80%",
                   height: "200px",
                   objectFit: "cover",
                   borderRadius: "8px",
-                  margin: "0 auto",
+                  marginBottom: "0.5rem",
+                  marginInline: "auto", // asegura que la imagen esté centrada
                 }}
               />
               <h3
                 style={{
                   fontFamily: "GroteskBold",
-                  margin: "1rem 0",
+                  margin: "0.5rem 0",
                   fontSize: "1rem",
                   display: "-webkit-box",
                   WebkitLineClamp: 1,
@@ -326,7 +332,7 @@ const DonarIndumentarea = () => {
                 style={{
                   fontFamily: "GroteskRegular",
                   fontSize: "0.9rem",
-                  marginBottom: "0.5rem",
+                  flexGrow: 1,
                   display: "-webkit-box",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
@@ -337,7 +343,6 @@ const DonarIndumentarea = () => {
                 {p.descripcion}
               </p>
 
-              {/* Checkbox centrado */}
               <div
                 style={{
                   margin: "0.3rem 0",
@@ -355,7 +360,6 @@ const DonarIndumentarea = () => {
                 <span>Seleccionar</span>
               </div>
 
-              {/* Contador de cantidad centrado */}
               <div
                 style={{
                   marginBottom: "0.3rem",
@@ -381,7 +385,7 @@ const DonarIndumentarea = () => {
                 style={{
                   position: "absolute",
                   top: "10px",
-                  right: "10px",
+                  right: "1px",
                   color: "#10045c",
                 }}
               >
@@ -390,6 +394,8 @@ const DonarIndumentarea = () => {
             </div>
           ))}
         </div>
+
+
 
         <div style={{ marginTop: "2rem", textAlign: "center" }}>
           <button
@@ -509,59 +515,84 @@ const DonarIndumentarea = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Modal ficha completa */}
-      <Dialog
-        open={modalFicha.open}
-        onClose={() => setModalFicha({ open: false, producto: null })}
-        fullWidth
-        maxWidth="sm"
-      >
-        <DialogTitle>
-          <Typography
-            variant="h4"
-            align="center"
-            sx={{ fontFamily: "GroteskBold", fontSize: "2rem" }}
-          >
-            {modalFicha.producto?.nombre}
-          </Typography>
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ textAlign: "center" }}>
-            <img
-              src={getImagen(modalFicha.producto?.imagen)}
-              alt={modalFicha.producto?.nombre}
-              onError={(e) => {
-                e.target.onerror = null;
-                e.target.src = "/Images/producto_defecto.png";
-              }}
-              style={{
-                width: "50%",
-                height: "50%",
-                objectFit: "contain",
-                borderRadius: "8px",
-                marginBottom: "1rem",
-              }}
-            />
-            <Typography
-              align="center"
-              sx={{
-                fontSize: "1.2rem",
-                fontFamily: "GroteskRegular",
-                mt: 1,
-              }}
-            >
-              {modalFicha.producto?.descripcion}
-            </Typography>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={() => setModalFicha({ open: false, producto: null })}
-          >
-            Cerrar
-          </Button>
-        </DialogActions>
-      </Dialog>
+      {/* Modal ficha completa rediseñado */}
+<Dialog
+  open={modalFicha.open}
+  onClose={() => setModalFicha({ open: false, producto: null })}
+  fullWidth
+  maxWidth="sm"
+  PaperProps={{
+    style: {
+      borderRadius: "20px",
+      padding: "1rem",
+      backgroundColor: "#f5f5f5",
+      boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+    },
+  }}
+>
+  <DialogContent
+    sx={{
+      display: "flex",
+      flexDirection: "column",
+      alignItems: "center",
+      textAlign: "center",
+      gap: "1rem",
+    }}
+  >
+    <img
+      src={getImagen(modalFicha.producto?.imagen)}
+      alt={modalFicha.producto?.nombre}
+      onError={(e) => {
+        e.target.onerror = null;
+        e.target.src = "/Images/producto_defecto.png";
+      }}
+      style={{
+        width: "80%",
+        maxHeight: "500px",
+        objectFit: "cover",
+        borderRadius: "15px",
+        boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
+      }}
+    />
+    <Typography
+      variant="h4"
+      sx={{
+        fontFamily: "GroteskBold",
+        fontSize: "1.8rem",
+        color: "#10045c",
+      }}
+    >
+      {modalFicha.producto?.nombre}
+    </Typography>
+    <Typography
+      sx={{
+        fontSize: "1rem",
+        fontFamily: "GroteskRegular",
+        color: "#333",
+      }}
+    >
+      {modalFicha.producto?.descripcion}
+    </Typography>
+
+    {/* Botón cerrar centrado */}
+    <Button
+      variant="contained"
+      onClick={() => setModalFicha({ open: false, producto: null })}
+      sx={{
+        mt: 2,
+        backgroundColor: "#ff6600",
+        color: "#fff",
+        fontFamily: "GroteskBold",
+        '&:hover': { backgroundColor: "#e65c00" },
+        width: "50%",
+        borderRadius: "10px",
+      }}
+    >
+      Cerrar
+    </Button>
+  </DialogContent>
+</Dialog>
+
     </div>
   );
 };

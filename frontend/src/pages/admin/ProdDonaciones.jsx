@@ -33,11 +33,15 @@ const ProdDonaciones = () => {
     });
     const [selectedFile, setSelectedFile] = useState(null);
 
+    // Popup de confirmación
+    const [deleteOpen, setDeleteOpen] = useState(false);
+    const [deleteId, setDeleteId] = useState(null);
+
     // Manejo de preview de imagen
     const getImagen = (imagen) => {
         if (!imagen) return "/Images/producto_defecto.png";
-        if (imagen.startsWith("http")) return imagen; // URL pública (Supabase)
-        if (imagen.startsWith("/Images/")) return imagen; // local
+        if (imagen.startsWith("http")) return imagen;
+        if (imagen.startsWith("/Images/")) return imagen;
         return "/Images/producto_defecto.png";
     };
 
@@ -55,7 +59,7 @@ const ProdDonaciones = () => {
         fetchProductos();
     }, []);
 
-    // Abrir modal
+    // Abrir modal de agregar/editar
     const handleOpen = (producto = null) => {
         if (producto) {
             setFormData({
@@ -85,7 +89,6 @@ const ProdDonaciones = () => {
         try {
             let imagenUrl = formData.imagen;
 
-            // 🔹 Si seleccionó un archivo nuevo, lo subimos primero
             if (selectedFile) {
                 const fd = new FormData();
                 fd.append("file", selectedFile);
@@ -94,7 +97,7 @@ const ProdDonaciones = () => {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
 
-                imagenUrl = uploadRes.data.url; // URL pública de Supabase
+                imagenUrl = uploadRes.data.url;
             }
 
             const payload = { ...formData, imagen: imagenUrl };
@@ -114,7 +117,6 @@ const ProdDonaciones = () => {
 
     // Eliminar producto
     const handleDelete = async (id) => {
-        if (!window.confirm("¿Seguro que deseas eliminar este producto?")) return;
         try {
             await api.delete(`/auth/productos/${id}`);
             fetchProductos();
@@ -210,7 +212,10 @@ const ProdDonaciones = () => {
                                 </IconButton>
                                 <IconButton
                                     color="error"
-                                    onClick={() => handleDelete(item.id)}
+                                    onClick={() => {
+                                        setDeleteId(item.id);
+                                        setDeleteOpen(true);
+                                    }}
                                 >
                                     <Delete />
                                 </IconButton>
@@ -220,71 +225,259 @@ const ProdDonaciones = () => {
                 ))}
             </Grid>
 
-            {/* Modal */}
-            <Dialog open={open} onClose={handleClose}>
-                <DialogTitle>
-                    {editMode ? "Editar Producto" : "Agregar Producto"}
+            {/* Modal de agregar/editar */}
+            <Dialog
+                open={open}
+                onClose={handleClose}
+                maxWidth="md"
+                fullWidth
+                PaperProps={{
+                    sx: { borderRadius: "20px", p: 2, background: "#f9f9fc" },
+                }}
+            >
+                <DialogTitle
+                    sx={{
+                        fontFamily: "GroteskBold",
+                        fontSize: "1.5rem",
+                        textAlign: "center",
+                        color: "#10045c",
+                        pb: 1,
+                    }}
+                >
+                    {editMode ? "✏️ Editar Producto" : "🛒 Agregar Producto"}
+                </DialogTitle>
+                <DialogContent sx={{ mt: 2 }}>
+                    <Grid container spacing={3}>
+                        {/* Vista previa */}
+                        <Grid item xs={12} md="auto">
+                            <Box display="flex" flexDirection="column" alignItems="center">
+                                <Typography
+                                    variant="h6"
+                                    sx={{ mb: 2, fontFamily: "GroteskBold", textAlign: "center" }}
+                                >
+                                    Vista Previa
+                                </Typography>
+
+                                <Card
+                                    sx={{
+                                        width: 320,
+                                        height: 400,
+                                        display: "flex",
+                                        flexDirection: "column",
+                                        justifyContent: "space-between",
+                                        borderRadius: "16px",
+                                        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+                                    }}
+                                >
+                                    <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
+                                        <img
+                                            src={
+                                                selectedFile
+                                                    ? URL.createObjectURL(selectedFile)
+                                                    : getImagen(formData.imagen)
+                                            }
+                                            alt="Preview"
+                                            style={{
+                                                width: "65%",
+                                                height: "175px",
+                                                objectFit: "cover",
+                                                borderRadius: "8px",
+                                                margin: "0 auto",
+                                            }}
+                                        />
+                                        <Typography
+                                            variant="h6"
+                                            sx={{
+                                                mt: 2,
+                                                fontFamily: "GroteskBold",
+                                                whiteSpace: "nowrap",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                            }}
+                                        >
+                                            {formData.nombre || "Nombre del producto"}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontFamily: "GroteskRegular",
+                                                mb: 1,
+                                                display: "-webkit-box",
+                                                WebkitLineClamp: 3,
+                                                WebkitBoxOrient: "vertical",
+                                                overflow: "hidden",
+                                                textOverflow: "ellipsis",
+                                            }}
+                                        >
+                                            {formData.descripcion || "Aquí aparecerá la descripción..."}
+                                        </Typography>
+                                        <Typography
+                                            variant="body2"
+                                            sx={{
+                                                fontFamily: "GroteskBold",
+                                                color: formData.estado ? "green" : "red",
+                                            }}
+                                        >
+                                            {formData.estado ? "Activo" : "Inactivo"}
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </Box>
+                        </Grid>
+
+                        {/* Formulario */}
+                        <Grid item xs={12} md sx={{ flexGrow: 1, display: "flex" }}>
+                            <Box display="flex" flexDirection="column" gap={2} sx={{ width: "100%", mt: 5 }}>
+                                <TextField
+                                    margin="dense"
+                                    label="Nombre del Producto"
+                                    placeholder="Ejemplo: Balón de béisbol"
+                                    fullWidth
+                                    variant="outlined"
+                                    value={formData.nombre}
+                                    onChange={(e) => setFormData({ ...formData, nombre: e.target.value })}
+                                    InputProps={{ sx: { borderRadius: "12px", backgroundColor: "#fff" } }}
+                                />
+
+                                <TextField
+                                    margin="dense"
+                                    label="Descripción"
+                                    placeholder="Agrega una breve descripción..."
+                                    fullWidth
+                                    multiline
+                                    minRows={3}
+                                    variant="outlined"
+                                    value={formData.descripcion}
+                                    onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                                    InputProps={{ sx: { borderRadius: "12px", backgroundColor: "#fff" } }}
+                                />
+
+                                <Box textAlign="center">
+                                    <Button
+                                        variant="contained"
+                                        component="label"
+                                        sx={{
+                                            px: 4,
+                                            py: 1.2,
+                                            borderRadius: "12px",
+                                            fontFamily: "GroteskBold",
+                                            backgroundColor: "#10045c",
+                                            "&:hover": { backgroundColor: "#24157a" },
+                                        }}
+                                    >
+                                        {selectedFile ? "✅ Imagen lista" : "📸 Subir Imagen"}
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            hidden
+                                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                                        />
+                                    </Button>
+                                </Box>
+
+                                <FormControl fullWidth>
+                                    <InputLabel>Estado</InputLabel>
+                                    <Select
+                                        value={formData.estado}
+                                        onChange={(e) => setFormData({ ...formData, estado: e.target.value })}
+                                        label="Estado"
+                                        sx={{ borderRadius: "12px", backgroundColor: "#fff" }}
+                                    >
+                                        <MenuItem value={true}>Activo</MenuItem>
+                                        <MenuItem value={false}>Inactivo</MenuItem>
+                                    </Select>
+                                </FormControl>
+
+                                {/* Botones centrados abajo del formulario */}
+                                <Box display="flex" justifyContent="center" gap={2} mt={2}>
+                                    <Button
+                                        onClick={handleClose}
+                                        variant="outlined"
+                                        sx={{
+                                            borderRadius: "12px",
+                                            px: 4,
+                                            py: 1,
+                                            borderColor: "#10045c",
+                                            color: "#10045c",
+                                            fontFamily: "GroteskBold",
+                                            "&:hover": { backgroundColor: "#eee" },
+                                        }}
+                                    >
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        onClick={handleSave}
+                                        variant="contained"
+                                        sx={{
+                                            borderRadius: "12px",
+                                            px: 4,
+                                            py: 1,
+                                            fontFamily: "GroteskBold",
+                                            backgroundColor: "#10045c",
+                                            "&:hover": { backgroundColor: "#24157a" },
+                                        }}
+                                    >
+                                        Guardar
+                                    </Button>
+                                </Box>
+                            </Box>
+                        </Grid>
+
+                    </Grid>
+                </DialogContent>
+
+            </Dialog>
+
+            {/* Popup de confirmación de eliminación */}
+            <Dialog
+                open={deleteOpen}
+                onClose={() => setDeleteOpen(false)}
+                PaperProps={{ sx: { borderRadius: "16px", p: 2 } }}
+            >
+                <DialogTitle
+                    sx={{
+                        fontFamily: "GroteskBold",
+                        textAlign: "center",
+                        color: "#10045c",
+                    }}
+                >
+                    ⚠️ Confirmar Eliminación
                 </DialogTitle>
                 <DialogContent>
-                    <TextField
-                        margin="dense"
-                        label="Nombre"
-                        fullWidth
-                        value={formData.nombre}
-                        onChange={(e) =>
-                            setFormData({ ...formData, nombre: e.target.value })
-                        }
-                    />
-                    <TextField
-                        margin="dense"
-                        label="Descripción"
-                        fullWidth
-                        value={formData.descripcion}
-                        onChange={(e) =>
-                            setFormData({ ...formData, descripcion: e.target.value })
-                        }
-                    />
-
-                    {/* 🔹 Campo de archivo */}
+                    <Typography sx={{ textAlign: "center", fontFamily: "GroteskRegular" }}>
+                        ¿Estás seguro de que deseas eliminar este producto? Esta acción no se puede deshacer.
+                    </Typography>
+                </DialogContent>
+                <DialogActions sx={{ justifyContent: "center", gap: 2, pb: 2 }}>
                     <Button
                         variant="outlined"
-                        component="label"
-                        sx={{ mt: 2 }}
+                        onClick={() => setDeleteOpen(false)}
+                        sx={{
+                            borderRadius: "12px",
+                            px: 4,
+                            borderColor: "#10045c",
+                            color: "#10045c",
+                            fontFamily: "GroteskBold",
+                            "&:hover": { backgroundColor: "#eee" },
+                        }}
                     >
-                        {selectedFile ? "Imagen seleccionada" : "Subir Imagen"}
-                        <input
-                            type="file"
-                            accept="image/*"
-                            hidden
-                            onChange={(e) => setSelectedFile(e.target.files[0])}
-                        />
+                        Cancelar
                     </Button>
-
-                    {/* Si ya hay imagen en edición, la mostramos */}
-                    {formData.imagen && !selectedFile && (
-                        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                            Imagen actual: {formData.imagen}
-                        </Typography>
-                    )}
-
-                    <FormControl fullWidth sx={{ mt: 2 }}>
-                        <InputLabel>Estado</InputLabel>
-                        <Select
-                            value={formData.estado}
-                            onChange={(e) =>
-                                setFormData({ ...formData, estado: e.target.value })
-                            }
-                            label="Estado"
-                        >
-                            <MenuItem value={true}>Activo</MenuItem>
-                            <MenuItem value={false}>Inactivo</MenuItem>
-                        </Select>
-                    </FormControl>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={handleClose}>Cancelar</Button>
-                    <Button onClick={handleSave} variant="contained" color="primary">
-                        Guardar
+                    <Button
+                        variant="contained"
+                        onClick={async () => {
+                            await handleDelete(deleteId);
+                            setDeleteOpen(false);
+                        }}
+                        sx={{
+                            borderRadius: "12px",
+                            px: 4,
+                            fontFamily: "GroteskBold",
+                            backgroundColor: "#c62828",
+                            "&:hover": { backgroundColor: "#b71c1c" },
+                        }}
+                    >
+                        Eliminar
                     </Button>
                 </DialogActions>
             </Dialog>
