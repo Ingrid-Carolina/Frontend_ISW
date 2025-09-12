@@ -29,15 +29,16 @@ const ProdDonaciones = () => {
         nombre: "",
         descripcion: "",
         imagen: "",
-        estado: true, // 🔹 por defecto activo
+        estado: true,
     });
+    const [selectedFile, setSelectedFile] = useState(null);
 
-    // 🔹 Validación de imagen igual a tu otro componente
+    // Manejo de preview de imagen
     const getImagen = (imagen) => {
         if (!imagen) return "/Images/producto_defecto.png";
-        return imagen.startsWith("/Images/")
-            ? imagen
-            : "/Images/producto_defecto.png";
+        if (imagen.startsWith("http")) return imagen; // URL pública (Supabase)
+        if (imagen.startsWith("/Images/")) return imagen; // local
+        return "/Images/producto_defecto.png";
     };
 
     // Cargar productos
@@ -62,27 +63,48 @@ const ProdDonaciones = () => {
                 nombre: producto.nombre,
                 descripcion: producto.descripcion,
                 imagen: producto.imagen,
-                estado: producto.estado, // 🔹 cargamos el estado
+                estado: producto.estado,
             });
             setEditMode(true);
         } else {
             setFormData({ id: null, nombre: "", descripcion: "", imagen: "", estado: true });
             setEditMode(false);
         }
+        setSelectedFile(null);
         setOpen(true);
     };
 
     // Cerrar modal
-    const handleClose = () => setOpen(false);
+    const handleClose = () => {
+        setOpen(false);
+        setSelectedFile(null);
+    };
 
     // Guardar producto
     const handleSave = async () => {
         try {
-            if (editMode) {
-                await api.put(`/auth/productos/${formData.id}`, formData);
-            } else {
-                await api.post("/auth/productos", formData);
+            let imagenUrl = formData.imagen;
+
+            // 🔹 Si seleccionó un archivo nuevo, lo subimos primero
+            if (selectedFile) {
+                const fd = new FormData();
+                fd.append("file", selectedFile);
+
+                const uploadRes = await api.post("/auth/upload", fd, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+
+                imagenUrl = uploadRes.data.url; // URL pública de Supabase
             }
+
+            const payload = { ...formData, imagen: imagenUrl };
+
+            if (editMode) {
+                await api.put(`/auth/productos/${formData.id}`, payload);
+            } else {
+                await api.post("/auth/productos", payload);
+            }
+
             fetchProductos();
             handleClose();
         } catch (e) {
@@ -115,17 +137,13 @@ const ProdDonaciones = () => {
                 Agregar Producto
             </Button>
 
-            <Grid
-                container
-                spacing={3}
-                justifyContent="center" // 🔹 centra horizontalmente
-            >
+            <Grid container spacing={3} justifyContent="center">
                 {productos.map((item) => (
                     <Grid item xs={12} sm={6} md={4} key={item.id}>
                         <Card
                             sx={{
-                                width: 300, // 🔹 ancho fijo
-                                height: 400, // 🔹 altura fija
+                                width: 300,
+                                height: 400,
                                 display: "flex",
                                 flexDirection: "column",
                                 justifyContent: "space-between",
@@ -226,16 +244,29 @@ const ProdDonaciones = () => {
                             setFormData({ ...formData, descripcion: e.target.value })
                         }
                     />
-                    <TextField
-                        margin="dense"
-                        label="Imagen (ruta)"
-                        fullWidth
-                        value={formData.imagen}
-                        onChange={(e) =>
-                            setFormData({ ...formData, imagen: e.target.value })
-                        }
-                    />
-                    {/* 🔹 Selector de estado */}
+
+                    {/* 🔹 Campo de archivo */}
+                    <Button
+                        variant="outlined"
+                        component="label"
+                        sx={{ mt: 2 }}
+                    >
+                        {selectedFile ? "Imagen seleccionada" : "Subir Imagen"}
+                        <input
+                            type="file"
+                            accept="image/*"
+                            hidden
+                            onChange={(e) => setSelectedFile(e.target.files[0])}
+                        />
+                    </Button>
+
+                    {/* Si ya hay imagen en edición, la mostramos */}
+                    {formData.imagen && !selectedFile && (
+                        <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                            Imagen actual: {formData.imagen}
+                        </Typography>
+                    )}
+
                     <FormControl fullWidth sx={{ mt: 2 }}>
                         <InputLabel>Estado</InputLabel>
                         <Select

@@ -27,8 +27,8 @@ const DonarIndumentarea = () => {
   const [seleccion, setSeleccion] = useState([]);
   const [open, setOpen] = useState(false);
   const [errores, setErrores] = useState({});
-  const [producto, setproducto]= useState("");
-  const [cantidad, setcantidad]= useState("");
+  const [producto, setproducto] = useState("");
+  const [cantidad, setcantidad] = useState("");
   const [displayPhone, setDisplayPhone] = useState("");
   const [formData, setFormData] = useState({
     nombre: "",
@@ -50,10 +50,12 @@ const DonarIndumentarea = () => {
 
   const getImagen = (imagen) => {
     if (!imagen) return "/Images/producto_defecto.png";
-    return imagen.startsWith("/Images/") ? imagen : "/Images/producto_defecto.png";
+    if (imagen.startsWith("http")) return imagen;       // Supabase u otro CDN
+    if (imagen.startsWith("/Images/")) return imagen;   // Imágenes locales antiguas
+    return "/Images/producto_defecto.png";              // Fallback
   };
 
-  
+
 
   useEffect(() => {
     const fetchProductos = async () => {
@@ -62,9 +64,9 @@ const DonarIndumentarea = () => {
         const productos = res.data.productos || [];
         const productosActivos = productos
           .filter((p) => p.estado === true)
-          .map((p) => ({ ...p, checked: false, cantidad:0}));
+          .map((p) => ({ ...p, checked: false, cantidad: 0 }));
 
-          console.log(productosActivos);
+        console.log(productosActivos);
         setSeleccion(productosActivos);
       } catch (err) {
         console.error("Error al cargar productos:", err);
@@ -75,19 +77,19 @@ const DonarIndumentarea = () => {
     fetchProductos();
   }, []);
 
- const handleCheckbox = (id) => {
-  setSeleccion((prev) => {
-    const updated = prev.map((item) =>
-      item.id === id
-        ? { ...item, checked: !item.checked, cantidad: !item.checked ? 1 : 0 }
-        : item
-    );
+  const handleCheckbox = (id) => {
+    setSeleccion((prev) => {
+      const updated = prev.map((item) =>
+        item.id === id
+          ? { ...item, checked: !item.checked, cantidad: !item.checked ? 1 : 0 }
+          : item
+      );
 
-     const seleccionados = updated.filter((item) => item.checked);
-    console.log("Productos seleccionados:", seleccionados);
-    return updated;
-  });
-};
+      const seleccionados = updated.filter((item) => item.checked);
+      console.log("Productos seleccionados:", seleccionados);
+      return updated;
+    });
+  };
 
   const handleCantidad = (id, cantidad) => {
     setSeleccion((prev) =>
@@ -145,14 +147,14 @@ const DonarIndumentarea = () => {
 
       .filter((item) => item.checked && item.cantidad > 0)
       .map((item) => ({ nombre: item.nombre, cantidad: item.cantidad }));
-    
+
     // Validar teléfono
     const rawPhone = formData.telefono?.replace(/\s+/g, "");
     const countryCode = formData.pais?.toUpperCase();
     const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
     formData.telefono = parsedPhone?.formatInternational?.() || formData.telefono;
 
-    const body={
+    const body = {
       nombre: formData.nombre,
       telefono: formData.telefono,
       correo: formData.correo,
@@ -164,39 +166,39 @@ const DonarIndumentarea = () => {
 
     try {
 
-       const res= await api.post('/auth/registrardonacion', body, {
+      const res = await api.post('/auth/registrardonacion', body, {
         headers: { "Content-Type": "application/json" }
       })
 
-      const donaciondata= res.data;
+      const donaciondata = res.data;
 
       console.log(donaciondata);
 
-      
+
     } catch (error) {
 
-         const msg =
+      const msg =
         error?.data?.mensaje || error?.message || 'Error en la Red';
-        console.log(msg);
+      console.log(msg);
 
-    setNotificacion({ open: true, mensaje: msg, tipo: "error" });
-    setOpen(false);
-      
-      
+      setNotificacion({ open: true, mensaje: msg, tipo: "error" });
+      setOpen(false);
+
+
     }
-    
+
 
     setFormData({
-  nombre: '',
-  correo: '',
-  telefono: '',
-  pais: '',
-  dia: '',
-  horario: '',
-  descripcion: ''
-});
+      nombre: '',
+      correo: '',
+      telefono: '',
+      pais: '',
+      dia: '',
+      horario: '',
+      descripcion: ''
+    });
 
-console.log(formData)
+    console.log(formData)
 
     // ✅ Éxito al enviar
     setNotificacion({ open: true, mensaje: "Donación enviada correctamente. ¡Gracias!", tipo: "success" });
@@ -271,8 +273,9 @@ console.log(formData)
 
         <div
           style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+            display: "flex",
+            flexWrap: "wrap",        // permite varias filas
+            justifyContent: "center", // centra todas las filas, incluida la última
             gap: "1rem",
           }}
         >
@@ -286,27 +289,33 @@ console.log(formData)
                 textAlign: "center",
                 backgroundColor: "rgba(255, 255, 255, 0.9)",
                 color: "#000",
+                width: "calc(16.6667% - 1rem)", // 6 columnas menos el gap
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "space-between",
                 position: "relative",
               }}
             >
               <img
                 src={getImagen(p.imagen)}
                 alt={p.nombre}
-                onError={(e) =>
-                  (e.target.src = "/Images/producto_defecto.png")
-                }
+                onError={(e) => (e.target.src = "/Images/producto_defecto.png")}
                 style={{
-                  width: "70%",
-                  height: "50%",
+                  width: "200px",
+                  height: "200px",
                   objectFit: "cover",
                   borderRadius: "8px",
+                  margin: "0 auto",
                 }}
               />
               <h3
                 style={{
                   fontFamily: "GroteskBold",
                   margin: "1rem 0",
-                  whiteSpace: "nowrap",
+                  fontSize: "1rem",
+                  display: "-webkit-box",
+                  WebkitLineClamp: 1,
+                  WebkitBoxOrient: "vertical",
                   overflow: "hidden",
                   textOverflow: "ellipsis",
                 }}
@@ -317,7 +326,7 @@ console.log(formData)
                 style={{
                   fontFamily: "GroteskRegular",
                   fontSize: "0.9rem",
-                  marginBottom: "1rem",
+                  marginBottom: "0.5rem",
                   display: "-webkit-box",
                   WebkitLineClamp: 3,
                   WebkitBoxOrient: "vertical",
@@ -327,27 +336,48 @@ console.log(formData)
               >
                 {p.descripcion}
               </p>
-              <div style={{ marginBottom: "1rem" }}>
+
+              {/* Checkbox centrado */}
+              <div
+                style={{
+                  margin: "0.3rem 0",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                  gap: "0.5rem",
+                }}
+              >
                 <input
                   type="checkbox"
                   checked={p.checked}
                   onChange={() => handleCheckbox(p.id)}
-                />{" "}
-                Seleccionar
+                />
+                <span>Seleccionar</span>
               </div>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                value={p.cantidad}
-                disabled={!p.checked}
-                onChange={(e) => handleCantidad(p.id, e.target.value)}
-                style={{ width: "60px", textAlign: "center" }}
-              />
+
+              {/* Contador de cantidad centrado */}
+              <div
+                style={{
+                  marginBottom: "0.3rem",
+                  textAlign: "center",
+                }}
+              >
+                {p.checked && (
+                  <span style={{ marginRight: "0.5rem" }}>Cantidad: {p.cantidad}</span>
+                )}
+                <input
+                  type="number"
+                  min="1"
+                  max="100"
+                  value={p.cantidad}
+                  disabled={!p.checked}
+                  onChange={(e) => handleCantidad(p.id, e.target.value)}
+                  style={{ width: "60px", textAlign: "center" }}
+                />
+              </div>
+
               <IconButton
-                onClick={() =>
-                  setModalFicha({ open: true, producto: p })
-                }
+                onClick={() => setModalFicha({ open: true, producto: p })}
                 style={{
                   position: "absolute",
                   top: "10px",
@@ -498,11 +528,7 @@ console.log(formData)
         <DialogContent>
           <Box sx={{ textAlign: "center" }}>
             <img
-              src={
-                modalFicha.producto?.imagen
-                  ? `${window.location.origin}${modalFicha.producto.imagen}`
-                  : "/Images/producto_defecto.png"
-              }
+              src={getImagen(modalFicha.producto?.imagen)}
               alt={modalFicha.producto?.nombre}
               onError={(e) => {
                 e.target.onerror = null;
