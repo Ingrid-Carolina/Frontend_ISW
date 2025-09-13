@@ -1,6 +1,5 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import MapComponent from '../components/MapComponent';
-
 import {
 	Box,
 	Typography,
@@ -10,17 +9,23 @@ import {
 	FormControlLabel,
 	Checkbox,
 	Button,
+	Snackbar,
+	Alert,
+	Dialog,
+	DialogTitle,
+	DialogContent,
+	DialogActions,
 } from '@mui/material';
 import fond from '/Images/pilotos.c.jpg';
 import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { Controller } from 'react-hook-form';
-import { Snackbar, Alert } from '@mui/material';
-//import axios from 'axios';
+import { useForm, Controller } from 'react-hook-form';
 import { api } from '../api/api';
 import ReCAPTCHA from 'react-google-recaptcha';
+import EditIcon from '@mui/icons-material/Edit';
+import { IconButton, Tooltip } from '@mui/material';
 
 const Contacto = () => {
+	// ======== FORM DE MENSAJE ========
 	const {
 		register,
 		handleSubmit,
@@ -30,42 +35,115 @@ const Contacto = () => {
 	} = useForm();
 
 	const [openSnackbar, setOpenSnackbar] = useState(false);
-	const [snackbarType, setSnackbarType] = useState('success'); // 'success' | 'error'
+	const [snackbarType, setSnackbarType] = useState('success');
 	const [snackbarMsg, setSnackbarMsg] = useState('');
 	const captcha = useRef(null);
-
-	//const soloLetras = /^[A-Za-zÁÉÍÓÚáéíóúÑñ\s]+$/;
 
 	const contieneScript = value =>
 		!/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi.test(value) ||
 		'Contenido inválido';
-
 	const noEspaciosEnBlanco = value =>
-		// Valida que el input no esté vacío ni contenga solo espacios. Se aplica a varios campos del formulario.
 		value.trim() !== '' || 'No puede contener solo espacios';
 
-	const onSubmit = async (data) => {
+	// ======== estado para info de contacto  ========
+	const [contacto, setContacto] = useState(null);
+	const [isAdmin, setIsAdmin] = useState(false);
+	const [openEdit, setOpenEdit] = useState(false);
+	const [formContacto, setFormContacto] = useState({
+		org_nombre: '',
+		telefono_lbl: '',
+		telefono_val: '',
+		email_lbl: '',
+		email_val: '',
+		texto_intro: '',
+		texto_cta: '',
+	});
 
+	// Cargar info de contacto (endpoint público)
+	useEffect(() => {
+		const fetchContacto = async () => {
+			try {
+				const res = await api.get('/auth/contacto', { skipAuthRedirect: true });
+				const payload = res?.data?.contacto ?? res?.data ?? null;
+				setContacto(payload);
+			} catch (e) {
+				console.log('No se pudo cargar /contacto:', e.message);
+			}
+		};
+		fetchContacto();
+	}, []);
 
-		 const token = await captcha.current.executeAsync();
-		 captcha.current.reset();
-	 if (!token) {
-	 	window.alert('Por favor, valida el CAPTCHA.');
-		 	return;
-		 }
+	// Comprobar rol (para mostrar botón "editar")
+	useEffect(() => {
+		const checkRole = async () => {
+			try {
+				const r = await api.get('/auth/obtenerperfil', {
+					withCredentials: true,
+					skipAuthRedirect: true,
+				});
+				const p = Array.isArray(r.data) ? r.data[0] : r.data;
+				const role = String(p?.rol || '').toLowerCase();
+				setIsAdmin(role === 'admin' || role === 'admin-calendario');
+			} catch {
+				setIsAdmin(false);
+			}
+		};
+		checkRole();
 
-	// Verificar token con el backend
+		const onAuthRefresh = () => checkRole();
+		window.addEventListener('auth:refresh', onAuthRefresh);
+		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
+	}, []);
+
+	const openEditor = () => {
+		// Permite abrir aunque no haya registro (usa defaults)
+		const c = contacto ?? {};
+		setFormContacto({
+			org_nombre: c.org_nombre ?? 'Organización de Béisbol PILOTOS - FAH',
+			telefono_lbl: c.telefono_lbl ?? 'NUESTRO NÚMERO',
+			telefono_val: c.telefono_val ?? '+504 9918-2456',
+			email_lbl: c.email_lbl ?? 'CORREO ELECTRÓNICO',
+			email_val: c.email_val ?? 'pilotoshn@outlook.com',
+			texto_intro: c.texto_intro ?? 'Comparta su experiencia con nosotros.',
+			texto_cta: c.texto_cta ?? 'Envíe una historia o testimonio.',
+		});
+		setOpenEdit(true);
+	};
+
+	const saveContacto = async () => {
 		try {
-			 const res = await api.post('/auth/verificar', { token });
+			const res = await api.put('/auth/contacto', formContacto);
+			const updated = res?.data?.contacto ?? res?.data ?? null;
+			setContacto(updated);
+			setOpenEdit(false);
+			setSnackbarType('success');
+			setSnackbarMsg('Contacto actualizado');
+			setOpenSnackbar(true);
+		} catch (e) {
+			setSnackbarType('error');
+			setSnackbarMsg(e.message || 'No se pudo guardar');
+			setOpenSnackbar(true);
+		}
+	};
 
-		 if (!res.data.success) {
-			 	setSnackbarType('error');
-			 	setSnackbarMsg('Verificación del CAPTCHA fallida.');
-			 	setOpenSnackbar(true);
-			 	return;
-			 }
+	// ======== ENVIO DEL FORM DE MENSAJE ========
+	const onSubmit = async data => {
+		const token = await captcha.current.executeAsync();
+		captcha.current.reset();
+		if (!token) {
+			window.alert('Por favor, valida el CAPTCHA.');
+			return;
+		}
 
-			// Procede con el envío del formulario
+		try {
+			const res = await api.post('/auth/verificar', { token });
+			if (!res.data.success) {
+				setSnackbarType('error');
+				setSnackbarMsg('Verificación del CAPTCHA fallida.');
+				setOpenSnackbar(true);
+				return;
+			}
+
 			const body = {
 				email: data.correo,
 				nombre: data.nombre,
@@ -77,7 +155,6 @@ const Contacto = () => {
 			};
 
 			const response = await api.post('/auth/registrarformulario', body);
-
 			reset({
 				nombre: '',
 				apellido: '',
@@ -88,10 +165,11 @@ const Contacto = () => {
 				mensaje: '',
 			});
 
-			setSnackbarMsg('Formulario enviado exitosamente.');
+			setSnackbarMsg(
+				response.data?.mensaje || 'Formulario enviado exitosamente.',
+			);
 			setSnackbarType('success');
 			setOpenSnackbar(true);
-			console.log('response data:', response.data.mensaje);
 		} catch (error) {
 			const mensaje =
 				error.response?.data?.mensaje || 'Hubo un error en el servidor.';
@@ -130,7 +208,6 @@ const Contacto = () => {
 						zIndex: 1,
 					}}
 				/>
-
 				<Box
 					sx={{
 						position: 'relative',
@@ -168,14 +245,14 @@ const Contacto = () => {
 						display: 'flex',
 						flexDirection: { xs: 'column', md: 'row' },
 						gap: { xs: 3, md: 4 },
-						alignItems: { xs: 'center', md: 'flex-start' }, //centra en móvil
+						alignItems: { xs: 'center', md: 'flex-start' },
 					}}
 				>
-					{/* INFO DE CONTACTO */}
+					{/* ======== PANEL DE INFORMACION EDITABLE ======== */}
 					<Box
 						sx={{
-							width: { xs: 'min(560px, 92vw)', md: 320, lg: 360 }, // fluido en móvil, fijo en desktop
-							mx: { xs: 'auto', md: 0 }, // centrado en móvil
+							width: { xs: 'min(560px, 92vw)', md: 320, lg: 360 },
+							mx: { xs: 'auto', md: 0 },
 							backgroundColor: '#fff',
 							border: '1px solid #ccc',
 							boxShadow: 2,
@@ -197,25 +274,47 @@ const Contacto = () => {
 								px: 2,
 								fontSize: { xs: 'clamp(18px, 4.8vw, 22px)', md: '1.4rem' },
 								lineHeight: 1.2,
+								position: 'relative', 
 							}}
 						>
-							Organización de Béisbol PILOTOS - FAH
+							{contacto?.org_nombre || 'Organización de Béisbol PILOTOS - FAH'}
+
+							{isAdmin && (
+								<Tooltip title='Editar'>
+									<IconButton
+										size='small'
+										onClick={openEditor}
+										sx={{
+											position: 'absolute',
+											top: 4,
+											right: 4,
+											color: 'white',
+											backgroundColor: 'transparent',
+											'&:hover': {
+												backgroundColor: 'rgba(255,255,255,0.3)',
+											},
+										}}
+									>
+										<EditIcon fontSize='small' />
+									</IconButton>
+								</Tooltip>
+							)}
 						</Box>
 
-						<Box sx={{ px: 2, py: 2 }}>
+						<Box sx={{ px: 2, py: 2, position: 'relative' }}>
 							<Typography sx={{ fontWeight: 'bold', color: '#c62828' }}>
-								NUESTRO NÚMERO
+								{contacto?.telefono_lbl || 'NUESTRO NÚMERO'}
 							</Typography>
 							<Typography sx={{ fontWeight: 'bold', color: '#002c6c', mb: 1 }}>
-								+504 9918-2456
+								{contacto?.telefono_val || '+504 9918-2456'}
 							</Typography>
 
 							<Typography sx={{ fontWeight: 'bold', color: '#c62828' }}>
-								CORREO ELECTRÓNICO
+								{contacto?.email_lbl || 'CORREO ELECTRÓNICO'}
 							</Typography>
 							<Typography
 								component='a'
-								href='mailto:pilotoshn@outlook.com'
+								href={`mailto:${contacto?.email_val || 'pilotoshn@outlook.com'}`}
 								sx={{
 									fontWeight: 'bold',
 									color: '#002c6c',
@@ -224,11 +323,12 @@ const Contacto = () => {
 									mb: 2,
 								}}
 							>
-								pilotoshn@outlook.com
+								{contacto?.email_val || 'pilotoshn@outlook.com'}
 							</Typography>
 
 							<Typography sx={{ fontSize: '0.95rem' }}>
-								Comparta su experiencia con nosotros.
+								{contacto?.texto_intro ||
+									'Comparta su experiencia con nosotros.'}
 							</Typography>
 							<Link
 								to='/Testimonio'
@@ -241,12 +341,12 @@ const Contacto = () => {
 								onMouseEnter={e => (e.target.style.color = '#e06c14')}
 								onMouseLeave={e => (e.target.style.color = '#002c6c')}
 							>
-								Envíe una historia o testimonio.
+								{contacto?.texto_cta || 'Envíe una historia o testimonio.'}
 							</Link>
 						</Box>
 					</Box>
 
-					{/* FORMULARIO */}
+					{/* ======== FORMULARIO DE MENSAJE ======== */}
 					<Box
 						component='form'
 						onSubmit={handleSubmit(onSubmit)}
@@ -297,10 +397,7 @@ const Contacto = () => {
 										{...register(field.name, {
 											required: `El campo ${field.label} es obligatorio`,
 											pattern: field.pattern
-												? {
-														value: field.pattern,
-														message: field.message,
-													}
+												? { value: field.pattern, message: field.message }
 												: undefined,
 											validate: value =>
 												(field.customValidate
@@ -312,17 +409,13 @@ const Contacto = () => {
 										InputLabelProps={{
 											sx: {
 												color: '#002c6c',
-												'& .MuiFormLabel-asterisk': {
-													color: 'red',
-												},
+												'& .MuiFormLabel-asterisk': { color: 'red' },
 											},
 										}}
 										onKeyPress={
 											field.name === 'telefono'
 												? e => {
-														if (!/[0-9]/.test(e.key)) {
-															e.preventDefault();
-														}
+														if (!/[0-9]/.test(e.key)) e.preventDefault();
 													}
 												: undefined
 										}
@@ -341,10 +434,8 @@ const Contacto = () => {
 										validate: value => {
 											const espacio = noEspaciosEnBlanco(value);
 											if (espacio !== true) return espacio;
-
 											const script = contieneScript(value);
 											if (script !== true) return script;
-
 											return true;
 										},
 									})}
@@ -353,9 +444,7 @@ const Contacto = () => {
 									InputLabelProps={{
 										sx: {
 											color: '#002c6c',
-											'& .MuiFormLabel-asterisk': {
-												color: 'red',
-											},
+											'& .MuiFormLabel-asterisk': { color: 'red' },
 										},
 									}}
 								/>
@@ -417,7 +506,7 @@ const Contacto = () => {
 							</Grid>
 						</Grid>
 
-						{/* CAMPO MENSAJE*/}
+						{/* CAMPO MENSAJE */}
 						<Box sx={{ mt: 3 }}>
 							<Controller
 								name='mensaje'
@@ -433,10 +522,8 @@ const Contacto = () => {
 									validate: value => {
 										const espacio = noEspaciosEnBlanco(value);
 										if (espacio !== true) return espacio;
-
 										const script = contieneScript(value);
 										if (script !== true) return script;
-
 										return true;
 									},
 								}}
@@ -452,9 +539,7 @@ const Contacto = () => {
 											errors.mensaje?.message ||
 											`${field.value.length}/500 caracteres`
 										}
-										inputProps={{
-											maxLength: 500, // Limita la escritura a 500 caracteres
-										}}
+										inputProps={{ maxLength: 500 }}
 										InputLabelProps={{
 											required: true,
 											sx: {
@@ -477,21 +562,20 @@ const Contacto = () => {
 							/>
 						</Box>
 
-						{/* BOTÓN ENVIAR MENSAJE*/}
-						 <ReCAPTCHA
+						{/* BOTON ENVIAR MENSAJE */}
+						<ReCAPTCHA
 							ref={captcha}
 							sitekey='6LeoJWErAAAAAL6RcLtqe59DOJyUGdkQO1gc3Nvm'
 							size='invisible'
-						/> 
-
+						/>
 						<Box sx={{ mt: 3, display: 'flex', justifyContent: 'flex-start' }}>
 							<Button
 								type='submit'
 								variant='contained'
 								sx={{
 									height: '40px',
-									minWidth: '120px', // ancho mínimo
-									px: 3, // padding horizontal interno
+									minWidth: '120px',
+									px: 3,
 									backgroundColor: '#0c005a',
 									color: 'white',
 									textTransform: 'none',
@@ -500,9 +584,7 @@ const Contacto = () => {
 									fontSize: '1rem',
 									borderRadius: '6px',
 									boxShadow: '0px 3px 8px rgba(0,0,0,0.15)',
-									'&:hover': {
-										backgroundColor: '#e06c14',
-									},
+									'&:hover': { backgroundColor: '#e06c14' },
 								}}
 							>
 								Enviar
@@ -511,15 +593,10 @@ const Contacto = () => {
 					</Box>
 				</Box>
 			</Box>
-			{/* MAPA DE UBICACIÓN */}
+
+			{/* MAPA */}
 			<Box sx={{ py: 6, backgroundColor: '#f1f5fb' }}>
-				<Box
-					sx={{
-						maxWidth: '1200px',
-						margin: '0 auto',
-						px: 2,
-					}}
-				>
+				<Box sx={{ maxWidth: '1200px', margin: '0 auto', px: 2 }}>
 					<Typography
 						variant='h4'
 						sx={{
@@ -534,7 +611,7 @@ const Contacto = () => {
 					</Typography>
 					<MapComponent isInteractive={false} />
 
-					{/* FEEDBACK flotante sobre Formulario Exitoso o Algun Error */}
+					{/* FEEDBACK */}
 					<Snackbar
 						open={openSnackbar}
 						autoHideDuration={4000}
@@ -552,6 +629,106 @@ const Contacto = () => {
 					</Snackbar>
 				</Box>
 			</Box>
+
+			{/* MODAL DE EDICION DE CONTACTO (solo admin) */}
+			<Dialog
+				open={openEdit}
+				onClose={() => setOpenEdit(false)}
+				scroll='paper'
+				sx={{
+					zIndex: theme => theme.zIndex.modal, 
+				}}
+				PaperProps={{
+					sx: {
+						mt: { xs: 8, md: 10 }, 
+						mx: 2, 
+						width: '100%',
+						maxWidth: 560, 
+						maxHeight: 'calc(100vh - 140px)', 
+						borderRadius: 2,
+					},
+				}}
+				slotProps={{
+					backdrop: {
+						sx: {
+							backgroundColor: 'rgba(0,0,0,0.35)',
+							backdropFilter: 'blur(2px)',
+						},
+					},
+				}}
+			>
+				<DialogTitle sx={{ pb: 1, fontWeight: 700 }}>
+					Editar Información de Contacto
+				</DialogTitle>
+
+				<DialogContent dividers sx={{ display: 'grid', gap: 1.5, pt: 1 }}>
+					<TextField
+						label='Nombre de la organización'
+						value={formContacto.org_nombre}
+						onChange={e =>
+							setFormContacto({ ...formContacto, org_nombre: e.target.value })
+						}
+						size='small'
+					/>
+					<TextField
+						label='Etiqueta teléfono'
+						value={formContacto.telefono_lbl}
+						onChange={e =>
+							setFormContacto({ ...formContacto, telefono_lbl: e.target.value })
+						}
+						size='small'
+					/>
+					<TextField
+						label='Número de teléfono'
+						value={formContacto.telefono_val}
+						onChange={e =>
+							setFormContacto({ ...formContacto, telefono_val: e.target.value })
+						}
+						size='small'
+					/>
+					<TextField
+						label='Etiqueta email'
+						value={formContacto.email_lbl}
+						onChange={e =>
+							setFormContacto({ ...formContacto, email_lbl: e.target.value })
+						}
+						size='small'
+					/>
+					<TextField
+						label='Correo'
+						value={formContacto.email_val}
+						onChange={e =>
+							setFormContacto({ ...formContacto, email_val: e.target.value })
+						}
+						size='small'
+					/>
+					<TextField
+						label='Texto introductorio'
+						value={formContacto.texto_intro}
+						onChange={e =>
+							setFormContacto({ ...formContacto, texto_intro: e.target.value })
+						}
+						size='small'
+						multiline
+					/>
+					<TextField
+						label='Texto de redireccion'
+						value={formContacto.texto_cta}
+						onChange={e =>
+							setFormContacto({ ...formContacto, texto_cta: e.target.value })
+						}
+						size='small'
+						multiline
+					/>
+				</DialogContent>
+
+				<DialogActions sx={{ px: 2, py: 1.5 }}>
+					<Button onClick={() => setOpenEdit(false)}>Cancelar</Button>
+					<Button variant='contained' onClick={saveContacto}>
+						Guardar
+					</Button>
+				</DialogActions>
+			</Dialog>
 		</>
 	);
 };
