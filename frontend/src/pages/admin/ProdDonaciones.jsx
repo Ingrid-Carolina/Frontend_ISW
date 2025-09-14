@@ -48,7 +48,7 @@ const ProdDonaciones = () => {
     // Cargar productos
     const fetchProductos = async () => {
         try {
-            const res = await api.get("/auth/productos");
+            const res = await api.get("/auth/donaciones/productos");
             setProductos(res.data.productos || []);
         } catch (e) {
             console.error("Error al obtener productos:", e);
@@ -103,9 +103,9 @@ const ProdDonaciones = () => {
             const payload = { ...formData, imagen: imagenUrl };
 
             if (editMode) {
-                await api.put(`/auth/productos/${formData.id}`, payload);
+                await api.put(`/auth/donaciones/productos/${formData.id}`, payload);
             } else {
-                await api.post("/auth/productos", payload);
+                await api.post("/auth/donaciones/productos", payload);
             }
 
             fetchProductos();
@@ -118,7 +118,7 @@ const ProdDonaciones = () => {
     // Eliminar producto
     const handleDelete = async (id) => {
         try {
-            await api.delete(`/auth/productos/${id}`);
+            await api.delete(`/auth/donaciones/productos/${id}`);
             fetchProductos();
         } catch (e) {
             console.error("Error al eliminar producto:", e);
