@@ -51,8 +51,6 @@ const baseMenuItems = [
 	{ text: 'Contacto', icon: <CallIcon />, path: '/Contacto' },
 ];
 
-const isLive = true;
-
 const pulseAnimation = (
 	<Global
 		styles={`
@@ -209,12 +207,16 @@ export default function CustomNavbar() {
 	const [avatarUrl, setAvatarUrl] = React.useState('');
 	const [avatarVer, setAvatarVer] = React.useState(0);
 
-	// >>>>>>>>>>>>>>>>  NOMBRE Y ROL SOLO EN ESTADO (no storage)  <<<<<<<<<<<<<<<<<
+	//NOMBRE Y ROL SOLO EN ESTADO
 	const [userName, setUserName] = React.useState('');
 	const [userRole, setUserRole] = React.useState('');
 
+	//esta logueado const
 	const isLoggedIn = !!userName;
 	const avatarLetter = (userName || 'U').charAt(0).toUpperCase();
+
+	//revisar si esta envivo
+	const [isLive, setIsLive] = React.useState(false);
 
 	// estilos drawer
 	const drawerItemSx = {
@@ -244,57 +246,112 @@ export default function CustomNavbar() {
 	}, []);
 
 	// Cargar perfil desde backend usando cookie HttpOnly
-
 	React.useEffect(() => {
+		let mounted = true;
+		let intervalId;
+
 		const fetchProfile = async () => {
-			setLoadingUser(true); // arrancamos cargando
+			if (!mounted) return;
+			setLoadingUser(true);
 			try {
 				const res = await api.get('/auth/obtenerperfil', {
 					withCredentials: true,
 				});
+
 				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
 
-				// nombre
 				const nombre = perfil?.nombre ?? perfil?.name ?? '';
-				setUserName(nombre);
+				if (mounted) setUserName(nombre);
 
-				// rol: soporta string o array y normaliza a lowercase
+				// normaliza rol
 				const rolesArr = Array.isArray(perfil?.roles)
 					? perfil.roles.map(r => String(r).toLowerCase())
 					: [];
 				const roleStr = String(perfil?.rol ?? perfil?.role ?? '').toLowerCase();
 
-				let effectiveRole =
+				const effectiveRole =
 					roleStr || (rolesArr.includes('admin') ? 'admin' : rolesArr[0] || '');
-				setUserRole(effectiveRole);
+				if (mounted) setUserRole(effectiveRole);
 
 				// avatar
 				if (perfil?.avatar) {
-					setAvatarUrl(perfil.avatar);
-					setAvatarVer(Date.now());
-				} else {
+					if (mounted) {
+						setAvatarUrl(perfil.avatar);
+						setAvatarVer(Date.now());
+					}
+				} else if (mounted) {
 					setAvatarUrl('');
 				}
 			} catch (e) {
-				setUserName('');
-				setUserRole('');
-				setAvatarUrl('');
+				console.error("Error al obtener perfil:", e);
+				// si no hay sesión, limpiamos estado
+				if (mounted) {
+					setUserName('');
+					setUserRole('');
+					setAvatarUrl('');
+					navigate('/login');
+				}
 			} finally {
-				setLoadingUser(false); // ya terminó
+				if (mounted) setLoadingUser(false);
 			}
 		};
 
+		// primera carga
 		fetchProfile();
-		/*
-		// refrescar cada hora (opcional)
-		const interval = setInterval(fetchProfile, 60 * 60 * 1000); 
-  		return () => clearInterval(interval);
-		*/
 
-		// escucha refrescos de auth para re-consultar el perfil tras login
+		// refresco periodico (cada hora)
+		intervalId = setInterval(fetchProfile, 60 * 60 * 1000);
+
 		const onAuthRefresh = () => fetchProfile();
 		window.addEventListener('auth:refresh', onAuthRefresh);
-		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
+
+		// cleanup unico
+		return () => {
+			mounted = false;
+			clearInterval(intervalId);
+			window.removeEventListener('auth:refresh', onAuthRefresh);
+		};
+	}, []);
+
+	//verifica si un video esta envivo
+	React.useEffect(() => {
+		let cancelled = false;
+
+		const fetchLive = async () => {
+			try {
+				const res = await api.get('/auth/obtenerenvivo', {
+					skipAuthRedirect: true,
+				});
+				const data = Array.isArray(res.data)
+					? res.data
+					: res.data?.videos || [];
+
+				// ordenar por id_envivo 
+				const last = data.sort((a, b) => b.id_envivo - a.id_envivo)[0];
+
+				if (!cancelled) {
+					const val = last?.activo;
+					const isActive =
+						val === true ||
+						val === 1 ||
+						String(val).trim().toUpperCase() === 'TRUE';
+					setIsLive(isActive);
+				}
+			} catch (e) {
+				console.error('Error al verificar En Vivo:', e);
+				if (!cancelled) setIsLive(false);
+			}
+		};
+
+		fetchLive();
+
+		// verifica cada 15s
+		const interval = setInterval(fetchLive, 15 * 1000);
+
+		return () => {
+			cancelled = true;
+			clearInterval(interval);
+		};
 	}, []);
 
 	// Helper de color
@@ -324,7 +381,11 @@ export default function CustomNavbar() {
 			setUserRole('');
 			setAvatarUrl('');
 			navigate('/');
-			setTimeout(() => window.location.reload(), 100);
+			window.dispatchEvent(new Event('auth:refresh'));
+			// Redirige una sola vez
+			if (location.pathname !== '/login') {
+				navigate('/login', { replace: true });
+			}
 		} catch (error) {
 			console.error('Error al cerrar sesión:', error);
 			alert('Error al cerrar sesión. Inténtalo de nuevo.');

@@ -83,7 +83,7 @@ const Contacto = () => {
 				});
 				const p = Array.isArray(r.data) ? r.data[0] : r.data;
 				const role = String(p?.rol || '').toLowerCase();
-				setIsAdmin(role === 'admin' || role === 'admin-calendario');
+				setIsAdmin(role === 'admin');
 			} catch {
 				setIsAdmin(false);
 			}
