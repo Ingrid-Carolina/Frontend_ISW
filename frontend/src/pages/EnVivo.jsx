@@ -37,6 +37,7 @@ const EnVivo = () => {
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 	const [videos, setVideos] = useState([]);
+	const [activo, setactivo]= useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(null);
 	const [urlData, setUrlData] = useState({
 		videoUrl: '',
@@ -280,11 +281,13 @@ const EnVivo = () => {
 			// Convertir la URL a formato embed antes de enviar
 			const embedUrl = convertToEmbedUrl(formData.videoUrl.trim());
 
+			const isActivo = formData.tipoTransmision === 'en_directo';
+
 			const requestBody = {
 				video_url: formData.videoUrl.trim(),
 				channel_url: formData.channelUrl.trim(),
 				descripcion: formData.descripcion.trim() || 'Video en vivo',
-				tipo_transmision: formData.tipoTransmision, // Agregar el nuevo campo
+				activo: isActivo,
 			};
 
 			console.log('Enviando datos:', requestBody);

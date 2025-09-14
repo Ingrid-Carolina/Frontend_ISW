@@ -17,6 +17,7 @@ const menuItems = [
   { text: 'Testimonios', path: 'mngtestimonios' },
   { text: 'Administrar Ordenes', path: 'mngordenes' }, 
   { text: 'Administrar Productos de Donaciones', path: 'mngproddonaciones' }, 
+   { text: 'Administrar Roles', path: 'mngusuarios' }, 
 ];
 
 export default function AdminLayout() {

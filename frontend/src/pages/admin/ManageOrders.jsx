@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Typography,
@@ -11,6 +11,8 @@ import {
   Paper,
   List,
   ListItem,
+  MenuItem,
+  Select
 } from "@mui/material";
 
 export default function ManageOrders() {
@@ -24,7 +26,7 @@ export default function ManageOrders() {
       fecha: "2025-09-01",
       idProducto: ["P123"],
       idCompra: "C456",
-      estado: "Enviando",
+      estado: "",
     },
     {
       usuario: "María López",
@@ -35,7 +37,7 @@ export default function ManageOrders() {
       fecha: "2025-09-02",
       idProducto: ["P789"],
       idCompra: "C987",
-      estado: "Entregado",
+      estado: "",
     },
     {
       usuario: "Carlos Gómez",
@@ -46,7 +48,7 @@ export default function ManageOrders() {
       fecha: "2025-09-03",
       idProducto: ["P123", "P456"],
       idCompra: "C654",
-      estado: "Pendiente",
+      estado: "",
     },
     {
       usuario: "Ana Martínez",
@@ -57,9 +59,22 @@ export default function ManageOrders() {
       fecha: "2025-09-04",
       idProducto: ["P789", "P123", "P321"],
       idCompra: "C741",
-      estado: "En proceso",
+      estado: "",
     },
   ];
+
+  const[estado, setestado]=useState(orders);
+
+  const handleEstado = (orderIndex, newEstado) => {
+  setestado((prevOrders) =>
+    prevOrders.map((order, i) =>
+      i === orderIndex ? { ...order, estado: newEstado } : order //iteramos hasta llegar al indice elegido
+    )
+  );
+
+  console.log(orders[orderIndex]);
+};
+
 
   return (
     <Box sx={{ mt: 12, px: { xs: 1, sm: 2, md: 3 } }}>
@@ -111,7 +126,7 @@ export default function ManageOrders() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {orders.map((order, index) => {
+            {estado.map((order, index) => {
               // Calcular total de la orden
               const total = order.productos.reduce(
                 (acc, _, i) => acc + order.cantidad[i] * order.precios[i],
@@ -148,7 +163,18 @@ export default function ManageOrders() {
                     ${total.toFixed(2)}
                   </TableCell>
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.email}</TableCell>
-                  <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.estado}</TableCell>
+                <TableCell sx={{ fontFamily: "PeterMedium" }}>
+                    <Select
+                      value={order.estado}
+                      onChange={(e) => handleEstado(index, e.target.value)}
+                      variant="standard"
+                      sx={{ fontFamily: "PeterMedium", minWidth: 120 }}
+                    >
+                      <MenuItem value="En Proceso">En Proceso</MenuItem>
+                      <MenuItem value="Enviando">Enviando</MenuItem>
+                      <MenuItem value="Entregado">Entregado</MenuItem>
+                    </Select>
+                </TableCell>
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.fecha}</TableCell>
 
                   {/* IDs de productos */}
