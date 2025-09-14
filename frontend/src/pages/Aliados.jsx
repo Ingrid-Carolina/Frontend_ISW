@@ -1,77 +1,26 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Box,
   Button,
   Container,
   Divider,
   Grid,
-  Stack,
+  CircularProgress,
+  Alert,
   Typography,
   useMediaQuery,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
-
-import luz from "/Images/LUFUS.jpg";
-import mobile from "/Images/Mob.jpg";
-import dental from "/Images/d.jpg";
-import angelitos from "/Images/fundacion.jpg";
-import Faerea from "/Images/fuerzaAerea.jpg";
 import { motion } from "framer-motion";
+import { api } from "../api/api";
+import EditableImage from "../components/EditableImage";
 
-const partners = [
-  {
-    name: "Luz y Fuerza de San Lorenzo S.A. (Lufussa)",
-    img: luz,
-    links: [
-      { label: "Visitar Página", href: "https://lufussa.com/es/inicio/" },
-      { label: "Visita Facebook", href: "https://www.facebook.com/LufussaHonduras/?locale=es_LA" },
-    ],
-  },
-  {
-    name: "Mobile Spot Honduras",
-    img: mobile,
-    links: [
-      { label: "Visita Facebook", href: "https://www.facebook.com/MobileSpothonduras" },
-      { label: "Visita Instagram", href: "https://www.instagram.com/mobilespothn/?hl=es-la" },
-    ],
-  },
-  {
-    name: "Dental D.",
-    img: dental,
-    links: [
-      { label: "Visita Facebook", href: "https://www.facebook.com/Dentaldhn" },
-      { label: "Visita Instagram", href: "https://www.instagram.com/dentaldhn/" },
-    ],
-  },
-];
-
-const strategicAllies = [
-  {
-    name: "Fundación Angelitos",
-    img: angelitos,
-    links: [
-      { label: "Visita Fundación", href: "http://www.fundacionangelitos.org" },
-      { label: "Visita Facebook", href: "https://www.facebook.com/fundacionangelitoshn" },
-      { label: "Visita Instagram", href: "https://www.instagram.com/fundacionangelitoshn/" },
-    ],
-  },
-  {
-    name: "Fuerza Aérea Hondureña",
-    img: Faerea,
-    links: [
-      { label: "Visita Facebook", href: "https://www.facebook.com/FuerzaAereaHN/?locale=es_LA" },
-      { label: "Visita Instagram", href: "https://www.instagram.com/fuerzaaereahn/?hl=es" },
-    ],
-  },
-];
-
-// NEW: variantes de animación
+// Variantes de animación
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
 };
 
-// NEW: slide desde la izquierda o derecha (según posición de la imagen)
 const slideFrom = (dir) => ({
   hidden: { opacity: 0, x: dir === "left" ? -60 : 60 },
   visible: {
@@ -81,21 +30,14 @@ const slideFrom = (dir) => ({
   },
 });
 
-// Opcional: pequeño stagger para botones/enlaces
 const stagger = {
   visible: { transition: { staggerChildren: 0.08 } },
 };
-const fadeItem = {
-  hidden: { opacity: 0, y: 10 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.35 } },
-};
 
-
-function PartnerSection({ name, img, links, reverse = false }) {
+function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
-  // En móviles apilamos; en desktop alternamos con "reverse"
   const textOrder = isMdUp ? (reverse ? 2 : 1) : 1;
   const rightOrder = isMdUp ? (reverse ? 1 : 2) : 2;
 
@@ -106,7 +48,7 @@ function PartnerSection({ name, img, links, reverse = false }) {
     <Box
       component="section"
       sx={{
-        my: { xs: 6, md: 10 } 
+        my: { xs: 6, md: 10 },
       }}
     >
       <Grid
@@ -116,7 +58,6 @@ function PartnerSection({ name, img, links, reverse = false }) {
         justifyContent="space-between"
         wrap="wrap"
       >
-        {/* Titulo */}
         <Grid item xs={12} md={7} order={textOrder}>
           <motion.div
             initial="hidden"
@@ -124,140 +65,242 @@ function PartnerSection({ name, img, links, reverse = false }) {
             viewport={{ once: true, amount: 0.35 }}
             variants={slideFrom(isMdUp ? textSlideDir : "right")}
           >
-            <Box sx={{
-              display: "flex",
-              flexDirection: { xs: "column", lg: "row" },   // <- apilar en xs
-              alignItems: { xs: "center", lg: "stretch" },  // <- centrar en xs
-              gap: { xs: 3, md: 0 },                        // <- aire en xs
-
-            }}>
-              <Box>
-                <Typography
-                  variant="h3"
-                  sx={{
-                    fontWeight: 800,
-                    fontSize: { xs: "2rem", md: "3.25rem" },
-                    lineHeight: 1.1,
-                    color: "#190B5A",
-                    textAlign: { xs: "center", md: "left" },
-                    mb: 1,
-                  }}
-                >
-                  {name}
-                </Typography>
-
-                {/*Subrayado*/}
-                <Box
-                  sx={{
-                    height: 3,
-                    width: { xs: 220, md: 520 },
-                    bgcolor: "#E06C14",
-                    borderRadius: 1,
-                    mb: { xs: 3, md: 4 },
-                    mx: { xs: "auto", md: 0 },
-                  }}
-
-                />
-
-                {/*Texto */}
-                <Typography
-                  variant="body1"
-                  sx={{
-                    color: "text.secondary",
-                    fontSize: { xs: "1rem", md: "1.125rem" },
-                    lineHeight: { xs: 1.7, md: 1.9 },
-                    maxWidth: { xs: "100%", md: "80%" },
-                    mb: 3,
-                    textAlign: { xs: "center", md: "left" }
-                  }}
-                >
-                  Gracias al apoyo de nuestros aliados estratégicos, hemos podido
-                  implementar proyectos sociales, apoyar comunidades vulnerables y
-                  promover la educación ambiental en distintas regiones del país.
-                </Typography>
-                <motion.div
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.35 }}
-                  style={{ display: "flex", flexWrap: "wrap", gap: 16 }}
-                  variants={stagger}
-                >
-                  {links.map((link) => (
-                    <Button
-                      key={link.href}
-                      variant="outlined"
-                      href={link.href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      sx={{
-                        px: 2.5,
-                        py: 1.25,
-                        borderWidth: 2,
-                        borderColor: "#E06C14",
-                        color: "#E06C14",
-                        fontWeight: 700,
-                        textTransform: "none",
-                        "&:hover": {
-                          bgcolor: "white",
-                          color: "#190B5A",
-                          borderColor: "#190B5A",
-                        },
-                      }}
-                    >
-                      {link.label}
-                    </Button>
-                  ))}
-                </motion.div>
-              </Box>
-
-
-              <Grid item xs={12} md={5} order={rightOrder}>
-                <motion.div
-                  initial="hidden"
-                  whileInView="visible"
-                  viewport={{ once: true, amount: 0.25 }}
-                  variants={slideFrom(isMdUp ? imgSlideDir : "left")}
-                >
-                  <Box
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: { xs: "center", md: "flex-start" },
+                gap: { xs: 3, md: 0 },
+              }}
+            >
+              <Typography
+                variant="h3"
+                sx={{
+                  fontWeight: 800,
+                  fontSize: { xs: "2rem", md: "3.25rem" },
+                  lineHeight: 1.1,
+                  color: "#190B5A",
+                  textAlign: { xs: "center", md: "left" },
+                  mb: 1,
+                }}
+              >
+                {name}
+              </Typography>
+              <Box
+                sx={{
+                  height: 3,
+                  width: { xs: 220, md: 520 },
+                  bgcolor: "#E06C14",
+                  borderRadius: 1,
+                  mb: { xs: 3, md: 4 },
+                  mx: { xs: "auto", md: 0 },
+                }}
+              />
+              <Typography
+                variant="body1"
+                sx={{
+                  color: "text.secondary",
+                  fontSize: { xs: "1rem", md: "1.125rem" },
+                  lineHeight: { xs: 1.7, md: 1.9 },
+                  maxWidth: { xs: "100%", md: "80%" },
+                  mb: 3,
+                  textAlign: { xs: "center", md: "left" },
+                }}
+              >
+                Gracias al apoyo de nuestros aliados estratégicos, hemos podido
+                implementar proyectos sociales, apoyar comunidades vulnerables y
+                promover la educación ambiental en distintas regiones del país.
+              </Typography>
+              <motion.div
+                initial="hidden"
+                whileInView="visible"
+                viewport={{ once: true, amount: 0.35 }}
+                style={{ display: "flex", flexWrap: "wrap", gap: 16 }}
+                variants={stagger}
+              >
+                {links.map((link) => (
+                  <Button
+                    key={link.href}
+                    variant="outlined"
+                    href={link.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
                     sx={{
-                      display: "flex",
-                      justifyContent: { xs: "center", md: reverse ? "flex-start" : "flex-end" },
-                      mt: { xs: 3, md: 0 },
-                      width: "100%",
+                      px: 2.5,
+                      py: 1.25,
+                      borderWidth: 2,
+                      borderColor: "#E06C14",
+                      color: "#E06C14",
+                      fontWeight: 700,
+                      textTransform: "none",
+                      "&:hover": {
+                        bgcolor: "white",
+                        color: "#190B5A",
+                        borderColor: "#190B5A",
+                      },
                     }}
                   >
-                    <Box
-                      component="img"
-                      src={img}
-                      alt={name}
-                      sx={{
-                        width: { xs: 240, sm: 260, md: 300 },
-                        height: { xs: 240, sm: 260, md: 300 },
-                        objectFit: "contain",
-                        borderRadius: "50%",
-                        border: { xs: "4px solid #E06C14", md: "6px solid #E06C14" },
-                        p: { xs: 1.15, md: 2 },
-                        bgcolor: "white",
-                        boxShadow: "0 2px 0 rgba(0,0,0,0.05)",
-                      }}
-                    />
-                  </Box>
-                </motion.div>
-              </Grid>
+                    {link.label}
+                  </Button>
+                ))}
+              </motion.div>
             </Box>
-
           </motion.div>
-
-
         </Grid>
-
-
+        <Grid item xs={12} md={5} order={rightOrder}>
+          <motion.div
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, amount: 0.25 }}
+            variants={slideFrom(isMdUp ? imgSlideDir : "left")}
+          >
+            <Box
+              sx={{
+                display: "flex",
+                justifyContent: {
+                  xs: "center",
+                  md: reverse ? "flex-start" : "flex-end",
+                },
+                mt: { xs: 3, md: 0 },
+                width: "100%",
+              }}
+            >
+              <EditableImage
+                src={img}
+                alt={name}
+                onImageUpload={onImageUpload}
+                sx={{
+                  width: { xs: 240, sm: 260, md: 300 },
+                  height: { xs: 240, sm: 260, md: 300 },
+                  objectFit: "contain",
+                  borderRadius: "50%",
+                  border: { xs: "4px solid #E06C14", md: "6px solid #E06C14" },
+                  p: { xs: 1.15, md: 2 },
+                  bgcolor: "white",
+                  boxShadow: "0 2px 0 rgba(0,0,0,0.05)",
+                  '& .edit-button': {
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    zIndex: 10,
+                  }
+                }}
+              />
+            </Box>
+          </motion.div>
+        </Grid>
       </Grid>
     </Box>
   );
 }
 
 export default function Aliados() {
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [images, setImages] = useState({});
+
+  const partners = [
+    {
+      name: "Luz y Fuerza de San Lorenzo S.A. (Lufussa)",
+      type: "aliado_lufussa",
+      links: [
+        { label: "Visitar Página", href: "https://lufussa.com/es/inicio/" },
+        { label: "Visita Facebook", href: "https://www.facebook.com/LufussaHonduras/?locale=es_LA" },
+      ],
+    },
+    {
+      name: "Mobile Spot Honduras",
+      type: "aliado_mobile",
+      links: [
+        { label: "Visita Facebook", href: "https://www.facebook.com/MobileSpothonduras" },
+        { label: "Visita Instagram", href: "https://www.instagram.com/mobilespothn/?hl=es-la" },
+      ],
+    },
+    {
+      name: "Dental D.",
+      type: "aliado_dental",
+      links: [
+        { label: "Visita Facebook", href: "https://www.facebook.com/Dentaldhn" },
+        { label: "Visita Instagram", href: "https://www.instagram.com/dentaldhn/" },
+      ],
+    },
+  ];
+
+  const strategicAllies = [
+    {
+      name: "Fundación Angelitos",
+      type: "aliado_angelitos",
+      links: [
+        { label: "Visita Fundación", href: "http://www.fundacionangelitos.org" },
+        { label: "Visita Facebook", href: "https://www.facebook.com/fundacionangelitoshn" },
+        { label: "Visita Instagram", href: "https://www.instagram.com/fundacionangelitoshn/" },
+      ],
+    },
+    {
+      name: "Fuerza Aérea Hondureña",
+      type: "aliado_faerea",
+      links: [
+        { label: "Visita Facebook", href: "https://www.facebook.com/FuerzaAereaHN/?locale=es_LA" },
+        { label: "Visita Instagram", href: "https://www.instagram.com/fuerzaaereahn/?hl=es" },
+      ],
+    },
+  ];
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        setLoading(true);
+        const response = await api.get("/auth/images");
+        const imagesMap = response.data.reduce((acc, current) => {
+          acc[current.type] = current.url;
+          return acc;
+        }, {});
+        setImages(imagesMap);
+      } catch (err) {
+        console.error("Error al cargar las imágenes:", err);
+        setError("No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchImages();
+  }, []);
+
+  const handleImageChange = async (type, file) => {
+    try {
+      if (!(file instanceof File)) return;
+
+      const formData = new FormData();
+      formData.append('file', file);
+      const uploadResponse = await api.post('/auth/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      const finalUrl = uploadResponse.data.url;
+      
+      await api.put('/auth/images', { type, url: finalUrl });
+
+      setImages(prev => ({
+        ...prev,
+        [type]: finalUrl,
+      }));
+    } catch (err) {
+      console.error(`Error al actualizar la imagen de tipo ${type}:`, err);
+      setError(`Error al actualizar la imagen.`);
+    }
+  };
+
+  if (loading) {
+    return (
+      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+        <CircularProgress />
+      </Box>
+    );
+  }
+
+  if (error) {
+    return <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>;
+  }
+
   return (
     <Box
       sx={{
@@ -267,45 +310,69 @@ export default function Aliados() {
         textAlign: "center",
       }}
     >
-
       <Box
         sx={{
-          position: 'relative',
-          width: '100%',
-          minHeight: { xs: '65vh', md: '80vh' },
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          backgroundImage: 'url(https://scontent.ftgu2-3.fna.fbcdn.net/v/t39.30808-6/480163521_947789290859942_4018030677925717705_n.jpg?_nc_cat=111&ccb=1-7&_nc_sid=cc71e4&_nc_eui2=AeGgaEHWfw5QqKvsPxfooL5O-zdtk3OFSnL7N22Tc4VKchfM9zSoTqkgCcrs2gFvwph7Ts4JNI0oMfL_V13WbF5x&_nc_ohc=6ZIJPgxs2BAQ7kNvwGRcYiz&_nc_oc=AdnHo4dVpUd1uaJMZmI1gfgUGI7TQCsV5Kblg-eFIrSiHWcG1u5SGzYS-yJRHmuMLY8&_nc_zt=23&_nc_ht=scontent.ftgu2-3.fna&_nc_gid=32Fs-3E_HXpaJRh_HMKztw&oh=00_AfWvFAdWUGXntKtB23D_jXQNvDpxtE9p2Dq6QePWiQZ0pA&oe=68B161C3)',
-          backgroundSize: 'cover',
-          backgroundPosition: 'center',
+          position: "relative",
+          width: "100%",
+          minHeight: { xs: "65vh", md: "80vh" },
+          backgroundImage: `url(${images.aliados_header})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
           py: { xs: 6, md: 8 },
         }}
       >
-        {/* Overlay */}
-        <Box
+        <EditableImage
+          src={images.aliados_header}
+          alt="Encabezado de aliados"
+          onImageUpload={(file) => handleImageChange('aliados_header', file)}
           sx={{
             position: 'absolute',
+            top: 0,
+            left: 0,
             width: '100%',
             height: '100%',
-            background: 'linear-gradient(to bottom right, rgba(12,0,90,0.85), rgba(0,0,0,0.7))',
+            zIndex: 0,
+            '& .editable-image': {
+              objectFit: 'cover',
+              width: '100%',
+              height: '100%',
+              borderRadius: 0,
+              boxShadow: 'none',
+            },
+            '& .edit-button': {
+              position: 'absolute',
+              bottom: 16,
+              right: 16,
+              zIndex: 10,
+              backgroundColor: 'rgba(255, 255, 255, 0.7)',
+              '&:hover': {
+                backgroundColor: 'rgba(255, 255, 255, 0.9)',
+              },
+            }
           }}
         />
-
-        {/* Contenido */}
         <Box
           sx={{
-            position: 'relative',
+            position: "absolute",
+            width: "100%",
+            height: "100%",
+            background:
+              "linear-gradient(to bottom right, rgba(12,0,90,0.85), rgba(0,0,0,0.7))",
+            zIndex: 1,
+          }}
+        />
+        <Box
+          sx={{
+            position: "relative",
             zIndex: 2,
-            textAlign: 'center',
-            color: 'white',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
+            textAlign: "center",
+            color: "white",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
             px: 2,
           }}
         >
-
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -313,21 +380,18 @@ export default function Aliados() {
             variants={fadeUp}
           >
             <Typography
-              variant='h2'
+              variant="h2"
               sx={{
-                fontWeight: 'bold',
-                fontSize: { xs: '2.8rem', md: '5rem' },
-                fontFamily: 'Varsity, sans-serif',
-                textShadow: '2px 2px 6px rgba(0,0,0,0.7)',
+                fontWeight: "bold",
+                fontSize: { xs: "2.8rem", md: "5rem" },
+                fontFamily: "Varsity, sans-serif",
+                textShadow: "2px 2px 6px rgba(0,0,0,0.7)",
                 mb: 2,
               }}
             >
               Nuestros Aliados
             </Typography>
-
           </motion.div>
-
-
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -335,27 +399,23 @@ export default function Aliados() {
             variants={fadeUp}
           >
             <Typography
-              variant='h6'
+              variant="h6"
               sx={{
                 maxWidth: 800,
-                fontSize: { xs: '1rem', md: '1.3rem' },
-                color: 'rgba(255,255,255,0.9)',
-                textShadow: '1px 1px 4px rgba(0,0,0,0.6)',
+                fontSize: { xs: "1rem", md: "1.3rem" },
+                color: "rgba(255,255,255,0.9)",
+                textShadow: "1px 1px 4px rgba(0,0,0,0.6)",
                 fontWeight: 300,
-                fontFamily: 'ManropeEB, sans-serif',
+                fontFamily: "ManropeEB, sans-serif",
               }}
             >
               Gracias a nuestros patrocinadores por impulsar el desarrollo deportivo de nuestros jóvenes atletas y fortalecer el espíritu del béisbol en nuestra comunidad.
             </Typography>
-
           </motion.div>
         </Box>
       </Box>
 
       <Container maxWidth="xl">
-
-        {/*Titulo Nuestros Socios */}
-
         <motion.div
           initial="hidden"
           whileInView="visible"
@@ -367,7 +427,7 @@ export default function Aliados() {
             sx={{
               fontSize: { xs: "2.8rem", md: "5rem" },
               fontWeight: 800,
-              fontFamily: 'Varsity, sans-serif',
+              fontFamily: "Varsity, sans-serif",
               color: "#E06C14",
               mb: { xs: 4 },
               mt: { xs: 4, md: 6 },
@@ -376,12 +436,7 @@ export default function Aliados() {
           >
             Nuestros Socios
           </Typography>
-
         </motion.div>
-
-       
-
-        {/* Título Patrocinadores */}
         <Typography
           variant="body1"
           sx={{
@@ -394,23 +449,27 @@ export default function Aliados() {
         >
           La Asociación de Béisbol Menor Pilotos de Honduras (FAH) cuenta con
           más de 76 años de historia desde su formación en 1948. Nuestro
-          principal objetivo es la formación integral de jovenes atletas, no
+          principal objetivo es la formación integral de jóvenes atletas, no
           solo en el juego del béisbol, sino también en la generación de líderes
           y ciudadanos de sus comunidades y país.
         </Typography>
 
-        {/* Partners */}
         {partners.map((p, idx) => (
-          <PartnerSection key={p.name} {...p} reverse={idx % 2 !== 0} />
+          <PartnerSection 
+            key={p.name} 
+            {...p} 
+            img={images[p.type]}
+            reverse={idx % 2 !== 0} 
+            onImageUpload={(file) => handleImageChange(p.type, file)}
+          />
         ))}
 
-        {/* Título Alianzas */}
         <Typography
           variant="h2"
           sx={{
             fontSize: { xs: "2.8rem", md: "5rem" },
             fontWeight: 800,
-            fontFamily: 'Varsity, sans-serif',
+            fontFamily: "Varsity, sans-serif",
             color: "#E06C14",
             mb: { xs: 4, md: 3 },
             mt: { xs: 4, md: 6 },
@@ -434,11 +493,16 @@ export default function Aliados() {
           Unidos con nuestros aliados estratégicos, impulsamos el deporte y transformamos comunidades.
         </Typography>
 
-        {/* Strategic Allies */}
         {strategicAllies.map((ally, idx) => (
-          <PartnerSection key={ally.name} {...ally} reverse={idx % 2 === 0} />
+          <PartnerSection 
+            key={ally.name} 
+            {...ally} 
+            img={images[ally.type]}
+            reverse={idx % 2 === 0} 
+            onImageUpload={(file) => handleImageChange(ally.type, file)}
+          />
         ))}
       </Container>
-    </Box >
+    </Box>
   );
 }
