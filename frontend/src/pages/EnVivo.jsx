@@ -37,6 +37,7 @@ const EnVivo = () => {
 	const [isAdmin, setIsAdmin] = useState(false);
 	const [showModal, setShowModal] = useState(false);
 	const [videos, setVideos] = useState([]);
+	const [activo, setactivo]= useState(false);
 	const [selectedIndex, setSelectedIndex] = useState(null);
 	const [urlData, setUrlData] = useState({
 		videoUrl: '',
@@ -46,6 +47,7 @@ const EnVivo = () => {
 		videoUrl: '',
 		channelUrl: '',
 		descripcion: '',
+		tipoTransmision: 'en_directo', // Nuevo campo para tipo de transmisión
 		activo: 'S',
 	});
 	const [bannerMsg, setBannerMsg] = useState('');
@@ -53,6 +55,7 @@ const EnVivo = () => {
 	const [showBanner, setShowBanner] = useState(false);
 	const [loading, setLoading] = useState(false);
 	const [checkingAuth, setCheckingAuth] = useState(true); // Estado para verificación de autenticación
+	
 	const fetchUrls = async () => {
 		setLoading(true);
 		try {
@@ -67,6 +70,7 @@ const EnVivo = () => {
   					video_url: video.video_url,
   					channel_url: video.channel_url,
   					descripcion: video.descripcion,
+					tipo_transmision: video.tipo_transmision || 'en_directo', // Agregar campo tipo_transmision
  					 activo: video.activo,
 					}));
 				setVideos(videosActualizados);
@@ -168,6 +172,7 @@ const EnVivo = () => {
 			videoUrl: urlData.videoUrl,
 			channelUrl: urlData.channelUrl,
 			descripcion: '',
+			tipoTransmision: 'en_directo', // Valor por defecto
 			activo: 'S',
 		});
 		setShowModal(true);
@@ -179,6 +184,7 @@ const EnVivo = () => {
 			videoUrl: '',
 			channelUrl: '',
 			descripcion: '',
+			tipoTransmision: 'en_directo', // Resetear al valor por defecto
 			activo: 'S',
 		});
 		setShowBanner(false);
@@ -217,7 +223,9 @@ const EnVivo = () => {
 
 			// Si encontramos un video ID, crear la URL embed
 			if (videoId) {
-				return `https://www.youtube.com/embed/${videoId}?autoplay=1&mute=1`;
+				// Agregar autoplay solo si es "en_directo"
+				const autoplayParam = formData.tipoTransmision === 'en_directo' ? '&autoplay=1&mute=1' : '';
+				return `https://www.youtube.com/embed/${videoId}?${autoplayParam.substring(1)}`;
 			}
 		} catch (error) {
 			console.error('Error procesando URL:', error);
@@ -273,10 +281,13 @@ const EnVivo = () => {
 			// Convertir la URL a formato embed antes de enviar
 			const embedUrl = convertToEmbedUrl(formData.videoUrl.trim());
 
+			const isActivo = formData.tipoTransmision === 'en_directo';
+
 			const requestBody = {
 				video_url: formData.videoUrl.trim(),
 				channel_url: formData.channelUrl.trim(),
 				descripcion: formData.descripcion.trim() || 'Video en vivo',
+				activo: isActivo,
 			};
 
 			console.log('Enviando datos:', requestBody);
@@ -296,28 +307,6 @@ const EnVivo = () => {
 				videoUrl: embedUrl,
 				channelUrl: formData.channelUrl.trim(),
 			});
-
-			// Recargar los videos para mostrar los cambios
-			/*try {
-				const resVideos = await api.get('/auth/obtenerenvivo', {
-					skipAuthRedirect: true,
-				});
-				if (resVideos.data && Array.isArray(resVideos.data)) {
-					const videosActualizados = resVideos.data.map(video => ({
-						id: video.id_envivo,
-						video_url: video.video_url,
-						channel_url: video.channel_url,
-						descripcion: video.descripcion,
-						activo: video.activo,
-					}));
-					setVideos(videosActualizados);
-					urlData.videoUrl= videosActualizados[0].video_url;
-					urlData.channelUrl= videosActualizados[0].channel_url;
-					
-				}
-			} catch (fetchError) {
-				console.warn('Error al recargar videos:', fetchError);
-			}*/
 
 			const mensaje = res.data?.mensaje || 'URLs actualizadas correctamente';
 			showMessage(mensaje, 'success');
@@ -751,6 +740,62 @@ const EnVivo = () => {
 									onFocus={e => (e.target.style.borderColor = '#3b82f6')}
 									onBlur={e => (e.target.style.borderColor = '#e5e7eb')}
 								/>
+							</div>
+
+							{/* Nuevo campo: Tipo de Transmisión */}
+							<div>
+								<label
+									style={{
+										display: 'block',
+										marginBottom: '8px',
+										fontWeight: '600',
+										color: '#374151',
+										fontSize: '14px',
+									}}
+								>
+									Tipo de Transmisión *
+								</label>
+								<select
+									value={formData.tipoTransmision}
+									onChange={e =>
+										setFormData({
+											...formData,
+											tipoTransmision: e.target.value,
+										})
+									}
+									disabled={loading}
+									style={{
+										width: '100%',
+										padding: '12px',
+										border: '2px solid #e5e7eb',
+										borderRadius: '8px',
+										fontSize: '14px',
+										boxSizing: 'border-box',
+										outline: 'none',
+										transition: 'border-color 0.2s',
+										opacity: loading ? 0.7 : 1,
+										backgroundColor: 'white',
+										cursor: loading ? 'not-allowed' : 'pointer',
+									}}
+									onFocus={e => (e.target.style.borderColor = '#3b82f6')}
+									onBlur={e => (e.target.style.borderColor = '#e5e7eb')}
+								>
+									<option value='en_directo'>En Directo</option>
+									<option value='video'>Video</option>
+								</select>
+								<small
+									style={{
+										color: '#6b7280',
+										fontSize: '12px',
+										display: 'block',
+										marginTop: '4px',
+									}}
+								>
+									{formData.tipoTransmision === 'en_directo' 
+										? 'Se reproducirá automáticamente con audio silenciado'
+										: 'Video pregrabado - el usuario debe hacer clic para reproducir'
+									}
+								</small>
 							</div>
 						</div>
 
