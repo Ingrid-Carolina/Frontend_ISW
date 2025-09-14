@@ -1,15 +1,9 @@
-import React, { useState } from 'react';
-import { Box, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, CircularProgress, Alert } from '@mui/material';
 import { motion } from 'framer-motion';
 import Slider from 'react-slick';
+import { api } from '../api/api';
 import EditableImage from '../components/EditableImage';
-
-// Importa las imágenes locales por defecto
-import equipoImgDefault from '/Images/equipo.jpg';
-import equipoImg2Default from '/Images/equipo2.jpg';
-import foto4Default from '/Images/foto4.jpg';
-import foto2Default from '/Images/foto2.jpg';
-import foto3Default from '/Images/foto3.jpg';
 
 // Variantes de animación
 const fadeUp = {
@@ -17,33 +11,113 @@ const fadeUp = {
     visible: { opacity: 1, y: 0, transition: { duration: 1 } },
 };
 
-const NuestraHistoria = () => {
-    // Estado para las URLs de las imágenes
-    const [headerImage, setHeaderImage] = useState(equipoImgDefault);
-    const [quienesSomosImage, setQuienesSomosImage] = useState(equipoImg2Default);
-    const [nuestrosIniciosImage, setNuestrosIniciosImage] = useState(foto4Default);
-    const [impactoComunitarioImage, setImpactoComunitarioImage] = useState(foto4Default);
-    const [nuestrosValoresImage, setNuestrosValoresImage] = useState(foto4Default);
-    const [galeriaImages, setGaleriaImages] = useState([
-        foto2Default,
-        foto4Default,
-        foto3Default,
-        foto4Default,
-    ]);
+function NuestraHistoria() {
+    const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
 
-    // Función para manejar la subida de imágenes
-    const handleImageUpload = (setImageState) => (newImageUrl) => {
-        setImageState(newImageUrl);
-        // Aquí podrías agregar lógica para guardar la nueva URL en Supabase si es necesario
-        console.log("Nueva URL de imagen subida:", newImageUrl);
+    // Estado para las imágenes del encabezado y la galería, cargadas desde la API
+    const [headerImage, setHeaderImage] = useState('');
+    const [galeriaImages, setGaleriaImages] = useState([]);
+
+    // Estado para las imágenes de las secciones
+    const [images, setImages] = useState({
+        quienes_somos: '',
+        nuestros_inicios: '',
+        impacto_comunitario: '',
+        nuestros_valores: '',
+        historia_header: ''
+    });
+
+    useEffect(() => {
+        const fetchImages = async () => {
+            try {
+                setLoading(true);
+                const response = await api.get('/auth/images');
+                
+                const imagesMap = response.data.reduce((acc, current) => {
+                    if (current.type && current.url) {
+                        acc[current.type] = current.url;
+                    }
+                    return acc;
+                }, {});
+
+                // Actualiza las imágenes de las secciones y el encabezado
+                setImages(prevImages => ({
+                    ...prevImages,
+                    quienes_somos: imagesMap.quienes_somos || '',
+                    nuestros_inicios: imagesMap.nuestros_inicios || '',
+                    impacto_comunitario: imagesMap.impacto_comunitario || '',
+                    nuestros_valores: imagesMap.nuestros_valores || '',
+                    historia_header: imagesMap.historia_header || ''
+                }));
+
+                // Filtra y ordena las imágenes de la galería
+                const galeriaImagesFromApi = response.data
+                    .filter(img => img.type && img.type.startsWith('galeria_'))
+                    .sort((a, b) => {
+                        const numA = parseInt(a.type.split('_')[1]);
+                        const numB = parseInt(b.type.split('_')[1]);
+                        return numA - numB;
+                    })
+                    .map(img => img.url);
+
+                setGaleriaImages(galeriaImagesFromApi);
+
+            } catch (error) {
+                console.error('Error al cargar las imágenes de la página de historia:', error);
+                setError('No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.');
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchImages();
+    }, []);
+
+    const handleImageChange = async (type, file) => {
+        try {
+            if (!(file instanceof File)) {
+                setError('Error: No se seleccionó un archivo válido.');
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const uploadResponse = await api.post('/auth/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' },
+            });
+            
+            const finalUrl = uploadResponse.data.url;
+            
+            await api.put('/auth/images', {
+                type,
+                url: finalUrl,
+            });
+            
+            // Actualizamos la imagen en el estado local
+            if (type.startsWith('galeria_')) {
+                const index = parseInt(type.split('_')[1]) - 1;
+                setGaleriaImages(prevImages => {
+                    const updatedImages = [...prevImages];
+                    updatedImages[index] = finalUrl;
+                    return updatedImages;
+                });
+            } else {
+                 setImages(prevImages => ({
+                    ...prevImages,
+                    [type]: finalUrl,
+                }));
+            }
+            
+        } catch (error) {
+            console.error(`Error al actualizar la imagen de ${type}:`, error);
+            setError(`Error al actualizar la imagen de ${type}.`);
+        }
     };
-
-    const handleGalleryImageUpload = (index) => (newImageUrl) => {
-        const updatedGaleriaImages = [...galeriaImages];
-        updatedGaleriaImages[index] = newImageUrl;
-        setGaleriaImages(updatedGaleriaImages);
-        // Aquí podrías agregar lógica para guardar la nueva URL en Supabase
-        console.log("Nueva URL de imagen de galería subida:", newImageUrl);
+    
+    const handleGalleryImageUpload = (index) => async (file) => {
+        const type = `galeria_${index + 1}`;
+        await handleImageChange(type, file);
     };
 
     const sliderSettings = {
@@ -57,6 +131,18 @@ const NuestraHistoria = () => {
         autoplaySpeed: 5000,
     };
 
+    if (loading) {
+        return (
+            <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+                <CircularProgress />
+            </Box>
+        );
+    }
+
+    if (error) {
+        return <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>;
+    }
+
     return (
         <>
             {/* ENCABEZADO CON IMAGEN */}
@@ -68,42 +154,12 @@ const NuestraHistoria = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundImage: `url(${headerImage})`, // Usamos la URL del estado
+                    backgroundImage: `url(${images.historia_header})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     py: { xs: 6, md: 8 },
                 }}
             >
-                <EditableImage
-                    src={headerImage}
-                    alt="Encabezado"
-                    onImageUpload={handleImageUpload(setHeaderImage)}
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        zIndex: 0, // Asegura que el botón esté por encima de la imagen pero debajo de la capa oscura
-                        '& .editable-image': { // Estilos para la imagen dentro de EditableImage
-                            objectFit: 'cover',
-                            width: '100%',
-                            height: '100%',
-                            borderRadius: 0, // No queremos bordes redondeados para el encabezado
-                            boxShadow: 'none',
-                        },
-                        '& .edit-button': {
-                            position: 'absolute',
-                            bottom: 16,
-                            right: 16,
-                            zIndex: 10,
-                            backgroundColor: 'rgba(255, 255, 255, 0.7)',
-                            '&:hover': {
-                                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-                            },
-                        }
-                    }}
-                />
                 <Box
                     sx={{
                         position: 'absolute',
@@ -143,7 +199,7 @@ const NuestraHistoria = () => {
                     </motion.div>
                 </Box>
             </Box>
-
+            
             {/* SECCIÓN QUIÉNES SOMOS MEJORADA */}
             <Box
                 sx={{
@@ -161,12 +217,12 @@ const NuestraHistoria = () => {
                     whileInView='visible'
                     viewport={{ once: true }}
                     variants={fadeUp}
-                    style={{ flex: 1, position: 'relative' }} // Agrega position: 'relative'
+                    style={{ flex: 1, position: 'relative' }}
                 >
                     <EditableImage
-                        src={quienesSomosImage}
+                        src={images.quienes_somos}
                         alt='Equipo de béisbol'
-                        onImageUpload={handleImageUpload(setQuienesSomosImage)}
+                        onImageUpload={(file) => handleImageChange('quienes_somos', file)}
                         sx={{
                             width: '100%',
                             borderRadius: 2,
@@ -178,7 +234,6 @@ const NuestraHistoria = () => {
                         }}
                     />
                 </motion.div>
-
                 <motion.div
                     initial='hidden'
                     whileInView='visible'
@@ -264,7 +319,6 @@ const NuestraHistoria = () => {
                         disciplina, valores y comunidad.
                     </Typography>
                 </motion.div>
-
                 <motion.div
                     initial='hidden'
                     whileInView='visible'
@@ -273,9 +327,9 @@ const NuestraHistoria = () => {
                     style={{ flex: 1, position: 'relative' }}
                 >
                     <EditableImage
-                        src={nuestrosIniciosImage}
+                        src={images.nuestros_inicios}
                         alt='Nuestros inicios'
-                        onImageUpload={handleImageUpload(setNuestrosIniciosImage)}
+                        onImageUpload={(file) => handleImageChange('nuestros_inicios', file)}
                         sx={{
                             width: '100%',
                             borderRadius: 2,
@@ -335,7 +389,6 @@ const NuestraHistoria = () => {
                         mentoría y eventos familiares.
                     </Typography>
                 </motion.div>
-
                 <motion.div
                     initial='hidden'
                     whileInView='visible'
@@ -344,9 +397,9 @@ const NuestraHistoria = () => {
                     style={{ flex: 1, position: 'relative' }}
                 >
                     <EditableImage
-                        src={impactoComunitarioImage}
+                        src={images.impacto_comunitario}
                         alt='Impacto comunitario'
-                        onImageUpload={handleImageUpload(setImpactoComunitarioImage)}
+                        onImageUpload={(file) => handleImageChange('impacto_comunitario', file)}
                         sx={{
                             width: '100%',
                             borderRadius: 2,
@@ -405,7 +458,6 @@ const NuestraHistoria = () => {
                         actividad que realizamos como asociación.
                     </Typography>
                 </motion.div>
-
                 <motion.div
                     initial='hidden'
                     whileInView='visible'
@@ -414,9 +466,9 @@ const NuestraHistoria = () => {
                     style={{ flex: 1, position: 'relative' }}
                 >
                     <EditableImage
-                        src={nuestrosValoresImage}
+                        src={images.nuestros_valores}
                         alt='Nuestros valores'
-                        onImageUpload={handleImageUpload(setNuestrosValoresImage)}
+                        onImageUpload={(file) => handleImageChange('nuestros_valores', file)}
                         sx={{
                             width: '100%',
                             borderRadius: 2,
@@ -429,7 +481,7 @@ const NuestraHistoria = () => {
                     />
                 </motion.div>
             </Box>
-
+            
             {/* SECCIÓN DE GALERÍA HISTÓRICA CON CARRUSEL */}
             <Box
                 sx={{
@@ -457,7 +509,6 @@ const NuestraHistoria = () => {
                     >
                         Galería Histórica
                     </Typography>
-
                     <Slider {...sliderSettings}>
                         {galeriaImages.map((src, index) => (
                             <Box key={index} sx={{ px: 2, position: 'relative' }}>
@@ -473,7 +524,7 @@ const NuestraHistoria = () => {
                                         margin: '0 auto',
                                         '& .edit-button': {
                                             bottom: 8,
-                                            right: 'calc(15% + 8px)', // Ajuste para centrar el botón con la imagen
+                                            right: 'calc(15% + 8px)',
                                             transform: 'translateX(50%)',
                                         }
                                     }}
@@ -485,6 +536,6 @@ const NuestraHistoria = () => {
             </Box>
         </>
     );
-};
+}
 
 export default NuestraHistoria;
