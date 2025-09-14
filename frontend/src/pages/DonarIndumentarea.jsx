@@ -60,7 +60,7 @@ const DonarIndumentarea = () => {
   useEffect(() => {
     const fetchProductos = async () => {
       try {
-        const res = await api.get("/auth/productos");
+        const res = await api.get("/auth/donaciones/productos");
         const productos = res.data.productos || [];
         const productosActivos = productos
           .filter((p) => p.estado === true)
