@@ -1,7 +1,11 @@
-import React, { useState } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, IconButton, Alert } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import EditIcon from '@mui/icons-material/Edit';
+import { api } from '../api/api';
+
+// Imagen inicial del header
 import Img from '/Images/Categoria.png';
 
 const categorias = [
@@ -47,9 +51,132 @@ const categorias = [
   },
 ];
 
+const EditableImage = ({ src, alt, onImageUpload, imgSx }) => {
+  const fileRef = React.useRef(null);
+
+  const handleIconClick = (e) => {
+    e.stopPropagation();
+    fileRef.current?.click();
+  };
+
+  const handleFileChange = (e) => {
+    const file = e.target.files && e.target.files[0];
+    if (file && typeof onImageUpload === 'function') onImageUpload(file);
+  };
+
+  return (
+    <Box
+      sx={{
+        position: 'relative',
+        width: '100%',
+        '&:hover .edit-icon': {
+          opacity: 1, //aparece cuando hay hover
+        },
+      }}
+    >
+      <Box
+        component="img"
+        src={src}
+        alt={alt}
+        sx={{
+          width: '100%',
+          height: '100%',
+          objectFit: 'cover',
+          ...(imgSx || {}),
+        }}
+      />
+
+      <IconButton
+        size="small"
+        onClick={handleIconClick}
+        className="edit-icon"
+        sx={{
+          position: 'absolute',
+          bottom: 8,
+          right: 8,
+          backgroundColor: 'rgba(0,0,0,0.6)',
+          color: 'white',
+          opacity: 0, // oculto inicialmente
+          transition: 'opacity 0.3s ease',
+          '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' },
+        }}
+      >
+        <EditIcon fontSize="small" />
+      </IconButton>
+
+      <input
+        ref={fileRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        style={{ display: 'none' }}
+      />
+    </Box>
+  );
+};
+
+
 const Categorias = () => {
   const [startIndex, setStartIndex] = useState(0);
   const visibleCards = 3;
+
+  // estado que guarda las URLs actuales de cada categoría (inicial con imágenes locales)
+  const [categoryImages, setCategoryImages] = useState(
+    categorias.reduce((acc, cat) => {
+      acc[cat.slug] = cat.image;
+      return acc;
+    }, {})
+  );
+  const [error, setError] = useState('');
+
+  // Traer imágenes persistidas del backend (si existen)
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const response = await api.get('/auth/images');
+        // response.data esperado como array: [{ type: 'sub-8-escuelita', url: '...' }, ...]
+        const imagesMap = Array.isArray(response.data)
+          ? response.data.reduce((acc, cur) => {
+            if (cur.type && cur.url) acc[cur.type] = cur.url;
+            return acc;
+          }, {})
+          : {};
+        if (mounted) setCategoryImages(prev => ({ ...prev, ...imagesMap }));
+      } catch (err) {
+        console.error('Error al cargar imágenes de categorías:', err);
+        if (mounted) setError('No se pudieron cargar las imágenes de categorías.');
+      }
+    })();
+    return () => { mounted = false; };
+  }, []);
+
+  const handleImageChange = async (slug, file) => {
+    if (!(file instanceof File)) {
+      setError('No se seleccionó un archivo válido.');
+      return;
+    }
+    try {
+      const formData = new FormData();
+      formData.append('file', file);
+
+      const uploadResponse = await api.post('/auth/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      const finalUrl = uploadResponse.data.url;
+      // Guardar la URL persistente en la tabla de imágenes
+      await api.put('/auth/images', { type: slug, url: finalUrl });
+
+      // Actualizar UI local
+      setCategoryImages(prev => ({ ...prev, [slug]: finalUrl }));
+    } catch (err) {
+      console.error(`Error al actualizar la imagen de ${slug}:`, err);
+      setError(`Error al actualizar la imagen de ${slug}.`);
+    }
+  };
+
+
 
   const handleNext = () => {
     setStartIndex((prev) => (prev + 1) % categorias.length);
@@ -185,18 +312,19 @@ const Categorias = () => {
                   },
                 }}
               >
-                <Box
-                  component='img'
-                  src={categoria.image}
+                <EditableImage
+                  src={categoryImages[categoria.slug]}
                   alt={categoria.titleText}
-                  sx={{
+                  imgSx={{
                     width: '100%',
                     height: '250px',
                     objectFit: 'cover',
                     borderTopLeftRadius: 8,
                     borderTopRightRadius: 8,
                   }}
+                  onImageUpload={(file) => handleImageChange(categoria.slug, file)}
                 />
+
                 <Typography
                   variant='h5'
                   sx={{
@@ -263,15 +391,15 @@ const Categorias = () => {
               mx: 'auto',
             }}
           >
-            <Box
-              component='img'
-              src={cat.image}
-              alt={cat.titleText}
-              sx={{
-                width: { xs: '100%', md: '40%' },
-                objectFit: 'cover',
-              }}
-            />
+            <Box sx={{ width: { xs: '100%', md: '40%' } }}>
+              <EditableImage
+                src={categoryImages[cat.slug]}
+                alt={cat.titleText}
+                imgSx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                onImageUpload={(file) => handleImageChange(cat.slug, file)}
+              />
+            </Box>
+
 
             <Box sx={{ p: 4, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <Box
@@ -365,6 +493,8 @@ const Categorias = () => {
           </Box>
         ))}
       </Box>
+      {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
+
     </>
   );
 };
