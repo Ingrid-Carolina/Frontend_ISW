@@ -1,53 +1,80 @@
-import React, { useState } from 'react';
-import { Box, Typography, IconButton } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Typography, IconButton, Alert } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { api } from '../api/api';
+
+// Imagen inicial del header
 import Img from '/Images/Categoria.png';
 
-const categorias = [
-  {
-    slug: 'sub-8-escuelita',
-    titleText: 'Sub-8 (Escuelita)',
-    title: <>Sub-8<br />(Escuelita)</>,
-    image: '/Images/Cat_Sub8.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Formativa',
-    descripcion:
-      'Niños de hasta 8 años que están dando sus primeros pasos en el béisbol. Se enfoca en el juego recreativo, el aprendizaje básico y el desarrollo motriz en un ambiente divertido, seguro y adaptado a su edad.',
-  },
-  {
-    slug: 'sub-10-pre-infantil',
-    titleText: 'Sub-10 (Pre-Infantil)',
-    title: <>Sub-10<br />(Pre-Infantil)</>,
-    image: '/Images/Cat_Sub10.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Formativa',
-    descripcion:
-      'Categoría para jóvenes hasta 10 años, desarrollo básico de técnica y juego. Se fortalecen habilidades como lanzamiento, bateo y reglas del juego, con una estructura pedagógica que incentiva la disciplina y el trabajo en equipo.',
-  },
-  {
-    slug: 'sub-13-infantil',
-    titleText: 'Sub-13 (Infantil)',
-    title: <>Sub-13<br />(Infantil)</>,
-    image: '/Images/Cat_Sub13.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Competitiva',
-    descripcion:
-      'Jugadores entre 11 y 13 años, nivel intermedio y enfoque competitivo. Se introducen estrategias de juego, entrenamientos más rigurosos, y participación en competencias regionales, preparando la base para etapas superiores.',
-  },
-  {
-    slug: 'sub-16-pre-junior',
-    titleText: 'Sub-16 (Pre-Junior)',
-    title: <>Sub-16<br />(Pre-Junior)</>,
-    image: '/Images/Cat_Sub16.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Avanzada',
-    descripcion:
-      'Jugadores avanzados, cerca de pasar a ligas mayores, entrenamiento intensivo. Se perfecciona el rendimiento técnico y mental del jugador, con seguimiento profesional y oportunidades para ascender a niveles élite del deporte.',
-  },
-];
-
 const Categorias = () => {
+  // ======== estado para verificar admin ========
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  // ======== estado para categorías ========
+  const [categorias, setCategorias] = useState([]);
+  const [headerImage, setHeaderImage] = useState(Img);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
+
+  useEffect(() => {
+    const checkAdmin = async () => {
+      try {
+        const { data } = await api.get('/auth/check-admin');
+        setIsAdmin(data?.isAdmin || false);
+      } catch (err) {
+        console.error('Error verificando admin:', err);
+        setIsAdmin(false);
+      }
+    };
+
+    const fetchCategorias = async () => {
+      try {
+        setLoading(true);
+        const { data } = await api.get('/auth/categorias');
+        setCategorias(Array.isArray(data) ? data : []);
+      } catch (err) {
+        console.error('Error al cargar categorías:', err);
+        setError('No se pudieron cargar las categorías.');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAdmin();
+    fetchCategorias();
+  }, []);
+
+  // ======== subir imágenes ========
+  const handleImageUpload = async (e, target) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("target", target);
+
+    try {
+      const { data } = await api.post('/auth/upload-image', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+
+      if (target === 'header') {
+        setHeaderImage(data.url);
+      } else {
+        setCategorias((prev) =>
+          prev.map((c) =>
+            c.slug === target ? { ...c, image: data.url } : c
+          )
+        );
+      }
+    } catch (err) {
+      console.error('Error subiendo imagen:', err);
+      alert('No se pudo subir la imagen.');
+    }
+  };
+
+  // ======== carrusel ========
   const [startIndex, setStartIndex] = useState(0);
   const visibleCards = 3;
 
@@ -86,24 +113,22 @@ const Categorias = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundImage: `url(${Img})`,
+          backgroundImage: `url(${headerImage})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           py: { xs: 6, md: 8 },
         }}
       >
-        <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }} />
-        <Box
-          sx={{
-            position: 'relative',
-            zIndex: 2,
-            textAlign: 'center',
-            height: '100%',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-          }}
-        >
+        {isAdmin && (
+          <input
+            type="file"
+            accept="image/*"
+            onChange={(e) => handleImageUpload(e, 'header')}
+            style={{ position: 'absolute', top: 10, right: 10, zIndex: 10 }}
+          />
+        )}
+
+        <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center' }}>
           <Typography
             variant='h2'
             sx={{
@@ -197,6 +222,14 @@ const Categorias = () => {
                     borderTopRightRadius: 8,
                   }}
                 />
+                {isAdmin && (
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => handleImageUpload(e, categoria.slug)}
+                    style={{ display: 'block', margin: '10px auto' }}
+                  />
+                )}
                 <Typography
                   variant='h5'
                   sx={{
@@ -272,6 +305,14 @@ const Categorias = () => {
                 objectFit: 'cover',
               }}
             />
+            {isAdmin && (
+              <input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, cat.slug)}
+                style={{ marginTop: '10px', marginLeft: '10px' }}
+              />
+            )}
 
             <Box sx={{ p: 4, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
               <Box
@@ -285,22 +326,12 @@ const Categorias = () => {
               />
 
               {cat.logo && (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    mb: 0, // sin margen debajo
-                  }}
-                >
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 0 }}>
                   <Box
                     component='img'
                     src={cat.logo}
                     alt='Logo equipo'
-                    sx={{
-                      width: 120,
-                      height: 60,
-                    }}
+                    sx={{ width: 120, height: 60 }}
                   />
                   <Typography
                     variant='h5'
@@ -322,7 +353,7 @@ const Categorias = () => {
                   fontFamily: '"Varsity", cursive',
                   fontWeight: 'bold',
                   color: '#f26c23',
-                  mt: -0.5, // subido un poquito más
+                  mt: -0.5,
                 }}
               >
                 {cat.title}
