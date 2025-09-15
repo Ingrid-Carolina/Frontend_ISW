@@ -125,20 +125,7 @@ export default function Tienda() {
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  const [role, setRole] = useState(() => (localStorage.getItem('userRole') || '').toLowerCase());
-  const isAdmin = role === 'admin';
-
-  useEffect(() => {
-    const onRole = (e) => setRole((e.detail?.role || localStorage.getItem('userRole') || '').toLowerCase());
-    const onAuthRefresh = () => onRole({ detail: { role: localStorage.getItem('userRole') || '' } });
-
-    window.addEventListener('auth:role', onRole);
-    window.addEventListener('auth:refresh', onAuthRefresh);
-    return () => {
-      window.removeEventListener('auth:role', onRole);
-      window.removeEventListener('auth:refresh', onAuthRefresh);
-    };
-  }, []);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   const isShirt = useMemo(() => {
     const n = (formData.nombre_producto || '').toLowerCase();
@@ -221,6 +208,7 @@ export default function Tienda() {
 
   // Abrir/cerrar menú
   const handleMenuOpen = (event, product) => {
+    if(!isAdmin) return; //Esto es para que se evite abrir si no es admin
     setMenuAnchorEl(event.currentTarget);
     setMenuProduct(product);
   };
@@ -231,7 +219,7 @@ export default function Tienda() {
 
   // ---- EDITAR ----
   const handleEditOpen = () => {
-    if (!menuProduct) return;
+    if (!isAdmin || !menuProduct) return;
     setEditFormData({
       idproducto: menuProduct.idproducto,
       nombre_producto: menuProduct.nombre_producto || '',
@@ -309,7 +297,7 @@ export default function Tienda() {
 
   // ---- ELIMINAR ----
   const handleDeleteClick = () => {
-    if (!menuProduct) return;
+    if (!isAdmin || !menuProduct) return;
     setDeleteProduct(menuProduct);
     setDeleteOpen(true);
     handleMenuClose();
@@ -338,8 +326,6 @@ export default function Tienda() {
       setShowBanner(true);
     }
   };
-
-
 
 
   // Cargar productos
@@ -375,6 +361,35 @@ export default function Tienda() {
       cancelled = true;
     };
   }, []);
+
+  // Efecto para verificar admin
+  useEffect(() => {
+    const checkRole = async () =>{
+      try{
+        const res = await api.get('/auth/obtenerperfil', {
+          withCredentials: true,
+          skipAuthRedirect: true,
+        });
+
+        // Verifica que res es array, si es array, obtiene 1er elemento, sino, el elemento tal cual.
+        const p = Array.isArray(res.data) ? res.data[0] : res.data;
+
+        // Obtiene el atributo rol de la res
+        const role = String(p?.rol || '').toLowerCase();
+
+        // Si el rol es estrictamente admin, lo pone como true
+        setIsAdmin(role === 'admin');
+      }catch{
+        setIsAdmin(false);
+      }
+    }
+
+    checkRole();
+
+    // Eventlistener que escucha cuando se actualiza el token de inicio de sesion
+    const onAuthRefresh = () => checkRole();
+    window.addEventListener('auth:refresh', onAuthRefresh);
+  }, [])
 
   const totalItems = useMemo(
     () => cartItems.reduce((acc, it) => acc + (parseInt(it.cantidad) || 0), 0),
@@ -528,7 +543,7 @@ export default function Tienda() {
 
               {isAdmin && (
                 <IconButton
-                  onClick={() => setAddOpen(true)}
+                  onClick={() => isAdmin && setAddOpen(true)}
                   sx={{ color: 'black', backgroundColor: 'rgba(255,255,255,0.2)', '&:hover': { backgroundColor: 'rgba(255,255,255,0.4)' } }}
                 >
                   <Add />
@@ -764,7 +779,7 @@ export default function Tienda() {
                       <Box sx={{ position: 'relative' }}>
                         <IconButton
                           size="small"
-                          onClick={(e) => handleMenuOpen(e, p)}
+                          onClick={(e) => isAdmin && handleMenuOpen(e, p)}
                           sx={{ position: 'absolute', top: 4, right: 4 }}
                           aria-label="Más acciones"
                         >

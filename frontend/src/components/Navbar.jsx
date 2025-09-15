@@ -274,8 +274,8 @@ export default function CustomNavbar() {
 				if (mounted) setUserRole(effectiveRole);
 
 				// por mientras 
-				localStorage.setItem('userRole', effectiveRole);
-				window.dispatchEvent(new CustomEvent('auth:role', { detail: { role: effectiveRole } }));
+				//localStorage.setItem('userRole', effectiveRole);
+				//window.dispatchEvent(new CustomEvent('auth:role', { detail: { role: effectiveRole } }));
 
 				// avatar
 				if (perfil?.avatar) {
@@ -384,8 +384,8 @@ export default function CustomNavbar() {
 			setUserName('');
 			setUserRole('');
 			setAvatarUrl('');
-			localStorage.removeItem('userRole');
-			window.dispatchEvent(new CustomEvent('auth:role', { detail: { role: '' } }));
+			//localStorage.removeItem('userRole');
+			//window.dispatchEvent(new CustomEvent('auth:role', { detail: { role: '' } }));
 			navigate('/');
 			window.dispatchEvent(new Event('auth:refresh'));
 			// Redirige una sola vez
