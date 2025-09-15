@@ -3,8 +3,6 @@ import { Box, Typography, IconButton } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import Img from '/Images/Categoria.png';
-import { api } from '../api/api';
-import { Alert } from '@mui/material'
 
 const categorias = [
   {
@@ -50,43 +48,6 @@ const categorias = [
 ];
 
 const Categorias = () => {
-  // ======== estado para verificar admin ========
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  // ======== estado para categorías ========
-  //const [categorias, setCategorias] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
-
-  useEffect(() => {
-    const checkAdmin = async () => {
-      try {
-        // Verificar si el usuario es admin
-        const { data } = await api.get('/auth/check-admin');
-        setIsAdmin(data?.isAdmin || false);
-      } catch (err) {
-        console.error('Error verificando admin:', err);
-        setIsAdmin(false);
-      }
-    };
-
-    const fetchCategorias = async () => {
-      try {
-        setLoading(true);
-        const { data } = await api.get('/auth/categorias');
-        setCategorias(Array.isArray(data) ? data : []);
-      } catch (err) {
-        console.error('Error al cargar categorías:', err);
-        setError('No se pudieron cargar las categorías.');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    checkAdmin();
-    fetchCategorias();
-  }, []);
-
   const [startIndex, setStartIndex] = useState(0);
   const visibleCards = 3;
 
