@@ -1,873 +1,621 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Button } from '@mui/material';
+import {
+  Box,
+  Typography,
+  Button,
+  TextField,
+  IconButton,
+  Switch,
+  FormControlLabel,
+  MenuItem,
+  Select,
+  InputLabel,
+  FormControl,
+} from '@mui/material';
 import { api } from '../api/api';
 import HeaderBesibol from '/Logo-pilotosA.png';
 
-// SVG Icons
+// Íconos SVG (mantengo tus SVGs personalizados)
 const X = () => (
-	<svg
-		width='20'
-		height='20'
-		viewBox='0 0 24 24'
-		fill='none'
-		stroke='currentColor'
-		strokeWidth='2'
-	>
-		<line x1='18' y1='6' x2='6' y2='18'></line>
-		<line x1='6' y1='6' x2='18' y2='18'></line>
-	</svg>
+  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <line x1="18" y1="6" x2="6" y2="18"></line>
+    <line x1="6" y1="6" x2="18" y2="18"></line>
+  </svg>
 );
 
 const Edit = () => (
-	<svg
-		width='18'
-		height='18'
-		viewBox='0 0 24 24'
-		fill='none'
-		stroke='currentColor'
-		strokeWidth='2'
-	>
-		<path d='M12 20h9' />
-		<path d='M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z' />
-	</svg>
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+    <path d="M12 20h9" />
+    <path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z" />
+  </svg>
 );
 
 const EnVivo = () => {
-	const [isLoggedIn, setIsLoggedIn] = useState(false);
-	const [isAdmin, setIsAdmin] = useState(false);
-	const [showModal, setShowModal] = useState(false);
-	const [videos, setVideos] = useState([]);
-	const [activo, setactivo]= useState(false);
-	const [selectedIndex, setSelectedIndex] = useState(null);
-	const [urlData, setUrlData] = useState({
-		videoUrl: '',
-		channelUrl: '',
-	});
-	const [formData, setFormData] = useState({
-		videoUrl: '',
-		channelUrl: '',
-		descripcion: '',
-		tipoTransmision: 'en_directo', // Nuevo campo para tipo de transmisión
-		activo: 'S',
-	});
-	const [bannerMsg, setBannerMsg] = useState('');
-	const [bannerType, setBannerType] = useState('success');
-	const [showBanner, setShowBanner] = useState(false);
-	const [loading, setLoading] = useState(false);
-	const [checkingAuth, setCheckingAuth] = useState(true); // Estado para verificación de autenticación
-	
-	const fetchUrls = async () => {
-		setLoading(true);
-		try {
-			const res = await api.get('/auth/obtenerenvivo', { //hacemos fetch de los videos
-				skipAuthRedirect: true,
-			});
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [videos, setVideos] = useState([]);
+  const [urlData, setUrlData] = useState({ videoUrl: '', channelUrl: '' });
+  const [formData, setFormData] = useState({
+    id: null,
+    videoUrl: '',
+    channelUrl: '',
+    descripcion: '',
+    tipoTransmision: 'en_directo',
+    activo: true, // boolean para simplificar
+  });
+  const [bannerMsg, setBannerMsg] = useState('');
+  const [bannerType, setBannerType] = useState('success');
+  const [showBanner, setShowBanner] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
-			const hola= res.data; //encapsulamos el resultado para luego iterar sobre el
-			
-				const videosActualizados = hola.videos.map(video => ({
-  					id: video.id_envivo,
-  					video_url: video.video_url,
-  					channel_url: video.channel_url,
-  					descripcion: video.descripcion,
-					tipo_transmision: video.tipo_transmision || 'en_directo', // Agregar campo tipo_transmision
- 					 activo: video.activo,
-					}));
-				setVideos(videosActualizados);
-				console.log(videosActualizados[0]); 
-				
-				// CORRECCIÓN: Usar setUrlData y verificar que existe el primer elemento
+  // Obtener lista de videos (y seleccionar el primero activo para reproducir)
+  const fetchUrls = async () => {
+    setLoading(true);
+    try {
+      const res = await api.get('/auth/obtenerenvivo', { skipAuthRedirect: true });
+      const hola = res.data;
+      const videosActualizados = (hola?.videos || []).map(video => ({
+        id: video.id_envivo ?? null,
+        video_url: video.video_url,
+        channel_url: video.channel_url,
+        descripcion: video.descripcion,
+        tipo_transmision: video.tipo_transmision || 'en_directo',
+        activo: video.activo, // puede venir 'S'/'N' o true/false
+      }));
+      setVideos(videosActualizados);
 
-				if(videosActualizados.length>0){
-					setUrlData({
-						videoUrl: convertToEmbedUrl(videosActualizados[0].video_url),
-						channelUrl: videosActualizados[0].channel_url,
-					});
-				}
-			
-		} catch (fetchError) {
-			console.warn('Error al recargar videos:', fetchError);
-		} finally {
-			setLoading(false);
-			
-		}
-	};
-	// Check if user is admin - No bloquea el acceso si falla
-	useEffect(() => {
-		const fetchRole = async () => {
-			try {
-				const res = await api.get('/auth/obtenerperfil', {
-					withCredentials: true,
-					skipAuthRedirect: true,
-				});
-				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
+      // Filtrar los videos activos (aceptamos 'S' o true)
+      const activos = videosActualizados.filter(v => v.activo === 'S' || v.activo === true);
+      if (activos.length > 0) {
+        setUrlData({
+          videoUrl: convertToEmbedUrl(activos[0].video_url, activos[0].tipo_transmision),
+          channelUrl: activos[0].channel_url,
+        });
+      } else {
+        setUrlData({ videoUrl: '', channelUrl: '' });
+      }
+    } catch (error) {
+      console.warn('Error al recargar videos:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-				const role = String(perfil?.rol || '')
-					.toLowerCase()
-					.trim();
-				const isAdminUser = role === 'admin';
+  // Verificar rol / sesión (no bloqueante)
+  useEffect(() => {
+    const fetchRole = async () => {
+      try {
+        const res = await api.get('/auth/obtenerperfil', {
+          withCredentials: true,
+          skipAuthRedirect: true,
+        });
+        const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
+        const role = String(perfil?.rol || '').toLowerCase().trim();
+        setIsLoggedIn(!!perfil);
+        setIsAdmin(role === 'admin');
+      } catch (error) {
+        setIsLoggedIn(false);
+        setIsAdmin(false);
+      } finally {
+        setCheckingAuth(false);
+      }
+    };
 
-				setIsLoggedIn(!!perfil); // Usuario logueado si existe perfil
-				setIsAdmin(isAdminUser); // Usuario admin solo si tiene rol admin
+    fetchRole();
+    const onAuthRefresh = () => {
+      setCheckingAuth(true);
+      fetchRole();
+    };
+    window.addEventListener('auth:refresh', onAuthRefresh);
+    return () => window.removeEventListener('auth:refresh', onAuthRefresh);
+  }, []);
 
-				console.log(
-					'🔍 User role:',
-					role,
-					'isAdmin:',
-					isAdminUser,
-					'isLoggedIn:',
-					!!perfil,
-				);
-			} catch (error) {
-				console.log('Usuario no logueado o sin permisos:', error.message);
-				// No mostrar error, simplemente establecer como no logueado
-				setIsLoggedIn(false);
-				setIsAdmin(false);
-			} finally {
-				setCheckingAuth(false); // Terminar verificación de autenticación
-			}
+  useEffect(() => {
+    fetchUrls();
+  }, []);
 
-			
-		};
+  // Convertir una URL de YouTube a su embed y añadir autoplay si corresponde
+  const convertToEmbedUrl = (url, tipoTransmision = 'en_directo') => {
+    if (!url) return '';
+    if (url.includes('youtube.com/embed/') || url.includes('youtube-nocookie.com/embed/')) return url;
+    let videoId = '';
+    try {
+      if (url.includes('youtube.com/watch?v=')) {
+        const urlObj = new URL(url);
+        videoId = urlObj.searchParams.get('v');
+      } else if (url.includes('youtu.be/')) {
+        videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
+      } else if (url.includes('youtube.com/v/')) {
+        videoId = url.split('youtube.com/v/')[1].split('?')[0].split('&')[0];
+      }
+      if (videoId) {
+        const autoplayParam = tipoTransmision === 'en_directo' ? '&autoplay=1&mute=1' : '';
+        // Si autoplayParam vacío, evitamos el '?' final sobrante
+        return `https://www.youtube.com/embed/${videoId}${autoplayParam ? `?${autoplayParam.substring(1)}` : ''}`;
+      }
+    } catch (error) {
+      console.error('Error procesando URL:', error);
+    }
+    return url;
+  };
 
-		fetchRole();
+  // Abrir modal para agregar o editar
+  // mode: 'add' | 'edit'
+  const openModal = (mode = 'add', video = null) => {
+    if (!isLoggedIn) {
+      showMessage('Debes iniciar sesión para modificar las URLs', 'error');
+      return;
+    }
+    if (!isAdmin) {
+      showMessage('Solo el administrador puede modificar las URLs', 'error');
+      return;
+    }
 
+    if (mode === 'edit' && video) {
+      setFormData({
+        id: video.id ?? null,
+        videoUrl: video.video_url ?? '',
+        channelUrl: video.channel_url ?? '',
+        descripcion: video.descripcion ?? '',
+        tipoTransmision: video.tipo_transmision ?? 'en_directo',
+        // normalizamos activo a boolean
+        activo: video.activo === 'S' || video.activo === true,
+      });
+    } else {
+      // add new -> limpiar formulario
+      setFormData({
+        id: null,
+        videoUrl: '',
+        channelUrl: '',
+        descripcion: '',
+        tipoTransmision: 'en_directo',
+        activo: true,
+      });
+    }
 
-		// Listen for auth refresh events
-		const onAuthRefresh = () => {
-			setCheckingAuth(true);
-			fetchRole();
-		};
-		window.addEventListener('auth:refresh', onAuthRefresh);
-		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
+    setShowModal(true);
+  };
 
-		
+  const closeModal = () => {
+    setShowModal(false);
+    // reset form
+    setFormData({
+      id: null,
+      videoUrl: '',
+      channelUrl: '',
+      descripcion: '',
+      tipoTransmision: 'en_directo',
+      activo: true,
+    });
+    setShowBanner(false);
+  };
 
-		
-	}, []);
+  const showMessage = (message, type = 'success') => {
+    setBannerMsg(message);
+    setBannerType(type);
+    setShowBanner(true);
+    setTimeout(() => setShowBanner(false), 4000);
+  };
 
-	//Useffect sin autenticacion
+  const validateUrls = () => {
+    if (!formData.videoUrl.trim()) {
+      showMessage('La URL del video es requerida', 'error');
+      return false;
+    }
+    if (!formData.channelUrl.trim()) {
+      showMessage('La URL del canal es requerida', 'error');
+      return false;
+    }
+    const isYouTubeVideoUrl = formData.videoUrl.includes('youtube.com') || formData.videoUrl.includes('youtu.be');
+    if (!isYouTubeVideoUrl) {
+      showMessage('La URL del video debe ser un enlace de YouTube válido', 'error');
+      return false;
+    }
+    const isYouTubeChannelUrl = formData.channelUrl.includes('youtube.com/');
+    if (!isYouTubeChannelUrl) {
+      showMessage('La URL del canal debe ser un enlace de YouTube válido', 'error');
+      return false;
+    }
+    return true;
+  };
 
-	useEffect(() => {
-		
-		fetchUrls();
+  // Guardar (crear/actualizar) video
+  const saveUrls = async () => {
+    if (!validateUrls()) return;
 
-		
-	}, []);
+    try {
+      setLoading(true);
 
+      // Construimos el cuerpo según lo que espera tu backend.
+      // Incluimos id si estamos editando (algunas APIs esperan id para update).
+      const requestBody = {
+        video_url: formData.videoUrl.trim(),
+        channel_url: formData.channelUrl.trim(),
+        descripcion: formData.descripcion.trim() || 'Video en vivo',
+        tipo_transmision: formData.tipoTransmision,
+        activo: formData.activo, // boolean (backend acepta 'S'/'N' o true/false según tu implementación)
+      };
+      if (formData.id) {
+        requestBody.id_envivo = formData.id; // si tu backend espera otro nombre, ajusta aquí
+      }
 
-	const openModal = () => {
-		// Verificar si está logueado Y es admin
-		if (!isLoggedIn) {
-			showMessage('Debes iniciar sesión para modificar las URLs', 'error');
-			return;
-		}
+      // Llamada al endpoint - POST para crear/actualizar según backend
+      const res = await api.post('/auth/registrarenvivo', requestBody, {
+        headers: { 'Content-Type': 'application/json' },
+        withCredentials: true,
+      });
 
-		if (!isAdmin) {
-			showMessage('Solo el administrador puede modificar las URLs', 'error');
-			return;
-		}
+      // Actualizamos la vista: convertimos a embed para reproducir
+      setUrlData({
+        videoUrl: convertToEmbedUrl(formData.videoUrl.trim(), formData.tipoTransmision),
+        channelUrl: formData.channelUrl.trim(),
+      });
 
-		setFormData({
-			videoUrl: urlData.videoUrl,
-			channelUrl: urlData.channelUrl,
-			descripcion: '',
-			tipoTransmision: 'en_directo', // Valor por defecto
-			activo: 'S',
-		});
-		setShowModal(true);
-	};
+      // Refrescar lista
+      await fetchUrls();
 
-	const closeModal = () => {
-		setShowModal(false);
-		setFormData({
-			videoUrl: '',
-			channelUrl: '',
-			descripcion: '',
-			tipoTransmision: 'en_directo', // Resetear al valor por defecto
-			activo: 'S',
-		});
-		setShowBanner(false);
-	};
+      const mensaje = res.data?.mensaje || 'URLs actualizadas correctamente';
+      showMessage(mensaje, 'success');
 
-	const showMessage = (message, type = 'success') => {
-		setBannerMsg(message);
-		setBannerType(type);
-		setShowBanner(true);
-		setTimeout(() => setShowBanner(false), 4000);
-	};
+      // Cerramos modal después de un pequeño delay
+      setTimeout(() => closeModal(), 1200);
+    } catch (error) {
+      console.error('Error guardando URLs:', error);
+      let mensaje = 'Error al actualizar URLs';
+      if (error.response) {
+        const status = error.response.status;
+        const data = error.response.data;
+        if (status === 404) mensaje = 'Endpoint no encontrado. Verifica la ruta del backend';
+        else if (status === 401 || status === 403) mensaje = 'No tienes permisos para realizar esta acción';
+        else if (status === 400) mensaje = data?.mensaje || 'Datos inválidos enviados al servidor';
+        else if (status === 500) mensaje = 'Error interno del servidor. Revisa los logs del backend';
+        else mensaje = data?.mensaje || `Error ${status}: ${error.response.statusText}`;
+      } else if (error.request) {
+        mensaje = 'No se pudo conectar con el servidor. Verifica que el backend esté disponible';
+      } else {
+        mensaje = `Error en la petición: ${error.message}`;
+      }
+      showMessage(mensaje, 'error');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-	const convertToEmbedUrl = url => {
-		if (!url) return '';
+  // Render
+  if (loading && checkingAuth) {
+    return (
+      <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#10045c' }}>
+        <Typography variant="h6" sx={{ color: 'white' }}>Cargando...</Typography>
+      </Box>
+    );
+  }
 
-		// Si ya es una URL embed, devolverla tal como está
-		if (
-			url.includes('youtube.com/embed/') ||
-			url.includes('youtube-nocookie.com/embed/')
-		) {
-			return url;
-		}
+  const showEditButton = isLoggedIn && isAdmin;
 
-		let videoId = '';
+  return (
+    <Box
+      sx={{
+        minHeight: '100vh',
+        width: '100%',
+        backgroundImage: `linear-gradient(rgba(16, 4, 92, 0.95), rgba(16, 4, 92, 0.95)), url(${HeaderBesibol})`,
+        backgroundSize: 'cover',
+        backgroundRepeat: 'no-repeat',
+        backgroundPosition: 'center',
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-start',
+        padding: '40px 20px',
+        position: 'relative',
+      }}
+    >
+      {/* Botón flotante para admin: abrir modal (agregar) */}
+      {showEditButton && (
+        <Button
+          onClick={() => openModal('add', null)}
+          disabled={loading}
+          sx={{
+            position: 'absolute',
+            top: '20px',
+            right: '20px',
+            minWidth: 'auto',
+            width: '48px',
+            height: '48px',
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255,255,255,0.9)',
+            color: '#3b82f6',
+            '&:hover': { backgroundColor: 'rgba(255,255,255,1)' },
+            '&:disabled': { backgroundColor: 'rgba(255,255,255,0.5)' },
+            zIndex: 10,
+          }}
+        >
+          <Edit />
+        </Button>
+      )}
 
-		try {
-			// Extraer video ID de diferentes formatos de URL de YouTube
-			if (url.includes('youtube.com/watch?v=')) {
-				const urlObj = new URL(url);
-				videoId = urlObj.searchParams.get('v');
-			} else if (url.includes('youtu.be/')) {
-				videoId = url.split('youtu.be/')[1].split('?')[0].split('&')[0];
-			} else if (url.includes('youtube.com/v/')) {
-				videoId = url.split('youtube.com/v/')[1].split('?')[0].split('&')[0];
-			}
+      <Typography
+        variant="h4"
+        sx={{
+          fontFamily: 'Groteskbold',
+          color: 'white',
+          marginBottom: '2rem',
+          marginTop: '80px',
+          textAlign: 'center',
+        }}
+      >
+        Bienvenido! Esperamos disfrutes de nuestros partidos en vivo!!!
+      </Typography>
 
-			// Si encontramos un video ID, crear la URL embed
-			if (videoId) {
-				// Agregar autoplay solo si es "en_directo"
-				const autoplayParam = formData.tipoTransmision === 'en_directo' ? '&autoplay=1&mute=1' : '';
-				return `https://www.youtube.com/embed/${videoId}?${autoplayParam.substring(1)}`;
-			}
-		} catch (error) {
-			console.error('Error procesando URL:', error);
-		}
+      <Box sx={{ width: '95%', maxWidth: '1200px', display: 'flex', flexDirection: 'column', alignItems: 'flex-end', flex: 1 }}>
+        {/* Contenedor Video o Mensaje */}
+        <Box
+          sx={{
+            width: '100%',
+            flex: 1,
+            marginBottom: '2rem',
+            aspectRatio: '16/9',
+            borderRadius: '20px',
+            overflow: 'hidden',
+            boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+			backgroundColor: urlData.videoUrl ? 'transparent' : 'rgba(255,255,255,0.03)',
+            padding: urlData.videoUrl ? 0 : 2, // 👈 quitar padding si hay video
+          }}
+        >
+          {urlData.videoUrl && urlData.videoUrl.trim() !== '' ? (
+            <iframe
+              src={urlData.videoUrl}
+              title="En Vivo"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              style={{ width: '100%', height: '100%', border: 'none' }}
+            />
+          ) : (
+            <Box sx={{ px: 3 }}>
+              <Typography
+  sx={{
+    fontFamily: 'Groteskbold',
+    color: '#e06c14',
+    fontWeight: 'bold',
+    fontSize: { xs: '1rem', sm: '1.5rem', md: '2.5rem' }, // 👈 responsivo
+    textAlign: 'center',
+    lineHeight: 1.4,
+  }}
+>
+  Actualmente no hay ningún evento pasando en vivo, pero si quieres puedes visitar nuestro canal presionando el botón de abajo. ¡Muchas gracias!
+</Typography>
+            </Box>
+          )}
+        </Box>
 
-		return url; // Devolver la URL original si no se puede convertir
-	};
+        <Box
+  sx={{
+    display: 'flex',
+    gap: 2,
+    marginTop: '20px',
+    justifyContent: 'center',
+    flexWrap: 'wrap',
+  }}
+>
+  <Button
+    variant="contained"
+    sx={{
+      fontFamily: 'Petermedium',
+      backgroundColor: '#fff',
+      color: '#e06c14',
+      borderRadius: '20px',
+      '&:hover': { color: '#10045c', backgroundColor: '#c1c8cdf2' },
+    }}
+    onClick={() => {
+      if (urlData.channelUrl) window.open(urlData.channelUrl, '_blank');
+      else showMessage('No hay canal configurado', 'error');
+    }}
+  >
+    Ir al Canal
+  </Button>
 
-	const validateUrls = () => {
-		if (!formData.videoUrl.trim()) {
-			showMessage('La URL del video es requerida', 'error');
-			return false;
-		}
+  {isAdmin && (
+    <Button
+      variant="outlined"
+      sx={{
+        fontFamily: 'Petermedium',
+        color: '#fff',
+        borderColor: '#fff',
+        borderRadius: '20px',
+        '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' },
+      }}
+      onClick={() => openModal('add')}
+    >
+      <Edit />
+      &nbsp; 
+    </Button>
+  )}
+</Box>
 
-		if (!formData.channelUrl.trim()) {
-			showMessage('La URL del canal es requerida', 'error');
-			return false;
-		}
+      </Box>
 
-		// Verificar si es una URL de YouTube válida
-		const isYouTubeVideoUrl =
-			formData.videoUrl.includes('youtube.com') ||
-			formData.videoUrl.includes('youtu.be');
-		if (!isYouTubeVideoUrl) {
-			showMessage(
-				'La URL del video debe ser un enlace de YouTube válido',
-				'error',
-			);
-			return false;
-		}
+      {/* Banner */}
+      {showBanner && !showModal && (
+        <Box sx={{
+          position: 'fixed',
+          top: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 1001,
+          minWidth: '300px',
+          maxWidth: '500px',
+          p: 2,
+          borderRadius: 2,
+          backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
+          color: 'white',
+          boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
+        }}>
+          <Typography sx={{ fontWeight: 'bold', fontSize: '14px', textAlign: 'center' }}>{bannerMsg}</Typography>
+        </Box>
+      )}
 
-		// Validación básica de URL de canal YouTube
-		const isYouTubeChannelUrl = formData.channelUrl.includes('youtube.com/');
-		if (!isYouTubeChannelUrl) {
-			showMessage(
-				'La URL del canal debe ser un enlace de YouTube válido',
-				'error',
-			);
-			return false;
-		}
+      {/* Modal (Agregar / Editar URLs) */}
+      {showModal && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1200,
+          padding: 16,
+        }}>
+          <div style={{
+            backgroundColor: 'white',
+            borderRadius: 12,
+            padding: 20,
+            width: '100%',
+            maxWidth: 720,
+            maxHeight: '88vh',
+            overflow: 'auto',
+            boxSizing: 'border-box',
+          }}>
+            {/* Header */}
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+              <h3 style={{ margin: 0, fontSize: '1.25rem' }}>Configurar URLs de En Vivo</h3>
+              <button onClick={closeModal} disabled={loading} style={{
+                background: 'none',
+                border: 'none',
+                cursor: loading ? 'not-allowed' : 'pointer',
+                padding: 6,
+                borderRadius: 6,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+              }}>
+                <X />
+              </button>
+            </div>
 
-		return true;
-	};
+            {/* Lista rápida de videos guardados (opcional, para edición) */}
+            <div style={{ marginBottom: 16 }}>
+              <Typography sx={{ fontSize: 14, color: '#374151', marginBottom: 8 }}>Videos guardados</Typography>
+              {videos.length === 0 ? (
+                <Typography sx={{ fontSize: 13, color: '#6b7280' }}>No hay videos guardados.</Typography>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                  {videos.map((v) => (
+                    <div key={v.id ?? v.video_url} style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      background: '#f8fafc',
+                    }}>
+                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 440 }}>
+                        <strong style={{ fontSize: 13 }}>{v.descripcion || 'Video'}</strong>
+                        <div style={{ fontSize: 12, color: '#6b7280' }}>{v.video_url}</div>
+                      </div>
+                      <div style={{ display: 'flex', gap: 8 }}>
+                        <Button size="small" variant="contained" onClick={() => openModal('edit', v)}>
+                          Editar
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
-	const saveUrls = async () => {
-		if (!isLoggedIn || !isAdmin || !validateUrls()) {
-			return;
-		}
+            {/* Formulario */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+              <TextField
+                label="URL del video (YouTube)"
+                value={formData.videoUrl}
+                onChange={(e) => setFormData({ ...formData, videoUrl: e.target.value })}
+                fullWidth
+                variant="outlined"
+                size="small"
+              />
+              <TextField
+                label="URL del canal (YouTube)"
+                value={formData.channelUrl}
+                onChange={(e) => setFormData({ ...formData, channelUrl: e.target.value })}
+                fullWidth
+                variant="outlined"
+                size="small"
+              />
+              <TextField
+                label="Descripción (opcional)"
+                value={formData.descripcion}
+                onChange={(e) => setFormData({ ...formData, descripcion: e.target.value })}
+                fullWidth
+                variant="outlined"
+                size="small"
+              />
 
-		try {
-			setLoading(true);
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', flexWrap: 'wrap' }}>
+                <FormControl size="small" sx={{ minWidth: 180 }}>
+                  <InputLabel id="tipo-label">Tipo de transmisión</InputLabel>
+                  <Select
+                    labelId="tipo-label"
+                    label="Tipo de transmisión"
+                    value={formData.tipoTransmision}
+                    onChange={(e) => setFormData({ ...formData, tipoTransmision: e.target.value })}
+                    size="small"
+                  >
+                    <MenuItem value="en_directo">En directo</MenuItem>
+                    <MenuItem value="grabado">Grabado</MenuItem>
+                  </Select>
+                </FormControl>
 
-			// Convertir la URL a formato embed antes de enviar
-			const embedUrl = convertToEmbedUrl(formData.videoUrl.trim());
+                <FormControlLabel
+                  control={
+                    <Switch
+                      checked={!!formData.activo}
+                      onChange={(e) => setFormData({ ...formData, activo: e.target.checked })}
+                    />
+                  }
+                  label={formData.activo ? 'Activo' : 'Inactivo'}
+                />
+              </div>
+            </div>
 
-			const isActivo = formData.tipoTransmision === 'en_directo';
+            {/* Botones */}
+            <div style={{ display: 'flex', gap: 12, justifyContent: 'flex-end', marginTop: 18 }}>
+              <button onClick={closeModal} disabled={loading} style={{
+                padding: '10px 18px',
+                backgroundColor: '#f3f4f6',
+                color: '#374151',
+                border: '2px solid #e5e7eb',
+                borderRadius: 8,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: 14,
+                fontWeight: 500,
+              }}>
+                Cancelar
+              </button>
 
-			const requestBody = {
-				video_url: formData.videoUrl.trim(),
-				channel_url: formData.channelUrl.trim(),
-				descripcion: formData.descripcion.trim() || 'Video en vivo',
-				activo: isActivo,
-			};
+              <button onClick={saveUrls} disabled={loading} style={{
+                padding: '10px 18px',
+                backgroundColor: loading ? '#93c5fd' : '#3b82f6',
+                color: 'white',
+                border: 'none',
+                borderRadius: 8,
+                cursor: loading ? 'not-allowed' : 'pointer',
+                fontSize: 14,
+                fontWeight: 500,
+              }}>
+                {loading ? 'Guardando...' : (formData.id ? 'Guardar cambios' : 'Agregar video')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
-			console.log('Enviando datos:', requestBody);
-
-			// Usar PUT para actualizar/registrar
-			const res = await api.post('/auth/registrarenvivo', requestBody, {
-				headers: {
-					'Content-Type': 'application/json',
-				},
-				withCredentials: true,
-			});
-
-			console.log('Respuesta del servidor:', res.data);
-
-			// Actualizar el estado local inmediatamente
-			setUrlData({
-				videoUrl: embedUrl,
-				channelUrl: formData.channelUrl.trim(),
-			});
-
-			const mensaje = res.data?.mensaje || 'URLs actualizadas correctamente';
-			showMessage(mensaje, 'success');
-
-			// Cerrar modal después de un delay
-			setTimeout(() => {
-				closeModal();
-			}, 1500);
-		} catch (error) {
-			console.error('Error completo:', error);
-
-			let mensaje = 'Error al actualizar URLs';
-
-			if (error.response) {
-				// El servidor respondió con un código de error
-				const status = error.response.status;
-				const data = error.response.data;
-
-				console.error('Error response:', {
-					status,
-					data,
-					headers: error.response.headers,
-				});
-
-				if (status === 404) {
-					mensaje = 'Endpoint no encontrado. Verifica la ruta del backend';
-				} else if (status === 401 || status === 403) {
-					mensaje = 'No tienes permisos para realizar esta acción';
-				} else if (status === 400) {
-					mensaje = data?.mensaje || 'Datos inválidos enviados al servidor';
-				} else if (status === 500) {
-					mensaje = 'Error interno del servidor. Revisa los logs del backend';
-				} else {
-					mensaje =
-						data?.mensaje || `Error ${status}: ${error.response.statusText}`;
-				}
-			} else if (error.request) {
-				// La petición se hizo pero no hubo respuesta
-				console.error('No response received:', error.request);
-				mensaje =
-					'No se pudo conectar con el servidor. Verifica que el backend esté funcionando';
-			} else {
-				// Error en la configuración de la petición
-				console.error('Request setup error:', error.message);
-				mensaje = `Error en la petición: ${error.message}`;
-			}
-
-			showMessage(mensaje, 'error');
-		} finally {
-			setLoading(false);
-		}
-	};
-
-	// Solo mostrar loading si estamos cargando videos Y aún estamos verificando autenticación
-	if (loading && checkingAuth) {
-		return (
-			<Box
-				sx={{
-					minHeight: '100vh',
-					display: 'flex',
-					alignItems: 'center',
-					justifyContent: 'center',
-					backgroundColor: '#10045c',
-				}}
-			>
-				<Typography variant='h6' sx={{ color: 'white' }}>
-					Cargando...
-				</Typography>
-			</Box>
-		);
-	}
-
-	// Determinar si mostrar el botón de edición
-	const showEditButton = isLoggedIn && isAdmin;
-
-	return (
-		<Box
-			sx={{
-				minHeight: '100vh',
-				width: '100%',
-				backgroundImage: `linear-gradient(rgba(16, 4, 92, 0.95), rgba(16, 4, 92, 0.95)), url(${HeaderBesibol})`,
-				backgroundSize: 'cover',
-				backgroundRepeat: 'no-repeat',
-				backgroundPosition: 'center',
-				display: 'flex',
-				flexDirection: 'column',
-				alignItems: 'center',
-				justifyContent: 'flex-start',
-				padding: '40px 20px',
-				position: 'relative',
-			}}
-		>
-			{/* Admin Edit Button - Solo se muestra si está logueado Y es admin */}
-			{showEditButton && (
-				<Button
-					onClick={openModal}
-					disabled={loading}
-					sx={{
-						position: 'absolute',
-						top: '20px',
-						right: '20px',
-						minWidth: 'auto',
-						width: '48px',
-						height: '48px',
-						borderRadius: '50%',
-						backgroundColor: 'rgba(255,255,255,0.9)',
-						color: '#3b82f6',
-						'&:hover': {
-							backgroundColor: 'rgba(255,255,255,1)',
-						},
-						'&:disabled': {
-							backgroundColor: 'rgba(255,255,255,0.5)',
-						},
-						zIndex: 10,
-					}}
-				>
-					<Edit />
-				</Button>
-			)}
-
-			{/* Título */}
-			<Typography
-				variant='h4'
-				sx={{
-					fontFamily: 'Groteskbold',
-					color: 'white',
-					marginBottom: '2rem',
-					marginTop: '80px',
-					textAlign: 'center',
-				}}
-			>
-				Bienvenido! Esperamos disfrutes de nuestros partidos en vivo!!!
-			</Typography>
-
-			{/* Contenedor Video + Botón */}
-			<Box
-				sx={{
-					width: '95%',
-					maxWidth: '1200px',
-					display: 'flex',
-					flexDirection: 'column',
-					alignItems: 'flex-end',
-					flex: 1,
-				}}
-			>
-				{/* Video */}
-				<Box
-					sx={{
-						width: '100%',
-						flex: 1,
-						marginBottom: '2rem',
-						aspectRatio: '16/9',
-						borderRadius: '20px',
-						overflow: 'hidden',
-						boxShadow: '0 8px 25px rgba(0,0,0,0.7)',
-					}}
-				>
-					<iframe
-						src={urlData.videoUrl}
-						title='En Vivo'
-						allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture'
-						allowFullScreen
-						style={{ width: '100%', height: '100%', border: 'none' }}
-					></iframe>
-				</Box>
-
-				{/* Botones */}
-				<Box
-					sx={{
-						display: 'flex',
-						gap: '20px',
-						marginTop: '20px',
-						alignItems: 'center',
-					}}
-				>
-					<Button
-						variant='contained'
-						sx={{
-							fontFamily: 'Petermedium',
-							backgroundColor: '#fff',
-							color: '#e06c14',
-							borderRadius: '20px',
-							'&:hover': {
-								borderColor: '#e06c14',
-								backgroundColor: '#c8c6c5ff',
-							},
-						}}
-						onClick={() => window.open(urlData.channelUrl, '_blank')}
-					>
-						Ir al Canal
-					</Button>
-
-					{/* Admin Edit Button - Solo se muestra si está logueado Y es admin */}
-					{showEditButton && (
-						<Button
-							onClick={openModal}
-							disabled={loading}
-							sx={{
-								minWidth: 'auto',
-								width: '48px',
-								height: '48px',
-								borderRadius: '50%',
-								backgroundColor: 'rgba(255,255,255,0.9)',
-								color: '#3b82f6',
-								'&:hover': {
-									backgroundColor: 'rgba(255,255,255,1)',
-								},
-								'&:disabled': {
-									backgroundColor: 'rgba(255,255,255,0.5)',
-								},
-							}}
-						>
-							<Edit />
-						</Button>
-					)}
-				</Box>
-			</Box>
-
-			{/* Banner Global */}
-			{showBanner && !showModal && (
-				<Box
-					sx={{
-						position: 'fixed',
-						top: '20px',
-						left: '50%',
-						transform: 'translateX(-50%)',
-						zIndex: 1001,
-						minWidth: '300px',
-						maxWidth: '500px',
-						p: 2,
-						borderRadius: 2,
-						backgroundColor: bannerType === 'error' ? '#f44336' : '#4caf50',
-						color: 'white',
-						boxShadow: '0 4px 12px rgba(0,0,0,0.3)',
-						animation: 'slideDown 0.3s ease-in-out',
-					}}
-				>
-					<Typography
-						sx={{ fontWeight: 'bold', fontSize: '14px', textAlign: 'center' }}
-					>
-						{bannerMsg}
-					</Typography>
-				</Box>
-			)}
-
-			{/* Modal for URL editing */}
-			{showModal && (
-				<div
-					style={{
-						position: 'fixed',
-						top: 0,
-						left: 0,
-						right: 0,
-						bottom: 0,
-						backgroundColor: 'rgba(0,0,0,0.5)',
-						display: 'flex',
-						alignItems: 'center',
-						justifyContent: 'center',
-						zIndex: 1000,
-					}}
-				>
-					<div
-						style={{
-							backgroundColor: 'white',
-							borderRadius: '12px',
-							padding: '24px',
-							width: '90%',
-							maxWidth: '600px',
-							maxHeight: '80vh',
-							overflow: 'auto',
-						}}
-					>
-						{/* Modal Header */}
-						<div
-							style={{
-								display: 'flex',
-								justifyContent: 'space-between',
-								alignItems: 'center',
-								marginBottom: '20px',
-							}}
-						>
-							<h3 style={{ margin: 0, fontSize: '1.5rem', color: '#333' }}>
-								Configurar URLs de En Vivo
-							</h3>
-							<button
-								onClick={closeModal}
-								disabled={loading}
-								style={{
-									background: 'none',
-									border: 'none',
-									cursor: loading ? 'not-allowed' : 'pointer',
-									padding: '4px',
-									borderRadius: '4px',
-									display: 'flex',
-									alignItems: 'center',
-									justifyContent: 'center',
-									opacity: loading ? 0.5 : 1,
-								}}
-							>
-								<X />
-							</button>
-						</div>
-
-						{/* Form */}
-						<div
-							style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
-						>
-							<div>
-								<label
-									style={{
-										display: 'block',
-										marginBottom: '8px',
-										fontWeight: '600',
-										color: '#374151',
-										fontSize: '14px',
-									}}
-								>
-									URL del Video (YouTube) *
-								</label>
-								<input
-									type='text'
-									value={formData.videoUrl}
-									onChange={e =>
-										setFormData({
-											...formData,
-											videoUrl: e.target.value,
-										})
-									}
-									placeholder='https://www.youtube.com/watch?v=VIDEO_ID o https://youtu.be/VIDEO_ID'
-									disabled={loading}
-									style={{
-										width: '100%',
-										padding: '12px',
-										border: '2px solid #e5e7eb',
-										borderRadius: '8px',
-										fontSize: '14px',
-										boxSizing: 'border-box',
-										outline: 'none',
-										transition: 'border-color 0.2s',
-										opacity: loading ? 0.7 : 1,
-									}}
-									onFocus={e => (e.target.style.borderColor = '#3b82f6')}
-									onBlur={e => (e.target.style.borderColor = '#e5e7eb')}
-								/>
-								<small
-									style={{
-										color: '#6b7280',
-										fontSize: '12px',
-										display: 'block',
-										marginTop: '4px',
-									}}
-								>
-									Puedes usar cualquier formato de URL de YouTube. Se convertirá
-									automáticamente.
-								</small>
-							</div>
-
-							<div>
-								<label
-									style={{
-										display: 'block',
-										marginBottom: '8px',
-										fontWeight: '600',
-										color: '#374151',
-										fontSize: '14px',
-									}}
-								>
-									URL del Canal *
-								</label>
-								<input
-									type='text'
-									value={formData.channelUrl}
-									onChange={e =>
-										setFormData({
-											...formData,
-											channelUrl: e.target.value,
-										})
-									}
-									placeholder='https://www.youtube.com/@nombredelcanal'
-									disabled={loading}
-									style={{
-										width: '100%',
-										padding: '12px',
-										border: '2px solid #e5e7eb',
-										borderRadius: '8px',
-										fontSize: '14px',
-										boxSizing: 'border-box',
-										outline: 'none',
-										transition: 'border-color 0.2s',
-										opacity: loading ? 0.7 : 1,
-									}}
-									onFocus={e => (e.target.style.borderColor = '#3b82f6')}
-									onBlur={e => (e.target.style.borderColor = '#e5e7eb')}
-								/>
-							</div>
-
-							<div>
-								<label
-									style={{
-										display: 'block',
-										marginBottom: '8px',
-										fontWeight: '600',
-										color: '#374151',
-										fontSize: '14px',
-									}}
-								>
-									Descripción (Opcional)
-								</label>
-								<input
-									type='text'
-									value={formData.descripcion}
-									onChange={e =>
-										setFormData({
-											...formData,
-											descripcion: e.target.value,
-										})
-									}
-									placeholder='Descripción del video en vivo'
-									disabled={loading}
-									style={{
-										width: '100%',
-										padding: '12px',
-										border: '2px solid #e5e7eb',
-										borderRadius: '8px',
-										fontSize: '14px',
-										boxSizing: 'border-box',
-										outline: 'none',
-										transition: 'border-color 0.2s',
-										opacity: loading ? 0.7 : 1,
-									}}
-									onFocus={e => (e.target.style.borderColor = '#3b82f6')}
-									onBlur={e => (e.target.style.borderColor = '#e5e7eb')}
-								/>
-							</div>
-
-							{/* Nuevo campo: Tipo de Transmisión */}
-							<div>
-								<label
-									style={{
-										display: 'block',
-										marginBottom: '8px',
-										fontWeight: '600',
-										color: '#374151',
-										fontSize: '14px',
-									}}
-								>
-									Tipo de Transmisión *
-								</label>
-								<select
-									value={formData.tipoTransmision}
-									onChange={e =>
-										setFormData({
-											...formData,
-											tipoTransmision: e.target.value,
-										})
-									}
-									disabled={loading}
-									style={{
-										width: '100%',
-										padding: '12px',
-										border: '2px solid #e5e7eb',
-										borderRadius: '8px',
-										fontSize: '14px',
-										boxSizing: 'border-box',
-										outline: 'none',
-										transition: 'border-color 0.2s',
-										opacity: loading ? 0.7 : 1,
-										backgroundColor: 'white',
-										cursor: loading ? 'not-allowed' : 'pointer',
-									}}
-									onFocus={e => (e.target.style.borderColor = '#3b82f6')}
-									onBlur={e => (e.target.style.borderColor = '#e5e7eb')}
-								>
-									<option value='en_directo'>En Directo</option>
-									<option value='video'>Video</option>
-								</select>
-								<small
-									style={{
-										color: '#6b7280',
-										fontSize: '12px',
-										display: 'block',
-										marginTop: '4px',
-									}}
-								>
-									{formData.tipoTransmision === 'en_directo' 
-										? 'Se reproducirá automáticamente con audio silenciado'
-										: 'Video pregrabado - el usuario debe hacer clic para reproducir'
-									}
-								</small>
-							</div>
-						</div>
-
-						{/* Banner dentro del modal */}
-						{showBanner && (
-							<Box
-								sx={{
-									mt: 3,
-									p: 2,
-									borderRadius: 2,
-									backgroundColor:
-										bannerType === 'error' ? '#f44336' : '#4caf50',
-									color: 'white',
-									animation: 'slideDown 0.3s ease-in-out',
-								}}
-							>
-								<Typography sx={{ fontWeight: 'bold', fontSize: '14px' }}>
-									{bannerMsg}
-								</Typography>
-							</Box>
-						)}
-
-						{/* Buttons */}
-						<div
-							style={{
-								display: 'flex',
-								gap: '12px',
-								justifyContent: 'flex-end',
-								marginTop: '24px',
-							}}
-						>
-							<button
-								onClick={closeModal}
-								disabled={loading}
-								style={{
-									padding: '12px 24px',
-									backgroundColor: '#f3f4f6',
-									color: '#374151',
-									border: '2px solid #e5e7eb',
-									borderRadius: '8px',
-									cursor: loading ? 'not-allowed' : 'pointer',
-									fontSize: '14px',
-									fontWeight: '500',
-									opacity: loading ? 0.7 : 1,
-									transition: 'all 0.2s',
-								}}
-							>
-								Cancelar
-							</button>
-							<button
-								onClick={saveUrls}
-								disabled={loading}
-								style={{
-									padding: '12px 24px',
-									backgroundColor: loading ? '#93c5fd' : '#3b82f6',
-									color: 'white',
-									border: 'none',
-									borderRadius: '8px',
-									cursor: loading ? 'not-allowed' : 'pointer',
-									fontSize: '14px',
-									fontWeight: '500',
-									transition: 'all 0.2s',
-								}}
-							>
-								{loading ? 'Guardando...' : 'Guardar Cambios'}
-							</button>
-						</div>
-					</div>
-				</div>
-			)}
-		</Box>
-	);
+    </Box>
+  );
 };
 
 export default EnVivo;
