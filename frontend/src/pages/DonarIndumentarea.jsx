@@ -166,7 +166,7 @@ const DonarIndumentarea = () => {
 
     try {
 
-      const res = await api.post('/auth/registrardonacion', body, {
+      const res = await api.post('/auth/donaciones/registrardonacion', body, {
         headers: { "Content-Type": "application/json" }
       })
 

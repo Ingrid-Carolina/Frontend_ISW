@@ -4,6 +4,7 @@ import { motion } from 'framer-motion';
 import Slider from 'react-slick';
 import { api } from '../api/api';
 import EditableImage from '../components/EditableImage';
+import EditableHeaderImage from '../components/EditableHeaderImage';
 
 // Variantes de animación
 const fadeUp = {
@@ -147,58 +148,61 @@ function NuestraHistoria() {
         <>
             {/* ENCABEZADO CON IMAGEN */}
             <Box
-                sx={{
-                    position: 'relative',
-                    width: '100%',
-                    minHeight: { xs: '75vh', md: '90vh' },
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundImage: `url(${images.historia_header})`,
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    py: { xs: 6, md: 8 },
-                }}
-            >
-                <Box
-                    sx={{
-                        position: 'absolute',
-                        top: 0,
-                        left: 0,
-                        width: '100%',
-                        height: '100%',
-                        backgroundColor: 'rgba(0, 0, 80, 0.75)',
-                        zIndex: 1,
-                    }}
-                />
-                <Box
-                    sx={{
-                        position: 'relative',
-                        zIndex: 2,
-                        textAlign: 'center',
-                    }}
-                >
-                    <motion.div
-                        initial='hidden'
-                        whileInView='visible'
-                        viewport={{ once: true }}
-                        variants={fadeUp}
-                    >
-                        <Typography
-                            variant='h2'
-                            sx={{
-                                fontWeight: 'bold',
-                                fontSize: { xs: '4rem', md: '7rem' },
-                                fontFamily: '"Varsity", cursive',
-                                color: 'white',
-                                textAlign: 'center',
-                            }}
-                        >
-                            NUESTRA HISTORIA
-                        </Typography>
-                    </motion.div>
-                </Box>
-            </Box>
+                sx={{
+                    position: 'relative', // Necesario para posicionar el overlay y el botón de editar
+                    width: '100%',
+                    minHeight: { xs: '75vh', md: '90vh' },
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    backgroundImage: `url(${images.historia_header})`, // Usa la imagen de la API
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    py: { xs: 6, md: 8 },
+                }}
+            >
+                {/* Overlay azul */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(0, 0, 80, 0.75)', // Filtro azul
+                        zIndex: 1,
+                    }}
+                />
+                <Box
+                    sx={{
+                        position: 'relative', // Contenedor para el texto y el botón
+                        zIndex: 2, // Asegura que el texto y el botón estén por encima del overlay azul
+                        textAlign: 'center',
+                    }}
+                >
+                    <motion.div
+                        initial='hidden'
+                        whileInView='visible'
+                        viewport={{ once: true }}
+                        variants={fadeUp}
+                    >
+                        <Typography
+                            variant='h2'
+                            sx={{
+                                fontWeight: 'bold',
+                                fontSize: { xs: '4rem', md: '7rem' },
+                                fontFamily: '"Varsity", cursive',
+                                color: 'white',
+                                textAlign: 'center',
+                        }}
+                        >
+                            NUESTRA HISTORIA
+                        </Typography>
+                    </motion.div>
+                </Box>
+                {/* BOTÓN EDITAR PARA EL HEADER */}
+                <EditableHeaderImage onImageUpload={(file) => handleImageChange('historia_header', file)} />
+            </Box>
             
             {/* SECCIÓN QUIÉNES SOMOS MEJORADA */}
             <Box
