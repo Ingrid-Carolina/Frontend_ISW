@@ -34,6 +34,9 @@ import {
   Delete as DeleteIcon,
   Add as Add,
 } from '@mui/icons-material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
+import Menu from '@mui/material/Menu';
+
 import { api } from '../api/api';
 
 const TALLAS = ["6", "8", "10", "12", "14", "16", "XS", "S", "M", "L", "XL", "2XL"];
@@ -74,6 +77,7 @@ const buscarPorCategoria = (producto, searchTerm) => {
   return false;
 };
 
+
 export default function Tienda() {
   // Estado UI
   const [searchQuery, setSearchQuery] = useState('');
@@ -87,6 +91,28 @@ export default function Tienda() {
   const [loadingProductos, setLoadingProductos] = useState(false);
   const [errorProductos, setErrorProductos] = useState(null);
 
+  // Menú contextual por tarjeta
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [menuProduct, setMenuProduct] = useState(null);
+
+  // Edit dialog
+  const [editOpen, setEditOpen] = useState(false);
+  const [editFormData, setEditFormData] = useState({
+    idproducto: null,
+    nombre_producto: '',
+    descripcion: '',
+    precio_unitario: '',
+    cantidad: '',
+    talla: '',
+  });
+  const [editErrors, setEditErrors] = useState({});
+  const [editSaving, setEditSaving] = useState(false);
+
+  // Delete dialog
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [deleteProduct, setDeleteProduct] = useState(null);
+
+
   // Form Dialog
   const [addOpen, setAddOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -98,6 +124,21 @@ export default function Tienda() {
   });
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
+
+  const [role, setRole] = useState(() => (localStorage.getItem('userRole') || '').toLowerCase());
+  const isAdmin = role === 'admin';
+
+  useEffect(() => {
+    const onRole = (e) => setRole((e.detail?.role || localStorage.getItem('userRole') || '').toLowerCase());
+    const onAuthRefresh = () => onRole({ detail: { role: localStorage.getItem('userRole') || '' } });
+
+    window.addEventListener('auth:role', onRole);
+    window.addEventListener('auth:refresh', onAuthRefresh);
+    return () => {
+      window.removeEventListener('auth:role', onRole);
+      window.removeEventListener('auth:refresh', onAuthRefresh);
+    };
+  }, []);
 
   const isShirt = useMemo(() => {
     const n = (formData.nombre_producto || '').toLowerCase();
@@ -141,17 +182,17 @@ export default function Tienda() {
       const { data } = await api.post('/auth/tienda/agregarproducto', payload);
       const nuevo = data?.producto
         ? {
-            idproducto: data.producto.idproducto,
-            nombre_producto: data.producto.nombre_producto,
-            descripcion: data.producto.descripcion,
-            precio_unitario: data.producto.precio_unitario,
-            cantidad: data.producto.cantidad,
-            talla: data.producto.talla,
-          }
+          idproducto: data.producto.idproducto,
+          nombre_producto: data.producto.nombre_producto,
+          descripcion: data.producto.descripcion,
+          precio_unitario: data.producto.precio_unitario,
+          cantidad: data.producto.cantidad,
+          talla: data.producto.talla,
+        }
         : {
-            idproducto: Date.now(),
-            ...payload,
-          };
+          idproducto: Date.now(),
+          ...payload,
+        };
 
       setProductos((prev) => [nuevo, ...prev]);
 
@@ -177,6 +218,129 @@ export default function Tienda() {
       setSaving(false);
     }
   };
+
+  // Abrir/cerrar menú
+  const handleMenuOpen = (event, product) => {
+    setMenuAnchorEl(event.currentTarget);
+    setMenuProduct(product);
+  };
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+    setMenuProduct(null);
+  };
+
+  // ---- EDITAR ----
+  const handleEditOpen = () => {
+    if (!menuProduct) return;
+    setEditFormData({
+      idproducto: menuProduct.idproducto,
+      nombre_producto: menuProduct.nombre_producto || '',
+      descripcion: menuProduct.descripcion || '',
+      precio_unitario: String(menuProduct.precio_unitario ?? ''),
+      cantidad: String(menuProduct.cantidad ?? ''),
+      talla: menuProduct.talla || '',
+    });
+    setEditErrors({});
+    setEditOpen(true);
+    handleMenuClose();
+  };
+
+  const handleEditClose = () => {
+    if (editSaving) return;
+    setEditOpen(false);
+    setEditErrors({});
+  };
+
+  const handleEditChange = (field) => (e) => {
+    const value = e.target.value;
+    setEditFormData((s) => ({ ...s, [field]: value }));
+  };
+
+  const isShirtEdit = useMemo(() => {
+    const n = (editFormData.nombre_producto || '').toLowerCase();
+    return n.includes('camisa') || n.includes('camiseta');
+  }, [editFormData.nombre_producto]);
+
+  const validateEdit = () => {
+    const e = {};
+    if (!editFormData.nombre_producto?.trim()) e.nombre_producto = 'Requerido';
+    if (editFormData.precio_unitario === '' || isNaN(Number(editFormData.precio_unitario))) e.precio_unitario = 'Precio inválido';
+    if (editFormData.cantidad === '' || isNaN(Number(editFormData.cantidad))) e.cantidad = 'Cantidad inválida';
+    if (isShirtEdit && !editFormData.talla) e.talla = 'Selecciona una talla';
+    setEditErrors(e);
+    return Object.keys(e).length === 0;
+  };
+
+  const handleEditSubmit = async (e) => {
+    e.preventDefault();
+    if (!validateEdit()) return;
+    setEditSaving(true);
+    try {
+      const payload = {
+        nombre_producto: editFormData.nombre_producto.trim(),
+        descripcion: editFormData.descripcion?.trim() || null,
+        precio_unitario: Number(editFormData.precio_unitario),
+        cantidad: Number(editFormData.cantidad),
+        talla: isShirtEdit ? editFormData.talla : null,
+      };
+
+      // TODO: API call de actualización (PUT/PATCH)
+      const { data } = await api.put(`/auth/tienda/modificarproducto/${editFormData.idproducto}`, payload);
+
+
+      // Actualiza la lista en memoria
+      setProductos((prev) =>
+        prev.map((p) => (p.idproducto === editFormData.idproducto ? { ...p, ...data.producto } : p))
+      );
+
+      setBannerMsg('Producto actualizado');
+      setBannerType('success');
+      setShowBanner(true);
+      setEditOpen(false);
+    } catch (err) {
+      setEditErrors((s) => ({
+        ...s,
+        submit: err?.response?.data?.message || err.message || 'Error al actualizar producto',
+      }));
+    } finally {
+      setEditSaving(false);
+    }
+  };
+
+  // ---- ELIMINAR ----
+  const handleDeleteClick = () => {
+    if (!menuProduct) return;
+    setDeleteProduct(menuProduct);
+    setDeleteOpen(true);
+    handleMenuClose();
+  };
+
+  const handleDeleteClose = () => {
+    setDeleteOpen(false);
+    setDeleteProduct(null);
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      // TODO: API call de delete
+      await api.delete(`/auth/tienda/eliminarproducto/${deleteProduct.idproducto}`);
+
+      // Actualiza localmente
+      setProductos((prev) => prev.filter((p) => p.idproducto !== deleteProduct.idproducto));
+
+      setBannerMsg('Producto eliminado');
+      setBannerType('success');
+      setShowBanner(true);
+      handleDeleteClose();
+    } catch (err) {
+      setBannerMsg(err?.response?.data?.message || err.message || 'Error al eliminar producto');
+      setBannerType('error');
+      setShowBanner(true);
+    }
+  };
+
+
+
 
   // Cargar productos
   useEffect(() => {
@@ -362,12 +526,15 @@ export default function Tienda() {
                 </Badge>
               </IconButton>
 
-              <IconButton
-                onClick={() => setAddOpen(true)}
-                sx={{ color: 'black', backgroundColor: 'rgba(255,255,255,0.2)', '&:hover': { backgroundColor: 'rgba(255,255,255,0.4)' } }}
-              >
-                <Add />
-              </IconButton>
+              {isAdmin && (
+                <IconButton
+                  onClick={() => setAddOpen(true)}
+                  sx={{ color: 'black', backgroundColor: 'rgba(255,255,255,0.2)', '&:hover': { backgroundColor: 'rgba(255,255,255,0.4)' } }}
+                >
+                  <Add />
+                </IconButton>
+              )}
+
             </Box>
           </Toolbar>
         </AppBar>
@@ -379,7 +546,7 @@ export default function Tienda() {
               Bienvenido a la Tienda de Pilotos
             </Typography>
 
-            {/* Dialog */}
+            {/* Dialog de agregar*/}
             <Dialog
               open={addOpen}
               onClose={handleClose}
@@ -466,6 +633,109 @@ export default function Tienda() {
               </DialogActions>
             </Dialog>
 
+            {/* Dialog de editar */}
+            <Dialog
+              open={editOpen}
+              onClose={handleEditClose}
+              fullWidth
+              maxWidth="sm"
+              keepMounted
+              PaperProps={{ component: 'form', onSubmit: handleEditSubmit }}
+            >
+              <DialogTitle>Editar producto</DialogTitle>
+              <DialogContent dividers>
+                <Stack spacing={2} sx={{ mt: 0.5 }}>
+                  <TextField
+                    label="Nombre del producto"
+                    value={editFormData.nombre_producto}
+                    onChange={handleEditChange('nombre_producto')}
+                    error={!!editErrors.nombre_producto}
+                    helperText={editErrors.nombre_producto}
+                    required
+                    fullWidth
+                  />
+
+                  <TextField
+                    label="Descripción"
+                    value={editFormData.descripcion}
+                    onChange={handleEditChange('descripcion')}
+                    multiline
+                    minRows={2}
+                    fullWidth
+                  />
+
+                  <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
+                    <TextField
+                      label="Precio (L)"
+                      type="number"
+                      inputMode="decimal"
+                      value={editFormData.precio_unitario}
+                      onChange={handleEditChange('precio_unitario')}
+                      error={!!editErrors.precio_unitario}
+                      helperText={editErrors.precio_unitario}
+                      required
+                      fullWidth
+                    />
+                    <TextField
+                      label="Cantidad"
+                      type="number"
+                      inputMode="numeric"
+                      value={editFormData.cantidad}
+                      onChange={handleEditChange('cantidad')}
+                      error={!!editErrors.cantidad}
+                      helperText={editErrors.cantidad}
+                      required
+                      fullWidth
+                    />
+                  </Box>
+
+                  {isShirtEdit && (
+                    <FormControl fullWidth error={!!editErrors.talla}>
+                      <InputLabel id="edit-talla-label">Talla</InputLabel>
+                      <Select
+                        labelId="edit-talla-label"
+                        label="Talla"
+                        value={editFormData.talla}
+                        onChange={handleEditChange('talla')}
+                        input={<OutlinedInput label="Talla" />}
+                      >
+                        {TALLAS.map((t) => (
+                          <MenuItem key={t} value={t}>{t}</MenuItem>
+                        ))}
+                      </Select>
+                      {editErrors.talla && <Box sx={{ color: 'error.main', fontSize: 12, mt: 0.5 }}>{editErrors.talla}</Box>}
+                    </FormControl>
+                  )}
+
+                  {editErrors.submit && (
+                    <Box sx={{ color: 'error.main', fontSize: 14 }}>{editErrors.submit}</Box>
+                  )}
+                </Stack>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleEditClose} disabled={editSaving}>Cancelar</Button>
+                <Button type="submit" variant="contained" disabled={editSaving}>
+                  {editSaving ? 'Guardando...' : 'Actualizar'}
+                </Button>
+              </DialogActions>
+            </Dialog>
+
+            {/*Dialog de eliminar */}
+            <Dialog open={deleteOpen} onClose={handleDeleteClose} maxWidth="xs" fullWidth>
+              <DialogTitle>Eliminar producto</DialogTitle>
+              <DialogContent dividers>
+                <Typography>
+                  ¿Seguro que quieres eliminar <b>{deleteProduct?.nombre_producto}</b>?
+                </Typography>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDeleteClose}>Cancelar</Button>
+                <Button onClick={handleDeleteConfirm} variant="contained" color="error">
+                  Eliminar
+                </Button>
+              </DialogActions>
+            </Dialog>
+
             {/* Grid de productos */}
             <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: 3, mt: 3 }}>
               {filteredProducts.map((p) => {
@@ -488,6 +758,36 @@ export default function Tienda() {
                       height: 'fit-content',
                     }}
                   >
+                    {/*Tres puntitos */}
+
+                    {isAdmin && (
+                      <Box sx={{ position: 'relative' }}>
+                        <IconButton
+                          size="small"
+                          onClick={(e) => handleMenuOpen(e, p)}
+                          sx={{ position: 'absolute', top: 4, right: 4 }}
+                          aria-label="Más acciones"
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </Box>
+                    )}
+
+
+                    {/*Dropdown */}
+                    <Menu
+                      anchorEl={menuAnchorEl}
+                      open={Boolean(menuAnchorEl)}
+                      onClose={handleMenuClose}
+                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+                    >
+                      <MenuItem onClick={handleEditOpen}>Editar</MenuItem>
+                      <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
+                        Eliminar
+                      </MenuItem>
+                    </Menu>
+
                     <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'Varsity' }}>
                       {p.nombre_producto}
                     </Typography>
