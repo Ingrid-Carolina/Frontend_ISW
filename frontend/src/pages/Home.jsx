@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/api';
 import { Box, CircularProgress, Alert } from '@mui/material';
 import EditableImage from '../components/EditableImage';
+import EditableHeaderImage from '../components/EditableHeaderImage';
 
 const AboutUs = () => (
   <section className='about-us'>
@@ -141,106 +142,108 @@ function HomeNewsCards() {
 }
 
 function Home() {
-  const [error, setError] = useState("");
-  const [images, setImages] = useState({
-    mision: '/Images/Mision1.jpg',
-    vision: '/Images/Vision1.jpg',
-  });
+  const [error, setError] = useState("");
+  const [images, setImages] = useState({
+    mision: '/Images/Mision1.jpg',
+    vision: '/Images/Vision1.jpg',
+    header: '/Images/header.jpg', // Agrega la URL del header al estado
+  });
 
-  useEffect(() => {
-    const fetchImages = async () => {
-      try {
-        const response = await api.get('/auth/images');
-        console.log('Respuesta del backend /auth/images:', response.data);
-        
-        const imagesMap = response.data.reduce((acc, current) => {
-          if (current.type && current.url) {
-            acc[current.type] = current.url;
-          }
-          return acc;
-        }, {});
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const response = await api.get('/auth/images');
+        console.log('Respuesta del backend /auth/images:', response.data);
+        
+        const imagesMap = response.data.reduce((acc, current) => {
+          if (current.type && current.url) {
+            acc[current.type] = current.url;
+          }
+          return acc;
+        }, {});
 
-        console.log('Mapa de imágenes obtenidas:', imagesMap);
-        setImages(prevImages => ({
-          ...prevImages,
-          ...imagesMap,
-        }));
-        
-      } catch (error) {
-        console.error('Error al cargar las imágenes de la página de inicio:', error);
-        setError('No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.');
-      }
-    };
-    fetchImages();
-  }, []);
+        console.log('Mapa de imágenes obtenidas:', imagesMap);
+        setImages(prevImages => ({
+          ...prevImages,
+          ...imagesMap,
+        }));
+        
+      } catch (error) {
+        console.error('Error al cargar las imágenes de la página de inicio:', error);
+        setError('No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.');
+      }
+    };
+    fetchImages();
+  }, []);
 
-  const handleImageChange = async (type, file) => {
-    try {
-      if (!(file instanceof File)) {
-        console.error('El argumento no es un objeto File.');
-        setError('Error: No se seleccionó un archivo válido.');
-        return;
-      }
-      
-      const formData = new FormData();
-      formData.append('file', file);
-      
-      const uploadResponse = await api.post('/auth/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
-      
-      const finalUrl = uploadResponse.data.url;
-      console.log(`URL persistente obtenida tras subir ${type}:`, finalUrl);
-      
-      await api.put('/auth/images', {
-        type,
-        url: finalUrl,
-      });
-      
-      setImages(prevImages => ({
-        ...prevImages,
-        [type]: finalUrl,
-      }));
-      console.log(`Imagen de ${type} guardada y actualizada exitosamente en la base de datos con URL: ${finalUrl}.`);
+  const handleImageChange = async (type, file) => {
+    try {
+      if (!(file instanceof File)) {
+        console.error('El argumento no es un objeto File.');
+        setError('Error: No se seleccionó un archivo válido.');
+        return;
+      }
+      
+      const formData = new FormData();
+      formData.append('file', file);
+      
+      const uploadResponse = await api.post('/auth/upload', formData, {
+        headers: { 'Content-Type': 'multipart/form-data' },
+      });
+      
+      const finalUrl = uploadResponse.data.url;
+      console.log(`URL persistente obtenida tras subir ${type}:`, finalUrl);
+      
+      await api.put('/auth/images', {
+        type,
+        url: finalUrl,
+      });
+      
+      setImages(prevImages => ({
+        ...prevImages,
+        [type]: finalUrl,
+      }));
+      console.log(`Imagen de ${type} guardada y actualizada exitosamente en la base de datos con URL: ${finalUrl}.`);
 
-    } catch (error) {
-      console.error(`Error al manejar/guardar la imagen de ${type}:`, error);
-      setError(`Error al actualizar la imagen de ${type}.`);
-    }
-  };
+    } catch (error) {
+      console.error(`Error al manejar/guardar la imagen de ${type}:`, error);
+      setError(`Error al actualizar la imagen de ${type}.`);
+    }
+  };
 
-  const navigate = useNavigate();
-  const onClick = () => {
-    navigate("/Eventos");
-    window.scrollTo(0, 0);
-  };
+  const navigate = useNavigate();
+  const onClick = () => {
+    navigate("/Eventos");
+    window.scrollTo(0, 0);
+  };
 
-  return (
-    <div style={{ paddingTop: '90px' }}>
-      <div className='header'>
-        <div className='header-title'>
-          <p>ASOCIACIóN DE</p>
-          <p>DEPORTE MENOR</p>
-          <p>PILOTOS DE HONDURAS</p>
-        </div>
-      </div>
+  return (
+    <div style={{ paddingTop: '90px' }}>
+      <div className='header' style={{ backgroundImage: `url(${images.header})` }}> {/* Usa la URL del header del estado */}
+        <div className='header-title'>
+          <p>ASOCIACIóN DE</p>
+          <p>DEPORTE MENOR</p>
+          <p>PILOTOS DE HONDURAS</p>
+        </div>
+        <EditableHeaderImage onImageUpload={(file) => handleImageChange('header', file)} /> {/* Usa el nuevo componente aquí */}
+      </div>
 
-      <AboutUs />
-      <Mision misionImageUrl={images.mision} onImageChange={(imgFile) => handleImageChange('mision', imgFile)} />
-      <Vision visionImageUrl={images.vision} onImageChange={(imgFile) => handleImageChange('vision', imgFile)} />
-      
-      <Valores />
-      <Acordeon />
-      <Noticias_Eventos />
+      <AboutUs />
+      <Mision misionImageUrl={images.mision} onImageChange={(imgFile) => handleImageChange('mision', imgFile)} />
+      <Vision visionImageUrl={images.vision} onImageChange={(imgFile) => handleImageChange('vision', imgFile)} />
+      
+      <Valores />
+      <Acordeon />
+      <Noticias_Eventos />
 
-      <HomeNewsCards />
+      <HomeNewsCards />
 
-      <div style={{ textAlign: 'center', margin: '2rem 0 4rem' }}>
-        <button className='news-button' onClick={onClick}>Más Noticias</button>
-      </div>
-      {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
-    </div>
-  );
+      <div style={{ textAlign: 'center', margin: '2rem 0 4rem' }}>
+        <button className='news-button' onClick={onClick}>Más Noticias</button>
+      </div>
+      {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
+    </div>
+  );
 }
 
 export default Home;

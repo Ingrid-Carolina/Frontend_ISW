@@ -13,7 +13,7 @@ import {
 import { useTheme } from "@mui/material/styles";
 import { motion } from "framer-motion";
 import { api } from "../api/api";
-import EditableImage from "../components/EditableImage";
+import EditableImageCircular from "../components/EditableImageCircular";
 
 // Variantes de animación
 const fadeUp = {
@@ -39,7 +39,7 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
   const textOrder = isMdUp ? (reverse ? 2 : 1) : 1;
-  const rightOrder = isMdUp ? (reverse ? 1 : 2) : 2;
+  const imgOrder = isMdUp ? (reverse ? 1 : 2) : 2;
 
   const imgSlideDir = reverse ? "left" : "right";
   const textSlideDir = reverse ? "right" : "left";
@@ -58,6 +58,7 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
         justifyContent="space-between"
         wrap="wrap"
       >
+        {/* Lado del texto */}
         <Grid item xs={12} md={7} order={textOrder}>
           <motion.div
             initial="hidden"
@@ -147,7 +148,8 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
             </Box>
           </motion.div>
         </Grid>
-        <Grid item xs={12} md={5} order={rightOrder}>
+        {/* Lado de la imagen */}
+        <Grid item xs={12} md={5} order={imgOrder}>
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -165,7 +167,7 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
                 width: "100%",
               }}
             >
-              <EditableImage
+              <EditableImageCircular
                 src={img}
                 alt={name}
                 onImageUpload={onImageUpload}
@@ -310,47 +312,23 @@ export default function Aliados() {
         textAlign: "center",
       }}
     >
+      {/* Encabezado Modificado */}
       <Box
         sx={{
           position: "relative",
           width: "100%",
           minHeight: { xs: "65vh", md: "80vh" },
-          backgroundImage: `url(${images.aliados_header})`,
+          // Se usa la imagen cargada desde la API
+          backgroundImage: `url(${images.aliados_header})`, 
           backgroundSize: "cover",
           backgroundPosition: "center",
           py: { xs: 6, md: 8 },
+          display: "flex", // Añadido para centrar contenido
+          alignItems: "center", // Añadido para centrar contenido
+          justifyContent: "center", // Añadido para centrar contenido
         }}
       >
-        <EditableImage
-          src={images.aliados_header}
-          alt="Encabezado de aliados"
-          onImageUpload={(file) => handleImageChange('aliados_header', file)}
-          sx={{
-            position: 'absolute',
-            top: 0,
-            left: 0,
-            width: '100%',
-            height: '100%',
-            zIndex: 0,
-            '& .editable-image': {
-              objectFit: 'cover',
-              width: '100%',
-              height: '100%',
-              borderRadius: 0,
-              boxShadow: 'none',
-            },
-            '& .edit-button': {
-              position: 'absolute',
-              bottom: 16,
-              right: 16,
-              zIndex: 10,
-              backgroundColor: 'rgba(255, 255, 255, 0.7)',
-              '&:hover': {
-                backgroundColor: 'rgba(255, 255, 255, 0.9)',
-              },
-            }
-          }}
-        />
+        {/* Overlay */}
         <Box
           sx={{
             position: "absolute",
@@ -358,19 +336,20 @@ export default function Aliados() {
             height: "100%",
             background:
               "linear-gradient(to bottom right, rgba(12,0,90,0.85), rgba(0,0,0,0.7))",
-            zIndex: 1,
+            zIndex: 1, // Asegura que el overlay esté sobre la imagen pero debajo del texto
           }}
         />
+        {/* Contenido del Encabezado */}
         <Box
           sx={{
-            position: "relative",
-            zIndex: 2,
+            position: "relative", // Importante para que zIndex funcione
+            zIndex: 2, // Asegura que el texto esté sobre el overlay
             textAlign: "center",
             color: "white",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
-            px: 2,
+            px: 2, // Padding horizontal para pantallas pequeñas
           }}
         >
           <motion.div
@@ -414,6 +393,7 @@ export default function Aliados() {
           </motion.div>
         </Box>
       </Box>
+      {/* Fin del Encabezado Modificado */}
 
       <Container maxWidth="xl">
         <motion.div
@@ -455,11 +435,11 @@ export default function Aliados() {
         </Typography>
 
         {partners.map((p, idx) => (
-          <PartnerSection 
-            key={p.name} 
-            {...p} 
+          <PartnerSection
+            key={p.name}
+            {...p}
             img={images[p.type]}
-            reverse={idx % 2 !== 0} 
+            reverse={idx % 2 !== 0}
             onImageUpload={(file) => handleImageChange(p.type, file)}
           />
         ))}
@@ -494,11 +474,11 @@ export default function Aliados() {
         </Typography>
 
         {strategicAllies.map((ally, idx) => (
-          <PartnerSection 
-            key={ally.name} 
-            {...ally} 
+          <PartnerSection
+            key={ally.name}
+            {...ally}
             img={images[ally.type]}
-            reverse={idx % 2 === 0} 
+            reverse={idx % 2 === 0}
             onImageUpload={(file) => handleImageChange(ally.type, file)}
           />
         ))}
