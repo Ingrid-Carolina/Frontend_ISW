@@ -7,7 +7,8 @@ import { Link } from 'react-router-dom';
 import { IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { api } from '../api/api';
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
+
 
 // Variantes de animación para la entrada en vista
 const fadeIn = {
@@ -23,9 +24,11 @@ const scaleIn = {
 const Voluntariado = () => {
 
   const [images, setImages] = useState({
-  header: equipoImg, // antes usabas equipoImg fijo
-  voluntariado: "https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg",
-});
+    header: equipoImg, // antes usabas equipoImg fijo
+    voluntariado: "https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg",
+  });
+  const [isAdmin, setIsAdmin] = useState(false);
+
 
 
   const sliderSettings = {
@@ -40,28 +43,43 @@ const Voluntariado = () => {
   };
 
   const handleImageChange = async (key, file) => {
-  if (!(file instanceof File)) return;
+    if (!(file instanceof File)) return;
 
-  const formData = new FormData();
-  formData.append("file", file);
+    const formData = new FormData();
+    formData.append("file", file);
 
-  try {
-    const uploadResponse = await api.post("/auth/upload", formData, {
-      headers: { "Content-Type": "multipart/form-data" },
-    });
+    try {
+      const uploadResponse = await api.post("/auth/upload", formData, {
+        headers: { "Content-Type": "multipart/form-data" },
+      });
 
-    const finalUrl = uploadResponse.data.url;
+      const finalUrl = uploadResponse.data.url;
 
-    await api.put("/auth/images", { type: key, url: finalUrl });
+      await api.put("/auth/images", { type: key, url: finalUrl });
 
-    setImages((prev) => ({
-      ...prev,
-      [key]: finalUrl,
-    }));
-  } catch (error) {
-    console.error(`Error al actualizar la imagen de ${key}:`, error);
-  }
-};
+      setImages((prev) => ({
+        ...prev,
+        [key]: finalUrl,
+      }));
+    } catch (error) {
+      console.error(`Error al actualizar la imagen de ${key}:`, error);
+    }
+  };
+
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const r = await api.get('/auth/obtenerperfil', { withCredentials: true, skipAuthRedirect: true });
+        const p = Array.isArray(r.data) ? r.data[0] : r.data;
+        const role = String(p?.rol || '').toLowerCase();
+        setIsAdmin(role === 'admin');
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+    checkRole();
+  }, []);
+
 
 
   return (
@@ -76,14 +94,25 @@ const Voluntariado = () => {
           flexDirection: 'column',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundImage: `url(${equipoImg})`,
+          backgroundImage: `url(${images.header})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           py: { xs: 6, md: 8 },
           clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
           marginTop: '90px',
         }}
+
       >
+        {isAdmin && (
+          <IconButton
+            sx={{ position: 'absolute', top: 20, right: 20, zIndex: 20, color: 'white', backgroundColor: 'rgba(0,0,0,0.5)' }}
+            component="label"
+          >
+            <EditIcon />
+            <input type="file" hidden accept="image/*" onChange={(e) => handleImageChange('header', e.target.files[0])} />
+          </IconButton>
+        )}
+
         {/* Capa de filtro de color semitransparente */}
         <Box
           sx={{
@@ -314,19 +343,57 @@ const Voluntariado = () => {
               justifyContent: 'center',
             }}
           >
-            <Box
-              component="img"
-              src="https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg"
-              alt=""
-              sx={{
-                width: '90%',
-                height: 'auto',
-                display: 'block',
-                borderRadius: '8px',
-                objectFit: 'cover',
-              }}
-            />
+            {isAdmin ? (
+              <Box sx={{ position: 'relative', width: '90%' }}>
+                <Box
+                  component="img"
+                  src={images.voluntariado}
+                  alt="Voluntariado"
+                  sx={{
+                    width: '100%',
+                    height: 'auto',
+                    display: 'block',
+                    borderRadius: '8px',
+                    objectFit: 'cover',
+                  }}
+                />
+                <IconButton
+                  sx={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    color: 'white',
+                    backgroundColor: 'rgba(0,0,0,0.5)',
+                  }}
+                  component="label"
+                >
+                  <EditIcon />
+                  <input
+                    type="file"
+                    hidden
+                    accept="image/*"
+                    onChange={(e) =>
+                      handleImageChange('voluntariado', e.target.files[0])
+                    }
+                  />
+                </IconButton>
+              </Box>
+            ) : (
+              <Box
+                component="img"
+                src={images.voluntariado}
+                alt="Voluntariado"
+                sx={{
+                  width: '90%',
+                  height: 'auto',
+                  display: 'block',
+                  borderRadius: '8px',
+                  objectFit: 'cover',
+                }}
+              />
+            )}
           </motion.div>
+
         </Box>
       </Box>
     </>
