@@ -79,7 +79,6 @@ const buscarPorCategoria = (producto, searchTerm) => {
   return false;
 };
 
-
 export default function Tienda() {
   // Estado UI
   const [searchQuery, setSearchQuery] = useState('');
@@ -92,8 +91,6 @@ export default function Tienda() {
   const [productos, setProductos] = useState([]);
   const [loadingProductos, setLoadingProductos] = useState(false);
   const [errorProductos, setErrorProductos] = useState(null);
-  const [open, setopen]= useState(false);
-  const[openSnackbar, setOpenSnackbar]= useState(false);
 
   // Menú contextual por tarjeta
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
@@ -116,7 +113,6 @@ export default function Tienda() {
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteProduct, setDeleteProduct] = useState(null);
 
-
   // Form Dialog
   const [addOpen, setAddOpen] = useState(false);
   const [formData, setFormData] = useState({
@@ -124,24 +120,35 @@ export default function Tienda() {
     descripcion: '',
     precio_unitario: '',
     cantidad: '',
-    talla: '',              // ← ahora es string
+    talla: '',
   });
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  const [role, setRole] = useState(() => (localStorage.getItem('userRole') || '').toLowerCase());
-  const isAdmin = role === 'admin';
+  // Rol desde backend (no localStorage)
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
-    const onRole = (e) => setRole((e.detail?.role || localStorage.getItem('userRole') || '').toLowerCase());
-    const onAuthRefresh = () => onRole({ detail: { role: localStorage.getItem('userRole') || '' } });
-
-    window.addEventListener('auth:role', onRole);
-    window.addEventListener('auth:refresh', onAuthRefresh);
-    return () => {
-      window.removeEventListener('auth:role', onRole);
-      window.removeEventListener('auth:refresh', onAuthRefresh);
+    const checkRole = async () => {
+      try {
+        const r = await api.get('/auth/obtenerperfil', {
+          withCredentials: true,
+          skipAuthRedirect: true,
+        });
+        const p = Array.isArray(r.data) ? r.data[0] : r.data;
+        const role = String(p?.rol || '').toLowerCase().trim();
+        const adminAliases = ['admin', 'administrador', 'adm'];
+        setIsAdmin(adminAliases.includes(role));
+      } catch {
+        setIsAdmin(false);
+      }
     };
+    checkRole();
+
+    // revalidar ante refresh de sesión (si lo usas en otras partes)
+    const onAuthRefresh = () => checkRole();
+    window.addEventListener('auth:refresh', onAuthRefresh);
+    return () => window.removeEventListener('auth:refresh', onAuthRefresh);
   }, []);
 
   const isShirt = useMemo(() => {
@@ -180,23 +187,20 @@ export default function Tienda() {
         descripcion: formData.descripcion?.trim() || null,
         precio_unitario: Number(formData.precio_unitario),
         cantidad: Number(formData.cantidad),
-        talla: isShirt ? formData.talla : null, // ← una sola talla o null
+        talla: isShirt ? formData.talla : null,
       };
 
       const { data } = await api.post('/auth/tienda/agregarproducto', payload);
       const nuevo = data?.producto
         ? {
-          idproducto: data.producto.idproducto,
-          nombre_producto: data.producto.nombre_producto,
-          descripcion: data.producto.descripcion,
-          precio_unitario: data.producto.precio_unitario,
-          cantidad: data.producto.cantidad,
-          talla: data.producto.talla,
-        }
-        : {
-          idproducto: Date.now(),
-          ...payload,
-        };
+            idproducto: data.producto.idproducto,
+            nombre_producto: data.producto.nombre_producto,
+            descripcion: data.producto.descripcion,
+            precio_unitario: data.producto.precio_unitario,
+            cantidad: data.producto.cantidad,
+            talla: data.producto.talla,
+          }
+        : { idproducto: Date.now(), ...payload };
 
       setProductos((prev) => [nuevo, ...prev]);
 
@@ -288,11 +292,8 @@ export default function Tienda() {
         talla: isShirtEdit ? editFormData.talla : null,
       };
 
-      // TODO: API call de actualización (PUT/PATCH)
       const { data } = await api.put(`/auth/tienda/modificarproducto/${editFormData.idproducto}`, payload);
 
-
-      // Actualiza la lista en memoria
       setProductos((prev) =>
         prev.map((p) => (p.idproducto === editFormData.idproducto ? { ...p, ...data.producto } : p))
       );
@@ -326,10 +327,7 @@ export default function Tienda() {
 
   const handleDeleteConfirm = async () => {
     try {
-      // TODO: API call de delete
       await api.delete(`/auth/tienda/eliminarproducto/${deleteProduct.idproducto}`);
-
-      // Actualiza localmente
       setProductos((prev) => prev.filter((p) => p.idproducto !== deleteProduct.idproducto));
 
       setBannerMsg('Producto eliminado');
@@ -342,9 +340,6 @@ export default function Tienda() {
       setShowBanner(true);
     }
   };
-
-
-
 
   // Cargar productos
   useEffect(() => {
@@ -401,47 +396,46 @@ export default function Tienda() {
     });
   }, [searchQuery, productos]);
 
-  const openFactura=()=>{
+  // ---- FACTURA ----
+  const [open, setopen] = useState(false);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
 
-    setopen(true)
-  }
+  const openFactura = () => {
+    if (cartItems.length === 0) {
+      setBannerMsg('Tu carrito está vacío.');
+      setBannerType('error');
+      setShowBanner(true);
+      return;
+    }
+    setopen(true);
+  };
 
- 
-  const CerrarModal= async()=>{
-
+  const CerrarModal = async () => {
     try {
-       const uidRes = await api.get('/auth/obteneruid', { withCredentials: true });
-    console.log('Mi id:', uidRes.data.id);
+      const uidRes = await api.get('/auth/obteneruid', { withCredentials: true });
+      const id = uidRes?.data?.id;
+      if (!id) throw new Error('No autenticado');
 
-    const id= uidRes.data.id;
+      const body = {
+        uid: id,
+        cartItems,
+      };
 
-    const body={
+      await api.post('/auth/agregarorden', body, {
+        headers: { 'Content-Type': 'application/json' },
+      });
 
-      uid:id,
-      cartItems:cartItems
-    }
-
-   
-      const res= await api.post('/auth/agregarorden',body, {
-           headers: { "Content-Type": "application/json" }
-         })
-
-        
-          setCartItems([]);
-          setOpenSnackbar(true);
-         
-      
+      setCartItems([]);
+      setOpenSnackbar(true);
     } catch (error) {
-
-       console.error('Error al crear la orden:', error.message);
+      console.error('Error al crear la orden:', error?.message || error);
+      setBannerMsg(error?.response?.data?.message || error.message || 'Error al crear la orden');
+      setBannerType('error');
+      setShowBanner(true);
+    } finally {
+      setopen(false);
     }
-
-    setopen(false);
-   
-
-  }
-
-
+  };
 
   // Carrito
   const addToCart = (producto) => {
@@ -562,7 +556,7 @@ export default function Tienda() {
             </Box>
 
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 2 }}>
-              <IconButton type="submit" sx={{ color: 'black', backgroundColor: 'rgba(255,255,255,0.2)', '&:hover': { backgroundColor: 'rgba(255,255,255,0.4)' } }} size="large">
+              <IconButton sx={{ color: 'black', backgroundColor: 'rgba(255,255,255,0.2)', '&:hover': { backgroundColor: 'rgba(255,255,255,0.4)' } }} size="large">
                 <SearchIcon sx={{ fontSize: 30 }} />
               </IconButton>
 
@@ -580,7 +574,6 @@ export default function Tienda() {
                   <Add />
                 </IconButton>
               )}
-
             </Box>
           </Toolbar>
         </AppBar>
@@ -592,7 +585,7 @@ export default function Tienda() {
               Bienvenido a la Tienda de Pilotos
             </Typography>
 
-            {/* Dialog de agregar*/}
+            {/* Dialog de agregar */}
             <Dialog
               open={addOpen}
               onClose={handleClose}
@@ -766,7 +759,7 @@ export default function Tienda() {
               </DialogActions>
             </Dialog>
 
-            {/*Dialog de eliminar */}
+            {/* Dialog de eliminar */}
             <Dialog open={deleteOpen} onClose={handleDeleteClose} maxWidth="xs" fullWidth>
               <DialogTitle>Eliminar producto</DialogTitle>
               <DialogContent dividers>
@@ -804,8 +797,7 @@ export default function Tienda() {
                       height: 'fit-content',
                     }}
                   >
-                    {/*Tres puntitos */}
-
+                    {/* Tres puntitos */}
                     {isAdmin && (
                       <Box sx={{ position: 'relative' }}>
                         <IconButton
@@ -819,8 +811,7 @@ export default function Tienda() {
                       </Box>
                     )}
 
-
-                    {/*Dropdown */}
+                    {/* Dropdown */}
                     <Menu
                       anchorEl={menuAnchorEl}
                       open={Boolean(menuAnchorEl)}
@@ -896,7 +887,7 @@ export default function Tienda() {
         </Box>
       </Box>
 
-      {/* Drawer */}
+      {/* Drawer Carrito */}
       <Drawer
         anchor="right"
         open={cartModalOpen}
@@ -1022,15 +1013,20 @@ export default function Tienda() {
                   variant="contained"
                   sx={{ bgcolor: '#E06C14', fontWeight: 'bold', '&:hover': { bgcolor: '#28a428' } }}
                   onClick={() => {
+                    if (cartItems.length === 0) {
+                      setBannerMsg('Tu carrito está vacío.');
+                      setBannerType('error');
+                      setShowBanner(true);
+                      return;
+                    }
                     setBannerMsg('Compra procesada correctamente');
                     setBannerType('success');
                     setShowBanner(true);
-                    //setCartItems([]);
                     setTimeout(() => {
                       setShowBanner(false);
                       setCartModalOpen(false);
                       openFactura();
-                    }, 1500);
+                    }, 1000);
                   }}
                 >
                   Confirmar Factura
@@ -1041,97 +1037,95 @@ export default function Tienda() {
         </Box>
       </Drawer>
 
-   {/* Modal factura de cliente */}
+      {/* Modal factura de cliente */}
+      <Dialog open={open} onClose={() => setopen(false)} fullWidth maxWidth="sm" sx={{ zIndex: 1300 }}>
+        <DialogContent>
+          <DialogTitle variant="h5" sx={{ color: '#2c1a99', fontFamily: 'Varsity', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent:'center' }}>
+            Factura del Cliente
+          </DialogTitle>
 
-    
-           <Dialog open={open} onClose={() => setopen(false)} fullWidth maxWidth="sm" sx={{ zIndex: 1300 }}>
-   <DialogContent>
-  <DialogTitle variant="h5" sx={{ color: '#2c1a99', fontFamily: 'Varsity', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent:'center' }}>
-    Factura del Cliente
-  </DialogTitle>
+          <Typography variant="body1" sx={{ fontFamily: 'PeterMedium', mb: 2, ml: 5 }}>
+            Fecha: {new Date().toLocaleDateString('es-HN', { day: 'numeric', month: 'long', year: 'numeric' })}
+          </Typography>
+          <Typography variant="body1" sx={{ fontFamily: 'PeterMedium', mb: 2, ml: 5 }}>
+            PILOTOS FAH. Campo de la Fuerza Aérea Hondureña.
+          </Typography>
 
-  <Typography variant="body1" sx={{ fontFamily: 'PeterMedium', marginBottom: 2, marginLeft: 5 }}>
-  Fecha: {new Date().toLocaleDateString('es-HN', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })}
-</Typography>
-<Typography variant="body1" sx={{ fontFamily: 'PeterMedium', marginBottom: 2, marginLeft: 5 }}>
-  PILOTOS FAH. Campo de la Fuerza Area Hondureña.
-</Typography>
+          <p>Resumen de su orden:</p>
 
+          {cartItems.length === 0 ? (
+            <p>No hay productos en el carrito.</p>
+          ) : (
+            <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+              <thead>
+                <tr style={{ backgroundColor: '#2c1a99'}}>
+                  <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Producto</th>
+                  <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Talla</th>
+                  <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Cantidad</th>
+                  <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Precio Unitario</th>
+                  <th style={{ padding: '8px', border: '1px solid #ccc',color:'white' }}>Precio Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cartItems.map((item, index) => {
+                  const unit = getPrecioByTalla(item, item.talla);
+                  return (
+                    <tr key={index}>
+                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.nombre_producto}</td>
+                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.talla || '-'}</td>
+                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.cantidad}</td>
+                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>
+                        L.{unit.toFixed(2)}
+                      </td>
+                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>
+                        L.{(unit * item.cantidad).toFixed(2)}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          )}
 
-    <p>Resumen de su orden:</p>
+          {cartItems.length > 0 && (
+            <div style={{ marginTop: '2.5rem', textAlign: 'right', fontWeight: 'bold' }}>
+              {(() => {
+                const total = cartItems.reduce((acc, item) => {
+                  const unit = getPrecioByTalla(item, item.talla);
+                  return acc + unit * item.cantidad;
+                }, 0);
+                const isv = total * 0.15;
+                const subtotal = total - isv;
 
-    {cartItems.length === 0 ? (
-      <p>No hay productos en el carrito.</p>
-    ) : (
-      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
-        <thead>
-          <tr style={{ backgroundColor: '#2c1a99'}}>
-            <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Producto</th>
-            <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Cantidad</th>
-            <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Precio Unitario</th>
-            <th style={{ padding: '8px', border: '1px solid #ccc',color:'white' }}>Precio Total</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cartItems.map((item, index) => (
-            <tr key={index}>
-              <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.nombre_producto}</td>
-              <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.cantidad}</td>
-                <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.precio_unitario}</td>
-              <td style={{ padding: '8px', border: '1px solid #ccc' }}>
-                L.{(item.precio_unitario * item.cantidad).toFixed(2)}
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    )}
-    
+                return (
+                  <>
+                    <div>Subtotal: L.{(subtotal).toFixed(2)}</div>
+                    <div>I.S.V 15%: L.{isv.toFixed(2)}</div>
+                    <div>Total a Pagar: L.{total.toFixed(2)}</div>
 
-   {cartItems.length > 0 && (
-  <div style={{ marginTop: '2.5rem', textAlign: 'right', fontWeight: 'bold' }}>
-    {(() => {
-      const total = cartItems.reduce(
-        (acc, item) => acc + item.precio_unitario * item.cantidad,
-        0
-      );
-      const isv = total * 0.15;
-      const subtotal = total-isv;
+                    <Typography
+                      variant="body2"
+                      sx={{
+                        color: 'red',
+                        fontWeight: 'bold',
+                        fontFamily: 'PeterMedium',
+                        m: 3,
+                        textAlign: 'center',
+                        fontSize: '1rem'
+                      }}
+                    >
+                      Esta factura es necesaria para reclamar su producto en el punto de entrega. Por favor, no la pierda.
+                    </Typography>
+                  </>
+                );
+              })()}
+            </div>
+          )}
+        </DialogContent>
 
-      return (
-        <>
-          <div>Subtotal: L.{(subtotal).toFixed(2)}</div>
-          <div>I.S.V 15%: L.{isv.toFixed(2)}</div>
-          <div>Total a Pagar: L.{total.toFixed(2)}</div>
-
-          <Typography
-  variant="body2"
-  sx={{
-    color: 'red',
-    fontWeight: 'bold',
-    fontFamily: 'PeterMedium',
-    margin: 3,
-    textAlign: 'center',
-    fontSize: '1rem'
-  }}
->
-  Esta factura es necesaria para reclamar su producto en el punto de entrega. Por favor, no la pierda.
-</Typography>
-        </>
-      );
-    })()}
-  </div>
-)}
-
-  </DialogContent>
-  
-<Button
+        <Button
           variant="contained"
-          onClick={() => CerrarModal()}
+          onClick={CerrarModal}
           sx={{
             mt: 2,
             backgroundColor: "#ff6600",
@@ -1139,31 +1133,30 @@ export default function Tienda() {
             fontFamily: "PeterMedium",
             '&:hover': { backgroundColor: "#e65c00" },
             width: "30%",
-            margin:3,
+            m: 3,
             borderRadius: "10px",
           }}
         >
           Proceder Orden
         </Button>
-</Dialog>
+      </Dialog>
 
-<Snackbar
-  open={openSnackbar}
-  autoHideDuration={4000}
-  onClose={() => setOpenSnackbar(false)}
-  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
->
-  <Alert
-    onClose={() => setOpenSnackbar(false)}
-    severity="success"
-    sx={{ width: '100%' }}
-    elevation={6}
-    variant="filled"
-  >
-    ¡Orden registrada exitosamente!
-  </Alert>
-</Snackbar>
-
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={4000}
+        onClose={() => setOpenSnackbar(false)}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+      >
+        <Alert
+          onClose={() => setOpenSnackbar(false)}
+          severity="success"
+          sx={{ width: '100%' }}
+          elevation={6}
+          variant="filled"
+        >
+          ¡Orden registrada exitosamente!
+        </Alert>
+      </Snackbar>
     </>
   );
 }
