@@ -128,6 +128,8 @@ const Categorias = () => {
     }, {})
   );
   const [error, setError] = useState('');
+  const [isAdmin, setIsAdmin] = useState(false);
+
 
   // Traer imágenes persistidas del backend (si existen)
   useEffect(() => {
@@ -150,6 +152,21 @@ const Categorias = () => {
     })();
     return () => { mounted = false; };
   }, []);
+
+  useEffect(() => {
+    const checkRole = async () => {
+      try {
+        const r = await api.get('/auth/obtenerperfil', { withCredentials: true, skipAuthRedirect: true });
+        const p = Array.isArray(r.data) ? r.data[0] : r.data;
+        const role = String(p?.rol || '').toLowerCase();
+        setIsAdmin(role === 'admin');
+      } catch {
+        setIsAdmin(false);
+      }
+    };
+    checkRole();
+  }, []);
+
 
   const handleImageChange = async (slug, file) => {
     if (!(file instanceof File)) {
@@ -312,18 +329,21 @@ const Categorias = () => {
                   },
                 }}
               >
-                <EditableImage
-                  src={categoryImages[categoria.slug]}
-                  alt={categoria.titleText}
-                  imgSx={{
-                    width: '100%',
-                    height: '250px',
-                    objectFit: 'cover',
-                    borderTopLeftRadius: 8,
-                    borderTopRightRadius: 8,
-                  }}
-                  onImageUpload={(file) => handleImageChange(categoria.slug, file)}
-                />
+                {isAdmin ? (
+                  <EditableImage
+                    src={categoryImages[categoria.slug]}
+                    alt={categoria.titleText}
+                    imgSx={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
+                    onImageUpload={(file) => handleImageChange(categoria.slug, file)}
+                  />
+                ) : (
+                  <img
+                    src={categoryImages[categoria.slug]}
+                    alt={categoria.titleText}
+                    style={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
+                  />
+                )}
+
 
                 <Typography
                   variant='h5'
@@ -392,12 +412,21 @@ const Categorias = () => {
             }}
           >
             <Box sx={{ width: { xs: '100%', md: '40%' } }}>
-              <EditableImage
-                src={categoryImages[cat.slug]}
-                alt={cat.titleText}
-                imgSx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                onImageUpload={(file) => handleImageChange(cat.slug, file)}
-              />
+              {isAdmin ? (
+                <EditableImage
+                  src={categoryImages[cat.slug]}
+                  alt={cat.titleText}
+                  imgSx={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  onImageUpload={(file) => handleImageChange(cat.slug, file)}
+                />
+              ) : (
+                <img
+                  src={categoryImages[cat.slug]}
+                  alt={cat.titleText}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              )}
+
             </Box>
 
 

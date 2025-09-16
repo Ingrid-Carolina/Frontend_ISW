@@ -1,10 +1,13 @@
-import React from 'react';
 import { Box, Typography } from '@mui/material';
 import { motion } from 'framer-motion';
 import Slider from 'react-slick';
 import equipoImg from '/Images/greyimg.jpg';
 import equipoImg2 from '/Images/equipo2.jpg';
 import { Link } from 'react-router-dom';
+import { IconButton } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import { api } from '../api/api';
+import React, { useState, useRef } from 'react';
 
 // Variantes de animación para la entrada en vista
 const fadeIn = {
@@ -18,6 +21,13 @@ const scaleIn = {
 };
 
 const Voluntariado = () => {
+
+  const [images, setImages] = useState({
+  header: equipoImg, // antes usabas equipoImg fijo
+  voluntariado: "https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg",
+});
+
+
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -28,6 +38,31 @@ const Voluntariado = () => {
     autoplay: true,
     autoplaySpeed: 5000,
   };
+
+  const handleImageChange = async (key, file) => {
+  if (!(file instanceof File)) return;
+
+  const formData = new FormData();
+  formData.append("file", file);
+
+  try {
+    const uploadResponse = await api.post("/auth/upload", formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+
+    const finalUrl = uploadResponse.data.url;
+
+    await api.put("/auth/images", { type: key, url: finalUrl });
+
+    setImages((prev) => ({
+      ...prev,
+      [key]: finalUrl,
+    }));
+  } catch (error) {
+    console.error(`Error al actualizar la imagen de ${key}:`, error);
+  }
+};
+
 
   return (
     <>
