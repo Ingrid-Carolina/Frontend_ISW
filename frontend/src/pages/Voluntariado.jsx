@@ -4,10 +4,12 @@ import Slider from 'react-slick';
 import equipoImg from '/Images/greyimg.jpg';
 import equipoImg2 from '/Images/equipo2.jpg';
 import { Link } from 'react-router-dom';
-import { IconButton } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 import { api } from '../api/api';
 import React, { useState, useRef, useEffect } from 'react';
+import EditableImage from '../components/EditableImage';
+import EditableHeaderImage from '../components/EditableHeaderImage';
+
 
 
 // Variantes de animación para la entrada en vista
@@ -22,12 +24,31 @@ const scaleIn = {
 };
 
 const Voluntariado = () => {
-
   const [images, setImages] = useState({
-    header: equipoImg, // antes usabas equipoImg fijo
+    header: equipoImg,
     voluntariado: "https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg",
   });
+
+  useEffect(() => {
+    const fetchImages = async () => {
+      try {
+        const res = await api.get('/voluntariado/images', { withCredentials: true });
+        const imgObj = {};
+        res.data.forEach(item => {
+          imgObj[item.type] = item.url;
+        });
+        setImages(imgObj);
+      } catch (err) {
+        console.error('Error al cargar imágenes:', err);
+      }
+    };
+
+    fetchImages();
+  }, []);
+
+
   const [isAdmin, setIsAdmin] = useState(false);
+
 
 
 
@@ -49,13 +70,13 @@ const Voluntariado = () => {
     formData.append("file", file);
 
     try {
-      const uploadResponse = await api.post("/auth/upload", formData, {
+      const uploadResponse = await api.post("/voluntariado/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       const finalUrl = uploadResponse.data.url;
 
-      await api.put("/auth/images", { type: key, url: finalUrl });
+      await api.put("/voluntariado/images", { type: key, url: finalUrl });
 
       setImages((prev) => ({
         ...prev,
@@ -105,29 +126,11 @@ const Voluntariado = () => {
 
       >
         {isAdmin && (
-          <IconButton
-            className="edit-btn"
-            sx={{
-              position: 'absolute',
-              bottom: 10, // debajo de la imagen
-              left: '50%',
-              transform: 'translateX(-50%)',
-              color: 'white',
-              backgroundColor: 'rgba(0,0,0,0.5)',
-              opacity: 0, // invisible inicialmente
-              transition: 'opacity 0.3s',
-            }}
-            component="label"
-          >
-            <EditIcon />
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={(e) => handleImageChange('header', e.target.files[0])}
-            />
-          </IconButton>
+          <EditableHeaderImage
+            onImageUpload={file => handleImageChange('header', file)}
+          />
         )}
+
 
 
         {/* Capa de filtro de color semitransparente */}
@@ -360,42 +363,27 @@ const Voluntariado = () => {
               justifyContent: 'center',
             }}
           >
-            <Box
-              component="img"
-              src={images.voluntariado}
-              alt="Voluntariado"
-              sx={{
-                width: '90%',
-                height: 'auto',
-                display: 'block',
-                borderRadius: '8px',
-                objectFit: 'cover',
-              }}
-            />
-            {isAdmin && (
-              <IconButton
-                className="edit-btn"
+            {isAdmin ? (
+              <EditableImage
+                src={images.voluntariado}
+                alt="Voluntariado"
+                onImageUpload={file => handleImageChange('voluntariado', file)}
+              />
+            ) : (
+              <Box
+                component="img"
+                src={images.voluntariado}
+                alt="Voluntariado"
                 sx={{
-                  position: 'absolute',
-                  bottom: 10,
-                  left: '50%',
-                  transform: 'translateX(-50%)',
-                  color: 'white',
-                  backgroundColor: 'rgba(0,0,0,0.5)',
-                  opacity: 0,
-                  transition: 'opacity 0.3s',
+                  width: '90%',
+                  height: 'auto',
+                  display: 'block',
+                  borderRadius: '8px',
+                  objectFit: 'cover',
                 }}
-                component="label"
-              >
-                <EditIcon />
-                <input
-                  type="file"
-                  hidden
-                  accept="image/*"
-                  onChange={(e) => handleImageChange('voluntariado', e.target.files[0])}
-                />
-              </IconButton>
+              />
             )}
+
 
           </motion.div>
 

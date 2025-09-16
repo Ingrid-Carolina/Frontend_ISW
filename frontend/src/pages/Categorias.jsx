@@ -131,7 +131,6 @@ const Categorias = () => {
   const [isAdmin, setIsAdmin] = useState(false);
 
 
-  // Traer imágenes persistidas del backend (si existen)
   useEffect(() => {
     let mounted = true;
     (async () => {
