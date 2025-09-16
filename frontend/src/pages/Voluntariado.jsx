@@ -100,18 +100,35 @@ const Voluntariado = () => {
           py: { xs: 6, md: 8 },
           clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
           marginTop: '90px',
+          '&:hover .edit-btn': { opacity: 1 },
         }}
 
       >
         {isAdmin && (
           <IconButton
-            sx={{ position: 'absolute', top: 20, right: 20, zIndex: 20, color: 'white', backgroundColor: 'rgba(0,0,0,0.5)' }}
+            className="edit-btn"
+            sx={{
+              position: 'absolute',
+              bottom: 10, // debajo de la imagen
+              left: '50%',
+              transform: 'translateX(-50%)',
+              color: 'white',
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              opacity: 0, // invisible inicialmente
+              transition: 'opacity 0.3s',
+            }}
             component="label"
           >
             <EditIcon />
-            <input type="file" hidden accept="image/*" onChange={(e) => handleImageChange('header', e.target.files[0])} />
+            <input
+              type="file"
+              hidden
+              accept="image/*"
+              onChange={(e) => handleImageChange('header', e.target.files[0])}
+            />
           </IconButton>
         )}
+
 
         {/* Capa de filtro de color semitransparente */}
         <Box
@@ -343,55 +360,43 @@ const Voluntariado = () => {
               justifyContent: 'center',
             }}
           >
-            {isAdmin ? (
-              <Box sx={{ position: 'relative', width: '90%' }}>
-                <Box
-                  component="img"
-                  src={images.voluntariado}
-                  alt="Voluntariado"
-                  sx={{
-                    width: '100%',
-                    height: 'auto',
-                    display: 'block',
-                    borderRadius: '8px',
-                    objectFit: 'cover',
-                  }}
-                />
-                <IconButton
-                  sx={{
-                    position: 'absolute',
-                    top: 10,
-                    right: 10,
-                    color: 'white',
-                    backgroundColor: 'rgba(0,0,0,0.5)',
-                  }}
-                  component="label"
-                >
-                  <EditIcon />
-                  <input
-                    type="file"
-                    hidden
-                    accept="image/*"
-                    onChange={(e) =>
-                      handleImageChange('voluntariado', e.target.files[0])
-                    }
-                  />
-                </IconButton>
-              </Box>
-            ) : (
-              <Box
-                component="img"
-                src={images.voluntariado}
-                alt="Voluntariado"
+            <Box
+              component="img"
+              src={images.voluntariado}
+              alt="Voluntariado"
+              sx={{
+                width: '90%',
+                height: 'auto',
+                display: 'block',
+                borderRadius: '8px',
+                objectFit: 'cover',
+              }}
+            />
+            {isAdmin && (
+              <IconButton
+                className="edit-btn"
                 sx={{
-                  width: '90%',
-                  height: 'auto',
-                  display: 'block',
-                  borderRadius: '8px',
-                  objectFit: 'cover',
+                  position: 'absolute',
+                  bottom: 10,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  color: 'white',
+                  backgroundColor: 'rgba(0,0,0,0.5)',
+                  opacity: 0,
+                  transition: 'opacity 0.3s',
                 }}
-              />
+                component="label"
+              >
+                <EditIcon />
+                <input
+                  type="file"
+                  hidden
+                  accept="image/*"
+                  onChange={(e) => handleImageChange('voluntariado', e.target.files[0])}
+                />
+              </IconButton>
             )}
+
           </motion.div>
 
         </Box>
