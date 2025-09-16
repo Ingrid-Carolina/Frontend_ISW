@@ -135,8 +135,7 @@ const Categorias = () => {
     let mounted = true;
     (async () => {
       try {
-        const response = await api.get('/auth/images');
-        // response.data esperado como array: [{ type: 'sub-8-escuelita', url: '...' }, ...]
+        const response = await api.get('/categorias/images'); // NUEVO ENDPOINT
         const imagesMap = Array.isArray(response.data)
           ? response.data.reduce((acc, cur) => {
             if (cur.type && cur.url) acc[cur.type] = cur.url;
@@ -151,6 +150,7 @@ const Categorias = () => {
     })();
     return () => { mounted = false; };
   }, []);
+
 
   useEffect(() => {
     const checkRole = async () => {
@@ -176,13 +176,15 @@ const Categorias = () => {
       const formData = new FormData();
       formData.append('file', file);
 
-      const uploadResponse = await api.post('/auth/upload', formData, {
+      // Subir imagen al backend
+      const uploadResponse = await api.post('/categorias/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       const finalUrl = uploadResponse.data.url;
-      // Guardar la URL persistente en la tabla de imágenes
-      await api.put('/auth/images', { type: slug, url: finalUrl });
+
+      // Guardar URL persistente en DB
+      await api.put('/categorias/images', { type: slug, url: finalUrl });
 
       // Actualizar UI local
       setCategoryImages(prev => ({ ...prev, [slug]: finalUrl }));
@@ -191,6 +193,7 @@ const Categorias = () => {
       setError(`Error al actualizar la imagen de ${slug}.`);
     }
   };
+
 
 
 
