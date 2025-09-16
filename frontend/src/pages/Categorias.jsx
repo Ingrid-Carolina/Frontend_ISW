@@ -135,7 +135,7 @@ const Categorias = () => {
     let mounted = true;
     (async () => {
       try {
-        const response = await api.get('/categorias/images'); // NUEVO ENDPOINT
+        const response = await api.get('/auth/images'); // NUEVO ENDPOINT
         const imagesMap = Array.isArray(response.data)
           ? response.data.reduce((acc, cur) => {
             if (cur.type && cur.url) acc[cur.type] = cur.url;
@@ -177,14 +177,14 @@ const Categorias = () => {
       formData.append('file', file);
 
       // Subir imagen al backend
-      const uploadResponse = await api.post('/categorias/upload', formData, {
+      const uploadResponse = await api.post('/auth/upload', formData, {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
 
       const finalUrl = uploadResponse.data.url;
 
       // Guardar URL persistente en DB
-      await api.put('/categorias/images', { type: slug, url: finalUrl });
+      await api.put('/auth/images', { type: slug, url: finalUrl });
 
       // Actualizar UI local
       setCategoryImages(prev => ({ ...prev, [slug]: finalUrl }));
