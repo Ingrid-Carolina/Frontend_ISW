@@ -104,7 +104,6 @@ export default function Tienda() {
     precio_unitario: '',
     cantidad: '',
     talla: '',
-    imagen: '',
   });
   const [editErrors, setEditErrors] = useState({});
   const [editSaving, setEditSaving] = useState(false);
@@ -122,14 +121,24 @@ export default function Tienda() {
     precio_unitario: '',
     cantidad: '',
     talla: '',              // ← ahora es string
-    imagen: '',
   });
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  const [isAdmin, setIsAdmin] = useState(false);
+  const [role, setRole] = useState(() => (localStorage.getItem('userRole') || '').toLowerCase());
+  const isAdmin = role === 'admin';
 
+  useEffect(() => {
+    const onRole = (e) => setRole((e.detail?.role || localStorage.getItem('userRole') || '').toLowerCase());
+    const onAuthRefresh = () => onRole({ detail: { role: localStorage.getItem('userRole') || '' } });
 
+    window.addEventListener('auth:role', onRole);
+    window.addEventListener('auth:refresh', onAuthRefresh);
+    return () => {
+      window.removeEventListener('auth:role', onRole);
+      window.removeEventListener('auth:refresh', onAuthRefresh);
+    };
+  }, []);
 
   const isShirt = useMemo(() => {
     const n = (formData.nombre_producto || '').toLowerCase();
@@ -168,7 +177,6 @@ export default function Tienda() {
         precio_unitario: Number(formData.precio_unitario),
         cantidad: Number(formData.cantidad),
         talla: isShirt ? formData.talla : null, // ← una sola talla o null
-        imagen: isAdmin ? formData.imagen?.trim() || null : null,
       };
 
       const { data } = await api.post('/auth/tienda/agregarproducto', payload);
@@ -213,7 +221,6 @@ export default function Tienda() {
 
   // Abrir/cerrar menú
   const handleMenuOpen = (event, product) => {
-    if (!isAdmin) return; //Esto es para que se evite abrir si no es admin
     setMenuAnchorEl(event.currentTarget);
     setMenuProduct(product);
   };
@@ -224,7 +231,7 @@ export default function Tienda() {
 
   // ---- EDITAR ----
   const handleEditOpen = () => {
-    if (!isAdmin || !menuProduct) return;
+    if (!menuProduct) return;
     setEditFormData({
       idproducto: menuProduct.idproducto,
       nombre_producto: menuProduct.nombre_producto || '',
@@ -275,7 +282,6 @@ export default function Tienda() {
         precio_unitario: Number(editFormData.precio_unitario),
         cantidad: Number(editFormData.cantidad),
         talla: isShirtEdit ? editFormData.talla : null,
-        imagen: isAdmin ? editFormData.imagen?.trim() || null : null,
       };
 
       // TODO: API call de actualización (PUT/PATCH)
@@ -303,7 +309,7 @@ export default function Tienda() {
 
   // ---- ELIMINAR ----
   const handleDeleteClick = () => {
-    if (!isAdmin || !menuProduct) return;
+    if (!menuProduct) return;
     setDeleteProduct(menuProduct);
     setDeleteOpen(true);
     handleMenuClose();
@@ -332,6 +338,8 @@ export default function Tienda() {
       setShowBanner(true);
     }
   };
+
+
 
 
   // Cargar productos
@@ -367,35 +375,6 @@ export default function Tienda() {
       cancelled = true;
     };
   }, []);
-
-  // Efecto para verificar admin
-  useEffect(() => {
-    const checkRole = async () => {
-      try {
-        const res = await api.get('/auth/obtenerperfil', {
-          withCredentials: true,
-          skipAuthRedirect: true,
-        });
-
-        // Verifica que res es array, si es array, obtiene 1er elemento, sino, el elemento tal cual.
-        const p = Array.isArray(res.data) ? res.data[0] : res.data;
-
-        // Obtiene el atributo rol de la res
-        const role = String(p?.rol || '').toLowerCase();
-
-        // Si el rol es estrictamente admin, lo pone como true
-        setIsAdmin(role === 'admin');
-      } catch {
-        setIsAdmin(false);
-      }
-    }
-
-    checkRole();
-
-    // Eventlistener que escucha cuando se actualiza el token de inicio de sesion
-    const onAuthRefresh = () => checkRole();
-    window.addEventListener('auth:refresh', onAuthRefresh);
-  }, [])
 
   const totalItems = useMemo(
     () => cartItems.reduce((acc, it) => acc + (parseInt(it.cantidad) || 0), 0),
@@ -549,7 +528,7 @@ export default function Tienda() {
 
               {isAdmin && (
                 <IconButton
-                  onClick={() => isAdmin && setAddOpen(true)}
+                  onClick={() => setAddOpen(true)}
                   sx={{ color: 'black', backgroundColor: 'rgba(255,255,255,0.2)', '&:hover': { backgroundColor: 'rgba(255,255,255,0.4)' } }}
                 >
                   <Add />
@@ -597,16 +576,6 @@ export default function Tienda() {
                     minRows={2}
                     fullWidth
                   />
-
-                  {isAdmin && (
-                    <TextField
-                      label="URL de la Imagen"
-                      value={formData.imagen} // para agregar, o editFormData.imagen para editar
-                      onChange={handleChangeForm('imagen')} // o handleEditChange('imagen') para editar
-                      fullWidth
-                    />
-                  )}
-
 
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                     <TextField
@@ -795,7 +764,7 @@ export default function Tienda() {
                       <Box sx={{ position: 'relative' }}>
                         <IconButton
                           size="small"
-                          onClick={(e) => isAdmin && handleMenuOpen(e, p)}
+                          onClick={(e) => handleMenuOpen(e, p)}
                           sx={{ position: 'absolute', top: 4, right: 4 }}
                           aria-label="Más acciones"
                         >
@@ -818,24 +787,6 @@ export default function Tienda() {
                         Eliminar
                       </MenuItem>
                     </Menu>
-                    <Typography variant="subtitle1">L. {p.precio_unitario}</Typography>
-
-                    {isAdmin && (
-                      <Button size="small" onClick={() => handleEditOpen(p)} sx={{ mt: 1 }}>
-                        Cambiar Imagen
-                      </Button>
-                    )}
-                    F
-                    {p.imagen && (
-                      <Box sx={{ width: '100%', height: 180, mb: 1 }}>
-                        <img
-                          src={p.imagen}
-                          alt={p.nombre_producto}
-                          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }}
-                        />
-                      </Box>
-                    )}
-
 
                     <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'Varsity' }}>
                       {p.nombre_producto}
