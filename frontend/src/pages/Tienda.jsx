@@ -183,10 +183,10 @@ export default function Tienda() {
 		if (!formData.nombre_producto?.trim()) e.nombre_producto = 'Requerido';
 		if (
 			formData.precio_unitario === '' ||
-			isNaN(Number(formData.precio_unitario))
+			isNaN(Number(formData.precio_unitario))||formData.precio_unitario<1
 		)
 			e.precio_unitario = 'Precio inválido';
-		if (formData.cantidad === '' || isNaN(Number(formData.cantidad)))
+		if (formData.cantidad === '' || isNaN(Number(formData.cantidad))||formData.cantidad<0) 
 			e.cantidad = 'Cantidad inválida';
 		if (isShirt && !formData.talla) e.talla = 'Selecciona una talla';
 		setFormErrors(e);
@@ -314,6 +314,7 @@ export default function Tienda() {
 				precio_unitario: Number(editFormData.precio_unitario),
 				cantidad: Number(editFormData.cantidad),
 				talla: isShirtEdit ? editFormData.talla : null,
+        estado: 'recibido',
 			};
 
 			const { data } = await api.put(
