@@ -23,6 +23,8 @@ import { api } from '../api/api';
 import ReCAPTCHA from 'react-google-recaptcha';
 import EditIcon from '@mui/icons-material/Edit';
 import { IconButton, Tooltip } from '@mui/material';
+import fondDefault from '/Images/pilotos.c.jpg';
+import EditableHeaderImage from '../components/EditableHeaderImage';
 
 const Contacto = () => {
 	// ======== FORM DE MENSAJE ========
@@ -59,6 +61,12 @@ const Contacto = () => {
 		texto_cta: '',
 	});
 
+	//const para lasa imagenes
+	const [headerUrl, setHeaderUrl] = useState(null);
+	const [imageError, setImageError] = useState(null);
+	const [uploading, setUploading] = useState(false);
+	const [justSaved, setJustSaved] = useState(false);
+
 	// Cargar info de contacto (endpoint público)
 	useEffect(() => {
 		const fetchContacto = async () => {
@@ -94,6 +102,72 @@ const Contacto = () => {
 		window.addEventListener('auth:refresh', onAuthRefresh);
 		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
 	}, []);
+
+	//cargar imagen
+	useEffect(() => {
+		const loadHeader = async () => {
+			try {
+				const res = await api.get('/auth/contactoimages');
+				const rows = Array.isArray(res.data) ? res.data : [];
+				const row = rows.find(
+					r => String(r.type).toLowerCase() === 'contacto_header',
+				);
+				setHeaderUrl(row?.url || null);
+			} catch (err) {
+				console.error('Error cargando contacto_header:', err?.message || err);
+			}
+		};
+		loadHeader();
+	}, []);
+
+	const handleHeaderChange = async file => {
+		try {
+			setImageError(null);
+
+			// Validación simple
+			const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+			if (!allowed.includes(file.type)) {
+				setImageError('Formato no permitido. Usa JPG, PNG, WEBP o AVIF.');
+				return;
+			}
+			if (file.size > 8 * 1024 * 1024) {
+				setImageError('La imagen supera los 8 MB.');
+				return;
+			}
+
+			setUploading(true);
+
+			// 1) Subir archivo
+			const formData = new FormData();
+			formData.append('file', file);
+			const uploadResponse = await api.post('/auth/upload', formData, {
+				headers: { 'Content-Type': 'multipart/form-data' },
+			});
+			const finalUrl = uploadResponse?.data?.url;
+			if (!finalUrl) throw new Error('No se recibió URL de subida');
+
+			// 2) Guardar URL con type = 'contacto_header'
+			await api.put('/auth/contactoimages', {
+				type: 'contacto_header',
+				url: finalUrl,
+			});
+
+			// 3) Refrescar UI
+			setHeaderUrl(finalUrl);
+			setJustSaved(true);
+			setTimeout(() => setJustSaved(false), 1800);
+		} catch (err) {
+			const msg =
+				err?.response?.data?.mensaje ||
+				err?.response?.data?.error ||
+				err?.message ||
+				'Error al actualizar el header.';
+			setImageError(msg);
+			console.error('[handleHeaderChange]', err);
+		} finally {
+			setUploading(false);
+		}
+	};
 
 	const openEditor = () => {
 		// Permite abrir aunque no haya registro (usa defaults)
@@ -191,7 +265,7 @@ const Contacto = () => {
 					display: 'flex',
 					alignItems: 'center',
 					justifyContent: 'center',
-					backgroundImage: `url(${fond})`,
+					backgroundImage: `url(${headerUrl || fondDefault})`,
 					backgroundSize: 'cover',
 					backgroundPosition: 'center',
 					py: { xs: 6, md: 8 },
@@ -208,6 +282,18 @@ const Contacto = () => {
 						zIndex: 1,
 					}}
 				/>
+
+				{/*editar (solo admin) */}
+				{isAdmin && (
+					<EditableHeaderImage
+						onImageUpload={handleHeaderChange}
+						uploading={uploading}
+						saved={justSaved}
+						sx={{ position: 'absolute', top: 16, right: 16, zIndex: 3 }}
+						tooltip='Cambiar imagen de encabezado'
+					/>
+				)}
+
 				<Box
 					sx={{
 						position: 'relative',
@@ -274,7 +360,7 @@ const Contacto = () => {
 								px: 2,
 								fontSize: { xs: 'clamp(18px, 4.8vw, 22px)', md: '1.4rem' },
 								lineHeight: 1.2,
-								position: 'relative', 
+								position: 'relative',
 							}}
 						>
 							{contacto?.org_nombre || 'Organización de Béisbol PILOTOS - FAH'}
@@ -636,15 +722,15 @@ const Contacto = () => {
 				onClose={() => setOpenEdit(false)}
 				scroll='paper'
 				sx={{
-					zIndex: theme => theme.zIndex.modal, 
+					zIndex: theme => theme.zIndex.modal,
 				}}
 				PaperProps={{
 					sx: {
-						mt: { xs: 8, md: 10 }, 
-						mx: 2, 
+						mt: { xs: 8, md: 10 },
+						mx: 2,
 						width: '100%',
-						maxWidth: 560, 
-						maxHeight: 'calc(100vh - 140px)', 
+						maxWidth: 560,
+						maxHeight: 'calc(100vh - 140px)',
 						borderRadius: 2,
 					},
 				}}
