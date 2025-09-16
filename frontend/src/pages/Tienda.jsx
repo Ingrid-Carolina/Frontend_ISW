@@ -14,6 +14,8 @@ import {
   List,
   ListItem,
   Divider,
+  Snackbar,
+  Alert,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -90,6 +92,8 @@ export default function Tienda() {
   const [productos, setProductos] = useState([]);
   const [loadingProductos, setLoadingProductos] = useState(false);
   const [errorProductos, setErrorProductos] = useState(null);
+  const [open, setopen]= useState(false);
+  const[openSnackbar, setOpenSnackbar]= useState(false);
 
   // Menú contextual por tarjeta
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
@@ -396,6 +400,48 @@ export default function Tienda() {
       return nombreMatch || descripcionMatch || palabrasMatch || categoriaMatch;
     });
   }, [searchQuery, productos]);
+
+  const openFactura=()=>{
+
+    setopen(true)
+  }
+
+ 
+  const CerrarModal= async()=>{
+
+    try {
+       const uidRes = await api.get('/auth/obteneruid', { withCredentials: true });
+    console.log('Mi id:', uidRes.data.id);
+
+    const id= uidRes.data.id;
+
+    const body={
+
+      uid:id,
+      cartItems:cartItems
+    }
+
+   
+      const res= await api.post('/auth/agregarorden',body, {
+           headers: { "Content-Type": "application/json" }
+         })
+
+        
+          setCartItems([]);
+          setOpenSnackbar(true);
+         
+      
+    } catch (error) {
+
+       console.error('Error al crear la orden:', error.message);
+    }
+
+    setopen(false);
+   
+
+  }
+
+
 
   // Carrito
   const addToCart = (producto) => {
@@ -979,20 +1025,145 @@ export default function Tienda() {
                     setBannerMsg('Compra procesada correctamente');
                     setBannerType('success');
                     setShowBanner(true);
-                    setCartItems([]);
+                    //setCartItems([]);
                     setTimeout(() => {
                       setShowBanner(false);
                       setCartModalOpen(false);
+                      openFactura();
                     }, 1500);
                   }}
                 >
-                  Proceder al Pago
+                  Confirmar Factura
                 </Button>
               </Box>
             </>
           )}
         </Box>
       </Drawer>
+
+   {/* Modal factura de cliente */}
+
+    
+           <Dialog open={open} onClose={() => setopen(false)} fullWidth maxWidth="sm" sx={{ zIndex: 1300 }}>
+   <DialogContent>
+  <DialogTitle variant="h5" sx={{ color: '#2c1a99', fontFamily: 'Varsity', fontWeight: 'bold', textAlign: 'center', display: 'flex', justifyContent:'center' }}>
+    Factura del Cliente
+  </DialogTitle>
+
+  <Typography variant="body1" sx={{ fontFamily: 'PeterMedium', marginBottom: 2, marginLeft: 5 }}>
+  Fecha: {new Date().toLocaleDateString('es-HN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric'
+  })}
+</Typography>
+<Typography variant="body1" sx={{ fontFamily: 'PeterMedium', marginBottom: 2, marginLeft: 5 }}>
+  PILOTOS FAH. Campo de la Fuerza Area Hondureña.
+</Typography>
+
+
+    <p>Resumen de su orden:</p>
+
+    {cartItems.length === 0 ? (
+      <p>No hay productos en el carrito.</p>
+    ) : (
+      <table style={{ width: '100%', borderCollapse: 'collapse', marginTop: '1rem' }}>
+        <thead>
+          <tr style={{ backgroundColor: '#2c1a99'}}>
+            <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Producto</th>
+            <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Cantidad</th>
+            <th style={{ padding: '8px', border: '1px solid #ccc', color:'white' }}>Precio Unitario</th>
+            <th style={{ padding: '8px', border: '1px solid #ccc',color:'white' }}>Precio Total</th>
+          </tr>
+        </thead>
+        <tbody>
+          {cartItems.map((item, index) => (
+            <tr key={index}>
+              <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.nombre_producto}</td>
+              <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.cantidad}</td>
+                <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.precio_unitario}</td>
+              <td style={{ padding: '8px', border: '1px solid #ccc' }}>
+                L.{(item.precio_unitario * item.cantidad).toFixed(2)}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    )}
+    
+
+   {cartItems.length > 0 && (
+  <div style={{ marginTop: '2.5rem', textAlign: 'right', fontWeight: 'bold' }}>
+    {(() => {
+      const total = cartItems.reduce(
+        (acc, item) => acc + item.precio_unitario * item.cantidad,
+        0
+      );
+      const isv = total * 0.15;
+      const subtotal = total-isv;
+
+      return (
+        <>
+          <div>Subtotal: L.{(subtotal).toFixed(2)}</div>
+          <div>I.S.V 15%: L.{isv.toFixed(2)}</div>
+          <div>Total a Pagar: L.{total.toFixed(2)}</div>
+
+          <Typography
+  variant="body2"
+  sx={{
+    color: 'red',
+    fontWeight: 'bold',
+    fontFamily: 'PeterMedium',
+    margin: 3,
+    textAlign: 'center',
+    fontSize: '1rem'
+  }}
+>
+  Esta factura es necesaria para reclamar su producto en el punto de entrega. Por favor, no la pierda.
+</Typography>
+        </>
+      );
+    })()}
+  </div>
+)}
+
+  </DialogContent>
+  
+<Button
+          variant="contained"
+          onClick={() => CerrarModal()}
+          sx={{
+            mt: 2,
+            backgroundColor: "#ff6600",
+            color: "#fff",
+            fontFamily: "PeterMedium",
+            '&:hover': { backgroundColor: "#e65c00" },
+            width: "30%",
+            margin:3,
+            borderRadius: "10px",
+          }}
+        >
+          Proceder Orden
+        </Button>
+</Dialog>
+
+<Snackbar
+  open={openSnackbar}
+  autoHideDuration={4000}
+  onClose={() => setOpenSnackbar(false)}
+  anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+>
+  <Alert
+    onClose={() => setOpenSnackbar(false)}
+    severity="success"
+    sx={{ width: '100%' }}
+    elevation={6}
+    variant="filled"
+  >
+    ¡Orden registrada exitosamente!
+  </Alert>
+</Snackbar>
+
     </>
   );
 }

@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { api } from '../../api/api';
 import {
   Box,
   Typography,
@@ -16,65 +17,98 @@ import {
 } from "@mui/material";
 
 export default function ManageOrders() {
-  const orders = [
-    {
-      usuario: "Juan Pérez",
-      productos: ["Camiseta Oficial"],
-      cantidad: [2],
-      precios: [25], // precio unitario
-      email: "juan@example.com",
-      fecha: "2025-09-01",
-      idProducto: ["P123"],
-      idCompra: "C456",
-      estado: "",
-    },
-    {
-      usuario: "María López",
-      productos: ["Gorra del equipo"],
-      cantidad: [1],
-      precios: [15],
-      email: "maria@example.com",
-      fecha: "2025-09-02",
-      idProducto: ["P789"],
-      idCompra: "C987",
-      estado: "",
-    },
-    {
-      usuario: "Carlos Gómez",
-      productos: ["Camiseta Oficial", "Bufanda del equipo"],
-      cantidad: [1, 1],
-      precios: [25, 20],
-      email: "carlos@example.com",
-      fecha: "2025-09-03",
-      idProducto: ["P123", "P456"],
-      idCompra: "C654",
-      estado: "",
-    },
-    {
-      usuario: "Ana Martínez",
-      productos: ["Gorra del equipo", "Camiseta Oficial", "Taza con logo"],
-      cantidad: [1, 2, 1],
-      precios: [15, 25, 10],
-      email: "ana@example.com",
-      fecha: "2025-09-04",
-      idProducto: ["P789", "P123", "P321"],
-      idCompra: "C741",
-      estado: "",
-    },
-  ];
+  
 
-  const[estado, setestado]=useState(orders);
+  const [ordenes, setordenes]= useState([]);
+ const [productosPorOrden, setProductosPorOrden] = useState({});
 
-  const handleEstado = (orderIndex, newEstado) => {
-  setestado((prevOrders) =>
-    prevOrders.map((order, i) =>
-      i === orderIndex ? { ...order, estado: newEstado } : order //iteramos hasta llegar al indice elegido
-    )
-  );
+ 
+   const fetchOrdenes = async () => {
+  try {
+    const res = await api.get('/auth/ordenes', { skipAuthRedirect: true });
+    const orders = res.data.ordenes;
 
-  console.log(orders[orderIndex]);
+    const ordenesConProductos = await Promise.all(
+      orders.map(async (orden) => {
+        try {
+          const productosRes = await api.get(`/auth/ordenes/${orden.idorden}/productos_comprados`);
+          const productosLista = productosRes.data.map((producto) => ({
+            producto: producto.nombre_producto,
+            cantidad: producto.cantidad,
+            precio_unitario: producto.precio_unitario,
+            total: producto.cantidad * producto.precio_unitario,
+          }));
+
+          return {
+            idorden: orden.idorden,
+            nombre_usuario: orden.nombre_usuario,
+            fecha: orden.fecha,
+            estado: orden.estado,
+            email: orden.email,
+            productos_comprados: productosLista,
+          };
+        } catch (err) {
+          console.error(`Error al obtener productos para orden ${orden.idorden}:`, err.message);
+          return {
+            ...orden,
+            productos_comprados: [],
+          };
+        }
+      })
+    );
+
+    setordenes(ordenesConProductos);
+    console.log(ordenesConProductos);
+  } catch (error) {
+    console.error('Error al obtener ordenes:', error.message);
+  }
 };
 
+
+useEffect(() => {
+
+    fetchOrdenes();
+        
+        
+    }, []);
+
+    const handleEstado = async (orderIndex, newEstado) => {
+       const idorden = ordenes[orderIndex].idorden;
+     setordenes((prevordenes) => //solamente para frontend
+       prevordenes.map((orden, i) =>
+         i === orderIndex ? { ...orden, estado: newEstado } : orden //iteramos hasta llegar al indice elegido
+       )
+     );
+   
+   
+     
+   
+      const url = `/auth/orden/${idorden}`;
+   
+      const updatedestado={
+   
+       estado: newEstado
+   
+      }
+   
+      try {
+   
+        const res = await api.put(url, updatedestado, {
+              headers: { "Content-Type": "application/json" }
+            });
+   
+            console.log(res.data);
+       
+      } catch (error) {
+   
+        console.error('Error al setear el estado:', error.message);
+       
+      }
+   
+     }
+
+
+ 
 
   return (
     <Box sx={{ mt: 12, px: { xs: 1, sm: 2, md: 3 } }}>
@@ -118,31 +152,28 @@ export default function ManageOrders() {
                 Fecha de Compra
               </TableCell>
               <TableCell sx={{ fontFamily: "PeterMedium", fontWeight: "bold", color: "#fff" }}>
-                ID Producto
-              </TableCell>
-              <TableCell sx={{ fontFamily: "PeterMedium", fontWeight: "bold", color: "#fff" }}>
                 ID Compra
               </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
-            {estado.map((order, index) => {
+            {ordenes.map((order, index) => {
               // Calcular total de la orden
-              const total = order.productos.reduce(
-                (acc, _, i) => acc + order.cantidad[i] * order.precios[i],
+              const total = order.productos_comprados.reduce(
+                (acc,item) => acc + item.total, //por cada item, calculamos su total
                 0
               );
 
               return (
                 <TableRow key={index} hover>
-                  <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.usuario}</TableCell>
+                  <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.nombre_usuario}</TableCell>
 
                   {/* Productos en lista */}
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>
                     <List dense>
-                      {order.productos.map((prod, i) => (
+                      {order.productos_comprados.map((prod, i) => (
                         <ListItem key={i} sx={{ p: 0 }}>
-                          {prod}
+                          {prod.producto}
                         </ListItem>
                       ))}
                     </List>
@@ -151,16 +182,16 @@ export default function ManageOrders() {
                   {/* Cantidades en lista */}
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>
                     <List dense>
-                      {order.cantidad.map((cant, i) => (
+                      {order.productos_comprados.map((prod, i) => (
                         <ListItem key={i} sx={{ p: 0 }}>
-                          {cant}
+                          {prod.cantidad}
                         </ListItem>
                       ))}
                     </List>
                   </TableCell>
                   {/* Precio Total */}
                   <TableCell sx={{ fontFamily: "PeterMedium", fontWeight: "bold" }}>
-                    ${total.toFixed(2)}
+                    L.{total.toFixed(2)}
                   </TableCell>
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.email}</TableCell>
                 <TableCell sx={{ fontFamily: "PeterMedium" }}>
@@ -170,25 +201,14 @@ export default function ManageOrders() {
                       variant="standard"
                       sx={{ fontFamily: "PeterMedium", minWidth: 120 }}
                     >
+                      <MenuItem value="Pendiente">Pendiente</MenuItem>
                       <MenuItem value="En Proceso">En Proceso</MenuItem>
-                      <MenuItem value="Enviando">Enviando</MenuItem>
                       <MenuItem value="Entregado">Entregado</MenuItem>
                     </Select>
                 </TableCell>
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.fecha}</TableCell>
 
-                  {/* IDs de productos */}
-                  <TableCell sx={{ fontFamily: "PeterMedium" }}>
-                    <List dense>
-                      {order.idProducto.map((id, i) => (
-                        <ListItem key={i} sx={{ p: 0 }}>
-                          {id}
-                        </ListItem>
-                      ))}
-                    </List>
-                  </TableCell>
-
-                  <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.idCompra}</TableCell>
+                  <TableCell sx={{ fontFamily: "PeterMedium" }}>{order.idorden}</TableCell>
                 </TableRow>
               );
             })}
@@ -198,3 +218,4 @@ export default function ManageOrders() {
     </Box>
   );
 }
+
