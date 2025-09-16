@@ -104,6 +104,7 @@ export default function Tienda() {
     precio_unitario: '',
     cantidad: '',
     talla: '',
+    imagen: '',
   });
   const [editErrors, setEditErrors] = useState({});
   const [editSaving, setEditSaving] = useState(false);
@@ -121,11 +122,14 @@ export default function Tienda() {
     precio_unitario: '',
     cantidad: '',
     talla: '',              // ← ahora es string
+    imagen: '',
   });
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
   const [isAdmin, setIsAdmin] = useState(false);
+
+
 
   const isShirt = useMemo(() => {
     const n = (formData.nombre_producto || '').toLowerCase();
@@ -164,6 +168,7 @@ export default function Tienda() {
         precio_unitario: Number(formData.precio_unitario),
         cantidad: Number(formData.cantidad),
         talla: isShirt ? formData.talla : null, // ← una sola talla o null
+        imagen: isAdmin ? formData.imagen?.trim() || null : null,
       };
 
       const { data } = await api.post('/auth/tienda/agregarproducto', payload);
@@ -208,7 +213,7 @@ export default function Tienda() {
 
   // Abrir/cerrar menú
   const handleMenuOpen = (event, product) => {
-    if(!isAdmin) return; //Esto es para que se evite abrir si no es admin
+    if (!isAdmin) return; //Esto es para que se evite abrir si no es admin
     setMenuAnchorEl(event.currentTarget);
     setMenuProduct(product);
   };
@@ -270,6 +275,7 @@ export default function Tienda() {
         precio_unitario: Number(editFormData.precio_unitario),
         cantidad: Number(editFormData.cantidad),
         talla: isShirtEdit ? editFormData.talla : null,
+        imagen: isAdmin ? editFormData.imagen?.trim() || null : null,
       };
 
       // TODO: API call de actualización (PUT/PATCH)
@@ -364,8 +370,8 @@ export default function Tienda() {
 
   // Efecto para verificar admin
   useEffect(() => {
-    const checkRole = async () =>{
-      try{
+    const checkRole = async () => {
+      try {
         const res = await api.get('/auth/obtenerperfil', {
           withCredentials: true,
           skipAuthRedirect: true,
@@ -379,7 +385,7 @@ export default function Tienda() {
 
         // Si el rol es estrictamente admin, lo pone como true
         setIsAdmin(role === 'admin');
-      }catch{
+      } catch {
         setIsAdmin(false);
       }
     }
@@ -592,6 +598,16 @@ export default function Tienda() {
                     fullWidth
                   />
 
+                  {isAdmin && (
+                    <TextField
+                      label="URL de la Imagen"
+                      value={formData.imagen} // para agregar, o editFormData.imagen para editar
+                      onChange={handleChangeForm('imagen')} // o handleEditChange('imagen') para editar
+                      fullWidth
+                    />
+                  )}
+
+
                   <Box sx={{ display: 'grid', gridTemplateColumns: { xs: '1fr', sm: '1fr 1fr' }, gap: 2 }}>
                     <TextField
                       label="Precio (L)"
@@ -802,6 +818,24 @@ export default function Tienda() {
                         Eliminar
                       </MenuItem>
                     </Menu>
+                    <Typography variant="subtitle1">L. {p.precio_unitario}</Typography>
+
+                    {isAdmin && (
+                      <Button size="small" onClick={() => handleEditOpen(p)} sx={{ mt: 1 }}>
+                        Cambiar Imagen
+                      </Button>
+                    )}
+                    F
+                    {p.imagen && (
+                      <Box sx={{ width: '100%', height: 180, mb: 1 }}>
+                        <img
+                          src={p.imagen}
+                          alt={p.nombre_producto}
+                          style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 8 }}
+                        />
+                      </Box>
+                    )}
+
 
                     <Typography variant="h6" gutterBottom sx={{ fontWeight: 'bold', fontFamily: 'Varsity' }}>
                       {p.nombre_producto}
