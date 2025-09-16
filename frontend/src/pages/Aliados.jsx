@@ -48,7 +48,9 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
     <Box
       component="section"
       sx={{
-        my: { xs: 6, md: 10 },
+        backgroundColor:'#fff',
+        mt: { xs: 6, md: 10 },   // solo espacio arriba
+    mb: { xs: 4, md: 6 }, 
       }}
     >
       <Grid
@@ -56,10 +58,16 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
         spacing={{ xs: 4, md: 6 }}
         alignItems="center"
         justifyContent="space-between"
-        wrap="wrap"
+        wrap={isMdUp ? "nowrap" : "wrap"}// 👈 siempre wrap para evitar superposición
       >
         {/* Lado del texto */}
-        <Grid item xs={12} md={7} order={textOrder}>
+        <Grid
+          item
+          xs={12}
+          md={7}
+          order={textOrder}
+          sx={{ minWidth: 0, flexShrink: 1 }}
+        >
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -148,8 +156,15 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
             </Box>
           </motion.div>
         </Grid>
+
         {/* Lado de la imagen */}
-        <Grid item xs={12} md={5} order={imgOrder}>
+        <Grid
+          item
+          xs={12}
+          md={5}
+          order={imgOrder}
+          sx={{ minWidth: 0, flexShrink: 1 }}
+        >
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -167,27 +182,35 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
                 width: "100%",
               }}
             >
-              <EditableImageCircular
-                src={img}
-                alt={name}
-                onImageUpload={onImageUpload}
+              <Box
                 sx={{
                   width: { xs: 240, sm: 260, md: 300 },
-                  height: { xs: 240, sm: 260, md: 300 },
-                  objectFit: "contain",
-                  borderRadius: "50%",
-                  border: { xs: "4px solid #E06C14", md: "6px solid #E06C14" },
-                  p: { xs: 1.15, md: 2 },
-                  bgcolor: "white",
-                  boxShadow: "0 2px 0 rgba(0,0,0,0.05)",
-                  '& .edit-button': {
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    zIndex: 10,
-                  }
+                  maxWidth: "100%", // 👈 asegura que no se expanda más que su columna
+                  flexShrink: 0,
                 }}
-              />
+              >
+                <EditableImageCircular
+                  src={img}
+                  alt={name}
+                  onImageUpload={onImageUpload}
+                  sx={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                    borderRadius: "50%",
+                    border: { xs: "4px solid #E06C14", md: "6px solid #E06C14" },
+                    p: { xs: 1.15, md: 2 },
+                    bgcolor: "white",
+                    boxShadow: "0 2px 0 rgba(0,0,0,0.05)",
+                    "& .edit-button": {
+                      top: "50%",
+                      left: "50%",
+                      transform: "translate(-50%, -50%)",
+                      zIndex: 10,
+                    },
+                  }}
+                />
+              </Box>
             </Box>
           </motion.div>
         </Grid>
@@ -195,6 +218,8 @@ function PartnerSection({ name, img, links, reverse = false, onImageUpload }) {
     </Box>
   );
 }
+
+
 
 export default function Aliados() {
   const [loading, setLoading] = useState(true);
@@ -293,7 +318,7 @@ export default function Aliados() {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" height="100vh">
+      <Box display="flex" justifyContent="center" alignItems="center" >
         <CircularProgress />
       </Box>
     );
@@ -308,7 +333,7 @@ export default function Aliados() {
       sx={{
         py: 0,
         px: 0,
-        bgcolor: "#f9f9f9",
+        bgcolor: "#fff",
         textAlign: "center",
       }}
     >
@@ -317,6 +342,7 @@ export default function Aliados() {
         sx={{
           position: "relative",
           width: "100%",
+          bgcolor: "#fff",
           minHeight: { xs: "65vh", md: "80vh" },
           // Se usa la imagen cargada desde la API
           backgroundImage: `url(${images.aliados_header})`, 
@@ -334,6 +360,7 @@ export default function Aliados() {
             position: "absolute",
             width: "100%",
             height: "100%",
+            bgcolor: "#fff",
             background:
               "linear-gradient(to bottom right, rgba(12,0,90,0.85), rgba(0,0,0,0.7))",
             zIndex: 1, // Asegura que el overlay esté sobre la imagen pero debajo del texto
