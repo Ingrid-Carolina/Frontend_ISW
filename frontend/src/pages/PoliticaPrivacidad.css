@@ -1,75 +1,66 @@
-.privacidad-container {
-  max-width: 900px;
-  margin: 0 auto;
-  padding: 2rem;
-  padding-top: 100px;
+.politica-container {
+  width: 100%;
+  margin: auto;
+  padding: 90px 90px 70px 90px; /* espacio arriba, derecha, abajo, izquierda */
+  box-sizing: border-box;
   background-color: #ffffff;
-  color: #000000;
-  font-family: "PeterMedium", sans-serif;
-  line-height: 1.6;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
 }
 
-.privacidad-title {
-  font-family: "Varsity", sans-serif;
-  font-size: 2.5rem;
-  color: #10045c;
-  text-align: center;
-  margin-bottom: 2rem;
-  border-bottom: 3px solid #e06c14;
-  display: inline-block;
-  padding-bottom: 0.5rem;
+.politica-header {
+  margin-top: 50px;
+  text-align: left;
 }
 
-
-section h2 {
+.politica-titulo {
   font-family: "GroteskBold", sans-serif;
-  font-size: 1.3rem;
-  color: #e06c14;
-  margin-bottom: 0.5rem;
+  font-size: 4rem;
+  margin-bottom: 5px;
+  color: #10045c;
 }
 
-section p {
-  font-size: 1rem;
+.politica-separador {
+  border: none;
+  height: 2px;
+  background-color: #eb873b; /* tu naranja */
+  width: 100%;
+  margin: auto;
+  margin-bottom: 25px;
+}
+
+.politica-cuerpo {
+  display: block;
+}
+
+.politica-texto {
+  font-family: "PeterMedium", sans-serif;
+  font-size: 1.1rem;
+  text-align: justify;
+  line-height: 1.7;
+  margin-bottom: 1.2rem;
   color: #000000;
-  margin-left: 0.5rem;
 }
 
 /* Responsive */
-@media (max-width: 768px) {
-  .privacidad-container {
-    padding: 1.5rem;
+@media screen and (max-width: 900px) {
+  .politica-container {
+    padding: 90px 20px 40px 20px;
   }
 
-  .privacidad-title {
-    font-size: 2rem;
+  .politica-titulo {
+    font-size: 3rem;
   }
 
-  section h2 {
-    font-size: 1.2rem;
-  }
-
-  section p {
-    font-size: 0.95rem;
+  .politica-texto {
+    font-size: 1rem;
   }
 }
 
-@media (max-width: 480px) {
-  .privacidad-container {
-    padding: 1rem;
-    border-radius: 8px;
+@media screen and (max-width: 480px) {
+  .politica-titulo {
+    font-size: 2.2rem;
   }
 
-  .privacidad-title {
-    font-size: 1.6rem;
-  }
-
-  section h2 {
-    font-size: 1.1rem;
-  }
-
-  section p {
-    font-size: 0.9rem;
+  .politica-texto {
+    font-size: 0.95rem;
   }
 }
