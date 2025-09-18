@@ -285,7 +285,7 @@ function Home() {
 				{/* Usa la URL del header del estado */}
 				<div className='header-title'>
 					<p>ASOCIACIóN DE</p>
-					<p>DEPORTE MENOR</p>
+					<p>BÉISBOL MENOR</p>
 					<p>PILOTOS DE HONDURAS</p>
 				</div>
 				{isAdmin && (
