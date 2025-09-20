@@ -10,10 +10,15 @@ import {
   TableHead,
   TableRow,
   Paper,
+  TextField,
+  Pagination,
 } from "@mui/material";
 
 export default function BitacoraDonaciones() {
   const [donaciones, setDonaciones] = useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [page, setPage] = useState(1);
+  const rowsPerPage = 10;
 
   const fetchDonaciones = async () => {
     try {
@@ -29,6 +34,18 @@ export default function BitacoraDonaciones() {
     fetchDonaciones();
   }, []);
 
+  const filteredDonaciones = donaciones.filter((donacion) =>
+    Object.values(donacion).some((val) =>
+      String(val).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+  );
+
+  const totalPages = Math.ceil(filteredDonaciones.length / rowsPerPage);
+  const paginatedDonaciones = filteredDonaciones.slice(
+    (page - 1) * rowsPerPage,
+    page * rowsPerPage
+  );
+
   return (
     <Box sx={{ mt: 12, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Título */}
@@ -36,7 +53,7 @@ export default function BitacoraDonaciones() {
         variant="h4"
         sx={{
           fontFamily: "GroteskBold",
-          mb: 4,
+          mb: 2,
           textAlign: "center",
           color: "#10045c",
         }}
@@ -44,7 +61,28 @@ export default function BitacoraDonaciones() {
         Bitácora de Donaciones
       </Typography>
 
-      {/* Tabla de donaciones */}
+      {/* 🔍 Search Bar (más pequeña, centrada y con bordes redondeados) */}
+      <Box display="flex" justifyContent="center" sx={{ mb: 3 }}>
+        <TextField
+          label="Buscar..."
+          variant="outlined"
+          size="small"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+            setPage(1);
+          }}
+          sx={{
+            width: "50%", // más pequeño y centrado
+            borderRadius: "30px",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "30px",
+            },
+          }}
+        />
+      </Box>
+
+      {/* Tabla */}
       <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
         <Table>
           <TableHead>
@@ -73,7 +111,7 @@ export default function BitacoraDonaciones() {
             </TableRow>
           </TableHead>
           <TableBody>
-            {donaciones.map((donacion, index) => (
+            {paginatedDonaciones.map((donacion, index) => (
               <TableRow key={index} hover>
                 <TableCell sx={{ fontFamily: "PeterMedium" }}>{donacion.id_donacion}</TableCell>
                 <TableCell sx={{ fontFamily: "PeterMedium" }}>{donacion.nombre}</TableCell>
@@ -87,6 +125,24 @@ export default function BitacoraDonaciones() {
           </TableBody>
         </Table>
       </TableContainer>
+
+      {/* 📑 Paginación con color personalizado */}
+      <Box display="flex" justifyContent="center" sx={{ mt: 3 }}>
+        <Pagination
+          count={totalPages}
+          page={page}
+          onChange={(_, value) => setPage(value)}
+          sx={{
+            "& .MuiPaginationItem-root.Mui-selected": {
+              backgroundColor: "#10045c",
+              color: "#fff",
+            },
+            "& .MuiPaginationItem-root.Mui-selected:hover": {
+              backgroundColor: "#0d034a",
+            },
+          }}
+        />
+      </Box>
     </Box>
   );
 }
