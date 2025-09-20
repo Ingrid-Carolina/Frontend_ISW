@@ -18,6 +18,7 @@ const menuItems = [
   { text: 'Administrar Ordenes', path: 'mngordenes' }, 
   { text: 'Administrar Productos de Donaciones', path: 'mngproddonaciones' }, 
    { text: 'Administrar Roles', path: 'mngusuarios' }, 
+  { text: 'Administrar Donaciones', path: 'mngdonaciones' },
 ];
 
 export default function AdminLayout() {

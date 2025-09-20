@@ -16,6 +16,7 @@ import ManageTestimonios from './pages/admin/ManageTestimonios.jsx';
 import ManageOrders from './pages/admin/ManageOrders.jsx';
 import ProdDonaciones from './pages/admin/ProdDonaciones.jsx';
 import ManageUsuarios from './pages/admin/ManageUsuarios.jsx';
+import BitacoraDonaciones from './pages/admin/BitacoraDonaciones.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -35,6 +36,7 @@ createRoot(document.getElementById('root')).render(
           <Route path="mngordenes" element={<ManageOrders />} />
           <Route path="mngproddonaciones" element={<ProdDonaciones />} />
             <Route path="mngusuarios" element={<ManageUsuarios />} />
+          <Route path="mngdonaciones" element={<BitacoraDonaciones />} />
         </Route>
       </Routes>
     </BrowserRouter>
