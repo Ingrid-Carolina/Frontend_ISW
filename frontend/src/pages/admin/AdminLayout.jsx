@@ -15,7 +15,7 @@ const menuItems = [
   { text: 'Noticias', path: 'newsadm' },
   { text: 'Control de Jugadores', path: 'players' },
   { text: 'Testimonios', path: 'mngtestimonios' },
-  { text: 'Administrar Ordenes', path: 'mngordenes' }, 
+  { text: 'Administrar Órdenes', path: 'mngordenes' }, 
   { text: 'Administrar Productos de Donaciones', path: 'mngproddonaciones' }, 
    { text: 'Administrar Roles', path: 'mngusuarios' }, 
   { text: 'Administrar Donaciones', path: 'mngdonaciones' },
