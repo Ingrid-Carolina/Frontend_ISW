@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Button, TextField, MenuItem } from '@mui/material';
+import { Box, Typography, Paper, Button, TextField, MenuItem, CircularProgress, Alert, Backdrop  } from '@mui/material';
 import { api } from '../api/api';
 import Imgjud from '/Images/Fondojugadores.png';
+import EditableHeaderImage from '../components/EditableHeaderImage';
+import EditableText from '../components/EditableText';
+import './NuestroEquipo.css';
+
 
 // SVG Icons (los mismos que tienes)
 const X = () => (
@@ -74,7 +78,7 @@ const rolesDisponibles = [
     'Vocal III'
 ];
 
-const Jugadores = () => {
+const NuestroEquipo = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [showModal, setShowModal] = useState(false);
@@ -90,6 +94,56 @@ const Jugadores = () => {
     const [showBanner, setShowBanner] = useState(false);
     const [loading, setLoading] = useState(false);
     const [checkingAuth, setCheckingAuth] = useState(true);
+
+  const [textos, setTextos] = useState({});
+
+  const fetchTextos = async () => {
+    try {
+      const res = await api.get('/auth/nuestroequipo/textos', {
+        withCredentials: true
+      });
+      if (res.data.success) {
+        setTextos(res.data.data);
+      }
+    } catch (error) {
+      console.error('Error al cargar textos:', error);
+    }
+  };
+
+  const handleTextSave = async (clave, nuevoTexto) => {
+    try {
+      const res = await api.put('/auth/nuestroequipo/textos', {
+        clave,
+        valor: nuevoTexto
+      }, {
+        withCredentials: true
+      });
+
+      if (res.data.success) {
+        showMessage('Texto actualizado correctamente', 'success');
+        fetchTextos(); // Recargar textos
+      } else {
+        showMessage('Error al actualizar el texto', 'error');
+      }
+    } catch (error) {
+      console.error('Error al guardar texto:', error);
+      showMessage('Error al guardar el texto', 'error');
+    }
+  };
+
+
+
+    const [images, setImages] = useState({
+            Equipo_header: Imgjud,
+        });
+    
+    // Galería (carrusel)
+    const [uploadingImage, setUploadingImage] = useState(false);
+    
+        const [galeriaImages, setGaleriaImages] = useState([]);
+
+        const [error, setError] = useState('');
+
 
     // Función para obtener la junta directiva desde el backend
     const fetchCuerpoTecnico = async () => {
@@ -113,6 +167,52 @@ const Jugadores = () => {
             showMessage('Error al cargar los datos de la junta directiva', 'error');
         }
     };
+
+
+const fetchImages = async () => {
+                    try {
+                        setLoading(true);
+                        const response = await api.get('/auth/images', {
+                            withCredentials: true,
+                            skipAuthRedirect: true,
+                        });
+                       if (response.data && Array.isArray(response.data)) {
+                const imagesMap = response.data.reduce((acc, current) => {
+                    if (current.type && current.url) {
+                        acc[current.type] = current.url;
+                    }
+                    return acc;
+                }, {});
+
+                // Actualizar estado con imagen del header o usar la por defecto
+                setImages(prev => ({
+                    ...prev,
+                    Equipo_header: imagesMap.Equipo_header || Imgjud,
+                }));
+
+                // Procesar galería
+                const galeriaFromApi = response.data
+                    .filter(img => img.type && img.type.startsWith('galeria_'))
+                    .sort((a, b) => {
+                        const numA = parseInt(a.type.split('_')[1], 10);
+                        const numB = parseInt(b.type.split('_')[1], 10);
+                        return numA - numB;
+                    })
+                    .map(img => img.url);
+
+                setGaleriaImages(galeriaFromApi);
+                
+                console.log('Imágenes cargadas:', imagesMap);
+                       }
+                    } catch (e) {
+                        console.error('Error al cargar imágenes de Nuestro Equipo:', e);
+                        setError('No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.',);
+                    } finally {
+                        setLoading(false);
+                    }
+                };
+
+
 
     // Check if user is admin - No bloquea el acceso si falla
     useEffect(() => {
@@ -149,17 +249,150 @@ const Jugadores = () => {
             }
         };
 
+        
+
         fetchRole();
+    fetchTextos();
+        fetchImages();
         fetchCuerpoTecnico(); // Cargar datos iniciales
 
         // Listen for auth refresh events
         const onAuthRefresh = () => {
             setCheckingAuth(true);
             fetchRole();
+    fetchTextos();
         };
         window.addEventListener('auth:refresh', onAuthRefresh);
         return () => window.removeEventListener('auth:refresh', onAuthRefresh);
     }, []);
+
+// Subida/guardado genérico
+   const handleImageChange = async (type, file) => {
+        if (!file || !(file instanceof File)) {
+            showMessage('Error: No se seleccionó un archivo válido.', 'error');
+            return;
+        }
+
+        // Validar tipo de archivo
+        if (!file.type.startsWith('image/')) {
+            showMessage('Error: Solo se permiten archivos de imagen.', 'error');
+            return;
+        }
+
+        // Validar tamaño (máximo 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            showMessage('Error: La imagen no puede exceder 5MB.', 'error');
+            return;
+        }
+
+        try {
+            setUploadingImage(true);
+            showMessage('Subiendo imagen...', 'info');
+
+            // Crear FormData para la subida
+            const formData = new FormData();
+            formData.append('file', file);
+
+            console.log('Subiendo archivo:', file.name, 'Tipo:', file.type, 'Tamaño:', file.size);
+
+            // Subir archivo
+            const uploadResponse = await api.post('/auth/upload', formData, {
+                headers: { 
+                    'Content-Type': 'multipart/form-data' 
+                },
+                withCredentials: true,
+            });
+
+            if (!uploadResponse.data?.url) {
+                throw new Error('No se recibió URL de la imagen subida');
+            }
+
+            const finalUrl = uploadResponse.data.url;
+            console.log('Imagen subida exitosamente:', finalUrl);
+
+            // Guardar en base de datos
+            await api.put('/auth/images', {
+                type,
+                url: finalUrl,
+            }, {
+                withCredentials: true,
+            });
+
+            console.log('Imagen guardada en BD:', type, finalUrl);
+
+            // Actualizar estado local
+            if (type.startsWith('galeria_')) {
+                const index = parseInt(type.split('_')[1], 10) - 1;
+                setGaleriaImages(prevImages => {
+                    const updated = [...prevImages];
+                    updated[index] = finalUrl;
+                    return updated;
+                });
+            } else {
+                setImages(prev => ({ 
+                    ...prev, 
+                    [type]: finalUrl 
+                }));
+            }
+
+            showMessage('Imagen actualizada correctamente', 'success');
+
+        } catch (error) {
+            console.error(`Error al actualizar imagen de ${type}:`, error);
+            
+            let mensaje = 'Error al actualizar la imagen';
+            
+            if (error.response) {
+                const status = error.response.status;
+                const data = error.response.data;
+
+                if (status === 413) {
+                    mensaje = 'La imagen es demasiado grande. Máximo 5MB.';
+                } else if (status === 415) {
+                    mensaje = 'Formato de imagen no válido.';
+                } else if (status === 401 || status === 403) {
+                    mensaje = 'No tienes permisos para subir imágenes.';
+                } else if (status === 500) {
+                    mensaje = 'Error interno del servidor.';
+                } else {
+                    mensaje = data?.mensaje || `Error ${status}`;
+                }
+            } else if (error.request) {
+                mensaje = 'No se pudo conectar con el servidor.';
+            } else {
+                mensaje = error.message || 'Error desconocido';
+            }
+
+            showMessage(mensaje, 'error');
+        } finally {
+            setUploadingImage(false);
+        }
+    };
+
+
+    
+
+        if (loading) {
+            return (
+                <Box
+                    display='flex'
+                    justifyContent='center'
+                    alignItems='center'
+                    height='100vh'
+                >
+                    <CircularProgress />
+                </Box>
+            );
+        }
+    
+        if (error) {
+            return (
+                <Alert severity='error' sx={{ my: 2 }}>
+                    {error}
+                </Alert>
+            );
+        }
+
 
     const showMessage = (message, type = 'success') => {
         setBannerMsg(message);
@@ -358,61 +591,120 @@ const Jugadores = () => {
         }
     };
 
-    // Resto del componente igual (MemberCard, VerticalLine, etc.)
+    // Tarjeta de miembro mejorada con diseño más atractivo
     const MemberCard = ({ member }) => (
         <Paper
-            elevation={3}
+            elevation={8}
             sx={{
-                p: { xs: 1.5, md: 2 },
+                p: 3,
                 textAlign: 'center',
-                bgcolor: 'white',
-                borderRadius: 2,
-                minWidth: { xs: 140, md: 180 },
-                border: '2px solid #10045c',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                borderRadius: 4,
+                minWidth: { xs: 160, md: 220 },
+                minHeight: { xs: 120, md: 140 },
+                border: 'none',
                 position: 'relative',
+                transition: 'all 0.3s ease',
+                cursor: 'pointer',
+                overflow: 'hidden',
+                '&::before': {
+                    content: '""',
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    background: 'linear-gradient(135deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0) 100%)',
+                    pointerEvents: 'none',
+                },
+                '&:hover': {
+                    transform: 'translateY(-8px) scale(1.02)',
+                    boxShadow: '0 20px 40px rgba(102, 126, 234, 0.3)',
+                    '& .member-actions': {
+                        opacity: 1,
+                        transform: 'translateY(0)',
+                    }
+                }
             }}
         >
-            {/* Botones de administración */}
+            {/* Efecto de brillo sutil */}
+            <Box
+                sx={{
+                    position: 'absolute',
+                    top: '-50%',
+                    left: '-50%',
+                    width: '200%',
+                    height: '200%',
+                    background: 'linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.1) 50%, transparent 70%)',
+                    transform: 'rotate(45deg)',
+                    animation: 'shimmer 3s ease-in-out infinite',
+                    '@keyframes shimmer': {
+                        '0%': { transform: 'translateX(-100%) translateY(-100%) rotate(45deg)' },
+                        '100%': { transform: 'translateX(100%) translateY(100%) rotate(45deg)' },
+                    }
+                }}
+            />
+
+            {/* Botones de administración mejorados */}
             {isAdmin && (
                 <Box
+                    className="member-actions"
                     sx={{
                         position: 'absolute',
-                        top: 4,
-                        right: 4,
+                        top: 8,
+                        right: 8,
                         display: 'flex',
                         gap: 0.5,
+                        opacity: 0,
+                        transform: 'translateY(-10px)',
+                        transition: 'all 0.3s ease',
+                        zIndex: 10,
                     }}
                 >
                     <Button
-                        onClick={() => openModal('edit', member)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            openModal('edit', member);
+                        }}
                         sx={{
                             minWidth: 'auto',
-                            width: '24px',
-                            height: '24px',
+                            width: '28px',
+                            height: '28px',
                             borderRadius: '50%',
-                            backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
                             color: '#3b82f6',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255,255,255,0.2)',
                             '&:hover': {
-                                backgroundColor: 'rgba(59, 130, 246, 0.2)',
+                                backgroundColor: 'rgba(255, 255, 255, 1)',
+                                transform: 'scale(1.1)',
                             },
                             p: 0,
+                            transition: 'all 0.2s ease',
                         }}
                     >
                         <Edit />
                     </Button>
                     <Button
-                        onClick={() => deleteMember(member.id)}
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            deleteMember(member.id);
+                        }}
                         sx={{
                             minWidth: 'auto',
-                            width: '24px',
-                            height: '24px',
+                            width: '28px',
+                            height: '28px',
                             borderRadius: '50%',
-                            backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
                             color: '#f44336',
+                            backdropFilter: 'blur(10px)',
+                            border: '1px solid rgba(255,255,255,0.2)',
                             '&:hover': {
-                                backgroundColor: 'rgba(244, 67, 54, 0.2)',
+                                backgroundColor: 'rgba(255, 255, 255, 1)',
+                                transform: 'scale(1.1)',
                             },
                             p: 0,
+                            transition: 'all 0.2s ease',
                         }}
                     >
                         <Trash />
@@ -420,49 +712,77 @@ const Jugadores = () => {
                 </Box>
             )}
 
-            <Typography variant="subtitle1" sx={{ fontWeight: 'bold', color: '#10045c', fontSize: { xs: '0.9rem', md: '1rem' } }}>
+            {/* Avatar placeholder con iniciales */}
+            <Box
+                sx={{
+                    width: 50,
+                    height: 50,
+                    borderRadius: '50%',
+                    backgroundColor: 'rgba(255,255,255,0.2)',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    margin: '0 auto 12px',
+                    border: '2px solid rgba(255,255,255,0.3)',
+                    backdropFilter: 'blur(10px)',
+                }}
+            >
+                <Typography 
+                    sx={{ 
+                        color: 'white', 
+                        fontWeight: 'bold',
+                        fontSize: '1.2rem'
+                    }}
+                >
+                    {member.nombre.split(' ').map(n => n[0]).join('').substring(0, 2)}
+                </Typography>
+            </Box>
+
+            <Typography 
+                variant="h6" 
+                sx={{ 
+                    fontWeight: 'bold', 
+                    color: 'white', 
+                    fontSize: { xs: '0.9rem', md: '1.1rem' },
+                    mb: 1,
+                    textShadow: '0 2px 4px rgba(0,0,0,0.3)'
+                }}
+            >
                 {member.rol}
             </Typography>
-            <Typography variant="body2" sx={{ color: 'gray', fontSize: { xs: '0.8rem', md: '0.9rem' } }}>
+            <Typography 
+                variant="body2" 
+                sx={{ 
+                    color: 'rgba(255,255,255,0.9)', 
+                    fontSize: { xs: '0.8rem', md: '0.9rem' },
+                    fontWeight: 500,
+                    textShadow: '0 1px 2px rgba(0,0,0,0.2)'
+                }}
+            >
                 {member.nombre}
             </Typography>
         </Paper>
     );
 
-    // Línea vertical
-    const VerticalLine = ({ height = 30 }) => (
-        <Box sx={{ width: '2px', height: { xs: height / 2, md: height }, bgcolor: '#10045c', mx: 'auto' }} />
-    );
+    // Función para organizar miembros por categorías
+    const organizarMiembrosPorCategoria = () => {
+        const categorias = {
+            ejecutiva: ['Presidente', 'Vicepresidente'],
+            administrativa: ['Secretaria', 'Tesorera'],
+            supervision: ['Fiscal'],
+            vocales: ['Vocal I', 'Vocal II', 'Vocal III']
+        };
 
-    // Contenedor con línea horizontal conectando hijos
-    const HorizontalConnector = ({ children }) => (
-        <Box sx={{
-            display: 'flex',
-            flexDirection: { xs: 'column', md: 'row' },
-            alignItems: 'center',
-            justifyContent: 'center',
-            position: 'relative',
-            width: '100%'
-        }}>
-            <Box sx={{
-                position: 'absolute',
-                top: { xs: '0', md: '20px' },
-                left: 0,
-                right: 0,
-                height: '2px',
-                bgcolor: '#10045c'
-            }} />
-            <Box sx={{
-                display: 'flex',
-                flexDirection: { xs: 'column', md: 'row' },
-                justifyContent: 'center',
-                gap: { xs: 4, md: 6 },
-                width: '100%'
-            }}>
-                {children}
-            </Box>
-        </Box>
-    );
+        const resultado = {};
+        
+        Object.entries(categorias).forEach(([categoria, roles]) => {
+            resultado[categoria] = cuerpoTecnico.filter(miembro => 
+                roles.includes(miembro.rol)
+            );
+        });
+
+        return resultado;
+    };
 
     if (checkingAuth) {
         return (
@@ -482,8 +802,18 @@ const Jugadores = () => {
         );
     }
 
+    const miembrosPorCategoria = organizarMiembrosPorCategoria();
+
     return (
         <>
+
+        {/* Backdrop para mostrar carga de imagen */}
+            <Backdrop open={uploadingImage} sx={{ zIndex: 1300 }}>
+                <Box sx={{ textAlign: 'center', color: 'white' }}>
+                    <CircularProgress color="inherit" />
+                    <Typography sx={{ mt: 2 }}>Subiendo imagen...</Typography>
+                </Box>
+            </Backdrop>
             {/* HEADER */}
             <Box
                 sx={{
@@ -493,24 +823,33 @@ const Jugadores = () => {
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundImage: `url(${Imgjud})`,
+                    backgroundImage: `url(${images.Equipo_header})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     py: { xs: 6, md: 8 },
                 }}
             >
                 <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', color: 'white' }}>
-                    <Typography
+                    <EditableText
+                        text={textos.titulo_principal || "NUESTRO EQUIPO"}
+                        onTextSave={(newText) => handleTextSave("titulo_principal", newText)}
+                        isAdmin={isAdmin}
                         variant="h2"
+                        className="varsity-font"
                         sx={{
                             fontWeight: 'bold',
                             fontSize: { xs: '3rem', md: '7rem' },
-                            fontFamily: '"Varsity", cursive',
                         }}
-                    >
-                        NUESTRO EQUIPO
-                    </Typography>
+                        />
                 </Box>
+                {/* Lápiz header (solo admin) */}
+                {isAdmin && (
+                    <EditableHeaderImage
+                        onImageUpload={file => handleImageChange('Equipo_header', file)}
+                        sx={{ position: 'absolute', top: 16, right: 16, zIndex: 3 }}
+                        tooltip='Cambiar imagen de encabezado'
+                    />
+                )}
             </Box>
 
             {/* SECCIÓN JUGADORES */}
@@ -527,90 +866,245 @@ const Jugadores = () => {
                 }}
             >
                 <Box sx={{ flex: 1 }}>
-                    <Typography
-                        variant="h3"
+                    <EditableText
+                        text={textos.titulo_jugadores|| "LOS JUGADORES"}
+                        onTextSave={(newText) => handleTextSave("titulo_jugadores", newText)}
+                        isAdmin={isAdmin}
+                        variant="h2"
+                        className="varsity-font"
                         sx={{
-                            fontFamily: '"Varsity", cursive',
                             fontWeight: 'bold',
-                            mb: 2,
-                            fontSize: { xs: '2.5rem', md: '4rem' },
+                            fontSize: { xs: '3rem', md: '4rem' },
                         }}
-                    >
-                        LOS JUGADORES
-                    </Typography>
+                        />
                 </Box>
+                
+                
+                
             </Box>
 
-            {/* ORGANIGRAMA */}
-            <Box sx={{ px: { xs: 3, md: 10 }, py: 6, bgcolor: '#f1f1f1', position: 'relative' }}>
-                <Typography
-                    variant="h3"
-                    sx={{
-                        fontFamily: '"Varsity", cursive',
-                        fontWeight: 'bold',
-                        textAlign: 'center',
-                        mb: 6,
-                        fontSize: { xs: '2.5rem', md: '4rem' },
-                        color: '#10045c',
-                    }}
-                >
-                    Junta Directiva
-                </Typography>
+            {/* JUNTA DIRECTIVA MEJORADA */}
+            <Box 
+                sx={{ 
+                    px: { xs: 3, md: 10 }, 
+                    py: 8, 
+                    background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+                    minHeight: '100vh'
+                }}
+            >
+                
 
-                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
-                    
-                    {/* PRESIDENTE */}
-                    {cuerpoTecnico.find(m => m.rol === 'Presidente') && (
-                        <MemberCard member={cuerpoTecnico.find(m => m.rol === 'Presidente')} />
-                    )}
+                 <EditableText
+                        text={textos.titulo_junta_directiva|| "JUNTA DIRECTIVA"}
+                        onTextSave={(newText) => handleTextSave("titulo_junta_directiva", newText)}
+                        isAdmin={isAdmin}
+                        variant="h2"
+                        className="varsity-font"
+                        sx={{
+                            fontWeight: 'bold',
+                            fontFamily: '"Varsity", cursive',
+                            textAlign: 'center',
+                            mb: 8,
+                            fontSize: { xs: '2.5rem', md: '4rem' },
+                            background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                            backgroundClip: 'text',
+                            textFillColor: 'transparent',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            textShadow: '0 4px 8px rgba(102, 126, 234, 0.3)',
+                        }}
+                        />
 
-                    {/* Conexión hacia Vice, Secretaria y Tesorera */}
-                    <VerticalLine />
-                    <HorizontalConnector>
-                        {cuerpoTecnico
-                            .filter(m => ['Vicepresidente', 'Secretaria', 'Tesorera'].includes(m.rol))
-                            .map((persona) => (
-                                <Box key={persona.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                    <VerticalLine height={20} />
-                                    <MemberCard member={persona} />
-                                </Box>
+                {/* Liderazgo Ejecutivo */}
+                {miembrosPorCategoria.ejecutiva.length > 0 && (
+                    <Box sx={{ mb: 8 }}>
+                        <EditableText
+                        text={textos.categoria_ejecutiva|| "Liderazgo Ejecutivo"}
+                        onTextSave={(newText) => handleTextSave("categoria_ejecutiva", newText)}
+                        isAdmin={isAdmin}
+                        variant="h2"
+                        className="varsity-font"
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            mb: 4,
+                            color: '#17181bff',
+                               // fontWeight: 600,
+                            fontSize: { xs: '1.5rem', md: '1.8rem' }
+                        }}
+                        />
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                gap: 4,
+                                mb: 6
+                            }}
+                        >
+                            {miembrosPorCategoria.ejecutiva.map((miembro) => (
+                                <MemberCard key={miembro.id} member={miembro} />
                             ))}
-                    </HorizontalConnector>
+                        </Box>
+                    </Box>
+                )}
 
-                    {/* Conexión hacia Fiscal */}
-                    {cuerpoTecnico.find(m => m.rol === 'Fiscal') && (
-                        <>
-                            <VerticalLine />
-                            <MemberCard member={cuerpoTecnico.find(m => m.rol === 'Fiscal')} />
-                        </>
-                    )}
+                {/* Área Administrativa */}
+                {miembrosPorCategoria.administrativa.length > 0 && (
+                    <Box sx={{ mb: 8 }}>
+                        
 
-                    {/* Conexión hacia Vocales */}
-                    {cuerpoTecnico.filter(m => m.rol.includes('Vocal')).length > 0 && (
-                        <>
-                            <VerticalLine />
-                            <HorizontalConnector>
-                                {cuerpoTecnico
-                                    .filter(m => m.rol.includes('Vocal'))
-                                    .map((persona) => (
-                                        <Box key={persona.id} sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-                                            <VerticalLine height={20} />
-                                            <MemberCard member={persona} />
-                                        </Box>
-                                    ))}
-                            </HorizontalConnector>
-                        </>
-                    )}
-                </Box>
+                        <EditableText
+                        text={textos.categoria_administrativa|| "Área Administrativa"}
+                        onTextSave={(newText) => handleTextSave("categoria_administrativa", newText)}
+                        isAdmin={isAdmin}
+                        variant="h2"
+                        className="varsity-font"
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            mb: 4,
+                            color: '#17181bff',
+                               // fontWeight: 600,
+                            fontSize: { xs: '1.5rem', md: '1.8rem' }
+                        }}
+                        />
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                gap: 4,
+                                mb: 6
+                            }}
+                        >
+                            {miembrosPorCategoria.administrativa.map((miembro) => (
+                                <MemberCard key={miembro.id} member={miembro} />
+                            ))}
+                        </Box>
+                    </Box>
+                )}
 
-                {/* Botón de administración en la parte inferior */}
+                {/* Supervisión */}
+                {miembrosPorCategoria.supervision.length > 0 && (
+                    <Box sx={{ mb: 8 }}>
+                        
+
+                        <EditableText
+                        text={textos.categoria_supervision|| "Supervisión"}
+                        onTextSave={(newText) => handleTextSave("categoria_supervision", newText)}
+                        isAdmin={isAdmin}
+                        variant="h2"
+                        className="varsity-font"
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            mb: 4,
+                            color: '#17181bff',
+                               // fontWeight: 600,
+                            fontSize: { xs: '1.5rem', md: '1.8rem' }
+                        }}
+                        />
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                gap: 4,
+                                mb: 6
+                            }}
+                        >
+                            {miembrosPorCategoria.supervision.map((miembro) => (
+                                <MemberCard key={miembro.id} member={miembro} />
+                            ))}
+                        </Box>
+                    </Box>
+                )}
+
+                {/* Vocales */}
+                {miembrosPorCategoria.vocales.length > 0 && (
+                    <Box sx={{ mb: 8 }}>
+                        
+
+                        <EditableText
+                        text={textos.categoria_vocales|| "Vocales"}
+                        onTextSave={(newText) => handleTextSave("categoria_vocales", newText)}
+                        isAdmin={isAdmin}
+                        variant="h2"
+                        className="varsity-font"
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            mb: 4,
+                            color: '#17181bff',
+                               // fontWeight: 600,
+                            fontSize: { xs: '1.5rem', md: '1.8rem' }
+                        }}
+                        />
+                        <Box
+                            sx={{
+                                display: 'flex',
+                                flexWrap: 'wrap',
+                                justifyContent: 'center',
+                                gap: 4,
+                                mb: 6
+                            }}
+                        >
+                            {miembrosPorCategoria.vocales.map((miembro) => (
+                                <MemberCard key={miembro.id} member={miembro} />
+                            ))}
+                        </Box>
+                    </Box>
+                )}
+
+                {/* Mensaje cuando no hay miembros */}
+                {cuerpoTecnico.length === 0 && (
+                    <Box
+                        sx={{
+                            textAlign: 'center',
+                            py: 8,
+                        }}
+                    >
+                        
+                        <EditableText
+                        text={textos.mensaje_vacio|| " No hay miembros registrados en la junta directiva"}
+                        onTextSave={(newText) => handleTextSave("mensaje_vacio", newText)}
+                        isAdmin={isAdmin}
+                        variant="h3"
+                        className="varsity-font"
+                        sx={{
+                            fontWeight: 'bold',
+                            textAlign: 'center',
+                            mb: 4,
+                            color: '#718096',
+                               // fontWeight: 600,
+                            fontSize: { xs: '1.5rem', md: '1.8rem' }
+                        }}
+                        />
+
+
+                        {isAdmin && (
+                            <Typography
+                                variant="body2"
+                                sx={{
+                                    color: '#a0aec0'
+                                }}
+                            >
+                                Agrega el primer miembro usando el botón de abajo
+                            </Typography>
+                            
+
+                        )}
+                    </Box>
+                )}
+
+                {/* Botón de administración mejorado */}
                 {isAdmin && (
                     <Box
                         sx={{
                             display: 'flex',
                             justifyContent: 'center',
-                            mt: 6,
-                            gap: 2,
+                            mt: 8,
                         }}
                     >
                         <Button
@@ -618,15 +1112,24 @@ const Jugadores = () => {
                             variant="contained"
                             startIcon={<Plus />}
                             sx={{
-                                backgroundColor: '#10045c',
+                                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
                                 color: 'white',
-                                borderRadius: '25px',
-                                px: 3,
-                                py: 1.5,
+                                borderRadius: '50px',
+                                px: 4,
+                                py: 2,
+                                fontSize: '1.1rem',
                                 fontWeight: 'bold',
+                                textTransform: 'none',
+                                boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
+                                transition: 'all 0.3s ease',
                                 '&:hover': {
-                                    backgroundColor: '#0d0345',
+                                    background: 'linear-gradient(45deg, #5a67d8 30%, #6b46c1 90%)',
+                                    transform: 'translateY(-2px)',
+                                    boxShadow: '0 12px 35px rgba(102, 126, 234, 0.5)',
                                 },
+                                '&:active': {
+                                    transform: 'translateY(0)',
+                                }
                             }}
                         >
                             Agregar Miembro
@@ -687,6 +1190,7 @@ const Jugadores = () => {
                             maxWidth: '500px',
                             maxHeight: '80vh',
                             overflow: 'auto',
+                            boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
                         }}
                     >
                         {/* Modal Header */}
@@ -698,7 +1202,16 @@ const Jugadores = () => {
                                 marginBottom: '20px',
                             }}
                         >
-                            <h3 style={{ margin: 0, fontSize: '1.5rem', color: '#333' }}>
+                            <h3 style={{ 
+                                margin: 0, 
+                                fontSize: '1.5rem', 
+                                color: '#333',
+                                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                                backgroundClip: 'text',
+                                textFillColor: 'transparent',
+                                WebkitBackgroundClip: 'text',
+                                WebkitTextFillColor: 'transparent',
+                            }}>
                                 {modalMode === 'add' ? 'Agregar Miembro' : 'Editar Miembro'}
                             </h3>
                             <button
@@ -708,12 +1221,27 @@ const Jugadores = () => {
                                     background: 'none',
                                     border: 'none',
                                     cursor: loading ? 'not-allowed' : 'pointer',
-                                    padding: '4px',
-                                    borderRadius: '4px',
+                                    padding: '8px',
+                                    borderRadius: '50%',
                                     display: 'flex',
                                     alignItems: 'center',
                                     justifyContent: 'center',
                                     opacity: loading ? 0.5 : 1,
+                                    transition: 'all 0.2s ease',
+                                    backgroundColor: 'rgba(244, 67, 54, 0.1)',
+                                    color: '#f44336',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!loading) {
+                                        e.target.style.backgroundColor = 'rgba(244, 67, 54, 0.2)';
+                                        e.target.style.transform = 'scale(1.1)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!loading) {
+                                        e.target.style.backgroundColor = 'rgba(244, 67, 54, 0.1)';
+                                        e.target.style.transform = 'scale(1)';
+                                    }
                                 }}
                             >
                                 <X />
@@ -732,6 +1260,18 @@ const Jugadores = () => {
                                 fullWidth
                                 required
                                 variant="outlined"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#667eea',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        '&.Mui-focused': {
+                                            color: '#667eea',
+                                        },
+                                    },
+                                }}
                             />
 
                             <TextField
@@ -743,6 +1283,18 @@ const Jugadores = () => {
                                 fullWidth
                                 required
                                 variant="outlined"
+                                sx={{
+                                    '& .MuiOutlinedInput-root': {
+                                        '&.Mui-focused fieldset': {
+                                            borderColor: '#667eea',
+                                        },
+                                    },
+                                    '& .MuiInputLabel-root': {
+                                        '&.Mui-focused': {
+                                            color: '#667eea',
+                                        },
+                                    },
+                                }}
                             >
                                 {rolesDisponibles.map((rol) => (
                                     <MenuItem key={rol} value={rol}>
@@ -788,12 +1340,24 @@ const Jugadores = () => {
                                     backgroundColor: '#f3f4f6',
                                     color: '#374151',
                                     border: '2px solid #e5e7eb',
-                                    borderRadius: '8px',
+                                    borderRadius: '25px',
                                     cursor: loading ? 'not-allowed' : 'pointer',
                                     fontSize: '14px',
                                     fontWeight: '500',
                                     opacity: loading ? 0.7 : 1,
                                     transition: 'all 0.2s',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!loading) {
+                                        e.target.style.backgroundColor = '#e5e7eb';
+                                        e.target.style.transform = 'translateY(-1px)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!loading) {
+                                        e.target.style.backgroundColor = '#f3f4f6';
+                                        e.target.style.transform = 'translateY(0)';
+                                    }
                                 }}
                             >
                                 Cancelar
@@ -803,14 +1367,29 @@ const Jugadores = () => {
                                 disabled={loading}
                                 style={{
                                     padding: '12px 24px',
-                                    backgroundColor: loading ? '#93c5fd' : '#3b82f6',
+                                    background: loading ? 
+                                        '#93c5fd' : 
+                                        'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
                                     color: 'white',
                                     border: 'none',
-                                    borderRadius: '8px',
+                                    borderRadius: '25px',
                                     cursor: loading ? 'not-allowed' : 'pointer',
                                     fontSize: '14px',
                                     fontWeight: '500',
                                     transition: 'all 0.2s',
+                                    boxShadow: loading ? 'none' : '0 4px 15px rgba(102, 126, 234, 0.4)',
+                                }}
+                                onMouseEnter={(e) => {
+                                    if (!loading) {
+                                        e.target.style.transform = 'translateY(-2px)';
+                                        e.target.style.boxShadow = '0 6px 20px rgba(102, 126, 234, 0.5)';
+                                    }
+                                }}
+                                onMouseLeave={(e) => {
+                                    if (!loading) {
+                                        e.target.style.transform = 'translateY(0)';
+                                        e.target.style.boxShadow = '0 4px 15px rgba(102, 126, 234, 0.4)';
+                                    }
                                 }}
                             >
                                 {loading ? 'Guardando...' : modalMode === 'add' ? 'Agregar Miembro' : 'Guardar Cambios'}
@@ -823,4 +1402,4 @@ const Jugadores = () => {
     );
 };
 
-export default Jugadores;
+export default NuestroEquipo;

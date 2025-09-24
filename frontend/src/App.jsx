@@ -41,7 +41,7 @@ function App() {
 						<Route path='/' element={<Home />} />
 						<Route path='/historia' element={<NuestraHistoria />} />
 						<Route path='/Categoria' element={<Categorias />} />
-						<Route path='/NuestroEquipo' element={<NuestroEquipo />} />
+						<Route path='/nuestroequipo' element={<NuestroEquipo />} />
 						<Route path='/logros' element={<Logros />} />
 						<Route path='/voluntariado' element={<Voluntariado />} />
 						<Route path='/calendario' element={<Calendario />} />
