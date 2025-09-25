@@ -598,7 +598,7 @@ const fetchImages = async () => {
             sx={{
                 p: 3,
                 textAlign: 'center',
-                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                background: 'linear-gradient(135deg,  #2596be 0%, #1e0851 100%)',
                 borderRadius: 4,
                 minWidth: { xs: 160, md: 220 },
                 minHeight: { xs: 120, md: 140 },
@@ -906,7 +906,7 @@ const fetchImages = async () => {
                             textAlign: 'center',
                             mb: 8,
                             fontSize: { xs: '2.5rem', md: '4rem' },
-                            background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                            background: 'linear-gradient(45deg, #2596be 30%, #1e0851 90%)',
                             backgroundClip: 'text',
                             textFillColor: 'transparent',
                             WebkitBackgroundClip: 'text',
@@ -1112,7 +1112,7 @@ const fetchImages = async () => {
                             variant="contained"
                             startIcon={<Plus />}
                             sx={{
-                                background: 'linear-gradient(45deg, #667eea 30%, #764ba2 90%)',
+                                background: 'linear-gradient(45deg, #2596be 0%, #1e0851 100%)',
                                 color: 'white',
                                 borderRadius: '50px',
                                 px: 4,
@@ -1123,7 +1123,7 @@ const fetchImages = async () => {
                                 boxShadow: '0 8px 25px rgba(102, 126, 234, 0.4)',
                                 transition: 'all 0.3s ease',
                                 '&:hover': {
-                                    background: 'linear-gradient(45deg, #5a67d8 30%, #6b46c1 90%)',
+                                    background: 'linear-gradient(45deg, #2596beff 0%, #230a5fff 100%)',
                                     transform: 'translateY(-2px)',
                                     boxShadow: '0 12px 35px rgba(102, 126, 234, 0.5)',
                                 },
