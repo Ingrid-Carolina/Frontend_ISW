@@ -41,6 +41,9 @@ import Menu from '@mui/material/Menu';
 
 import { api } from '../api/api';
 
+import EditableText from '../components/EditableText'; // Importar el componente
+
+
 const TALLAS = [
 	'6',
 	'8',
@@ -105,6 +108,10 @@ export default function Tienda() {
 	const [loadingProductos, setLoadingProductos] = useState(false);
 	const [errorProductos, setErrorProductos] = useState(null);
 
+
+// NUEVO: Estado para textos editables
+	const [textos, setTextos] = useState({});
+
 	// Menú contextual por tarjeta
 	const [menuAnchorEl, setMenuAnchorEl] = useState(null);
 	const [menuProduct, setMenuProduct] = useState(null);
@@ -141,6 +148,70 @@ export default function Tienda() {
 	// Rol desde backend (no localStorage)
 	const [isAdmin, setIsAdmin] = useState(false);
 
+//función para cargar textos editables
+const fetchTextos = async () => {
+    try {
+        console.log('🔍 TIENDA: Iniciando carga de textos...');
+        console.log('🔍 TIENDA: URL:', '/auth/tienda/textos');
+        
+        const res = await api.get('/auth/tienda/textos', {
+            withCredentials: true,
+            skipAuthRedirect: true,
+        });
+        
+        console.log('📦 TIENDA: Status:', res.status);
+        console.log('📦 TIENDA: Response completa:', res);
+        console.log('📦 TIENDA: Response data:', res.data);
+        
+        if (res.data.success) {
+            console.log('✅ TIENDA: Textos cargados exitosamente:', res.data.data);
+            setTextos(res.data.data);
+        } else {
+            console.error('❌ TIENDA: Success = false:', res.data);
+        }
+    } catch (error) {
+        console.error('❌ TIENDA: Error completo:', error);
+        console.error('❌ TIENDA: Error response:', error.response);
+        console.error('❌ TIENDA: Error message:', error.message);
+        if (error.response) {
+            console.error('❌ TIENDA: Status:', error.response.status);
+            console.error('❌ TIENDA: Status text:', error.response.statusText);
+            console.error('❌ TIENDA: Data:', error.response.data);
+        }
+    }
+};
+//  Función para guardar textos editables
+	const handleTextSave = async (clave, nuevoTexto) => {
+    try {
+        console.log('💾 TIENDA: Guardando texto:', { clave, nuevoTexto });
+        
+        const res = await api.put('/auth/tienda/textos', {
+            clave,
+            valor: nuevoTexto
+        }, {
+            withCredentials: true
+        });
+
+        console.log('📤 TIENDA: Respuesta de guardado:', res);
+
+        if (res.data.success) {
+            setBannerMsg('Texto actualizado correctamente');
+            setBannerType('success');
+            setShowBanner(true);
+            fetchTextos(); // Recargar textos
+        } else {
+            console.error('❌ TIENDA: Error en respuesta:', res.data);
+            setBannerMsg('Error al actualizar el texto');
+            setBannerType('error');
+            setShowBanner(true);
+        }
+    } catch (error) {
+        console.error('❌ TIENDA: Error al guardar:', error);
+        setBannerMsg('Error al guardar el texto');
+        setBannerType('error');
+        setShowBanner(true);
+    }
+};
 	useEffect(() => {
 		const checkRole = async () => {
 			try {
@@ -157,7 +228,13 @@ export default function Tienda() {
 		};
 		checkRole();
 
-		const onAuthRefresh = () => checkRole();
+		fetchTextos();
+
+		const onAuthRefresh = () => {
+			checkRole(); 
+			fetchTextos();
+
+		};
 		window.addEventListener('auth:refresh', onAuthRefresh);
 		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
 	}, []);
@@ -687,16 +764,19 @@ export default function Tienda() {
 				{/* Contenido */}
 				<Box sx={{ flex: 1, backgroundColor: '#ffffff', overflow: 'hidden' }}>
 					<Container maxWidth='lg' sx={{ py: 4 }}>
-						<Typography
-							variant='h4'
-							sx={{
-								color: '#2c1a99',
-								fontWeight: 'bold',
-								fontFamily: 'Varsity',
-							}}
-						>
-							Bienvenido a la Tienda de Pilotos
-						</Typography>
+						{/*  Título editable */}
+						<EditableText
+								text={textos.tienda_titulo_principal || "Bienvenido a la Tienda de Pilotos"}
+								onTextSave={(newText) => handleTextSave("tienda_titulo_principal", newText)}
+								isAdmin={isAdmin}
+								variant="h4"
+								sx={{
+									color: '#2c1a99',
+									fontWeight: 'bold',
+									fontFamily: 'Varsity',
+									mb: 3,
+								}}
+							/>
 
 						{/* Dialog de agregar */}
 						<Dialog
@@ -1165,10 +1245,15 @@ export default function Tienda() {
 							<ShoppingCartIcon sx={{ fontSize: 48, color: 'grey.500' }} />
 							<Typography
 								variant='h6'
-								color='text.secondary'
-								sx={{ fontFamily: 'Varsity', fontWeight: 'bold' }}
-							>
-								Tu carrito está vacío
+										color='text.secondary'
+										sx={{ fontFamily: 'Varsity', fontWeight: 'bold' }}
+									>
+										<EditableText
+											text={textos.tienda_mensaje_carrito_vacio || "Tu carrito está vacío"}
+											onTextSave={(newText) => handleTextSave("tienda_mensaje_carrito_vacio", newText)}
+											isAdmin={isAdmin}
+											variant="h6"
+										/>
 							</Typography>
 						</Box>
 					) : (
