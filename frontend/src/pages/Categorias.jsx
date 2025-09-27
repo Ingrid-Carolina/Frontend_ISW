@@ -1,209 +1,56 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, IconButton, Alert } from '@mui/material';
+import { Box, Typography, IconButton, Alert, TextField, Button, Modal } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import EditIcon from '@mui/icons-material/Edit';
 import { api } from '../api/api';
 
-// Imagen inicial del header
 import Img from '/Images/Categoria.png';
-
-const categorias = [
-  {
-    slug: 'sub-8-escuelita',
-    titleText: 'Sub-8 (Escuelita)',
-    title: <>Sub-8<br />(Escuelita)</>,
-    image: '/Images/Cat_Sub8.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Formativa',
-    descripcion:
-      'Niños de hasta 8 años que están dando sus primeros pasos en el béisbol. Se enfoca en el juego recreativo, el aprendizaje básico y el desarrollo motriz en un ambiente divertido, seguro y adaptado a su edad.',
-  },
-  {
-    slug: 'sub-10-pre-infantil',
-    titleText: 'Sub-10 (Pre-Infantil)',
-    title: <>Sub-10<br />(Pre-Infantil)</>,
-    image: '/Images/Cat_Sub10.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Formativa',
-    descripcion:
-      'Categoría para jóvenes hasta 10 años, desarrollo básico de técnica y juego. Se fortalecen habilidades como lanzamiento, bateo y reglas del juego, con una estructura pedagógica que incentiva la disciplina y el trabajo en equipo.',
-  },
-  {
-    slug: 'sub-13-infantil',
-    titleText: 'Sub-13 (Infantil)',
-    title: <>Sub-13<br />(Infantil)</>,
-    image: '/Images/Cat_Sub13.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Competitiva',
-    descripcion:
-      'Jugadores entre 11 y 13 años, nivel intermedio y enfoque competitivo. Se introducen estrategias de juego, entrenamientos más rigurosos, y participación en competencias regionales, preparando la base para etapas superiores.',
-  },
-  {
-    slug: 'sub-16-pre-junior',
-    titleText: 'Sub-16 (Pre-Junior)',
-    title: <>Sub-16<br />(Pre-Junior)</>,
-    image: '/Images/Cat_Sub16.png',
-    logo: '/Images/Logo-pilotos.png',
-    tipo: 'Avanzada',
-    descripcion:
-      'Jugadores avanzados, cerca de pasar a ligas mayores, entrenamiento intensivo. Se perfecciona el rendimiento técnico y mental del jugador, con seguimiento profesional y oportunidades para ascender a niveles élite del deporte.',
-  },
-];
-
-const EditableImage = ({ src, alt, onImageUpload, imgSx }) => {
-  const fileRef = React.useRef(null);
-
-  const handleIconClick = (e) => {
-    e.stopPropagation();
-    fileRef.current?.click();
-  };
-
-  const handleFileChange = (e) => {
-    const file = e.target.files && e.target.files[0];
-    if (file && typeof onImageUpload === 'function') onImageUpload(file);
-  };
-
-  return (
-    <Box
-      sx={{
-        position: 'relative',
-        width: '100%',
-        '&:hover .edit-icon': {
-          opacity: 1, //aparece cuando hay hover
-        },
-      }}
-    >
-      <Box
-        component="img"
-        src={src}
-        alt={alt}
-        sx={{
-          width: '100%',
-          height: '100%',
-          objectFit: 'cover',
-          ...(imgSx || {}),
-        }}
-      />
-
-      <IconButton
-        size="small"
-        onClick={handleIconClick}
-        className="edit-icon"
-        sx={{
-          position: 'absolute',
-          bottom: 8,
-          right: 8,
-          backgroundColor: 'rgba(0,0,0,0.6)',
-          color: 'white',
-          opacity: 0, // oculto inicialmente
-          transition: 'opacity 0.3s ease',
-          '&:hover': { backgroundColor: 'rgba(0,0,0,0.8)' },
-        }}
-      >
-        <EditIcon fontSize="small" />
-      </IconButton>
-
-      <input
-        ref={fileRef}
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        style={{ display: 'none' }}
-      />
-    </Box>
-  );
-};
-
+import LogoPilotos from '/Images/Logo-pilotos.png';
 
 const Categorias = () => {
+  const [categorias, setCategorias] = useState([]);
   const [startIndex, setStartIndex] = useState(0);
   const visibleCards = 3;
-
-  // estado que guarda las URLs actuales de cada categoría (inicial con imágenes locales)
-  const [categoryImages, setCategoryImages] = useState(
-    categorias.reduce((acc, cat) => {
-      acc[cat.slug] = cat.image;
-      return acc;
-    }, {})
-  );
   const [error, setError] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [currentCat, setCurrentCat] = useState(null);
+  const [formData, setFormData] = useState({ titletext: '', tipo: '', descripcion: '', image: null, imagePreview: '' });
   const [isAdmin, setIsAdmin] = useState(false);
 
-
   useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const response = await api.get('/auth/images'); // NUEVO ENDPOINT
-        const imagesMap = Array.isArray(response.data)
-          ? response.data.reduce((acc, cur) => {
-            if (cur.type && cur.url) acc[cur.type] = cur.url;
-            return acc;
-          }, {})
-          : {};
-        if (mounted) setCategoryImages(prev => ({ ...prev, ...imagesMap }));
-      } catch (err) {
-        console.error('Error al cargar imágenes de categorías:', err);
-        if (mounted) setError('No se pudieron cargar las imágenes de categorías.');
-      }
-    })();
-    return () => { mounted = false; };
-  }, []);
-
-
-  useEffect(() => {
-    const checkRole = async () => {
-      try {
-        const r = await api.get('/auth/obtenerperfil', { withCredentials: true, skipAuthRedirect: true });
-        const p = Array.isArray(r.data) ? r.data[0] : r.data;
-        const role = String(p?.rol || '').toLowerCase();
-        setIsAdmin(role === 'admin');
-      } catch {
-        setIsAdmin(false);
-      }
-    };
-    checkRole();
-  }, []);
-
-
-  const handleImageChange = async (slug, file) => {
-    if (!(file instanceof File)) {
-      setError('No se seleccionó un archivo válido.');
-      return;
-    }
+  let mounted = true;
+  (async () => {
     try {
-      const formData = new FormData();
-      formData.append('file', file);
+      const response = await api.get('/auth/categorias');
+      if (mounted && response.data?.categorias) {
+        setCategorias(response.data.categorias);
+      }
 
-      // Subir imagen al backend
-      const uploadResponse = await api.post('/auth/upload', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
-      });
+      const checkRole = async () => {
+        try {
+          const r = await api.get('/auth/obtenerperfil', {
+            withCredentials: true,
+            skipAuthRedirect: true,
+          });
+          const p = Array.isArray(r.data) ? r.data[0] : r.data;
+          const role = String(p?.rol || '').toLowerCase();
+          setIsAdmin(role === 'admin');
+        } catch {
+          setIsAdmin(false);
+        }
+      };
 
-      const finalUrl = uploadResponse.data.url;
-
-      // Guardar URL persistente en DB
-      await api.put('/auth/images', { type: slug, url: finalUrl });
-
-      // Actualizar UI local
-      setCategoryImages(prev => ({ ...prev, [slug]: finalUrl }));
+      await checkRole();
     } catch (err) {
-      console.error(`Error al actualizar la imagen de ${slug}:`, err);
-      setError(`Error al actualizar la imagen de ${slug}.`);
+      console.error('Error al cargar categorías:', err);
     }
-  };
+  })();
+  return () => { mounted = false; };
+}, []);
 
-
-
-
-  const handleNext = () => {
-    setStartIndex((prev) => (prev + 1) % categorias.length);
-  };
-
-  const handlePrev = () => {
-    setStartIndex((prev) => (prev - 1 + categorias.length) % categorias.length);
-  };
+  const handleNext = () => setStartIndex((prev) => (prev + 1) % categorias.length);
+  const handlePrev = () => setStartIndex((prev) => (prev - 1 + categorias.length) % categorias.length);
 
   const getVisibleCards = () => {
     const cards = [];
@@ -216,10 +63,78 @@ const Categorias = () => {
 
   const scrollToCategory = (slug) => {
     const element = document.getElementById(`detalle-${slug}`);
-    if (element) {
-      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+
+  const openModal = (cat) => {
+    setCurrentCat(cat);
+    setFormData({
+      titletext: cat.titletext,
+      tipo: cat.tipo,
+      descripcion: cat.descripcion,
+      image: null,
+      imagePreview: cat.image,
+    });
+    setModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setModalOpen(false);
+    setCurrentCat(null);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value, files } = e.target;
+    if (name === "image" && files.length > 0) {
+      setFormData((prev) => ({
+        ...prev,
+        image: files[0],
+        imagePreview: URL.createObjectURL(files[0]),
+      }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: value }));
     }
   };
+
+  const handleUpdate = async () => {
+    if (!currentCat) return;
+    try {
+      let imageUrl = formData.imagePreview;
+
+      if (formData.image) {
+        const fd = new FormData();
+        fd.append("file", formData.image);
+
+        const uploadRes = await api.post("/auth/upload", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        imageUrl = uploadRes.data.url;
+      }
+
+      const payload = {
+        titletext: formData.titletext,
+        tipo: formData.tipo,
+        descripcion: formData.descripcion,
+        image: imageUrl,
+      };
+
+      const response = await api.put(`/auth/categorias/${currentCat.id}`, payload);
+
+      setCategorias((prev) =>
+        prev.map((cat) => (cat.id === currentCat.id ? response.data.categoria : cat))
+      );
+
+      closeModal();
+    } catch (err) {
+      console.error("Error al actualizar categoría:", err);
+      setError("No se pudo actualizar la categoría.");
+    }
+  };
+
+  if (!categorias.length) {
+    return error ? <Alert severity="error">{error}</Alert> : <Typography>Cargando categorías...</Typography>;
+  }
 
   return (
     <>
@@ -317,8 +232,8 @@ const Categorias = () => {
           <Box sx={{ display: 'flex', gap: 3, overflow: 'hidden', width: '80%', justifyContent: 'center' }}>
             {getVisibleCards().map((categoria) => (
               <Box
-                key={categoria.slug}
-                onClick={() => scrollToCategory(categoria.slug)}
+                key={categoria.slugs}
+                onClick={() => scrollToCategory(categoria.slugs)}
                 sx={{
                   width: '250px',
                   transition: 'transform 0.5s ease',
@@ -326,27 +241,14 @@ const Categorias = () => {
                   boxShadow: 4,
                   bgcolor: '#fff',
                   cursor: 'pointer',
-                  '&:hover': {
-                    transform: 'scale(1.05)',
-                  },
+                  '&:hover': { transform: 'scale(1.05)' },
                 }}
               >
-                {isAdmin ? (
-                  <EditableImage
-                    src={categoryImages[categoria.slug]}
-                    alt={categoria.titleText}
-                    imgSx={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
-                    onImageUpload={(file) => handleImageChange(categoria.slug, file)}
-                  />
-                ) : (
-                  <img
-                    src={categoryImages[categoria.slug]}
-                    alt={categoria.titleText}
-                    style={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
-                  />
-                )}
-
-
+                <img
+                  src={categoria.image}
+                  alt={categoria.titleText}
+                  style={{ width: '100%', height: '250px', objectFit: 'cover', borderTopLeftRadius: 8, borderTopRightRadius: 8 }}
+                />
                 <Typography
                   variant='h5'
                   sx={{
@@ -356,7 +258,7 @@ const Categorias = () => {
                     fontWeight: 'bold',
                   }}
                 >
-                  {categoria.title}
+                  {categoria.titletext}
                 </Typography>
               </Box>
             ))}
@@ -399,8 +301,8 @@ const Categorias = () => {
 
         {categorias.map((cat) => (
           <Box
-            key={cat.slug}
-            id={`detalle-${cat.slug}`}
+            key={cat.slugs}
+            id={`detalle-${cat.slugs}`}
             sx={{
               display: 'flex',
               flexDirection: { xs: 'column', md: 'row' },
@@ -414,118 +316,161 @@ const Categorias = () => {
             }}
           >
             <Box sx={{ width: { xs: '100%', md: '40%' } }}>
-              {isAdmin ? (
-                <EditableImage
-                  src={categoryImages[cat.slug]}
-                  alt={cat.titleText}
-                  imgSx={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  onImageUpload={(file) => handleImageChange(cat.slug, file)}
-                />
-              ) : (
-                <img
-                  src={categoryImages[cat.slug]}
-                  alt={cat.titleText}
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                />
-              )}
-
+              <img
+                src={cat.image}
+                alt={cat.titleText}
+                style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+              />
             </Box>
 
-
-            <Box sx={{ p: 4, flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-              <Box
-                sx={{
-                  height: '4px',
-                  background: 'linear-gradient(to right, #f26c23, transparent)',
-                  mb: 2,
-                  borderRadius: 2,
-                  width: '100%',
-                }}
-              />
-
-              {cat.logo && (
-                <Box
-                  sx={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 2,
-                    mb: 0, // sin margen debajo
-                  }}
-                >
-                  <Box
-                    component='img'
-                    src={cat.logo}
-                    alt='Logo equipo'
-                    sx={{
-                      width: 120,
-                      height: 60,
-                    }}
-                  />
-                  <Typography
-                    variant='h5'
-                    sx={{
-                      fontFamily: '"Varsity", cursive',
-                      color: '#f26c23',
-                      fontWeight: 'bold',
-                      letterSpacing: 1,
-                    }}
-                  >
-                    PILOTOS
-                  </Typography>
-                </Box>
+            <Box sx={{ p: 4, flex: 1, position: 'relative' }}>
+              <Box sx={{ height: '4px', background: 'linear-gradient(to right, transparent, #f26c23)', borderRadius: 2, width: '100%', }} />
+              {isAdmin && ( 
+                <IconButton onClick={() => openModal(cat)} sx={{ position: 'absolute', top: 46, right: 30, color: '#e6691d' }}>
+                  <EditIcon />
+                </IconButton>
               )}
 
-              <Typography
-                variant='h4'
-                sx={{
-                  fontFamily: '"Varsity", cursive',
-                  fontWeight: 'bold',
-                  color: '#f26c23',
-                  mt: -0.5, // subido un poquito más
-                }}
-              >
-                {cat.title}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
+                <Box component='img' src={LogoPilotos} alt='Logo Pilotos' sx={{ width: 120, height: 60 }} />
+                <Typography
+                  variant='h5'
+                  sx={{ fontFamily: '"Varsity", cursive', color: '#f26c23', fontWeight: 'bold', letterSpacing: 1 }}
+                >
+                  PILOTOS
+                </Typography>
+              </Box>
+
+              <Typography variant='h4' sx={{ fontFamily: '"Varsity", cursive', fontWeight: 'bold', color: '#e6691d', mb: 1 }}>
+                {cat.titletext}
               </Typography>
 
-              <Typography
-                variant='subtitle1'
-                sx={{
-                  fontFamily: '"PeterMedium", sans-serif',
-                  color: '#888',
-                  fontWeight: 'bold',
-                  mb: 2,
-                }}
-              >
+              <Typography variant='subtitle1' sx={{ fontFamily: '"PeterMedium", sans-serif', color: '#e6691d', fontWeight: 'bold', mb: 2 }}>
                 Tipo de categoría: {cat.tipo}
               </Typography>
 
-              <Typography
-                variant='body1'
-                sx={{
-                  fontFamily: '"PeterMedium", sans-serif',
-                  fontSize: '1.1rem',
-                  lineHeight: 1.8,
-                  color: '#444',
-                  mb: 3,
-                }}
-              >
+              <Typography variant='body1' sx={{ fontFamily: '"PeterMedium", sans-serif', fontSize: '1.1rem', lineHeight: 1.8, color: '#444', mb: 3 }}>
                 {cat.descripcion}
               </Typography>
-
-              <Box
-                sx={{
-                  height: '4px',
-                  background: 'linear-gradient(to right, transparent, #f26c23)',
-                  borderRadius: 2,
-                  width: '100%',
-                }}
-              />
+              <Box sx={{ height: '4px', background: 'linear-gradient(to right, transparent, #f26c23)', borderRadius: 2, width: '100%', }} />
             </Box>
           </Box>
         ))}
       </Box>
-      {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
 
+      {/* MODAL PARA EDITAR */}
+      <Modal open={modalOpen} onClose={closeModal}>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: { xs: '90%', sm: 500 },
+            bgcolor: 'background.paper',
+            borderRadius: 3,
+            boxShadow: 24,
+            width: '30%',
+            p: 4,
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 3,
+            border: '2px solid #e6691d',
+            backgroundImage: 'linear-gradient(145deg, #fff5f0, #ffe6d6)',
+          }}
+        >
+          {/* CABECERA */}
+          <Box sx={{ textAlign: 'center', mb: 2 }}>
+            <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#e6691d', letterSpacing: 1.5 }}>
+              Editar Categoría
+            </Typography>
+            <Box sx={{ width: 60, height: 4, bgcolor: '#e6691d', mx: 'auto', mt: 1, borderRadius: 2 }} />
+          </Box>
+
+          {/* CAMPOS */}
+          <TextField
+            label="Título"
+            name="titletext"
+            value={formData.titletext}
+            onChange={handleInputChange}
+            fullWidth
+            variant="outlined"
+            sx={{ bgcolor: '#fff', borderRadius: 2 }}
+          />
+          <TextField
+            label="Tipo"
+            name="tipo"
+            value={formData.tipo}
+            onChange={handleInputChange}
+            fullWidth
+            variant="outlined"
+            sx={{ bgcolor: '#fff', borderRadius: 2 }}
+          />
+          <TextField
+            label="Descripción"
+            name="descripcion"
+            value={formData.descripcion}
+            onChange={handleInputChange}
+            fullWidth
+            multiline
+            rows={4}
+            variant="outlined"
+            sx={{ bgcolor: '#fff', borderRadius: 2 }}
+          />
+
+          {/* PREVIEW IMAGEN */}
+          <Box sx={{ textAlign: 'center', mt: 1 }}>
+            <img
+              src={formData.imagePreview}
+              alt="Preview"
+              style={{
+                width: '100%',
+                maxHeight: '250px',
+                objectFit: 'cover',
+                borderRadius: 12,
+                marginBottom: 10,
+                boxShadow: '0px 4px 15px rgba(0,0,0,0.2)',
+              }}
+            />
+            <Button
+              variant="contained"
+              component="label"
+              sx={{
+                bgcolor: '#e6691d',
+                '&:hover': { bgcolor: '#f26c23' },
+                px: 4,
+                py: 1.5,
+                borderRadius: 2,
+                fontWeight: 'bold',
+              }}
+            >
+              Cambiar Imagen
+              <input type="file" hidden name="image" onChange={handleInputChange} />
+            </Button>
+          </Box>
+
+          {/* BOTONES */}
+          <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
+            <Button
+              variant="outlined"
+              onClick={closeModal}
+              sx={{ borderColor: '#e6691d', color: '#e6691d', '&:hover': { borderColor: '#f26c23', color: '#f26c23' } }}
+            >
+              Cancelar
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleUpdate}
+              sx={{ bgcolor: '#e6691d', '&:hover': { bgcolor: '#f26c23' }, fontWeight: 'bold' }}
+            >
+              Guardar
+            </Button>
+          </Box>
+        </Box>
+      </Modal>
+
+
+      {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
     </>
   );
 };

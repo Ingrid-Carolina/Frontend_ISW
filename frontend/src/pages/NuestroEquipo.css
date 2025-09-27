@@ -1,0 +1,151 @@
+/* jugadores.css */
+
+/* Fuentes personalizadas para mantener la estética */
+@import url('https://fonts.googleapis.com/css2?family=Varsity&display=swap');
+
+/* Estilos para textos editables */
+.editable-text {
+  position: relative;
+  transition: all 0.3s ease;
+  border-radius: 4px;
+  padding: 2px 4px;
+  margin: -2px -4px;
+}
+
+.editable-text:hover {
+  background-color: rgba(59, 130, 246, 0.1);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.3);
+}
+
+.editable-text.editing {
+  background-color: rgba(59, 130, 246, 0.2);
+  box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.5);
+}
+
+.editable-text-content {
+  font-family: inherit;
+  font-size: inherit;
+  font-weight: inherit;
+  color: inherit;
+  line-height: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+}
+
+/* Botón de edición para textos */
+.edit-text-button {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: white;
+  border: 1px solid #e2e8f0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(0.8);
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  z-index: 10;
+}
+
+.editable-text:hover .edit-text-button {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.edit-text-button:hover {
+  background: #3b82f6;
+  color: white;
+  transform: scale(1.1);
+}
+
+/* Modal de edición de texto */
+.text-edit-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.text-edit-modal-content {
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  width: 90%;
+  max-width: 500px;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
+}
+
+.text-edit-textarea {
+  width: 100%;
+  min-height: 100px;
+  padding: 12px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-family: inherit;
+  font-size: 16px;
+  resize: vertical;
+  transition: border-color 0.3s ease;
+}
+
+.text-edit-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+}
+
+.text-edit-buttons {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+/* Animaciones */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.fade-in {
+  animation: fadeIn 0.3s ease-in-out;
+}
+
+.slide-down {
+  animation: slideDown 0.3s ease-in-out;
+}
+
+/* Estilos específicos para mantener la fuente Varsity */
+.varsity-font {
+  font-family: 'Varsity', cursive !important;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .edit-text-button {
+    width: 20px;
+    height: 20px;
+    top: -6px;
+    right: -6px;
+  }
+  
+  .text-edit-modal-content {
+    margin: 20px;
+    padding: 20px;
+  }
+}
