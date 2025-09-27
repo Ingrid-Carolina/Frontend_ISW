@@ -15,16 +15,16 @@ import {
 	DialogTitle,
 	DialogContent,
 	DialogActions,
+	IconButton,
+	Tooltip,
+	LinearProgress,
 } from '@mui/material';
-import fond from '/Images/pilotos.c.jpg';
 import { Link } from 'react-router-dom';
 import { useForm, Controller } from 'react-hook-form';
 import { api } from '../api/api';
 import ReCAPTCHA from 'react-google-recaptcha';
 import EditIcon from '@mui/icons-material/Edit';
-import { IconButton, Tooltip } from '@mui/material';
 import fondDefault from '/Images/pilotos.c.jpg';
-import EditableHeaderImage from '../components/EditableHeaderImage';
 
 const Contacto = () => {
 	// ======== FORM DE MENSAJE ========
@@ -61,11 +61,16 @@ const Contacto = () => {
 		texto_cta: '',
 	});
 
-	//const para lasa imagenes
+	// Header: imagen + título
 	const [headerUrl, setHeaderUrl] = useState(null);
-	const [imageError, setImageError] = useState(null);
-	const [uploading, setUploading] = useState(false);
-	const [justSaved, setJustSaved] = useState(false);
+	const [headerTitle, setHeaderTitle] = useState('PONTE EN CONTACTO');
+
+	// ======== modal de header (título + imagen) ========
+	const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
+	const [headerTitleInput, setHeaderTitleInput] = useState('PONTE EN CONTACTO');
+	const [headerFile, setHeaderFile] = useState(null);
+	const [headerUploading, setHeaderUploading] = useState(false);
+	const [headerError, setHeaderError] = useState('');
 
 	// Cargar info de contacto (endpoint público)
 	useEffect(() => {
@@ -74,6 +79,7 @@ const Contacto = () => {
 				const res = await api.get('/auth/contacto', { skipAuthRedirect: true });
 				const payload = res?.data?.contacto ?? res?.data ?? null;
 				setContacto(payload);
+				if (payload?.header_title) setHeaderTitle(String(payload.header_title));
 			} catch (e) {
 				console.log('No se pudo cargar /contacto:', e.message);
 			}
@@ -103,7 +109,7 @@ const Contacto = () => {
 		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
 	}, []);
 
-	//cargar imagen
+	// Cargar imagen del header
 	useEffect(() => {
 		const loadHeader = async () => {
 			try {
@@ -120,57 +126,80 @@ const Contacto = () => {
 		loadHeader();
 	}, []);
 
-	const handleHeaderChange = async file => {
+	// Abre modal de header con datos actuales
+	const openHeaderEditor = () => {
+		setHeaderTitleInput(headerTitle || 'PONTE EN CONTACTO');
+		setHeaderFile(null);
+		setHeaderError('');
+		setOpenHeaderEdit(true);
+	};
+
+	// Guardar título/imagen del header
+	const saveHeader = async () => {
 		try {
-			setImageError(null);
+			setHeaderError('');
+			setHeaderUploading(true);
 
-			// Validación simple
-			const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
-			if (!allowed.includes(file.type)) {
-				setImageError('Formato no permitido. Usa JPG, PNG, WEBP o AVIF.');
-				return;
+			// 1) Subir imagen si se seleccionó
+			let newUrl = headerUrl;
+			if (headerFile) {
+				const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+				if (!allowed.includes(headerFile.type)) {
+					throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o AVIF.');
+				}
+				if (headerFile.size > 8 * 1024 * 1024) {
+					throw new Error('La imagen supera los 8 MB.');
+				}
+
+				const fd = new FormData();
+				fd.append('file', headerFile);
+				const up = await api.post('/auth/upload', fd, {
+					headers: { 'Content-Type': 'multipart/form-data' },
+				});
+				newUrl = up?.data?.url;
+				if (!newUrl) throw new Error('No se recibió URL de subida');
+
+				await api.put('/auth/contactoimages', {
+					type: 'contacto_header',
+					url: newUrl,
+				});
 			}
-			if (file.size > 8 * 1024 * 1024) {
-				setImageError('La imagen supera los 8 MB.');
-				return;
-			}
 
-			setUploading(true);
-
-			// 1) Subir archivo
-			const formData = new FormData();
-			formData.append('file', file);
-			const uploadResponse = await api.post('/auth/upload', formData, {
-				headers: { 'Content-Type': 'multipart/form-data' },
-			});
-			const finalUrl = uploadResponse?.data?.url;
-			if (!finalUrl) throw new Error('No se recibió URL de subida');
-
-			// 2) Guardar URL con type = 'contacto_header'
-			await api.put('/auth/contactoimages', {
-				type: 'contacto_header',
-				url: finalUrl,
-			});
+			// 2) Actualizar título en contacto_site (conservar demás campos)
+			const current = await api.get('/auth/contacto');
+			const c = current?.data ?? {};
+			const payload = {
+				org_nombre: c.org_nombre ?? 'Organización de Béisbol PILOTOS - FAH',
+				telefono_lbl: c.telefono_lbl ?? 'NUESTRO NÚMERO',
+				telefono_val: c.telefono_val ?? '+504 9918-2456',
+				email_lbl: c.email_lbl ?? 'CORREO ELECTRÓNICO',
+				email_val: c.email_val ?? 'pilotoshn@outlook.com',
+				texto_intro: c.texto_intro ?? 'Comparta su experiencia con nosotros.',
+				texto_cta: c.texto_cta ?? 'Envíe una historia o testimonio.',
+				header_title: headerTitleInput?.trim() || 'PONTE EN CONTACTO',
+			};
+			await api.put('/auth/contacto', payload);
 
 			// 3) Refrescar UI
-			setHeaderUrl(finalUrl);
-			setJustSaved(true);
-			setTimeout(() => setJustSaved(false), 1800);
+			setHeaderUrl(newUrl);
+			setHeaderTitle(payload.header_title);
+			setOpenHeaderEdit(false);
+			setSnackbarType('success');
+			setSnackbarMsg('Encabezado actualizado');
+			setOpenSnackbar(true);
 		} catch (err) {
 			const msg =
 				err?.response?.data?.mensaje ||
 				err?.response?.data?.error ||
 				err?.message ||
-				'Error al actualizar el header.';
-			setImageError(msg);
-			console.error('[handleHeaderChange]', err);
+				'Error al actualizar el encabezado.';
+			setHeaderError(msg);
 		} finally {
-			setUploading(false);
+			setHeaderUploading(false);
 		}
 	};
 
 	const openEditor = () => {
-		// Permite abrir aunque no haya registro (usa defaults)
 		const c = contacto ?? {};
 		setFormContacto({
 			org_nombre: c.org_nombre ?? 'Organización de Béisbol PILOTOS - FAH',
@@ -186,9 +215,13 @@ const Contacto = () => {
 
 	const saveContacto = async () => {
 		try {
-			const res = await api.put('/auth/contacto', formContacto);
+			const res = await api.put('/auth/contacto', {
+				...formContacto,
+				header_title: headerTitle || 'PONTE EN CONTACTO', // conservamos el título actual
+			});
 			const updated = res?.data?.contacto ?? res?.data ?? null;
 			setContacto(updated);
+			if (updated?.header_title) setHeaderTitle(String(updated.header_title));
 			setOpenEdit(false);
 			setSnackbarType('success');
 			setSnackbarMsg('Contacto actualizado');
@@ -283,15 +316,26 @@ const Contacto = () => {
 					}}
 				/>
 
-				{/*editar (solo admin) */}
+				{/* Botón único para editar TÍTULO + IMAGEN (solo admin) */}
 				{isAdmin && (
-					<EditableHeaderImage
-						onImageUpload={handleHeaderChange}
-						uploading={uploading}
-						saved={justSaved}
-						sx={{ position: 'absolute', top: 16, right: 16, zIndex: 3 }}
-						tooltip='Cambiar imagen de encabezado'
-					/>
+					<Tooltip title='Editar título/imagen'>
+						<IconButton
+							onClick={() => setOpenHeaderEdit(true)}
+							sx={{
+								position: 'absolute',
+								bottom: 16,
+								right: 16,
+								color: 'white',
+								backgroundColor: 'rgba(0,0,0,0.4)',
+								'&:hover': {
+									backgroundColor: 'rgba(255,255,255,0.3)',
+								},
+								zIndex: 3,
+							}}
+						>
+							<EditIcon />
+						</IconButton>
+					</Tooltip>
 				)}
 
 				<Box
@@ -316,7 +360,7 @@ const Contacto = () => {
 							textShadow: '2px 2px 6px rgba(0,0,0,0.7)',
 						}}
 					>
-						Ponte en Contacto
+						{headerTitle || 'PONTE EN CONTACTO'}
 					</Typography>
 				</Box>
 			</Box>
@@ -334,7 +378,7 @@ const Contacto = () => {
 						alignItems: { xs: 'center', md: 'flex-start' },
 					}}
 				>
-					{/* ======== PANEL DE INFORMACION EDITABLE ======== */}
+					{/* PANEL DE INFORMACIÓN EDITABLE */}
 					<Box
 						sx={{
 							width: { xs: 'min(560px, 92vw)', md: 320, lg: 360 },
@@ -432,7 +476,7 @@ const Contacto = () => {
 						</Box>
 					</Box>
 
-					{/* ======== FORMULARIO DE MENSAJE ======== */}
+					{/* FORMULARIO DE MENSAJE */}
 					<Box
 						component='form'
 						onSubmit={handleSubmit(onSubmit)}
@@ -721,9 +765,6 @@ const Contacto = () => {
 				open={openEdit}
 				onClose={() => setOpenEdit(false)}
 				scroll='paper'
-				sx={{
-					zIndex: theme => theme.zIndex.modal,
-				}}
 				PaperProps={{
 					sx: {
 						mt: { xs: 8, md: 10 },
@@ -811,6 +852,71 @@ const Contacto = () => {
 				<DialogActions sx={{ px: 2, py: 1.5 }}>
 					<Button onClick={() => setOpenEdit(false)}>Cancelar</Button>
 					<Button variant='contained' onClick={saveContacto}>
+						Guardar
+					</Button>
+				</DialogActions>
+			</Dialog>
+
+			{/* MODAL EDITAR HEADER (título + imagen) */}
+			<Dialog
+				open={openHeaderEdit}
+				onClose={() => !headerUploading && setOpenHeaderEdit(false)}
+				maxWidth='sm'
+				fullWidth
+			>
+				<DialogTitle>Editar encabezado</DialogTitle>
+				<DialogContent
+					dividers
+					sx={{
+						pt: 1.5, 
+						pb: 2,
+						px: 2,
+					}}
+				>
+					<TextField
+						label='Título del header'
+						value={headerTitle}
+						onChange={e => setHeaderTitle(e.target.value)}
+						fullWidth
+						size='small' 
+						margin='dense' 
+						InputLabelProps={{ shrink: true }} 
+						sx={{
+							'& .MuiOutlinedInput-root': { borderRadius: 1.2 },
+						}}
+					/>
+
+					<Button
+						variant='contained'
+						component='label'
+						disabled={headerUploading}
+						sx={{ mt: 2, fontWeight: 'bold', textTransform: 'none' }}
+					>
+						{headerFile ? 'Imagen seleccionada' : 'Seleccionar nueva imagen'}
+						<input
+							type='file'
+							hidden
+							accept='image/jpeg,image/png,image/webp,image/avif'
+							onChange={e => setHeaderFile(e.target.files?.[0] || null)}
+						/>
+					</Button>
+					<Box sx={{ mt: 1, opacity: 0.8, fontSize: 12 }}>
+						Formatos: JPG, PNG, WEBP, AVIF.
+					</Box>
+				</DialogContent>
+
+				<DialogActions>
+					<Button
+						onClick={() => setOpenHeaderEdit(false)}
+						disabled={headerUploading}
+					>
+						Cancelar
+					</Button>
+					<Button
+						onClick={saveHeader}
+						variant='contained'
+						disabled={headerUploading}
+					>
 						Guardar
 					</Button>
 				</DialogActions>
