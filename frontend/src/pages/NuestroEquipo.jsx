@@ -1,9 +1,27 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Button, TextField, MenuItem, CircularProgress, Alert, Backdrop  } from '@mui/material';
+import { 
+    Box, 
+    Typography, 
+    Paper, 
+    Button, 
+    TextField, 
+    MenuItem, 
+    CircularProgress, 
+    Alert, 
+    Backdrop,
+    Dialog,
+    DialogTitle,
+    DialogContent,
+    DialogActions,
+    IconButton,
+    Tooltip,
+    LinearProgress
+} from '@mui/material';
 import { api } from '../api/api';
 import Imgjud from '/Images/Fondojugadores.png';
 import EditableHeaderImage from '../components/EditableHeaderImage';
 import EditableText from '../components/EditableText';
+import EditIcon from '@mui/icons-material/Edit';
 import './NuestroEquipo.css';
 
 
@@ -95,55 +113,102 @@ const NuestroEquipo = () => {
     const [loading, setLoading] = useState(false);
     const [checkingAuth, setCheckingAuth] = useState(true);
 
-  const [textos, setTextos] = useState({});
+    const [textos, setTextos] = useState({});
 
-  const fetchTextos = async () => {
-    try {
-      const res = await api.get('/auth/nuestroequipo/textos', {
-        withCredentials: true
-      });
-      if (res.data.success) {
-        setTextos(res.data.data);
-      }
-    } catch (error) {
-      console.error('Error al cargar textos:', error);
-    }
-  };
+    // NUEVO: Estados para el header como en Contacto.jsx
+    const [headerUrl, setHeaderUrl] = useState(null);
+    const [headerTitle, setHeaderTitle] = useState('NUESTRO EQUIPO');
+    const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
+    const [headerTitleInput, setHeaderTitleInput] = useState('NUESTRO EQUIPO');
+    const [headerFile, setHeaderFile] = useState(null);
+    const [headerUploading, setHeaderUploading] = useState(false);
+    const [headerError, setHeaderError] = useState('');
+    const [headerPreview, setHeaderPreview] = useState(null);
 
-  const handleTextSave = async (clave, nuevoTexto) => {
-    try {
-      const res = await api.put('/auth/nuestroequipo/textos', {
-        clave,
-        valor: nuevoTexto
-      }, {
-        withCredentials: true
-      });
+    const [galeriaImages, setGaleriaImages] = useState([]);
+    const [uploadingImage, setUploadingImage] = useState(false);
+    const [error, setError] = useState('');
 
-      if (res.data.success) {
-        showMessage('Texto actualizado correctamente', 'success');
-        fetchTextos(); // Recargar textos
-      } else {
-        showMessage('Error al actualizar el texto', 'error');
-      }
-    } catch (error) {
-      console.error('Error al guardar texto:', error);
-      showMessage('Error al guardar el texto', 'error');
-    }
-  };
+    // NUEVO: Effect para gestionar preview de imagen del header
+    useEffect(() => {
+        if (!headerFile) {
+            setHeaderPreview(null);
+            return;
+        }
+        const url = URL.createObjectURL(headerFile);
+        setHeaderPreview(url);
+        return () => URL.revokeObjectURL(url);
+    }, [headerFile]);
 
+    const fetchTextos = async () => {
+        try {
+            const res = await api.get('/auth/nuestroequipo/textos', {
+                withCredentials: true
+            });
+            if (res.data && res.data.success && res.data.data) {
+                setTextos(prevTextos => ({
+                    ...prevTextos, // Mantener valores por defecto
+                    ...res.data.data // Sobrescribir con datos del servidor
+                }));
+                
+                // Sincronizar headerTitle si existe titulo_principal
+                if (res.data.data.titulo_principal) {
+                    setHeaderTitle(res.data.data.titulo_principal);
+                }
+            }
+        } catch (error) {
+            console.error('Error al cargar textos:', error);
+        }
+    };
 
+    const handleTextSave = async (clave, nuevoTexto) => {
+        if (!clave || !nuevoTexto) {
+            showMessage('Datos inválidos para guardar texto', 'error');
+            return;
+        }
+
+        try {
+            // Actualizar estado local inmediatamente
+            setTextos(prevTextos => ({
+                ...prevTextos,
+                [clave]: nuevoTexto
+            }));
+
+            // Sincronizar headerTitle si es el título principal
+            if (clave === 'titulo_principal') {
+                setHeaderTitle(nuevoTexto);
+            }
+
+            // Enviar al servidor
+            const res = await api.put('/auth/nuestroequipo/textos', {
+                clave,
+                valor: nuevoTexto
+            }, {
+                withCredentials: true
+            });
+
+            if (res.data && res.data.success) {
+                showMessage('Texto actualizado correctamente', 'success');
+            } else {
+                throw new Error('Respuesta inválida del servidor');
+            }
+        } catch (error) {
+            console.error('Error al guardar texto:', error);
+            // Revertir cambio local
+            setTextos(prevTextos => ({
+                ...prevTextos,
+                [clave]: textos[clave] || ''
+            }));
+            if (clave === 'titulo_principal') {
+                setHeaderTitle(textos.titulo_principal || 'NUESTRO EQUIPO');
+            }
+            showMessage('Error al guardar el texto', 'error');
+        }
+    };
 
     const [images, setImages] = useState({
-            Equipo_header: Imgjud,
-        });
-    
-    // Galería (carrusel)
-    const [uploadingImage, setUploadingImage] = useState(false);
-    
-        const [galeriaImages, setGaleriaImages] = useState([]);
-
-        const [error, setError] = useState('');
-
+        Equipo_header: Imgjud,
+    });
 
     // Función para obtener la junta directiva desde el backend
     const fetchCuerpoTecnico = async () => {
@@ -153,30 +218,30 @@ const NuestroEquipo = () => {
                 skipAuthRedirect: true,
             });
             
-            // Mapear los datos del backend al formato esperado por el frontend
-            const miembros = res.data.map(miembro => ({
-                id: miembro.id_miembro,
-                nombre: miembro.nombre,
-                rol: miembro.rol
-            }));
-            
-            setCuerpoTecnico(miembros);
-            console.log('Junta directiva cargada:', miembros);
+            if (res.data && Array.isArray(res.data)) {
+                const miembros = res.data.map(miembro => ({
+                    id: miembro.id_miembro,
+                    nombre: miembro.nombre || '',
+                    rol: miembro.rol || ''
+                }));
+                
+                setCuerpoTecnico(miembros);
+                console.log('Junta directiva cargada:', miembros);
+            }
         } catch (error) {
             console.error('Error al cargar junta directiva:', error);
             showMessage('Error al cargar los datos de la junta directiva', 'error');
         }
     };
 
-
-const fetchImages = async () => {
-                    try {
-                        setLoading(true);
-                        const response = await api.get('/auth/images', {
-                            withCredentials: true,
-                            skipAuthRedirect: true,
-                        });
-                       if (response.data && Array.isArray(response.data)) {
+    const fetchImages = async () => {
+        try {
+            const response = await api.get('/auth/images', {
+                withCredentials: true,
+                skipAuthRedirect: true,
+            });
+            
+            if (response.data && Array.isArray(response.data)) {
                 const imagesMap = response.data.reduce((acc, current) => {
                     if (current.type && current.url) {
                         acc[current.type] = current.url;
@@ -184,90 +249,155 @@ const fetchImages = async () => {
                     return acc;
                 }, {});
 
-                // Actualizar estado con imagen del header o usar la por defecto
+                const headerImageUrl = imagesMap.Equipo_header || Imgjud;
+                setHeaderUrl(headerImageUrl);
                 setImages(prev => ({
                     ...prev,
-                    Equipo_header: imagesMap.Equipo_header || Imgjud,
+                    Equipo_header: headerImageUrl,
                 }));
+            }
+        } catch (e) {
+            console.error('Error al cargar imágenes:', e);
+            setError('No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.');
+        }
+    };
 
-                // Procesar galería
-                const galeriaFromApi = response.data
-                    .filter(img => img.type && img.type.startsWith('galeria_'))
-                    .sort((a, b) => {
-                        const numA = parseInt(a.type.split('_')[1], 10);
-                        const numB = parseInt(b.type.split('_')[1], 10);
-                        return numA - numB;
-                    })
-                    .map(img => img.url);
+    // NUEVO: Funciones para gestionar el header como en Contacto.jsx
+     const openHeaderEditor = () => {
+        const currentTitle = textos.titulo_principal || headerTitle || 'NUESTRO EQUIPO';
+        setHeaderTitleInput(currentTitle);
+        setHeaderFile(null);
+        setHeaderError('');
+        setOpenHeaderEdit(true);
+    };
 
-                setGaleriaImages(galeriaFromApi);
+     const saveHeader = async () => {
+        try {
+            setHeaderError('');
+            setHeaderUploading(true);
+
+            const titleToSave = (headerTitleInput || '').trim() || 'NUESTRO EQUIPO';
+
+            // 1) Actualizar títulos inmediatamente
+            setTextos(prevTextos => ({
+                ...prevTextos,
+                titulo_principal: titleToSave
+            }));
+            setHeaderTitle(titleToSave);
+
+            // 2) Subir imagen si se seleccionó
+            let newUrl = headerUrl;
+            if (headerFile) {
+                const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+                if (!allowed.includes(headerFile.type)) {
+                    throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o AVIF.');
+                }
+                if (headerFile.size > 8 * 1024 * 1024) {
+                    throw new Error('La imagen supera los 8 MB.');
+                }
+
+                const fd = new FormData();
+                fd.append('file', headerFile);
+                const up = await api.post('/auth/upload', fd, {
+                    headers: { 'Content-Type': 'multipart/form-data' },
+                    withCredentials: true,
+                });
                 
-                console.log('Imágenes cargadas:', imagesMap);
-                       }
-                    } catch (e) {
-                        console.error('Error al cargar imágenes de Nuestro Equipo:', e);
-                        setError('No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.',);
-                    } finally {
-                        setLoading(false);
-                    }
-                };
+                if (up.data && up.data.url) {
+                    newUrl = up.data.url;
+                    
+                    await api.put('/auth/images', {
+                        type: 'Equipo_header',
+                        url: newUrl,
+                    }, {
+                        withCredentials: true,
+                    });
+                    
+                    setHeaderUrl(newUrl);
+                    setImages(prev => ({ 
+                        ...prev, 
+                        Equipo_header: newUrl 
+                    }));
+                }
+            }
 
+            // 3) Guardar título en servidor
+            try {
+                await handleTextSave('titulo_principal', titleToSave);
+            } catch (textError) {
+                console.warn('Error al guardar título:', textError);
+            }
 
+            // 4) Limpiar y cerrar
+            setHeaderFile(null);
+            setHeaderPreview(null);
+            setOpenHeaderEdit(false);
+            showMessage('Encabezado actualizado correctamente', 'success');
+            
+        } catch (err) {
+            console.error('Error en saveHeader:', err);
+            // Revertir cambios
+            const originalTitle = textos.titulo_principal || 'NUESTRO EQUIPO';
+            setTextos(prevTextos => ({
+                ...prevTextos,
+                titulo_principal: originalTitle
+            }));
+            setHeaderTitle(originalTitle);
+            
+            const msg = err?.response?.data?.mensaje || 
+                        err?.response?.data?.error || 
+                        err?.message || 
+                        'Error al actualizar el encabezado.';
+            setHeaderError(msg);
+        } finally {
+            setHeaderUploading(false);
+        }
+    };
 
     // Check if user is admin - No bloquea el acceso si falla
-    useEffect(() => {
-        const fetchRole = async () => {
+     useEffect(() => {
+        const initializeComponent = async () => {
             try {
+                // Verificar rol
                 const res = await api.get('/auth/obtenerperfil', {
                     withCredentials: true,
                     skipAuthRedirect: true,
                 });
                 const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
-
-                const role = String(perfil?.rol || '')
-                    .toLowerCase()
-                    .trim();
+                const role = String(perfil?.rol || '').toLowerCase().trim();
                 const isAdminUser = role === 'admin';
 
                 setIsLoggedIn(!!perfil);
                 setIsAdmin(isAdminUser);
-
-                console.log(
-                    '🔍 User role:',
-                    role,
-                    'isAdmin:',
-                    isAdminUser,
-                    'isLoggedIn:',
-                    !!perfil,
-                );
             } catch (error) {
-                console.log('Usuario no logueado o sin permisos:', error.message);
+                console.log('Usuario no logueado:', error.message);
                 setIsLoggedIn(false);
                 setIsAdmin(false);
-            } finally {
-                setCheckingAuth(false);
             }
+
+            // Cargar datos en paralelo
+            await Promise.allSettled([
+                fetchTextos(),
+                fetchImages(),
+                fetchCuerpoTecnico()
+            ]);
+
+            setCheckingAuth(false);
         };
 
-        
+        initializeComponent();
 
-        fetchRole();
-    fetchTextos();
-        fetchImages();
-        fetchCuerpoTecnico(); // Cargar datos iniciales
-
-        // Listen for auth refresh events
+        // Event listener para refresh de auth
         const onAuthRefresh = () => {
             setCheckingAuth(true);
-            fetchRole();
-    fetchTextos();
+            initializeComponent();
         };
         window.addEventListener('auth:refresh', onAuthRefresh);
         return () => window.removeEventListener('auth:refresh', onAuthRefresh);
     }, []);
 
-// Subida/guardado genérico
-   const handleImageChange = async (type, file) => {
+    // Subida/guardado genérico
+    const handleImageChange = async (type, file) => {
         if (!file || !(file instanceof File)) {
             showMessage('Error: No se seleccionó un archivo válido.', 'error');
             return;
@@ -280,8 +410,8 @@ const fetchImages = async () => {
         }
 
         // Validar tamaño (máximo 5MB)
-        if (file.size > 5 * 1024 * 1024) {
-            showMessage('Error: La imagen no puede exceder 5MB.', 'error');
+        if (file.size > 8 * 1024 * 1024) {
+            showMessage('Error: La imagen no puede exceder 8MB.', 'error');
             return;
         }
 
@@ -328,6 +458,13 @@ const fetchImages = async () => {
                     updated[index] = finalUrl;
                     return updated;
                 });
+            } else if (type === 'Equipo_header') {
+                // NUEVO: Actualizar también headerUrl
+                setHeaderUrl(finalUrl);
+                setImages(prev => ({ 
+                    ...prev, 
+                    [type]: finalUrl 
+                }));
             } else {
                 setImages(prev => ({ 
                     ...prev, 
@@ -369,33 +506,23 @@ const fetchImages = async () => {
         }
     };
 
+   if (loading && checkingAuth) {
+        return (
+            <Box display='flex' justifyContent='center' alignItems='center' height='100vh'>
+                <CircularProgress />
+            </Box>
+        );
+    }
 
-    
-
-        if (loading) {
-            return (
-                <Box
-                    display='flex'
-                    justifyContent='center'
-                    alignItems='center'
-                    height='100vh'
-                >
-                    <CircularProgress />
-                </Box>
-            );
-        }
-    
-        if (error) {
-            return (
-                <Alert severity='error' sx={{ my: 2 }}>
-                    {error}
-                </Alert>
-            );
-        }
-
-
+    if (error) {
+        return (
+            <Alert severity='error' sx={{ my: 2 }}>
+                {error}
+            </Alert>
+        );
+    }
     const showMessage = (message, type = 'success') => {
-        setBannerMsg(message);
+        setBannerMsg(message || 'Operación completada');
         setBannerType(type);
         setShowBanner(true);
         setTimeout(() => setShowBanner(false), 4000);
@@ -806,51 +933,212 @@ const fetchImages = async () => {
 
     return (
         <>
-
-        {/* Backdrop para mostrar carga de imagen */}
+            {/* Backdrop para mostrar carga de imagen */}
             <Backdrop open={uploadingImage} sx={{ zIndex: 1300 }}>
                 <Box sx={{ textAlign: 'center', color: 'white' }}>
                     <CircularProgress color="inherit" />
                     <Typography sx={{ mt: 2 }}>Subiendo imagen...</Typography>
                 </Box>
             </Backdrop>
-            {/* HEADER */}
+
+            {/* HEADER MEJORADO - IGUAL QUE CONTACTO */}
             <Box
                 sx={{
                     position: 'relative',
                     width: '100%',
-                    minHeight: { xs: '60vh', md: '90vh' },
+                    minHeight: { xs: '75vh', md: '90vh' },
                     display: 'flex',
                     alignItems: 'center',
                     justifyContent: 'center',
-                    backgroundImage: `url(${images.Equipo_header})`,
+                    backgroundImage: `url(${headerUrl || Imgjud})`,
                     backgroundSize: 'cover',
                     backgroundPosition: 'center',
                     py: { xs: 6, md: 8 },
                 }}
             >
-                <Box sx={{ position: 'relative', zIndex: 2, textAlign: 'center', color: 'white' }}>
-                    <EditableText
-                        text={textos.titulo_principal || "NUESTRO EQUIPO"}
-                        onTextSave={(newText) => handleTextSave("titulo_principal", newText)}
-                        isAdmin={isAdmin}
-                        variant="h2"
-                        className="varsity-font"
+                {/* Overlay oscuro */}
+                <Box
+                    sx={{
+                        position: 'absolute',
+                        top: 0,
+                        left: 0,
+                        width: '100%',
+                        height: '100%',
+                        backgroundColor: 'rgba(12, 0, 90, 0.8)',
+                        zIndex: 1,
+                    }}
+                />
+
+                {/* Botón único para editar TÍTULO + IMAGEN (solo admin) */}
+                {isAdmin && (
+                    <Tooltip title='Editar título/imagen'>
+                        <IconButton
+                            onClick={openHeaderEditor}
+                            sx={{
+                                position: 'absolute',
+                                bottom: 16,
+                                right: 16,
+                                color: 'white',
+                                backgroundColor: 'rgba(0,0,0,0.4)',
+                                '&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' },
+                                zIndex: 3,
+                            }}
+                        >
+                            <EditIcon />
+                        </IconButton>
+                    </Tooltip>
+                )}
+
+                {/* Título del header */}
+                <Box
+                    sx={{
+                        position: 'relative',
+                        zIndex: 2,
+                        textAlign: 'center',
+                        height: '100%',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                    }}
+                >
+                    <Typography
+                        variant='h2'
                         sx={{
                             fontWeight: 'bold',
-                            fontSize: { xs: '3rem', md: '7rem' },
+                            fontSize: { xs: '3.5rem', md: '6rem' },
+                            fontFamily: 'Varsity, sans-serif',
+                            color: 'white',
+                            textAlign: 'center',
+                            textShadow: '2px 2px 6px rgba(0,0,0,0.7)',
                         }}
-                        />
+                    >
+                        {headerTitle || 'NUESTRO EQUIPO'}
+                    </Typography>
                 </Box>
-                {/* Lápiz header (solo admin) */}
-                {isAdmin && (
-                    <EditableHeaderImage
-                        onImageUpload={file => handleImageChange('Equipo_header', file)}
-                        sx={{ position: 'absolute', top: 16, right: 16, zIndex: 3 }}
-                        tooltip='Cambiar imagen de encabezado'
-                    />
-                )}
             </Box>
+            <Dialog
+                open={openHeaderEdit}
+                onClose={() => !headerUploading && setOpenHeaderEdit(false)}
+                maxWidth='sm'
+                fullWidth
+            >
+                <DialogTitle>Editar encabezado</DialogTitle>
+                <DialogContent dividers sx={{ pt: 1.5, pb: 2, px: 2 }}>
+                    <TextField
+                        label='Título del header'
+                        value={headerTitleInput}
+                        onChange={e => setHeaderTitleInput(e.target.value)}
+                        fullWidth
+                        size='small'
+                        margin='dense'
+                        InputLabelProps={{ shrink: true }}
+                        sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.2 } }}
+                    />
+
+                    <Button
+                        variant='contained'
+                        component='label'
+                        disabled={headerUploading}
+                        sx={{ mt: 2, fontWeight: 'bold', textTransform: 'none' }}
+                    >
+                        {headerFile ? 'Imagen seleccionada' : 'Seleccionar nueva imagen'}
+                        <input
+                            type='file'
+                            hidden
+                            accept='image/jpeg,image/png,image/webp,image/avif'
+                            onChange={e => {
+                                const f = e.target.files?.[0] || null;
+                                setHeaderFile(f); 
+                            }}
+                        />
+                    </Button>
+                    <Box sx={{ mt: 1, opacity: 0.8, fontSize: 12 }}>
+                        Formatos: JPG, PNG, WEBP, AVIF.
+                    </Box>
+                    
+                    {/* Vista previa */}
+                    <Box sx={{ mt: 2, textAlign: 'center' }}>
+                        <Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>
+                            Vista previa
+                        </Typography>
+                        <Box
+                            sx={{
+                                width: { xs: 'min(85vw, 150px)', sm: 300 },
+                                mx: 'auto',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 1.5,
+                                overflow: 'hidden',
+                                position: 'relative',
+                                pt: '30%', 
+                                bgcolor: '#f7f7f7',
+                                boxShadow: 1,
+                            }}
+                        >
+                            <Box
+                                component='img'
+                                src={headerPreview || headerUrl || Imgjud}
+                                alt='Vista previa del encabezado'
+                                sx={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                }}
+                            />
+                        </Box>
+
+                        {headerFile && (
+                            <Button
+                                size='small'
+                                onClick={() => {
+                                    setHeaderFile(null);
+                                    setHeaderPreview(null);
+                                }}
+                                sx={{ mt: 1 }}
+                            >
+                                Quitar selección
+                            </Button>
+                        )}
+                    </Box>
+
+                    {headerError && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {headerError}
+                        </Alert>
+                    )}
+
+                    {headerUploading && (
+                        <Box sx={{ mt: 2 }}>
+                            <Typography variant="body2" sx={{ mb: 1 }}>
+                                Guardando encabezado...
+                            </Typography>
+                            <LinearProgress />
+                        </Box>
+                    )}
+                </DialogContent>
+
+                <DialogActions>
+                    <Button
+                        onClick={() => {
+                            setOpenHeaderEdit(false);
+                            setHeaderFile(null);
+                            setHeaderPreview(null);
+                        }}
+                        disabled={headerUploading}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={saveHeader}
+                        variant='contained'
+                        disabled={headerUploading}
+                    >
+                        Guardar
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* SECCIÓN JUGADORES */}
             <Box
@@ -878,9 +1166,6 @@ const fetchImages = async () => {
                         }}
                         />
                 </Box>
-                
-                
-                
             </Box>
 
             {/* JUNTA DIRECTIVA MEJORADA */}
@@ -892,46 +1177,43 @@ const fetchImages = async () => {
                     minHeight: '100vh'
                 }}
             >
-                
-
-                 <EditableText
-                        text={textos.titulo_junta_directiva|| "JUNTA DIRECTIVA"}
-                        onTextSave={(newText) => handleTextSave("titulo_junta_directiva", newText)}
-                        isAdmin={isAdmin}
-                        variant="h2"
-                        className="varsity-font"
-                        sx={{
-                            fontWeight: 'bold',
-                            fontFamily: '"Varsity", cursive',
-                            textAlign: 'center',
-                            mb: 8,
-                            fontSize: { xs: '2.5rem', md: '4rem' },
-                            background: 'linear-gradient(45deg, #2596be 30%, #1e0851 90%)',
-                            backgroundClip: 'text',
-                            textFillColor: 'transparent',
-                            WebkitBackgroundClip: 'text',
-                            WebkitTextFillColor: 'transparent',
-                            textShadow: '0 4px 8px rgba(102, 126, 234, 0.3)',
-                        }}
-                        />
+                <EditableText
+                    text={textos.titulo_junta_directiva|| "JUNTA DIRECTIVA"}
+                    onTextSave={(newText) => handleTextSave("titulo_junta_directiva", newText)}
+                    isAdmin={isAdmin}
+                    variant="h2"
+                    className="varsity-font"
+                    sx={{
+                        fontWeight: 'bold',
+                        fontFamily: '"Varsity", cursive',
+                        textAlign: 'center',
+                        mb: 8,
+                        fontSize: { xs: '2.5rem', md: '4rem' },
+                        background: 'linear-gradient(45deg, #2596be 30%, #1e0851 90%)',
+                        backgroundClip: 'text',
+                        textFillColor: 'transparent',
+                        WebkitBackgroundClip: 'text',
+                        WebkitTextFillColor: 'transparent',
+                        textShadow: '0 4px 8px rgba(102, 126, 234, 0.3)',
+                    }}
+                />
 
                 {/* Liderazgo Ejecutivo */}
                 {miembrosPorCategoria.ejecutiva.length > 0 && (
                     <Box sx={{ mb: 8 }}>
                         <EditableText
-                        text={textos.categoria_ejecutiva|| "Liderazgo Ejecutivo"}
-                        onTextSave={(newText) => handleTextSave("categoria_ejecutiva", newText)}
-                        isAdmin={isAdmin}
-                        variant="h2"
-                        className="varsity-font"
-                        sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            mb: 4,
-                            color: '#17181bff',
-                               // fontWeight: 600,
-                            fontSize: { xs: '1.5rem', md: '1.8rem' }
-                        }}
+                            text={textos.categoria_ejecutiva|| "Liderazgo Ejecutivo"}
+                            onTextSave={(newText) => handleTextSave("categoria_ejecutiva", newText)}
+                            isAdmin={isAdmin}
+                            variant="h2"
+                            className="varsity-font"
+                            sx={{
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                mb: 4,
+                                color: '#17181bff',
+                                fontSize: { xs: '1.5rem', md: '1.8rem' }
+                            }}
                         />
                         <Box
                             sx={{
@@ -952,22 +1234,19 @@ const fetchImages = async () => {
                 {/* Área Administrativa */}
                 {miembrosPorCategoria.administrativa.length > 0 && (
                     <Box sx={{ mb: 8 }}>
-                        
-
                         <EditableText
-                        text={textos.categoria_administrativa|| "Área Administrativa"}
-                        onTextSave={(newText) => handleTextSave("categoria_administrativa", newText)}
-                        isAdmin={isAdmin}
-                        variant="h2"
-                        className="varsity-font"
-                        sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            mb: 4,
-                            color: '#17181bff',
-                               // fontWeight: 600,
-                            fontSize: { xs: '1.5rem', md: '1.8rem' }
-                        }}
+                            text={textos.categoria_administrativa|| "Área Administrativa"}
+                            onTextSave={(newText) => handleTextSave("categoria_administrativa", newText)}
+                            isAdmin={isAdmin}
+                            variant="h2"
+                            className="varsity-font"
+                            sx={{
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                mb: 4,
+                                color: '#17181bff',
+                                fontSize: { xs: '1.5rem', md: '1.8rem' }
+                            }}
                         />
                         <Box
                             sx={{
@@ -988,22 +1267,19 @@ const fetchImages = async () => {
                 {/* Supervisión */}
                 {miembrosPorCategoria.supervision.length > 0 && (
                     <Box sx={{ mb: 8 }}>
-                        
-
                         <EditableText
-                        text={textos.categoria_supervision|| "Supervisión"}
-                        onTextSave={(newText) => handleTextSave("categoria_supervision", newText)}
-                        isAdmin={isAdmin}
-                        variant="h2"
-                        className="varsity-font"
-                        sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            mb: 4,
-                            color: '#17181bff',
-                               // fontWeight: 600,
-                            fontSize: { xs: '1.5rem', md: '1.8rem' }
-                        }}
+                            text={textos.categoria_supervision|| "Supervisión"}
+                            onTextSave={(newText) => handleTextSave("categoria_supervision", newText)}
+                            isAdmin={isAdmin}
+                            variant="h2"
+                            className="varsity-font"
+                            sx={{
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                mb: 4,
+                                color: '#17181bff',
+                                fontSize: { xs: '1.5rem', md: '1.8rem' }
+                            }}
                         />
                         <Box
                             sx={{
@@ -1024,22 +1300,19 @@ const fetchImages = async () => {
                 {/* Vocales */}
                 {miembrosPorCategoria.vocales.length > 0 && (
                     <Box sx={{ mb: 8 }}>
-                        
-
                         <EditableText
-                        text={textos.categoria_vocales|| "Vocales"}
-                        onTextSave={(newText) => handleTextSave("categoria_vocales", newText)}
-                        isAdmin={isAdmin}
-                        variant="h2"
-                        className="varsity-font"
-                        sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            mb: 4,
-                            color: '#17181bff',
-                               // fontWeight: 600,
-                            fontSize: { xs: '1.5rem', md: '1.8rem' }
-                        }}
+                            text={textos.categoria_vocales|| "Vocales"}
+                            onTextSave={(newText) => handleTextSave("categoria_vocales", newText)}
+                            isAdmin={isAdmin}
+                            variant="h2"
+                            className="varsity-font"
+                            sx={{
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                mb: 4,
+                                color: '#17181bff',
+                                fontSize: { xs: '1.5rem', md: '1.8rem' }
+                            }}
                         />
                         <Box
                             sx={{
@@ -1065,23 +1338,20 @@ const fetchImages = async () => {
                             py: 8,
                         }}
                     >
-                        
                         <EditableText
-                        text={textos.mensaje_vacio|| " No hay miembros registrados en la junta directiva"}
-                        onTextSave={(newText) => handleTextSave("mensaje_vacio", newText)}
-                        isAdmin={isAdmin}
-                        variant="h3"
-                        className="varsity-font"
-                        sx={{
-                            fontWeight: 'bold',
-                            textAlign: 'center',
-                            mb: 4,
-                            color: '#718096',
-                               // fontWeight: 600,
-                            fontSize: { xs: '1.5rem', md: '1.8rem' }
-                        }}
+                            text={textos.mensaje_vacio|| " No hay miembros registrados en la junta directiva"}
+                            onTextSave={(newText) => handleTextSave("mensaje_vacio", newText)}
+                            isAdmin={isAdmin}
+                            variant="h3"
+                            className="varsity-font"
+                            sx={{
+                                fontWeight: 'bold',
+                                textAlign: 'center',
+                                mb: 4,
+                                color: '#718096',
+                                fontSize: { xs: '1.5rem', md: '1.8rem' }
+                            }}
                         />
-
 
                         {isAdmin && (
                             <Typography
@@ -1092,8 +1362,6 @@ const fetchImages = async () => {
                             >
                                 Agrega el primer miembro usando el botón de abajo
                             </Typography>
-                            
-
                         )}
                     </Box>
                 )}
@@ -1164,6 +1432,151 @@ const fetchImages = async () => {
                     </Typography>
                 </Box>
             )}
+
+            {/* MODAL EDITAR HEADER (título + imagen) - IGUAL QUE CONTACTO */}
+            <Dialog
+                open={openHeaderEdit}
+                onClose={() => !headerUploading && setOpenHeaderEdit(false)}
+                maxWidth='sm'
+                fullWidth
+            >
+                <DialogTitle>Editar encabezado</DialogTitle>
+                <DialogContent
+                    dividers
+                    sx={{
+                        pt: 1.5,
+                        pb: 2,
+                        px: 2,
+                    }}
+                >
+                    <TextField
+                        label='Título del header'
+                        value={headerTitleInput}
+                        onChange={e => setHeaderTitleInput(e.target.value)}
+                        fullWidth
+                        size='small'
+                        margin='dense'
+                        InputLabelProps={{ shrink: true }}
+                        sx={{
+                            '& .MuiOutlinedInput-root': { borderRadius: 1.2 },
+                        }}
+                    />
+
+                    <Button
+                        variant='contained'
+                        component='label'
+                        disabled={headerUploading}
+                        sx={{ mt: 2, fontWeight: 'bold', textTransform: 'none' }}
+                    >
+                        {headerFile ? 'Imagen seleccionada' : 'Seleccionar nueva imagen'}
+                        <input
+                            type='file'
+                            hidden
+                            accept='image/jpeg,image/png,image/webp,image/avif'
+                            onChange={e => {
+                                const f = e.target.files?.[0] || null;
+                                setHeaderFile(f); 
+                            }}
+                        />
+                    </Button>
+                    <Box sx={{ mt: 1, opacity: 0.8, fontSize: 12 }}>
+                        Formatos: JPG, PNG, WEBP, AVIF.
+                    </Box>
+                    
+                    {/* Vista previa */}
+                    <Box sx={{ mt: 2, textAlign: 'center' }}>
+                        <Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>
+                            Vista previa
+                        </Typography>
+
+                        <Box
+                            sx={{
+                                width: { xs: 'min(85vw, 150px)', sm: 300 },
+                                mx: 'auto',
+                                border: '1px solid',
+                                borderColor: 'divider',
+                                borderRadius: 1.5,
+                                overflow: 'hidden',
+                                position: 'relative',
+                                pt: '30%', 
+                                bgcolor: '#f7f7f7',
+                                boxShadow: 1,
+                            }}
+                        >
+                            <Box
+                                component='img'
+                                src={headerPreview || headerUrl || undefined}
+                                alt='Vista previa del encabezado'
+                                sx={{
+                                    position: 'absolute',
+                                    inset: 0,
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                }}
+                            />
+                        </Box>
+
+                        {headerFile && (
+                            <Box
+                                sx={{
+                                    mt: 1,
+                                    display: 'flex',
+                                    gap: 1,
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Button
+                                    size='small'
+                                    onClick={() => {
+                                        setHeaderFile(null);
+                                        setHeaderPreview(null);
+                                    }}
+                                >
+                                    Quitar selección
+                                </Button>
+                            </Box>
+                        )}
+                    </Box>
+
+                    {/* Error del header */}
+                    {headerError && (
+                        <Alert severity="error" sx={{ mt: 2 }}>
+                            {headerError}
+                        </Alert>
+                    )}
+
+                    {/* Progress bar durante la subida */}
+                    {headerUploading && (
+                        <Box sx={{ mt: 2 }}>
+                            <Typography variant="body2" sx={{ mb: 1 }}>
+                                Guardando encabezado...
+                            </Typography>
+                            <LinearProgress />
+                        </Box>
+                    )}
+                </DialogContent>
+
+                <DialogActions>
+                    <Button
+                        onClick={() => {
+                            setOpenHeaderEdit(false);
+                            setHeaderFile(null);
+                            setHeaderPreview(null);
+                        }}
+                        disabled={headerUploading}
+                    >
+                        Cancelar
+                    </Button>
+                    <Button
+                        onClick={saveHeader}
+                        variant='contained'
+                        disabled={headerUploading}
+                    >
+                        Guardar
+                    </Button>
+                </DialogActions>
+            </Dialog>
 
             {/* Modal para editar/agregar miembros */}
             {showModal && (
