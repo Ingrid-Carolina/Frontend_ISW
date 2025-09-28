@@ -13,6 +13,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../api/api';
 import { Box, CircularProgress, Alert } from '@mui/material';
 import EditableImage from '../components/EditableImage';
+import EditableText from '../components/EditableText';
 import EditableHeaderImage from '../components/EditableHeaderImage';
 
 const AboutUs = () => (
@@ -25,10 +26,10 @@ const AboutUs = () => (
 	</section>
 );
 
-const Mision = ({ onImageChange, misionImageUrl, isAdmin }) => (
+const Mision = ({ onImageChange, misionImageUrl, isAdmin, titulo, descripcion }) => (
 	<SeccionInfo
-		titulo='Nuestra Misión'
-		descripcion='Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego.'
+		titulo={titulo}
+		descripcion={descripcion}
 		imagenComponent={
 			isAdmin ? (
 				<EditableImage
@@ -55,15 +56,15 @@ const Vision = ({ onImageChange, visionImageUrl, isAdmin }) => (
 		descripcion='Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida.'
 		imagenComponent={
 			isAdmin ? (
-        <EditableImage
-          src={visionImageUrl}
-          alt="Imagen de Visión"
-          onImageUpload={onImageChange}
-        />
-      ) : (
-        <img src={visionImageUrl} alt="Imagen de Visión" style={{ width: '100%', height: 'auto' }} />
-      )
-    }
+				<EditableImage
+					src={visionImageUrl}
+					alt="Imagen de Visión"
+					onImageUpload={onImageChange}
+				/>
+			) : (
+				<img src={visionImageUrl} alt="Imagen de Visión" style={{ width: '100%', height: 'auto' }} />
+			)
+		}
 		invertir
 		bgColor='#10045c'
 		textAlign='right'
@@ -88,6 +89,7 @@ function HomeNewsCards() {
 	const [news, setNews] = useState([]);
 	const [loading, setLoading] = useState(true);
 	const [err, setErr] = useState('');
+
 
 	useEffect(() => {
 		let cancelled = false;
@@ -116,10 +118,10 @@ function HomeNewsCards() {
 	const formatFecha = iso =>
 		iso
 			? new Date(iso).toLocaleDateString('es-ES', {
-					day: 'numeric',
-					month: 'long',
-					year: 'numeric',
-				})
+				day: 'numeric',
+				month: 'long',
+				year: 'numeric',
+			})
 			: '';
 
 	const clampText = (txt = '', max = 220) =>
@@ -178,6 +180,16 @@ function Home() {
 		vision: '/Images/Vision1.jpg',
 		header: '/Images/header.jpg', // Agrega la URL del header al estado
 	});
+	const [headerText, setHeaderText] = useState({
+		header_l1: 'ASOCIACIÓN DE',
+		header_l2: 'BÉISBOL MENOR',
+		header_l3: 'PILOTOS DE HONDURAS',
+	});
+	const [misionText, setMisionText] = useState({
+		mision_titulo: 'Nuestra Misión',
+		mision_desc:
+			'Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego.',
+	});
 
 	const [isAdmin, setIsAdmin] = useState(false);
 
@@ -233,6 +245,46 @@ function Home() {
 		fetchImages();
 	}, []);
 
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await api.get('/auth/home/textos', {
+					withCredentials: true,
+					skipAuthRedirect: true,
+				});
+				if (!cancelled && res?.data?.success && res.data.data) {
+					// merge para no perder defaults si faltara alguna clave
+					setHeaderText(prev => ({ ...prev, ...res.data.data }));
+				}
+			} catch {
+				/* si falla, seguimos con defaults locales */
+			}
+		})();
+		return () => { cancelled = true; };
+	}, []);
+
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await api.get('/auth/home/textos', {
+					withCredentials: true,
+					skipAuthRedirect: true,
+				});
+				if (!cancelled && res?.data?.success && res.data.data) {
+					setMisionText(prev => ({
+						...prev,
+						...((({ mision_titulo, mision_desc }) => ({ mision_titulo, mision_desc }))(res.data.data)),
+					}));
+				}
+			} catch {
+				/* si falla, seguimos con defaults locales */
+			}
+		})();
+		return () => { cancelled = true; };
+	}, []);
+
 	const handleImageChange = async (type, file) => {
 		try {
 			if (!(file instanceof File)) {
@@ -269,6 +321,26 @@ function Home() {
 		}
 	};
 
+	const saveHeaderText = async (clave, valor) => {
+		// Optimistic update
+		setHeaderText(prev => ({ ...prev, [clave]: valor }));
+		try {
+			await api.put('/auth/home/textos', { clave, valor }, { withCredentials: true });
+		} catch {
+			// si falla el backend, no rompemos la UI
+		}
+	};
+
+	const saveMisionText = async (clave, valor) => {
+		// Optimistic update
+		setMisionText(prev => ({ ...prev, [clave]: valor }));
+		try {
+			await api.put('/auth/home/textos', { clave, valor }, { withCredentials: true });
+		} catch {
+			// si falla, dejamos el cambio visual; puedes recargar con GET si prefieres
+		}
+	};
+
 	const navigate = useNavigate();
 	const onClick = () => {
 		navigate('/Eventos');
@@ -284,9 +356,24 @@ function Home() {
 				{' '}
 				{/* Usa la URL del header del estado */}
 				<div className='header-title'>
-					<p>ASOCIACIóN DE</p>
-					<p>BÉISBOL MENOR</p>
-					<p>PILOTOS DE HONDURAS</p>
+					<EditableText
+						text={headerText.header_l1}
+						onTextSave={(t) => saveHeaderText('header_l1', t)}
+						isAdmin={isAdmin}
+						variant='p'
+					/>
+					<EditableText
+						text={headerText.header_l2}
+						onTextSave={(t) => saveHeaderText('header_l2', t)}
+						isAdmin={isAdmin}
+						variant='p'
+					/>
+					<EditableText
+						text={headerText.header_l3}
+						onTextSave={(t) => saveHeaderText('header_l3', t)}
+						isAdmin={isAdmin}
+						variant='p'
+					/>
 				</div>
 				{isAdmin && (
 					<EditableHeaderImage
@@ -301,9 +388,26 @@ function Home() {
 				isAdmin={isAdmin}
 				misionImageUrl={images.mision}
 				onImageChange={imgFile => handleImageChange('mision', imgFile)}
+				titulo={
+					<EditableText
+						text={misionText.mision_titulo}
+						onTextSave={(t) => saveMisionText('mision_titulo', t)}
+						isAdmin={isAdmin}
+						variant='h2'
+					/>
+				}
+				descripcion={
+					<EditableText
+						text={misionText.mision_desc}
+						onTextSave={(t) => saveMisionText('mision_desc', t)}
+						isAdmin={isAdmin}
+						variant="p"
+						multiline
+					/>
+				}
 			/>
 			<Vision
-        isAdmin={isAdmin}
+				isAdmin={isAdmin}
 				visionImageUrl={images.vision}
 				onImageChange={imgFile => handleImageChange('vision', imgFile)}
 			/>

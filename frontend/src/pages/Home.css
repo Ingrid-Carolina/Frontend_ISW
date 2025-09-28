@@ -15,7 +15,7 @@
   color: white;
   font-size: 4.9vw; /* Escala según el ancho de pantalla */
   font-weight: bold;
-  text-align: left;
+  text-align: right;
   text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
   font-family: 'Varsity', sans-serif;
   line-height: 1.3;
@@ -26,7 +26,7 @@
   .header-title {
     font-size: 6.3vw;  /* Más grande pero aún proporcional */
     line-height: 1.2;
-    text-align: left;
+    text-align: right;
     margin-right: 0;
     padding: 0 10px;
   }
