@@ -417,9 +417,13 @@ const DonarIndumentarea = () => {
       </div>
 
       {/* Modal formulario con validaciones */}
-      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm">
+      <Dialog open={open} onClose={() => setOpen(false)} fullWidth maxWidth="sm" sx={{ marginTop:"50px" }}>
         <DialogTitle>Completar información de la donación</DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{
+    "&::-webkit-scrollbar": { display: "none" }, // Chrome, Safari
+    "-ms-overflow-style": "none", // IE y Edge
+    "scrollbar-width": "none", // Firefox
+  }}>
           <form onSubmit={handleSubmit}>
             <TextField
               fullWidth

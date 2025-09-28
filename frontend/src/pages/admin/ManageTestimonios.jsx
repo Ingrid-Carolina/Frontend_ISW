@@ -208,6 +208,7 @@ const ManageTestimonios = () => {
         sx={{
           fontFamily: 'GroteskBold',
           color: '#10045c',
+          marginTop: '50px',
           mb: 4,
           textAlign: 'center',
           fontSize: { xs: '2rem', sm: '2.5rem', md: '3rem' }
