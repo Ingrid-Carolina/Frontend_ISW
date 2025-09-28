@@ -71,6 +71,19 @@ const Contacto = () => {
 	const [headerFile, setHeaderFile] = useState(null);
 	const [headerUploading, setHeaderUploading] = useState(false);
 	const [headerError, setHeaderError] = useState('');
+	// preview local del archivo seleccionado
+	const [headerPreview, setHeaderPreview] = useState(null);
+
+	// cuando cambie el archivo, crear y limpiar el ObjectURL
+	useEffect(() => {
+		if (!headerFile) {
+			setHeaderPreview(null);
+			return;
+		}
+		const url = URL.createObjectURL(headerFile);
+		setHeaderPreview(url);
+		return () => URL.revokeObjectURL(url);
+	}, [headerFile]);
 
 	// Cargar info de contacto (endpoint público)
 	useEffect(() => {
@@ -183,6 +196,11 @@ const Contacto = () => {
 			// 3) Refrescar UI
 			setHeaderUrl(newUrl);
 			setHeaderTitle((headerTitleInput || 'PONTE EN CONTACTO').trim());
+
+			// limpia selección y preview
+			setHeaderFile(null);
+			setHeaderPreview(null);
+
 			setOpenHeaderEdit(false);
 			setSnackbarType('success');
 			setSnackbarMsg('Encabezado actualizado');
@@ -873,7 +891,7 @@ const Contacto = () => {
 				>
 					<TextField
 						label='Título del header'
-						value={headerTitleInput} 
+						value={headerTitleInput}
 						onChange={e => setHeaderTitleInput(e.target.value)}
 						fullWidth
 						size='small'
@@ -895,17 +913,80 @@ const Contacto = () => {
 							type='file'
 							hidden
 							accept='image/jpeg,image/png,image/webp,image/avif'
-							onChange={e => setHeaderFile(e.target.files?.[0] || null)}
+							onChange={e => {
+								const f = e.target.files?.[0] || null;
+								setHeaderFile(f); 
+							}}
 						/>
 					</Button>
 					<Box sx={{ mt: 1, opacity: 0.8, fontSize: 12 }}>
 						Formatos: JPG, PNG, WEBP, AVIF.
 					</Box>
+					{/* Vista previa */}
+					<Box sx={{ mt: 2, textAlign: 'center' }}>
+						<Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>
+							Vista previa
+						</Typography>
+
+						<Box
+							sx={{
+								// tamaño del preview de la imagen
+								width: { xs: 'min(85vw, 150px)', sm: 300 },
+								mx: 'auto',
+								border: '1px solid',
+								borderColor: 'divider',
+								borderRadius: 1.5,
+								overflow: 'hidden',
+								position: 'relative',
+								pt: '30%', 
+								bgcolor: '#f7f7f7',
+								boxShadow: 1,
+							}}
+						>
+							<Box
+								component='img'
+								src={headerPreview || headerUrl || undefined}
+								alt='Vista previa del encabezado'
+								sx={{
+									position: 'absolute',
+									inset: 0,
+									width: '100%',
+									height: '100%',
+									objectFit: 'cover',
+								}}
+							/>
+						</Box>
+
+						{headerFile && (
+							<Box
+								sx={{
+									mt: 1,
+									display: 'flex',
+									gap: 1,
+									justifyContent: 'center',
+								}}
+							>
+								<Button
+									size='small'
+									onClick={() => {
+										setHeaderFile(null);
+										setHeaderPreview(null); // <-- limpia el preview
+									}}
+								>
+									Quitar selección
+								</Button>
+							</Box>
+						)}
+					</Box>
 				</DialogContent>
 
 				<DialogActions>
 					<Button
-						onClick={() => setOpenHeaderEdit(false)}
+						onClick={() => {
+							setOpenHeaderEdit(false);
+							setHeaderFile(null);
+							setHeaderPreview(null);
+						}}
 						disabled={headerUploading}
 					>
 						Cancelar
