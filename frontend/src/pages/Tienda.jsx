@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import {
 	Box,
 	Container,
@@ -38,6 +38,10 @@ import {
 } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
+
+import  jsPDF  from 'jspdf';
+import autoTable from 'jspdf-autotable';
+
 
 import { api } from '../api/api';
 
@@ -107,6 +111,77 @@ export default function Tienda() {
 	const [productos, setProductos] = useState([]);
 	const [loadingProductos, setLoadingProductos] = useState(false);
 	const [errorProductos, setErrorProductos] = useState(null);
+	const contentRef= useRef();
+
+	const head = [['Producto', 'Talla', 'Cantidad', 'Precio Unitario', 'Precio Total']];
+
+const body = cartItems.map(item => {
+  const unit = getPrecioByTalla(item, item.talla);
+  return [
+    item.nombre_producto,
+    item.talla || '-',
+    item.cantidad,
+    `L.${unit.toFixed(2)}`,
+    `L.${(unit * item.cantidad).toFixed(2)}`
+  ];
+});
+
+
+const generateFacturaPDF = (idorden) => {
+  const doc = new jsPDF();
+
+  doc.setFont('helvetica', 'bold');
+  doc.setFontSize(16);
+  doc.text('Factura del Cliente', doc.internal.pageSize.getWidth() / 2, 20, { align: 'center' });
+
+  doc.setFontSize(12);
+  doc.text(`Fecha: ${new Date().toLocaleDateString('es-HN', {
+    day: 'numeric',
+    month: 'long',
+    year: 'numeric',
+  })}`, 14, 30);
+
+  doc.text('PILOTOS FAH. Campo de la Fuerza Aérea Hondureña.', 14, 38);
+
+  autoTable(doc, {
+    startY: 50,
+    head,
+    body,
+    theme: 'grid',
+    styles: { font: 'helvetica', fontSize: 10 },
+    headStyles: { fillColor: [44, 26, 153], textColor: 255 },
+    margin: { left: 14, right: 14 },
+  });
+
+  const finalY = doc.lastAutoTable.finalY || 60;
+
+  const total = cartItems.reduce((acc, item) => {
+    const unit = getPrecioByTalla(item, item.talla);
+    return acc + unit * item.cantidad;
+  }, 0);
+  const isv = total * 0.15;
+  const subtotal = total - isv;
+
+  doc.setFontSize(12);
+  doc.text(`Subtotal: L.${subtotal.toFixed(2)}`, 14, finalY + 10);
+  doc.text(`I.S.V 15%: L.${isv.toFixed(2)}`, 14, finalY + 18);
+  doc.text(`Total a Pagar: L.${total.toFixed(2)}`, 14, finalY + 26);
+
+  doc.setFontSize(10);
+  doc.text('Esta factura debera ser cancelada a la siguiente cuenta:', doc.internal.pageSize.getWidth() / 2, finalY + 40, { align: 'center' });
+
+  doc.text('Numero de Cuenta: 748728881', 14, finalY + 50);
+  doc.text('Banco: BAC', 14, finalY + 56);
+  doc.text('Nombre: Melissa Rosales', 14, finalY + 62);
+
+  doc.setTextColor(255, 0, 0);
+  doc.text('Esta factura es necesaria para reclamar su producto en el punto de entrega. Por favor, no la pierda.', doc.internal.pageSize.getWidth() / 2, finalY + 80, { align: 'center' });
+
+  doc.save(`Orden-${idorden}.pdf`);
+};
+
+
+	
 
 
 // NUEVO: Estado para textos editables
@@ -147,6 +222,7 @@ export default function Tienda() {
 
 	// Rol desde backend (no localStorage)
 	const [isAdmin, setIsAdmin] = useState(false);
+	
 
 //función para cargar textos editables
 const fetchTextos = async () => {
@@ -535,37 +611,48 @@ const fetchTextos = async () => {
 	};
 
 	const CerrarModal = async () => {
-		try {
-			const uidRes = await api.get('/auth/obteneruid', {
-				withCredentials: true,
-			});
-			const id = uidRes?.data?.id;
-			if (!id) throw new Error('No autenticado');
+    try {
+        const uidRes = await api.get('/auth/obteneruid', {
+            withCredentials: true,
+        });
+        const id = uidRes?.data?.id;
+        if (!id) throw new Error('No autenticado');
 
-			const body = {
-				uid: id,
-				cartItems,
-			};
+        const body = {
+            uid: id,
+            cartItems,
+        };
 
-			await api.post('/auth/agregarorden', body, {
-				headers: { 'Content-Type': 'application/json' },
-			});
+        await api.post('/auth/agregarorden', body, {
+            headers: { 'Content-Type': 'application/json' },
+        });
 
-			setCartItems([]);
-			setOpenSnackbar(true);
-		} catch (error) {
-			console.error('Error al crear la orden:', error?.message || error);
-			setBannerMsg(
-				error?.response?.data?.message ||
-					error.message ||
-					'Error al crear la orden',
-			);
-			setBannerType('error');
-			setShowBanner(true);
-		} finally {
-			setopen(false);
-		}
-	};
+        const res = await api.get('/auth/idorden');
+        const idorden = Number(res.data[0]?.idorden);
+
+		await generateFacturaPDF(idorden);
+      
+
+        setCartItems([]);
+        setOpenSnackbar(true);
+
+    
+    } catch (error) {
+        console.error('Error al crear la orden:', error?.message || error);
+        setBannerMsg(
+            error?.response?.data?.message ||
+                error.message ||
+                'Error al crear la orden',
+        );
+        setBannerType('error');
+        setShowBanner(true);
+    }finally{
+
+		setopen(false)
+	}
+  
+};
+
 
 	// Carrito
 	const addToCart = producto => {
@@ -1439,9 +1526,10 @@ const fetchTextos = async () => {
 				onClose={() => setopen(false)}
 				fullWidth
 				maxWidth='sm'
-				sx={{ zIndex: 1300 }}
+				sx={{ zIndex: 1300, marginTop:5  }}
 			>
-				<DialogContent>
+				<DialogContent ref={contentRef}  >
+        
 					<DialogTitle
 						variant='h5'
 						sx={{
@@ -1583,6 +1671,27 @@ const fetchTextos = async () => {
 										<div>Subtotal: L.{subtotal.toFixed(2)}</div>
 										<div>I.S.V 15%: L.{isv.toFixed(2)}</div>
 										<div>Total a Pagar: L.{total.toFixed(2)}</div>
+										  <Typography
+                                            variant='body2'
+                                            sx={{
+                                                color: 'black',
+                                                fontWeight: 'bold',
+                                                fontFamily: 'PeterMedium',
+                                                m: 3,
+                                                textAlign: 'center',
+                                                fontSize: '1rem',
+                                            }}
+                                        >
+                                            Esta factura debera ser cancelada a la siguiente cuenta:
+                                        </Typography>
+                                        <Box sx={{ textAlign: 'center', mt: 2 }}>
+                                            <Box component="ul" sx={{ display: 'inline-block', textAlign: 'left', fontFamily: 'PeterMedium', listStyleType: 'none', p: 0 }}>
+                                                  <li>Numero de Cuenta: 748728881</li>
+                                                  <li>Banco: BAC</li>
+                                                  <li>Nombre: Melissa Rosales</li>
+                                            </Box>
+                                        </Box>
+
 
 										<Typography
 											variant='body2'
@@ -1603,24 +1712,28 @@ const fetchTextos = async () => {
 							})()}
 						</div>
 					)}
+			
 				</DialogContent>
 
 				<Button
-					variant='contained'
-					onClick={CerrarModal}
-					sx={{
-						mt: 2,
-						backgroundColor: '#ff6600',
-						color: '#fff',
-						fontFamily: 'PeterMedium',
-						'&:hover': { backgroundColor: '#e65c00' },
-						width: '30%',
-						m: 3,
-						borderRadius: '10px',
-					}}
-				>
-					Proceder Orden
-				</Button>
+                variant='contained'
+                onClick={CerrarModal}
+                sx={{
+                    mt: 2,
+                    backgroundColor: '#ff6600',
+                    color: '#fff',
+                    fontFamily: 'PeterMedium',
+                    '&:hover': { backgroundColor: '#e65c00' },
+                    width: '30%',
+                    m: 3,
+                    borderRadius: '10px',
+                    '&:disabled': {
+                        backgroundColor: '#cccccc',
+                    }
+                }}
+            >
+              Proceder Orden
+            </Button>
 			</Dialog>
 
 			<Snackbar
