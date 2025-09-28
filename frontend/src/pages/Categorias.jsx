@@ -370,6 +370,7 @@ const Categorias = () => {
             bgcolor: 'background.paper',
             borderRadius: 3,
             boxShadow: 24,
+            width: '30%',
             p: 4,
             display: 'flex',
             flexDirection: 'column',
