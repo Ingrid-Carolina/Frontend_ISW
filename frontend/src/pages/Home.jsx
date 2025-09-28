@@ -16,13 +16,10 @@ import EditableImage from '../components/EditableImage';
 import EditableText from '../components/EditableText';
 import EditableHeaderImage from '../components/EditableHeaderImage';
 
-const AboutUs = () => (
+const AboutUs = ({ titulo, descripcion }) => (
 	<section className='about-us'>
-		<h2>Sobre Nosotros</h2>
-		<h3>
-			Somos una organización que fomenta la recreación del beisbol. Formamos
-			Vidas a través del Beisbol en Honduras!
-		</h3>
+		<h2>{titulo}</h2>
+		<h3>{descripcion}</h3>
 	</section>
 );
 
@@ -50,10 +47,10 @@ const Mision = ({ onImageChange, misionImageUrl, isAdmin, titulo, descripcion })
 	/>
 );
 
-const Vision = ({ onImageChange, visionImageUrl, isAdmin }) => (
+const Vision = ({ onImageChange, visionImageUrl, isAdmin, titulo, descripcion }) => (
 	<SeccionInfo
-		titulo='Nuestra Visión'
-		descripcion='Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida.'
+		titulo={titulo}
+		descripcion={descripcion}
 		imagenComponent={
 			isAdmin ? (
 				<EditableImage
@@ -71,10 +68,10 @@ const Vision = ({ onImageChange, visionImageUrl, isAdmin }) => (
 	/>
 );
 
-const Valores = () => (
+const Valores = ({ titulo, descripcion }) => (
 	<section className='values'>
-		<h2>Nuestros Valores</h2>
-		<h3>Nuestros Valores definen lo que nosotros somos en el área de juego.</h3>
+		<h2>{titulo}</h2>
+		<h3>{descripcion}</h3>
 	</section>
 );
 
@@ -185,10 +182,24 @@ function Home() {
 		header_l2: 'BÉISBOL MENOR',
 		header_l3: 'PILOTOS DE HONDURAS',
 	});
+	const [aboutText, setAboutText] = useState({
+		about_titulo: 'Sobre Nosotros',
+		about_desc:
+			'Somos una organización que fomenta la recreación del beisbol. Formamos Vidas a través del Beisbol en Honduras!',
+	});
 	const [misionText, setMisionText] = useState({
 		mision_titulo: 'Nuestra Misión',
 		mision_desc:
 			'Fomentar el amor por el béisbol en niños y jóvenes, proporcionando un ambiente seguro, divertido y educativo donde puedan desarrollar sus habilidades atléticas, cultivar valores como el respeto, la disciplina y el trabajo en equipo, y construir amistades duraderas que trasciendan el campo de juego.',
+	});
+	const [visionText, setVisionText] = useState({
+		vision_titulo: 'Nuestra Visión',
+		vision_desc:
+			'Que cada niño y joven de nuestra comunidad vea en el béisbol no solo un juego, sino un camino para crecer como deportista y persona, soñando en grande y llevando nuestros valores a cada paso de su vida.',
+	});
+	const [valoresText, setValoresText] = useState({
+		valores_titulo: 'Nuestros Valores',
+		valores_desc: 'Nuestros Valores definen lo que nosotros somos en el área de juego.',
 	});
 
 	const [isAdmin, setIsAdmin] = useState(false);
@@ -245,6 +256,7 @@ function Home() {
 		fetchImages();
 	}, []);
 
+	// trae textos de header title
 	useEffect(() => {
 		let cancelled = false;
 		(async () => {
@@ -264,6 +276,31 @@ function Home() {
 		return () => { cancelled = true; };
 	}, []);
 
+	// trae textos de about us
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await api.get('/auth/home/textos', {
+					withCredentials: true,
+					skipAuthRedirect: true,
+				});
+				if (!cancelled && res?.data?.success && res.data.data) {
+					const { about_titulo, about_desc } = res.data.data;
+					setAboutText(prev => ({
+						...prev,
+						...(about_titulo ? { about_titulo } : {}),
+						...(about_desc ? { about_desc } : {}),
+					}));
+				}
+			} catch {
+				/* si falla, mantenemos defaults */
+			}
+		})();
+		return () => { cancelled = true; };
+	}, []);
+
+	//trae textos de mision
 	useEffect(() => {
 		let cancelled = false;
 		(async () => {
@@ -276,6 +313,52 @@ function Home() {
 					setMisionText(prev => ({
 						...prev,
 						...((({ mision_titulo, mision_desc }) => ({ mision_titulo, mision_desc }))(res.data.data)),
+					}));
+				}
+			} catch {
+				/* si falla, seguimos con defaults locales */
+			}
+		})();
+		return () => { cancelled = true; };
+	}, []);
+
+	//trae textos de vision
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await api.get('/auth/home/textos', {
+					withCredentials: true,
+					skipAuthRedirect: true,
+				});
+				if (!cancelled && res?.data?.success && res.data.data) {
+					setVisionText(prev => ({
+						...prev,
+						...((({ vision_titulo, vision_desc }) => ({ vision_titulo, vision_desc }))(res.data.data)),
+					}));
+				}
+			} catch {
+				/* si falla, seguimos con defaults locales */
+			}
+		})();
+		return () => { cancelled = true; };
+	}, []);
+
+	//trae textos de valores
+	useEffect(() => {
+		let cancelled = false;
+		(async () => {
+			try {
+				const res = await api.get('/auth/home/textos', {
+					withCredentials: true,
+					skipAuthRedirect: true,
+				});
+				if (!cancelled && res?.data?.success && res.data.data) {
+					const { valores_titulo, valores_desc } = res.data.data;
+					setValoresText(prev => ({
+						...prev,
+						...(valores_titulo ? { valores_titulo } : {}),
+						...(valores_desc ? { valores_desc } : {}),
 					}));
 				}
 			} catch {
@@ -331,6 +414,16 @@ function Home() {
 		}
 	};
 
+	const saveAboutText = async (clave, valor) => {
+		// Optimistic update
+		setAboutText(prev => ({ ...prev, [clave]: valor }));
+		try {
+			await api.put('/auth/home/textos', { clave, valor }, { withCredentials: true });
+		} catch {
+			// si falla, podrías recargar con GET o dejar el cambio visible
+		}
+	};
+
 	const saveMisionText = async (clave, valor) => {
 		// Optimistic update
 		setMisionText(prev => ({ ...prev, [clave]: valor }));
@@ -338,6 +431,26 @@ function Home() {
 			await api.put('/auth/home/textos', { clave, valor }, { withCredentials: true });
 		} catch {
 			// si falla, dejamos el cambio visual; puedes recargar con GET si prefieres
+		}
+	};
+
+	const saveVisionText = async (clave, valor) => {
+		// Optimistic update
+		setVisionText(prev => ({ ...prev, [clave]: valor }));
+		try {
+			await api.put('/auth/home/textos', { clave, valor }, { withCredentials: true });
+		} catch {
+			// si falla, puedes recargar con GET o dejar el cambio visible
+		}
+	};
+
+	const saveValoresText = async (clave, valor) => {
+		// Optimistic update
+		setValoresText(prev => ({ ...prev, [clave]: valor }));
+		try {
+			await api.put('/auth/home/textos', { clave, valor }, { withCredentials: true });
+		} catch {
+			// si falla, puedes recargar con GET o dejar el cambio visible
 		}
 	};
 
@@ -383,7 +496,25 @@ function Home() {
 				{/* Usa el nuevo componente aquí */}
 			</div>
 
-			<AboutUs />
+			<AboutUs
+				titulo={
+					<EditableText
+						text={aboutText.about_titulo}
+						onTextSave={(t) => saveAboutText('about_titulo', t)}
+						isAdmin={isAdmin}
+						variant="h2"
+					/>
+				}
+				descripcion={
+					<EditableText
+						text={aboutText.about_desc}
+						onTextSave={(t) => saveAboutText('about_desc', t)}
+						isAdmin={isAdmin}
+						variant="p"
+						multiline
+					/>
+				}
+			/>
 			<Mision
 				isAdmin={isAdmin}
 				misionImageUrl={images.mision}
@@ -410,9 +541,43 @@ function Home() {
 				isAdmin={isAdmin}
 				visionImageUrl={images.vision}
 				onImageChange={imgFile => handleImageChange('vision', imgFile)}
+				titulo={
+					<EditableText
+						text={visionText.vision_titulo}
+						onTextSave={(t) => saveVisionText('vision_titulo', t)}
+						isAdmin={isAdmin}
+						variant="h2"
+					/>
+				}
+				descripcion={
+					<EditableText
+						text={visionText.vision_desc}
+						onTextSave={(t) => saveVisionText('vision_desc', t)}
+						isAdmin={isAdmin}
+						variant="p"
+						multiline
+					/>
+				}
 			/>
 
-			<Valores />
+			<Valores
+				titulo={
+					<EditableText
+						text={valoresText.valores_titulo}
+						onTextSave={(t) => saveValoresText('valores_titulo', t)}
+						isAdmin={isAdmin}
+						variant="h2"
+					/>
+				}
+				descripcion={
+					<EditableText
+						text={valoresText.valores_desc}
+						onTextSave={(t) => saveValoresText('valores_desc', t)}
+						isAdmin={isAdmin}
+						variant="h3"
+						multiline
+					/>
+				} />
 			<Acordeon />
 			<Noticias_Eventos />
 
