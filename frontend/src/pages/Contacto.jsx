@@ -182,7 +182,7 @@ const Contacto = () => {
 
 			// 3) Refrescar UI
 			setHeaderUrl(newUrl);
-			setHeaderTitle(payload.header_title);
+			setHeaderTitle((headerTitleInput || 'PONTE EN CONTACTO').trim());
 			setOpenHeaderEdit(false);
 			setSnackbarType('success');
 			setSnackbarMsg('Encabezado actualizado');
@@ -320,16 +320,14 @@ const Contacto = () => {
 				{isAdmin && (
 					<Tooltip title='Editar título/imagen'>
 						<IconButton
-							onClick={() => setOpenHeaderEdit(true)}
+							onClick={openHeaderEditor}
 							sx={{
 								position: 'absolute',
 								bottom: 16,
 								right: 16,
 								color: 'white',
 								backgroundColor: 'rgba(0,0,0,0.4)',
-								'&:hover': {
-									backgroundColor: 'rgba(255,255,255,0.3)',
-								},
+								'&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' },
 								zIndex: 3,
 							}}
 						>
@@ -868,19 +866,19 @@ const Contacto = () => {
 				<DialogContent
 					dividers
 					sx={{
-						pt: 1.5, 
+						pt: 1.5,
 						pb: 2,
 						px: 2,
 					}}
 				>
 					<TextField
 						label='Título del header'
-						value={headerTitle}
-						onChange={e => setHeaderTitle(e.target.value)}
+						value={headerTitleInput} 
+						onChange={e => setHeaderTitleInput(e.target.value)}
 						fullWidth
-						size='small' 
-						margin='dense' 
-						InputLabelProps={{ shrink: true }} 
+						size='small'
+						margin='dense'
+						InputLabelProps={{ shrink: true }}
 						sx={{
 							'& .MuiOutlinedInput-root': { borderRadius: 1.2 },
 						}}
