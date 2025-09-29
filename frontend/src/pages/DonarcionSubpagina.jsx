@@ -13,19 +13,20 @@ const DonarcionSubpagina = ({ onClose }) => {
     const [isCustomSelected, setIsCustomSelected] = useState(false);
     const [screenSize, setScreenSize] = useState("xl");
     const [notification, setNotification] = useState({ message: "", type: "" });
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    const [uploadedFile, setUploadedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
 
-    // Enhanced responsive system with more breakpoints
     const getScreenSize = () => {
         if (typeof window === 'undefined') return 'xl';
         const width = window.innerWidth;
-        if (width < 480) return 'xs';      // Extra small phones (320px-479px)
-        if (width < 768) return 'sm';      // Small phones/tablets (480px-767px)
-        if (width < 1024) return 'md';     // Tablets/small laptops (768px-1023px)
-        if (width < 1280) return 'lg';     // Laptops (1024px-1279px)
-        if (width < 1536) return 'xl';     // Desktop (1280px-1535px)
-        return 'xxl';                      // Large desktop (1536px+)
+        if (width < 480) return 'xs';
+        if (width < 768) return 'sm';
+        if (width < 1024) return 'md';
+        if (width < 1280) return 'lg';
+        if (width < 1536) return 'xl';
+        return 'xxl';
     };
-
 
     useEffect(() => {
         const handleResize = () => setScreenSize(getScreenSize());
@@ -34,7 +35,16 @@ const DonarcionSubpagina = ({ onClose }) => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // Enhanced responsive styles with fluid design
+    useEffect(() => {
+        if (uploadedFile) {
+            const url = URL.createObjectURL(uploadedFile);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        } else {
+            setPreviewUrl(null);
+        }
+    }, [uploadedFile]);
+
     const rootStyles = {
         width: '100%',
         minHeight: '100vh',
@@ -99,6 +109,33 @@ const DonarcionSubpagina = ({ onClose }) => {
         bottom: screenSize === 'xs' ? '0' : 'auto',
         zIndex: screenSize === 'xs' ? 100 : 'auto',
         borderTop: screenSize === 'xs' ? '2px solid #f1f5f9' : 'none'
+    };
+
+    const modalOverlayStyles = {
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0, 0, 0, 0.6)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 2000,
+        padding: screenSize === 'xs' ? '16px' : '20px',
+        backdropFilter: 'blur(4px)'
+    };
+
+    const modalContentStyles = {
+        backgroundColor: '#ffffff',
+        borderRadius: screenSize === 'xs' ? '16px' : '20px',
+        padding: screenSize === 'xs' ? '24px 20px' : '32px 28px',
+        width: '100%',
+        maxWidth: screenSize === 'xs' ? '100%' : '500px',
+        maxHeight: '90vh',
+        overflowY: 'auto',
+        boxShadow: '0 20px 60px rgba(0, 0, 0, 0.3)',
+        position: 'relative'
     };
 
     const backButtonStyles = {
@@ -193,7 +230,8 @@ const DonarcionSubpagina = ({ onClose }) => {
         backgroundColor: isSelected ? 'rgba(230, 105, 29, 0.05)' : '#ffffff',
         padding: screenSize === 'xs' ? '12px 16px' : '16px 20px',
         boxShadow: isSelected ? '0 4px 20px rgba(230, 105, 29, 0.15)' : '0 2px 8px rgba(0, 0, 0, 0.08)',
-        transform: isSelected ? 'translateY(-1px)' : 'translateY(0)'
+        transform: isSelected ? 'translateY(-1px)' : 'translateY(0)',
+        position: 'relative'
     });
 
     const customInputStyles = {
@@ -207,11 +245,7 @@ const DonarcionSubpagina = ({ onClose }) => {
         color: '#1e293b',
         fontWeight: '500',
         minHeight: screenSize === 'xs' ? '24px' : '28px',
-        boxSizing: 'border-box',
-        '::placeholder': {
-            color: '#94a3b8',
-            fontSize: screenSize === 'xs' ? '0.95rem' : '1rem'
-        }
+        boxSizing: 'border-box'
     };
 
     const contributionTitleStyles = {
@@ -274,49 +308,11 @@ const DonarcionSubpagina = ({ onClose }) => {
         overflow: 'hidden'
     });
 
-    const instructionStyles = {
-        fontSize: screenSize === 'xs' ? '0.9rem' : '0.95rem',
-        color: '#64748b',
-        textAlign: 'center',
-        marginBottom: '16px',
-        lineHeight: 1.5,
-        fontWeight: '400'
-    };
-
-    const safeAreaStyles = {
-        paddingBottom: screenSize === 'xs' ? 'env(safe-area-inset-bottom, 20px)' : '0'
-    };
-
-    // Animation styles
-    const pulseKeyframes = `
-        @keyframes pulse {
-            0%, 100% { opacity: 1; }
-            50% { opacity: 0.8; }
-        }
-        @keyframes slideUp {
-            from {
-                transform: translateY(20px);
-                opacity: 0;
-            }
-            to {
-                transform: translateY(0);
-                opacity: 1;
-            }
-        }
-        @keyframes buttonPress {
-            0% { transform: scale(1); }
-            50% { transform: scale(0.98); }
-            100% { transform: scale(1); }
-        }
-    `;
-
-    // Event handlers
     const handleSelectAmount = (amount) => {
         setSelectedAmount(amount);
         setIsCustomSelected(false);
         setCustomAmount('');
         
-        // Add haptic feedback for mobile
         if (screenSize === 'xs' && 'vibrate' in navigator) {
             navigator.vibrate(50);
         }
@@ -358,18 +354,46 @@ const DonarcionSubpagina = ({ onClose }) => {
 
         if (amount === "0.00") {
             setNotification({ message: "Debes seleccionar o ingresar una cantidad válida.", type: "error" });
+            setTimeout(() => setNotification({ message: "", type: "" }), 4000);
             return;
         }
 
-        // ✅ Mostrar notificación en lugar de alert()
-        setNotification({ message: `¡Gracias por tu donación de L.${amount}!`, type: "success" });
+        setShowPaymentModal(true);
+    };
 
-        // Limpieza después de 4s
-        setTimeout(() => setNotification({ message: "", type: "" }), 4000);
+    const handleFileChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            if (file.type.startsWith('image/')) {
+                setUploadedFile(file);
+            } else {
+                setNotification({ message: "Por favor selecciona una imagen válida", type: "error" });
+                setTimeout(() => setNotification({ message: "", type: "" }), 4000);
+            }
+        }
+    };
+
+    const handleSubmitPayment = () => {
+        if (!uploadedFile) {
+            setNotification({ message: "Por favor sube el comprobante de la Donacion", type: "error" });
+            setTimeout(() => setNotification({ message: "", type: "" }), 4000);
+            return;
+        }
+
+        setNotification({ 
+            message: `¡Gracias por tu donación de L.${getSelectedAmountValue()}! Tu comprobante ha sido recibido.`, 
+            type: "success" 
+        });
+        
+        setTimeout(() => {
+            setShowPaymentModal(false);
+            setUploadedFile(null);
+            setPreviewUrl(null);
+            setNotification({ message: "", type: "" });
+        }, 3000);
     };
 
     const handleCardTouch = (e, amount) => {
-        // Add touch feedback
         if (screenSize === 'xs') {
             e.currentTarget.style.transform = 'scale(0.98)';
             setTimeout(() => {
@@ -382,7 +406,6 @@ const DonarcionSubpagina = ({ onClose }) => {
 
     return (
         <>
-        {/* Notificación flotante */}
             {notification.message && (
                 <div
                     style={{
@@ -394,7 +417,7 @@ const DonarcionSubpagina = ({ onClose }) => {
                         padding: "12px 20px",
                         borderRadius: "12px",
                         boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
-                        zIndex: 2000,
+                        zIndex: 2100,
                         fontSize: "0.95rem",
                         fontWeight: "500",
                         transition: "opacity 0.3s ease-in-out"
@@ -404,17 +427,14 @@ const DonarcionSubpagina = ({ onClose }) => {
                 </div>
             )}
             
-            <style>{pulseKeyframes}</style>
             <div style={rootStyles}>
                 <div style={containerStyles}>
-                    {/* Left Panel - Donation Selection */}
                     <div style={leftPanelStyles}>
                         <button 
                             style={backButtonStyles}
                             onClick={handleBack}
                             onMouseEnter={(e) => e.target.style.color = '#d65a0c'}
                             onMouseLeave={(e) => e.target.style.color = '#e6691d'}
-                            aria-label="Regresar a la página anterior"
                         >
                             <span style={{ fontSize: '1.2em' }}>←</span>
                             <span>Regresar</span>
@@ -423,12 +443,6 @@ const DonarcionSubpagina = ({ onClose }) => {
                         <h1 style={titleStyles}>
                             Selecciona una cantidad para donar
                         </h1>
-
-                        {screenSize === 'xs' && (
-                            <p style={instructionStyles}>
-                                Toca una opción o ingresa una cantidad personalizada
-                            </p>
-                        )}
                         
                         <div style={gridStyles}>
                             {donationOptions.map((amount) => (
@@ -437,30 +451,6 @@ const DonarcionSubpagina = ({ onClose }) => {
                                     style={optionCardStyles(selectedAmount === amount)}
                                     onClick={() => handleSelectAmount(amount)}
                                     onTouchStart={(e) => handleCardTouch(e, amount)}
-                                    onMouseEnter={(e) => {
-                                        if (selectedAmount !== amount) {
-                                            e.target.style.borderColor = '#e6691d';
-                                            e.target.style.boxShadow = '0 4px 20px rgba(230, 105, 29, 0.15)';
-                                            e.target.style.transform = 'translateY(-1px)';
-                                        }
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        if (selectedAmount !== amount) {
-                                            e.target.style.borderColor = '#e2e8f0';
-                                            e.target.style.boxShadow = '0 2px 8px rgba(0, 0, 0, 0.1)';
-                                            e.target.style.transform = 'translateY(0)';
-                                        }
-                                    }}
-                                    role="button"
-                                    tabIndex={0}
-                                    onKeyDown={(e) => {
-                                        if (e.key === 'Enter' || e.key === ' ') {
-                                            e.preventDefault();
-                                            handleSelectAmount(amount);
-                                        }
-                                    }}
-                                    aria-pressed={selectedAmount === amount}
-                                    aria-label={`Seleccionar donación de ${amount}`}
                                 >
                                     <span style={amountTextStyles}>{amount}</span>
                                     {selectedAmount === amount && (
@@ -490,10 +480,7 @@ const DonarcionSubpagina = ({ onClose }) => {
                             <label style={customAmountLabelStyles}>
                                 Cantidad personalizada
                             </label>
-                            <div 
-                                style={customAmountCardStyles(isCustomSelected)}
-                                onClick={() => setIsCustomSelected(true)}
-                            >
+                            <div style={customAmountCardStyles(isCustomSelected)}>
                                 <span style={{
                                     fontSize: screenSize === 'xs' ? '1.1rem' : '1.2rem',
                                     fontWeight: '500',
@@ -506,11 +493,7 @@ const DonarcionSubpagina = ({ onClose }) => {
                                     style={customInputStyles}
                                     value={customAmount}
                                     onChange={handleCustomAmountChange}
-                                    min="0"
-                                    step="0.01"
                                     onFocus={handleCustomFocus}
-                                    inputMode="decimal"
-                                    aria-label="Ingresar cantidad personalizada en Lempiras"
                                 />
                                 {isCustomSelected && (
                                     <div style={{
@@ -535,8 +518,7 @@ const DonarcionSubpagina = ({ onClose }) => {
                         </div>
                     </div>
 
-                    {/* Right Panel - Contribution Summary */}
-                    <div style={{ ...rightPanelStyles, ...safeAreaStyles }}>
+                    <div style={rightPanelStyles}>
                         <h2 style={contributionTitleStyles}>Tu contribución</h2>
                         
                         <div style={summaryCardStyles}>
@@ -546,73 +528,176 @@ const DonarcionSubpagina = ({ onClose }) => {
                                     L.{getSelectedAmountValue()}
                                 </span>
                             </div>
-                            
-                            {getSelectedAmountValue() !== '0.00' && (
-                                <div style={{
-                                    fontSize: '0.9rem',
-                                    color: '#64748b',
-                                    textAlign: 'center',
-                                    marginTop: '8px'
-                                }}>
-                                    {screenSize === 'xs' ? 'Desliza hacia arriba para continuar' : ''}
-                                </div>
-                            )}
                         </div>
                         
                         <button
                             style={continueButtonStyles(getSelectedAmountValue() === '0.00')}
                             disabled={getSelectedAmountValue() === '0.00'}
                             onClick={handleContinue}
-                            onMouseEnter={(e) => {
-                                if (!e.target.disabled) {
-                                    e.target.style.backgroundColor = '#d65a0c';
-                                    e.target.style.transform = 'translateY(-2px)';
-                                    e.target.style.boxShadow = '0 6px 20px rgba(230, 105, 29, 0.4)';
-                                }
-                            }}
-                            onMouseLeave={(e) => {
-                                if (!e.target.disabled) {
-                                    e.target.style.backgroundColor = '#e6691d';
-                                    e.target.style.transform = 'translateY(0)';
-                                    e.target.style.boxShadow = '0 4px 15px rgba(230, 105, 29, 0.3)';
-                                }
-                            }}
-                            aria-label={`Proceder con donación de L.${getSelectedAmountValue()}`}
                         >
-                            {screenSize === 'xs' ? 
-                                `Donar L.${getSelectedAmountValue()}` : 
-                                'Continuar con la donación'
-                            }
+                            Continuar con la donación
                         </button>
-
-                        {getSelectedAmountValue() === '0.00' && (
-                            <div style={{
-                                fontSize: '0.9rem',
-                                color: '#94a3b8',
-                                textAlign: 'center',
-                                fontStyle: 'italic'
-                            }}>
-                                {screenSize === 'xs' ? 
-                                    'Selecciona una cantidad arriba para continuar' :
-                                    'Selecciona una cantidad para continuar'
-                                }
-                            </div>
-                        )}
-
-                        {screenSize === 'xs' && (
-                            <div style={{
-                                fontSize: '0.8rem',
-                                color: '#94a3b8',
-                                textAlign: 'center',
-                                marginTop: '12px',
-                                lineHeight: 1.4
-                            }}>
-                                Tu donación ayudará a transformar vidas a través del deporte
-                            </div>
-                        )}
                     </div>
                 </div>
             </div>
+
+            {showPaymentModal && (
+                <div style={modalOverlayStyles} onClick={() => setShowPaymentModal(false)}>
+                    <div style={modalContentStyles} onClick={(e) => e.stopPropagation()}>
+                        <h2 style={{
+                            fontSize: screenSize === 'xs' ? '1.4rem' : '1.6rem',
+                            fontWeight: '700',
+                            color: '#1e293b',
+                            marginBottom: '20px',
+                            textAlign: 'center'
+                        }}>
+                            Información de la Donacion
+                        </h2>
+
+                        <div style={{
+                            backgroundColor: '#fef3c7',
+                            border: '2px solid #f59e0b',
+                            borderRadius: '12px',
+                            padding: '20px',
+                            marginBottom: '24px'
+                        }}>
+                            <p style={{
+                                fontSize: '1rem',
+                                color: '#92400e',
+                                margin: '0 0 12px 0',
+                                fontWeight: '600'
+                            }}>
+                                Realiza tu depósito a:
+                            </p>
+                            <p style={{
+                                fontSize: '1.1rem',
+                                color: '#1e293b',
+                                margin: '0',
+                                fontWeight: '700',
+                                lineHeight: 1.6
+                            }}>
+                                Banco: <span style={{ color: '#e6691d' }}>BAC</span><br />
+                                Cuenta: <span style={{ color: '#e6691d' }}>748728881</span><br />
+                                A nombre de: <span style={{ color: '#e6691d' }}>Melissa Rosales</span>
+                            </p>
+                        </div>
+
+                        <div style={{
+                            border: '2px dashed #cbd5e1',
+                            borderRadius: '12px',
+                            padding: '24px',
+                            textAlign: 'center',
+                            marginBottom: '20px',
+                            backgroundColor: '#f8fafc'
+                        }}>
+                            <label htmlFor="file-upload" style={{
+                                cursor: 'pointer',
+                                display: 'block'
+                            }}>
+                                <div style={{
+                                    fontSize: '3rem',
+                                    marginBottom: '12px',
+                                    color: '#94a3b8'
+                                }}>
+                                    📤
+                                </div>
+                                <p style={{
+                                    fontSize: '1rem',
+                                    color: '#64748b',
+                                    margin: '0 0 8px 0',
+                                    fontWeight: '500'
+                                }}>
+                                    {uploadedFile ? 'Cambiar comprobante' : 'Subir comprobante de la Donacion'}
+                                </p>
+                                <p style={{
+                                    fontSize: '0.85rem',
+                                    color: '#94a3b8',
+                                    margin: 0
+                                }}>
+                                    Haz clic para seleccionar una imagen
+                                </p>
+                            </label>
+                            <input
+                                id="file-upload"
+                                type="file"
+                                accept="image/*"
+                                onChange={handleFileChange}
+                                style={{ display: 'none' }}
+                            />
+                        </div>
+
+                        {previewUrl && (
+                            <div style={{
+                                marginBottom: '20px',
+                                textAlign: 'center'
+                            }}>
+                                <p style={{
+                                    fontSize: '0.9rem',
+                                    color: '#64748b',
+                                    marginBottom: '8px',
+                                    fontWeight: '500'
+                                }}>
+                                    Vista previa:
+                                </p>
+                                <img
+                                    src={previewUrl}
+                                    alt="Comprobante"
+                                    style={{
+                                        maxWidth: '100%',
+                                        maxHeight: '200px',
+                                        borderRadius: '8px',
+                                        border: '2px solid #e2e8f0',
+                                        objectFit: 'contain'
+                                    }}
+                                />
+                            </div>
+                        )}
+
+                        <div style={{
+                            display: 'flex',
+                            gap: '12px',
+                            marginTop: '24px'
+                        }}>
+                            <button
+                                onClick={() => setShowPaymentModal(false)}
+                                style={{
+                                    flex: 1,
+                                    padding: '14px 20px',
+                                    backgroundColor: '#f1f5f9',
+                                    color: '#475569',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: 'pointer',
+                                    transition: 'background-color 0.3s'
+                                }}
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleSubmitPayment}
+                                disabled={!uploadedFile}
+                                style={{
+                                    flex: 1,
+                                    padding: '14px 20px',
+                                    backgroundColor: uploadedFile ? '#e6691d' : '#f1f5f9',
+                                    color: uploadedFile ? 'white' : '#94a3b8',
+                                    border: 'none',
+                                    borderRadius: '12px',
+                                    fontSize: '1rem',
+                                    fontWeight: '600',
+                                    cursor: uploadedFile ? 'pointer' : 'not-allowed',
+                                    transition: 'all 0.3s',
+                                    boxShadow: uploadedFile ? '0 4px 12px rgba(230, 105, 29, 0.3)' : 'none'
+                                }}
+                            >
+                                Enviar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </>
     );
 };
