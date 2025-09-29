@@ -26,18 +26,22 @@ const scaleIn = {
 const Voluntariado = () => {
   const [images, setImages] = useState({
     header: equipoImg,
-    voluntariado: "https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg",
+    voluntariado: "",
   });
 
   useEffect(() => {
     const fetchImages = async () => {
+      const fallbackUrl = "https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg";
       try {
-        const res = await api.get('/voluntariado/images', { withCredentials: true });
+        const res = await api.get('/auth/voluntariado/getimages', { withCredentials: true });
         const imgObj = {};
         res.data.forEach(item => {
-          imgObj[item.type] = item.url;
+          imgObj[item.type] = item.url|| fallbackUrl;
         });
-        setImages(imgObj);
+        setImages(prev => ({
+        ...prev,
+        ...imgObj,
+            }));
       } catch (err) {
         console.error('Error al cargar imágenes:', err);
       }
@@ -70,13 +74,13 @@ const Voluntariado = () => {
     formData.append("file", file);
 
     try {
-      const uploadResponse = await api.post("/voluntariado/upload", formData, {
+      const uploadResponse = await api.post("/auth/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
-      const finalUrl = uploadResponse.data.url;
+      const finalUrl = uploadResponse?.data?.url;
 
-      await api.put("/voluntariado/images", { type: key, url: finalUrl });
+      await api.put("/auth/voluntariado/images", { type: key, url: finalUrl });
 
       setImages((prev) => ({
         ...prev,
@@ -86,6 +90,7 @@ const Voluntariado = () => {
       console.error(`Error al actualizar la imagen de ${key}:`, error);
     }
   };
+
 
   useEffect(() => {
     const checkRole = async () => {
@@ -391,6 +396,7 @@ const Voluntariado = () => {
       </Box>
     </>
   );
+
 };
 
 export default Voluntariado;
