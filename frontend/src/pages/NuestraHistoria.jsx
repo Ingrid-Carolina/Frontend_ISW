@@ -65,7 +65,7 @@ function NuestraHistoria() {
 	// Galería (carrusel)
 	const [galeriaImages, setGaleriaImages] = useState([]);
 
-	// NUEVO: Effect para gestionar preview de imagen del header
+	// Effect para gestionar preview de imagen del header
 	useEffect(() => {
 		if (!headerFile) {
 			setHeaderPreview(null);
@@ -84,7 +84,7 @@ function NuestraHistoria() {
 		setTimeout(() => setShowBanner(false), 4000);
 	};
 
-	// NUEVO: Funciones para gestionar el header (copiadas de Aliados.jsx)
+	// Funciones para gestionar el header 
 	const openHeaderEditor = () => {
 		const currentTitle = textos.historia_titulo_principal || headerTitle || 'NUESTRA HISTORIA';
 		setHeaderTitleInput(currentTitle);
@@ -143,7 +143,7 @@ function NuestraHistoria() {
 				}
 			}
 
-			// 3) Guardar título en servidor
+			// 3) Guardar título 
 			try {
 				await handleTextSave('historia_titulo_principal', titleToSave);
 			} catch (textError) {

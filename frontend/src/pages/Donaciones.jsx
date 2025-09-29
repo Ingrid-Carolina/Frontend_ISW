@@ -455,13 +455,13 @@ const Donaciones = () => {
                     <MediaCard
                         title='Patrocinara un Jugador'
                         content='Mantenga vivo el sueño del béisbol para un joven jugador de béisbol en América Latina asegurándole que tenga los suministros que necesita para disfrutar del juego durante un año.'
-                        image='https://th.bing.com/th/id/OIP.H-VR5oO-zt3RacllWQKGsAHaFj?rs=1&pid=ImgDetMain'
+                        image='https://www.elheraldo.hn/binrepository/1199x900/0c0/0d0/none/45933/SYYW/IMG-20170206-WA0012_EH1042023_MG116888490.jpg'
                         onDonateClick={handleOpen}
                     />
                     <MediaCard
                         title='Patrocinar al Equipo'
                         content='Transforma el juego de todo el equipo durante un año. Este patrocinio Ayuda al equipo de béisbol, uniformes nuevos y apoyo para el transporte de los niños.'
-                        image='https://www.alamy.com/aggregator-api/download?url=https://c8.alamy.com/comp/P3F3HY/young-soccer-players-holding-trophy-boys-celebrating-soccer-football-championship-winning-team-of-sport-tournament-for-kids-children-P3F3HY.jpg'
+                        image='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkKUI35AarrNpOvArQK3u2OwgPP2PA5wfQNg&s'
                         onDonateClick={handleOpen}
                     />
                     <MediaCard
