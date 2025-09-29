@@ -1,28 +1,31 @@
 import React, { useState, useEffect } from 'react';
-// Importa el componente para mostrar testimonios individuales
 import TestimonioCapsula from '../../components/TestimonioCapsula';
-// Importa el cliente API personalizado
 import { api } from '../../api/api';
-// Importa componentes de Material UI para la interfaz
-import { Grid, Box, Typography, TextField, Button, Stack, Divider } from '@mui/material';
+import { Grid } from '@mui/material';
+import {
+  Box,
+  Typography,
+  TextField,
+  Button,
+  Stack,
+  Divider,
+  FormControlLabel,
+  Checkbox,
+  Chip
+} from '@mui/material';
 
-// Componente principal para gestionar testimonios
 const ManageTestimonios = () => {
-  // Estados para los campos del formulario
   const [nombre, setNombre] = useState('');
   const [contenido, setContenido] = useState('');
   const [imagen, setImagen] = useState('');
-  // Estado para la lista de testimonios
+  const [isFeatured, setIsFeatured] = useState(false);
   const [testimonios, setTestimonios] = useState([]);
-  // Estado para modo edición y el índice seleccionado
   const [modoEdicion, setModoEdicion] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
-  // Estados para el banner de mensajes (éxito/error)
   const [bannerMsg, setBannerMsg] = useState('');
-  const [bannerType, setBannerType] = useState('success'); // 'success' o 'error'
+  const [bannerType, setBannerType] = useState('success');
   const [showBanner, setShowBanner] = useState(false);
 
-  // Función para registrar un nuevo testimonio en el backend
   const realizarPeticion = async () => {
     const url = `/auth/registrartestimonio`;
     const body = {
@@ -32,20 +35,24 @@ const ManageTestimonios = () => {
     };
 
     try {
-      // Envía el testimonio al backend
       const res = await api.post(url, body, {
         headers: { "Content-Type": "application/json" }
       });
-      // Muestra mensaje de éxito en el banner
+      
+      // Si está marcado como destacado, marcarlo después de crear
+      if (isFeatured) {
+        await destacarTestimonioRecienCreado();
+      }
+      
       setBannerMsg(res.data.mensaje)
       setBannerType('success');
       setShowBanner(true);
       setTimeout(() => setShowBanner(false), 4000);
+
       return res.data;
+
     } catch (error) {
-      // Muestra mensaje de error en el banner
-      const msg =
-        error?.data?.mensaje || error?.message || 'Error en la Red';
+      const msg = error?.data?.mensaje || error?.message || 'Error en la Red';
       setBannerMsg(msg);
       setBannerType('error');
       setShowBanner(true);
@@ -54,54 +61,66 @@ const ManageTestimonios = () => {
     }
   };
 
-  // useEffect para cargar los testimonios al montar el componente
+  // Función para destacar testimonio recién creado
+  const destacarTestimonioRecienCreado = async () => {
+    try {
+      // Obtener el último testimonio creado (que debería ser este)
+      const res = await api.get('/auth/obtenertestimonios');
+      const testimonios = res.data;
+      if (testimonios.length > 0) {
+        const ultimoTestimonio = testimonios[0]; // El más reciente
+        await api.put('/auth/testimonios/destacado', { 
+          id: ultimoTestimonio.id_testimonio 
+        });
+      }
+    } catch (error) {
+      console.error('Error al destacar testimonio:', error);
+    }
+  };
+
+  // Cargar testimonios
   useEffect(() => {
     const fetchTestimonios = async () => {
       try {
-        // Obtiene los testimonios del backend
         const res = await api.get('/auth/obtenertestimonios');
         const testimonios = res.data;
-        // Formatea los testimonios para el frontend
+
         const testimoniosLista = testimonios.map(testimonio => ({
           id: testimonio.id_testimonio,
           nombre: testimonio.nombre,
           contenido: testimonio.contenido,
           imagen: testimonio.imagen,
+          is_featured: testimonio.is_featured
         }));
+
         setTestimonios(testimoniosLista);
         console.log(testimonios);
+
       } catch (err) {
         console.error('Error al obtener testimonios:', err);
       }
     };
+
     fetchTestimonios();
   }, []);
 
-  // Función para agregar un nuevo testimonio
   const handleAgregar = async () => {
-    if (!nombre || !contenido) return
-    else
-      await realizarPeticion();
-
-    // Limpia los campos del formulario
-    setNombre('');
-    setContenido('');
-    setImagen('');
-    // Recarga la página para actualizar la lista
+    if (!nombre || !contenido) return;
+    
+    await realizarPeticion();
+    resetForm();
+    
     setTimeout(() => {
       window.location.reload();
     }, 1000);
   };
 
-  // Función para eliminar un testimonio
   const handleEliminar = async (index) => {
     try {
       const id = testimonios[index].id;
       const url = `/auth/testimonio/${id}`;
       const res = await api.delete(url);
-      console.log(id);
 
-      // Muestra mensaje de éxito en el banner
       setBannerMsg(res.data.mensaje)
       setBannerType('success');
       setShowBanner(true);
@@ -109,14 +128,11 @@ const ManageTestimonios = () => {
 
       window.scrollTo(0, 0);
 
-      // Elimina el testimonio de la lista local
       const nuevaLista = [...testimonios];
       nuevaLista.splice(index, 1);
       setTestimonios(nuevaLista);
     } catch (error) {
-      // Muestra mensaje de error en el banner
-      const msg =
-        error?.data?.mensaje || error?.message || 'Error en la Red'
+      const msg = error?.data?.mensaje || error?.message || 'Error en la Red'
       setBannerMsg(msg)
       setBannerType('error');
       setShowBanner(true);
@@ -125,40 +141,48 @@ const ManageTestimonios = () => {
     }
   };
 
-  // Prepara el formulario para editar un testimonio existente
   const ActualizarContainer = (index) => {
     const testimonio = testimonios[index];
     setNombre(testimonio.nombre);
     setContenido(testimonio.contenido);
     setImagen(testimonio.imagen);
+    setIsFeatured(testimonio.is_featured || false);
     setModoEdicion(true);
     setSelectedIndex(index);
-    console.log("El index es" + " " + selectedIndex);
   }
 
-  // Función para modificar un testimonio existente
   const handleModificar = async (index) => {
     try {
       const id = testimonios[index].id;
       const url = `/auth/testimonio/${id}`;
+
       const updatedbody = {
         nombre: nombre,
         contenido: contenido,
         imagen: imagen,
       };
-      // Envía la actualización al backend
+
       const res = await api.put(url, updatedbody, {
         headers: { "Content-Type": "application/json" }
       });
-      console.log(id);
 
-      // Muestra mensaje de éxito en el banner
+      // Manejar el destacado por separado
+      if (isFeatured) {
+        await api.put('/auth/testimonios/destacado', { id: id });
+      } else {
+        // Si se está editando un testimonio destacado y se quita el check, quitar el destacado
+        const testimonioActual = testimonios[index];
+        if (testimonioActual.is_featured && !isFeatured) {
+          await api.put('/auth/testimonios/destacado', { id: null });
+        }
+      }
+
       setBannerMsg(res.data.mensaje)
       setBannerType('success');
       setShowBanner(true);
       setTimeout(() => setShowBanner(false), 4000);
+
     } catch (error) {
-      // Muestra mensaje de error en el banner
       const mensaje = error?.data?.mensaje || error?.message || 'Error en la Red'
       console.log(error);
       console.error("Error modificando testimonio:", error);
@@ -168,20 +192,69 @@ const ManageTestimonios = () => {
       setTimeout(() => setShowBanner(false), 4000);
       throw error;
     }
-    // Limpia los campos del formulario
-    setNombre('');
-    setContenido('');
-    setImagen('');
-    // Recarga la página para actualizar la lista
+    
+    resetForm();
     setTimeout(() => {
       window.location.reload();
     }, 1000);
   };
 
-  // Renderizado del componente
+  const resetForm = () => {
+    setNombre('');
+    setContenido('');
+    setImagen('');
+    setIsFeatured(false);
+    setModoEdicion(false);
+    setSelectedIndex(null);
+  };
+
+  const handleDestacar = async (id) => {
+    try {
+      await api.put('/auth/testimonios/destacado', { id: id });
+      setBannerMsg('Testimonio destacado correctamente');
+      setBannerType('success');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+      
+      // Recargar la lista
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      const msg = error?.data?.mensaje || error?.message || 'Error en la Red';
+      setBannerMsg(msg);
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+    }
+  };
+
+  const handleQuitarDestacado = async () => {
+    try {
+      await api.put('/auth/testimonios/destacado', { id: null });
+      setBannerMsg('Se quitó el testimonio destacado');
+      setBannerType('success');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+      
+      // Recargar la lista
+      setTimeout(() => {
+        window.location.reload();
+      }, 1000);
+    } catch (error) {
+      const msg = error?.data?.mensaje || error?.message || 'Error en la Red';
+      setBannerMsg(msg);
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+    }
+  };
+
+  // Encontrar testimonio destacado actual
+  const testimonioDestacado = testimonios.find(t => t.is_featured);
+
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
-      {/* Título principal */}
       <Typography
         variant="h3"
         sx={{
@@ -196,7 +269,7 @@ const ManageTestimonios = () => {
         Gestión de Testimonios
       </Typography>
 
-      {/* Formulario para agregar o modificar testimonios */}
+      {/* Formulario */}
       <Stack spacing={2} sx={{ mb: 4 }}>
         <TextField
           label="Nombre del niño o niña"
@@ -225,6 +298,24 @@ const ManageTestimonios = () => {
           inputProps={{ style: { fontFamily: 'ManropeEB' } }}
         />
 
+        <FormControlLabel
+          control={
+            <Checkbox
+              checked={isFeatured}
+              onChange={(e) => setIsFeatured(e.target.checked)}
+              disabled={modoEdicion && testimonioDestacado && testimonios[selectedIndex]?.id !== testimonioDestacado.id}
+            />
+          }
+          label="Destacar este testimonio"
+          sx={{ fontFamily: 'ManropeEB' }}
+        />
+        
+        {modoEdicion && testimonioDestacado && testimonios[selectedIndex]?.id !== testimonioDestacado.id && (
+          <Typography variant="body2" color="warning.main" sx={{ fontFamily: 'ManropeEB' }}>
+            Ya hay un testimonio destacado. Para destacar este, primero quite el destacado actual.
+          </Typography>
+        )}
+
         <Button
           variant="contained"
           onClick={modoEdicion ? () => handleModificar(selectedIndex) : handleAgregar}
@@ -242,7 +333,6 @@ const ManageTestimonios = () => {
         </Button>
       </Stack>
 
-      {/* Banner para mostrar mensajes de éxito o error */}
       {showBanner && (
         <Box
           sx={{
@@ -263,7 +353,46 @@ const ManageTestimonios = () => {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Vista previa del testimonio que se está editando/agregando */}
+      {/* Gestión de testimonio destacado */}
+      <Box sx={{ mb: 4, p: 2, backgroundColor: '#fff', borderRadius: 2, boxShadow: 1 }}>
+        <Typography
+          variant="h5"
+          sx={{
+            fontFamily: 'GroteskBold',
+            color: '#10045c',
+            mb: 2
+          }}
+        >
+          Testimonio Destacado Actual
+        </Typography>
+        
+        {testimonioDestacado ? (
+          <Box>
+            <TestimonioCapsula
+              nombre={testimonioDestacado.nombre}
+              contenido={testimonioDestacado.contenido}
+              imagen={testimonioDestacado.imagen}
+            />
+            <Button
+              variant="outlined"
+              color="warning"
+              size="small"
+              onClick={handleQuitarDestacado}
+              sx={{ mt: 1, fontFamily: 'ManropeEB' }}
+            >
+              Quitar como Destacado
+            </Button>
+          </Box>
+        ) : (
+          <Typography sx={{ fontFamily: 'ManropeEB', color: '#666' }}>
+            No hay testimonio destacado actualmente.
+          </Typography>
+        )}
+      </Box>
+
+      <Divider sx={{ mb: 3 }} />
+
+      {/* Vista previa del último testimonio */}
       {nombre || contenido || imagen ? (
         <>
           <Typography
@@ -298,7 +427,6 @@ const ManageTestimonios = () => {
       </Typography>
 
       <Stack spacing={3}>
-        {/* Mensaje si no hay testimonios guardados */}
         {testimonios.length === 0 && (
           <Typography
             variant="body1"
@@ -308,9 +436,22 @@ const ManageTestimonios = () => {
           </Typography>
         )}
 
-        {/* Renderiza cada testimonio guardado con botones para eliminar o modificar */}
         {testimonios.map((t, index) => (
-          <Box key={index}>
+          <Box key={index} sx={{ position: 'relative' }}>
+            {t.is_featured && (
+              <Chip 
+                label="Destacado" 
+                color="primary" 
+                size="small"
+                sx={{ 
+                  position: 'absolute', 
+                  top: 8, 
+                  right: 8, 
+                  zIndex: 10,
+                  fontFamily: 'ManropeEB'
+                }}
+              />
+            )}
             <TestimonioCapsula
               nombre={t.nombre}
               contenido={t.contenido}
@@ -321,19 +462,30 @@ const ManageTestimonios = () => {
               color="error"
               size="small"
               onClick={() => handleEliminar(index)}
-              sx={{ mt: 1, fontFamily: 'ManropeEB' }}
+              sx={{ mt: 1, mr: 1, fontFamily: 'ManropeEB' }}
             >
               Eliminar
             </Button>
             <Button
               variant="outlined"
-              color="error"
+              color="primary"
               size="small"
-              onClick={() => { ActualizarContainer(index) }}
-              sx={{ mt: 1, fontFamily: 'ManropeEB' }}
+              onClick={() => ActualizarContainer(index)}
+              sx={{ mt: 1, mr: 1, fontFamily: 'ManropeEB' }}
             >
               Modificar
             </Button>
+            {!t.is_featured && (
+              <Button
+                variant="outlined"
+                color="warning"
+                size="small"
+                onClick={() => handleDestacar(t.id)}
+                sx={{ mt: 1, fontFamily: 'ManropeEB' }}
+              >
+                Destacar
+              </Button>
+            )}
           </Box>
         ))}
       </Stack>

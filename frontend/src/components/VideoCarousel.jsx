@@ -1,23 +1,20 @@
 import React, { useState } from "react";
-import Slider from "react-slick";
-import "slick-carousel/slick/slick.css";
-import "slick-carousel/slick/slick-theme.css";
-import { Box, IconButton, Typography } from "@mui/material";
+import { Box, IconButton, Typography, Chip, Button } from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";
 import NavigateNextIcon from "@mui/icons-material/NavigateNext";
+import ShortsIcon from "@mui/icons-material/VideoLibrary";
+import OpenInNewIcon from "@mui/icons-material/OpenInNew";
 
-// Función mejorada para obtener ID de distintos tipos de URL
-function getYouTubeId(url) {
+// Función para obtener ID de YouTube Shorts
+function getYouTubeShortsId(url) {
   try {
     const urlObj = new URL(url);
     const hostname = urlObj.hostname;
 
-    if (hostname === "youtu.be") {
-      return urlObj.pathname.slice(1);
-    }
-
-    if (hostname.includes("youtube.com")) {
-      return urlObj.searchParams.get("v");
+    // YouTube Shorts
+    if (hostname.includes("youtube.com") && urlObj.pathname.includes("/shorts/")) {
+      const pathParts = urlObj.pathname.split("/shorts/");
+      return pathParts[1]?.split("?")[0]; // Remover parámetros de query
     }
 
     return null;
@@ -26,19 +23,18 @@ function getYouTubeId(url) {
   }
 }
 
+// Función para detectar si es un Short
+function isYouTubeShort(url) {
+  try {
+    const urlObj = new URL(url);
+    return urlObj.hostname.includes("youtube.com") && urlObj.pathname.includes("/shorts/");
+  } catch {
+    return false;
+  }
+}
+
 const VideoCarousel = ({ videos }) => {
   const [currentSlide, setCurrentSlide] = useState(0);
-
-  const settings = {
-    dots: false,
-    infinite: true,
-    speed: 500,
-    slidesToShow: 1,
-    slidesToScroll: 1,
-    arrows: false,
-    autoplay: false,
-    beforeChange: (_, next) => setCurrentSlide(next),
-  };
 
   const nextSlide = () => {
     setCurrentSlide((prev) => (prev + 1) % videos.length);
@@ -48,16 +44,21 @@ const VideoCarousel = ({ videos }) => {
     setCurrentSlide((prev) => (prev - 1 + videos.length) % videos.length);
   };
 
+  // Función para abrir Short en YouTube
+  const openInYouTube = (url) => {
+    window.open(url, '_blank', 'noopener,noreferrer');
+  };
+
   return (
     <Box
       sx={{
-        maxWidth: "900px",
+        maxWidth: "400px", // Ancho más adecuado para shorts
         margin: "auto",
         position: "relative",
-        backgroundColor: "#f8f9fa",
+        backgroundColor: "#000",
         borderRadius: "12px",
         overflow: "hidden",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.3)",
       }}
     >
       {/* Contador de slides */}
@@ -81,52 +82,177 @@ const VideoCarousel = ({ videos }) => {
       {/* Video principal */}
       <Box sx={{ position: "relative" }}>
         {videos.map((video, index) => {
-          const videoId = getYouTubeId(video.url);
+          const videoId = getYouTubeShortsId(video.url);
+          const isShort = isYouTubeShort(video.url);
+          const isActive = index === currentSlide;
+
           if (!videoId) {
             return (
               <Box
                 key={index}
                 sx={{
-                  display: index === currentSlide ? "block" : "none",
+                  display: isActive ? "block" : "none",
                   textAlign: "center",
                   padding: "60px 20px",
+                  backgroundColor: "#000",
+                  color: "white",
+                  height: "600px",
+                  display: "flex",
+                  flexDirection: "column",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
               >
-                <Typography variant="h6" color="text.secondary">
-                  Video no válido: {video.url}
+                <Typography variant="h6" color="text.secondary" sx={{ color: "white", mb: 2 }}>
+                  Short no válido
                 </Typography>
+                <Button 
+                  variant="contained" 
+                  onClick={() => openInYouTube(video.url)}
+                  startIcon={<OpenInNewIcon />}
+                >
+                  Abrir en YouTube
+                </Button>
               </Box>
             );
           }
 
-          const embedUrl = `https://www.youtube.com/embed/${videoId}?${
-            currentSlide === index ? "autoplay=1&mute=1" : "autoplay=0"
-          }`;
+          const thumbnailUrl = `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`;
 
           return (
             <Box
               key={index}
               sx={{
-                display: index === currentSlide ? "block" : "none",
+                display: isActive ? "block" : "none",
                 position: "relative",
-                paddingTop: "56.25%", // 16:9 aspect ratio
+                height: "600px", // Altura fija para formato vertical
+                backgroundColor: "#000",
+                cursor: "pointer",
               }}
+              onClick={() => openInYouTube(video.url)}
             >
-              <iframe
-                src={embedUrl}
-                title={`video-${index}`}
-                frameBorder="0"
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                style={{
+              {/* Badge para Shorts */}
+              <Chip
+                icon={<ShortsIcon />}
+                label="YouTube Short"
+                size="small"
+                sx={{
                   position: "absolute",
-                  top: 0,
-                  left: 0,
-                  width: "100%",
-                  height: "100%",
-                  border: "none",
+                  top: 16,
+                  left: 16,
+                  backgroundColor: "#FF0000",
+                  color: "white",
+                  fontWeight: "bold",
+                  zIndex: 10,
+                  "& .MuiChip-icon": {
+                    color: "white",
+                  },
                 }}
               />
+
+              {/* Miniatura del Short */}
+              <Box
+                sx={{
+                  width: "100%",
+                  height: "100%",
+                  position: "relative",
+                  overflow: "hidden",
+                }}
+              >
+                <img
+                  src={thumbnailUrl}
+                  alt={`Short ${index + 1}`}
+                  style={{
+                    width: "100%",
+                    height: "100%",
+                    objectFit: "cover",
+                  }}
+                  onError={(e) => {
+                    // Fallback si maxresdefault no existe
+                    e.target.src = `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`;
+                  }}
+                />
+                
+                {/* Overlay de play */}
+                <Box
+                  sx={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    right: 0,
+                    bottom: 0,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    backgroundColor: "rgba(0,0,0,0.4)",
+                    transition: "background-color 0.3s ease",
+                    "&:hover": {
+                      backgroundColor: "rgba(0,0,0,0.2)",
+                    },
+                  }}
+                >
+                  {/* Botón de play grande */}
+                  <Box
+                    sx={{
+                      width: 80,
+                      height: 80,
+                      borderRadius: "50%",
+                      backgroundColor: "#FF0000",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      marginBottom: 2,
+                      transition: "transform 0.3s ease",
+                      "&:hover": {
+                        transform: "scale(1.1)",
+                      },
+                    }}
+                  >
+                    <Box
+                      sx={{
+                        width: 0,
+                        height: 0,
+                        borderTop: "15px solid transparent",
+                        borderBottom: "15px solid transparent",
+                        borderLeft: "25px solid white",
+                        marginLeft: "5px",
+                      }}
+                    />
+                  </Box>
+
+                  <Typography 
+                    variant="h6" 
+                    sx={{ 
+                      color: "white", 
+                      fontWeight: "bold",
+                      textAlign: "center",
+                      mb: 1
+                    }}
+                  >
+                    Ver en YouTube
+                  </Typography>
+                  
+                  <Button 
+                    variant="outlined" 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      openInYouTube(video.url);
+                    }}
+                    startIcon={<OpenInNewIcon />}
+                    sx={{
+                      color: "white",
+                      borderColor: "white",
+                      "&:hover": {
+                        borderColor: "#FF0000",
+                        backgroundColor: "rgba(255,0,0,0.1)",
+                      },
+                    }}
+                  >
+                    Abrir Short
+                  </Button>
+                </Box>
+              </Box>
             </Box>
           );
         })}
@@ -140,7 +266,7 @@ const VideoCarousel = ({ videos }) => {
             top: "50%",
             transform: "translateY(-50%)",
             backgroundColor: "rgba(255,255,255,0.9)",
-            color: "#1976d2",
+            color: "#FF0000",
             "&:hover": {
               backgroundColor: "white",
               transform: "translateY(-50%) scale(1.1)",
@@ -162,7 +288,7 @@ const VideoCarousel = ({ videos }) => {
             top: "50%",
             transform: "translateY(-50%)",
             backgroundColor: "rgba(255,255,255,0.9)",
-            color: "#1976d2",
+            color: "#FF0000",
             "&:hover": {
               backgroundColor: "white",
               transform: "translateY(-50%) scale(1.1)",
@@ -184,12 +310,13 @@ const VideoCarousel = ({ videos }) => {
           justifyContent: "center",
           gap: 1,
           padding: "16px",
-          backgroundColor: "white",
-          borderTop: "1px solid #e0e0e0",
+          backgroundColor: "#1a1a1a",
+          borderTop: "1px solid #333",
+          overflowX: "auto",
         }}
       >
         {videos.map((video, index) => {
-          const videoId = getYouTubeId(video.url);
+          const videoId = getYouTubeShortsId(video.url);
           const isActive = index === currentSlide;
 
           if (!videoId) return null;
@@ -200,29 +327,31 @@ const VideoCarousel = ({ videos }) => {
               onClick={() => setCurrentSlide(index)}
               sx={{
                 position: "relative",
-                width: 80,
+                width: 60, // Miniaturas cuadradas para shorts
                 height: 60,
                 borderRadius: "8px",
                 overflow: "hidden",
                 cursor: "pointer",
-                border: isActive ? "3px solid #1976d2" : "3px solid transparent",
+                border: isActive ? "3px solid #FF0000" : "3px solid transparent",
                 opacity: isActive ? 1 : 0.7,
                 transition: "all 0.3s ease",
                 "&:hover": {
                   opacity: 1,
                   transform: "scale(1.05)",
                 },
+                flexShrink: 0,
               }}
             >
               <img
-                src={`https://img.youtube.com/vi/${videoId}/mqdefault.jpg`}
-                alt={`Miniatura ${index + 1}`}
+                src={`https://img.youtube.com/vi/${videoId}/hqdefault.jpg`}
+                alt={`Short ${index + 1}`}
                 style={{
                   width: "100%",
                   height: "100%",
                   objectFit: "cover",
                 }}
               />
+              
               {/* Overlay de play en miniatura */}
               <Box
                 sx={{
@@ -242,12 +371,30 @@ const VideoCarousel = ({ videos }) => {
                   sx={{
                     width: 0,
                     height: 0,
-                    borderTop: "6px solid transparent",
-                    borderBottom: "6px solid transparent",
-                    borderLeft: "12px solid white",
-                    marginLeft: "2px",
+                    borderTop: "4px solid transparent",
+                    borderBottom: "4px solid transparent",
+                    borderLeft: "8px solid white",
+                    marginLeft: "1px",
                   }}
                 />
+              </Box>
+
+              {/* Indicador de Short en miniatura */}
+              <Box
+                sx={{
+                  position: "absolute",
+                  top: 4,
+                  left: 4,
+                  backgroundColor: "#FF0000",
+                  color: "white",
+                  borderRadius: "4px",
+                  padding: "1px 4px",
+                  fontSize: "0.5rem",
+                  fontWeight: "bold",
+                  lineHeight: 1,
+                }}
+              >
+                S
               </Box>
             </Box>
           );
@@ -261,7 +408,7 @@ const VideoCarousel = ({ videos }) => {
           justifyContent: "center",
           gap: 1,
           padding: "12px",
-          backgroundColor: "white",
+          backgroundColor: "#1a1a1a",
         }}
       >
         {videos.map((_, index) => (
@@ -272,11 +419,11 @@ const VideoCarousel = ({ videos }) => {
               width: 8,
               height: 8,
               borderRadius: "50%",
-              backgroundColor: index === currentSlide ? "#1976d2" : "#e0e0e0",
+              backgroundColor: index === currentSlide ? "#FF0000" : "#666",
               cursor: "pointer",
               transition: "all 0.3s ease",
               "&:hover": {
-                backgroundColor: index === currentSlide ? "#1976d2" : "#bdbdbd",
+                backgroundColor: index === currentSlide ? "#FF0000" : "#999",
                 transform: "scale(1.2)",
               },
             }}
