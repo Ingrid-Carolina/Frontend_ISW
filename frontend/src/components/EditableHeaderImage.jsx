@@ -1,7 +1,9 @@
+/*EditableHeaderImage.jsx es el archivo que permite cambiar la imagen de fondo del header, y hacerla editable cada vez que se necesite*/
 import React, { useRef } from 'react';
 import { IconButton, Box, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
 
+// Componente para editar la imagen de fondo del header
 const EditableHeaderImage = ({ onImageUpload }) => {
   const fileInputRef = useRef(null);
 
@@ -46,7 +48,7 @@ const EditableHeaderImage = ({ onImageUpload }) => {
           <EditIcon />
         </IconButton>
       </Tooltip>
-      <input
+      <input // Input oculto para seleccionar archivo
         type="file"
         ref={fileInputRef}
         onChange={handleFileChange}

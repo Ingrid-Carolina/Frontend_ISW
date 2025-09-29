@@ -1,3 +1,4 @@
+/* NewsSection.css: Estilos para la sección de noticias, del apartado de NewsSection.jsx */
 .noticia-container {
   width: 100%;
   margin: auto;
@@ -5,10 +6,12 @@
   box-sizing: border-box;
 }
 
+/* Encabezado de la noticia */
 .noticia-header {
   text-align: center;
 }
 
+/* Título principal de la noticia */  
 .noticia-titulo {
   font-family: 'GroteskBold', sans-serif;
   font-size: 4rem; /* más grande */
@@ -16,6 +19,7 @@
   color: #10045c;
 }
 
+/* Fecha de la noticia */
 .noticia-fecha {
   font-family: 'ManropeEB', sans-serif;
   font-size: 1rem;
@@ -23,6 +27,7 @@
   margin-bottom: 20px;
 }
 
+/* Separador visual debajo del título */
 .noticia-separador {
   border: none;
   height: 3px;
@@ -32,10 +37,12 @@
   margin-bottom: 25px;
 }
 
+/* Cuerpo de la noticia */
 .noticia-cuerpo {
   display: block;
 }
 
+/* Imagen dentro del cuerpo de la noticia */
 .noticia-img {
   float: right;
   width: 480px;
@@ -44,6 +51,7 @@
   border-radius: 10px;
 }
 
+/* Texto principal de la noticia */
 .noticia-texto {
   font-family: 'ManropeEB', sans-serif;
   font-size: 1.1rem;
@@ -52,6 +60,7 @@
   white-space: pre-line; /* ← ESTO permite que \n se interprete como salto de línea */
 }
 
+/*Estilos responsivos para adaptar a pantallas pequeñas*/
 @media screen and (max-width: 900px) {
   .noticia-container {
     padding: 90px 20px 40px 20px; /* Reduce padding lateral en móviles */

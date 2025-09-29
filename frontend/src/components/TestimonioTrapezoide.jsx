@@ -1,3 +1,5 @@
+// Componente TestimonioTrapezoide.jsx es un componente de React que muestra un testimonio en un diseño trapezoidal con una imagen y texto.
+// Permite invertir el orden de los elementos, superponer sobre otros contenidos y personalizar colores y estilos.
 import React from "react";
 import { motion } from "framer-motion";
 import "./TestimonioTrapezoide.css";
@@ -11,8 +13,8 @@ const TestimonioTrapezoide = ({
   invertir = false,
   superponer = false,
   zIndex = 1, // valor por defecto
-  invertirDiagonal = false, // nuevo prop
-  finalTest = false, // nuevo prop para el test final
+  invertirDiagonal = false, 
+  finalTest = false, 
 }) => {
   return (
     <section

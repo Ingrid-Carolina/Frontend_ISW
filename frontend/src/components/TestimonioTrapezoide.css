@@ -1,3 +1,7 @@
+/* TestimonioTrapezoide.css contiene los estilos para el componente TestimonioTrapezoide, que presenta testimonios en un diseño trapezoidal con imágenes y texto. 
+   Incluye estilos responsivos para adaptarse a diferentes tamaños de pantalla y efectos visuales como sombras y transiciones. */
+
+/* Contenedor principal del testimonio */
 .testimonio-container {
   display: flex;
   flex-direction: row;
@@ -10,6 +14,7 @@
   box-sizing: border-box;
 }
 
+/* Permite invertir el orden de texto e imagen si se añade la clase "invertir" */
 .testimonio-container.invertir {
   flex-direction: row-reverse;
 }
@@ -22,6 +27,7 @@
   clip-path: polygon(0 0, 100% 0, 100% 100%, 0 100%);
 }
 
+/* Contenedor de texto */
 .testimonio-texto {
   flex: 1;
   font-family: 'GroteskBold', sans-serif;

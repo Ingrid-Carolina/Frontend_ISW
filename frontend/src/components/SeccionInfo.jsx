@@ -1,3 +1,6 @@
+// Componente SeccionInfo.jsx es un componente de React que muestra una sección informativa con un título, descripción e imagen. 
+// Permite invertir el orden de los elementos y personalizar el color de fondo y la alineación del texto. 
+// También permite pasar un componente de imagen personalizado en lugar de una URL de imagen estándar.
 import React from 'react';
 import './SeccionInfo.css';
 

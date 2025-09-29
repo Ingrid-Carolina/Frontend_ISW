@@ -1,5 +1,6 @@
-/* src/components/EditableImage.css */
-.editable-image-container {
+/* Estilos para el componente EditableImage */
+
+.editable-image-container {/* Contenedor relativo para posicionar el botón */
   position: relative;
   display: inline-block; /* O ajusta según el layout */
   overflow: hidden; /* Para que el botón no se salga */

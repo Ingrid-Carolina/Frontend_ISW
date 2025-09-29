@@ -1,4 +1,6 @@
-// components/Footer.jsx
+// components/Footer.jsx es un componente de React que representa el pie de página de nuestro sitio web. 
+// Incluye enlaces de navegación, un logotipo y iconos de redes sociales. 
+// Utiliza Material-UI para los estilos y los iconos.
 
 import InstagramIcon from '@mui/icons-material/Instagram';
 import FacebookIcon from '@mui/icons-material/Facebook';
@@ -9,12 +11,12 @@ import Box from '@mui/material/Box';
 import { Link } from 'react-router-dom';
 
 import '../components/styles.css';
-
+// Componente funcional Footer
 export default function Footer() {
 	return (
 		<footer className='footer'>
 			<Box className='footer-container'>
-				{/* IZQUIERDA */}
+				{/* IZQUIERDA DEL FOOTER: CONTACTO Y POLITICA DE PRIVACIDAD */}
 				<Box className='footer-left'>
 					<nav>
 						<Link to='/Contacto'>Contacto</Link>
@@ -23,7 +25,7 @@ export default function Footer() {
 					</nav>
 				</Box>
 
-				{/* CENTRO */}
+				{/* CENTRO DEL FOOTER: LOGO DE PILOTOS*/}
 				<Box className='footer-center'>
 					<img src={logo} alt='Logo Pilotos' className='footer-logo' />
 					<div className='social-icons'>
@@ -56,7 +58,7 @@ export default function Footer() {
 					</div>
 				</Box>
 
-				{/* DERECHA */}
+				{/* DERECHA DEL FOOTER*/}
 				<Box className='footer-right'>
 					<p>© 2025 - Mi Sitio Web. Todos los derechos reservados.</p>
 				</Box>

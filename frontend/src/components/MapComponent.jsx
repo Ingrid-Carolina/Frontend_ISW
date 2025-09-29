@@ -1,4 +1,7 @@
-// src/components/MapComponent.jsx
+// src/components/MapComponent.jsx es un componente de React que muestra un mapa interactivo utilizando Leaflet.
+// El mapa está centrado en una ubicación específica y muestra un marcador con un popup.
+// El componente acepta una prop isInteractive para habilitar o deshabilitar la interactividad del mapa.
+// También incluye estilos CSS específicos en MapComponent.css.
 import { useEffect, useRef } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';

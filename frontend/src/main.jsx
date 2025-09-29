@@ -41,7 +41,7 @@ createRoot(document.getElementById('root')).render(
         {/* Rutas específicas para el panel de administración */}
         <Route path="/admin" element={<AdminLayout />}>
           {/* Ruta principal del dashboard admin */}
-          <Route index element={<Dashboard />} />
+          <Route index element={<NoticiasAdmin />} />
           {/* Ruta explícita al dashboard */}
           <Route path="dashboard" element={<Dashboard />} />
           {/* Ruta para gestión de noticias */}

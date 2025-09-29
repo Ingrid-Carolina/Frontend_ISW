@@ -1,4 +1,4 @@
-
+/*Acordeon.jsx es el archivo principal del acordeon que se encuentra en la homepage*/
 import './Acordeon.css';
 import React from 'react';
 import {
@@ -9,6 +9,7 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 
+/* Datos de los valores del club, que iran dentro del acordeon */
 const valores = [
   {
     titulo: 'Pasión por el Juego',
@@ -36,6 +37,7 @@ const valores = [
   }
 ];
 
+/* Componente principal del acordeon */
 const Acordeon = () => (
   <section className="acordeon">
     <div className="content">

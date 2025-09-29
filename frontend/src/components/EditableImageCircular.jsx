@@ -1,3 +1,4 @@
+//EditableImageCircular.jsx es un componente de React que muestra una imagen circular que puede ser editada al hacer clic en ella. Al pasar el cursor sobre la imagen, aparece un botón de edición que permite al usuario seleccionar un nuevo archivo de imagen desde su dispositivo. El componente utiliza Material-UI para los estilos y los iconos.
 import React, { useState, useRef } from 'react';
 import { Box, IconButton, Tooltip } from '@mui/material';
 import EditIcon from '@mui/icons-material/Edit';
@@ -6,10 +7,12 @@ const EditableImageCircular = ({ src, alt, onImageUpload, sx = {}, ...props }) =
   const fileInputRef = useRef(null);
   const [isHovered, setIsHovered] = useState(false);
 
+  // Maneja el clic en la imagen para abrir el selector de archivos 
   const handleImageClick = () => {
     fileInputRef.current.click();
   };
 
+  // Maneja el cambio de archivo y llama a la función onImageUpload con el archivo seleccionado
   const handleChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -17,6 +20,7 @@ const EditableImageCircular = ({ src, alt, onImageUpload, sx = {}, ...props }) =
     }
   };
 
+  // Renderiza el componente con estilos y funcionalidad
   return (
     <Box
       sx={{

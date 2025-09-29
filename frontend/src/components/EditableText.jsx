@@ -1,7 +1,11 @@
-// components/EditableText.jsx
+// components/EditableText.jsx es un componente de React que permite editar texto al hacer clic en él. 
+// Si el usuario tiene permisos de administrador, aparece un botón de edición al pasar el cursor sobre el texto. 
+// Al hacer clic en el botón, se abre un modal con un campo de texto para editar el contenido. 
+// El componente utiliza Material-UI para los estilos y los componentes de la interfaz de usuario.
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Backdrop, TextField, Button } from '@mui/material';
 
+// Icono de edición personalizado
 const Edit = () => (
     <svg
         width='14'
@@ -16,6 +20,7 @@ const Edit = () => (
     </svg>
 );
 
+// Componente EditableText
 const EditableText = ({
     text,
     onTextSave,

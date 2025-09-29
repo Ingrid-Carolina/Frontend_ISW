@@ -14,9 +14,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 
 // Array con los elementos del menú lateral, cada uno tiene texto y ruta
 const menuItems = [
-  { text: 'Estadisticas del Sitio', path: 'dashboard' },
   { text: 'Noticias', path: 'newsadm' },
-  { text: 'Control de Jugadores', path: 'players' },
   { text: 'Testimonios', path: 'mngtestimonios' },
   { text: 'Administrar Órdenes', path: 'mngordenes' }, 
   { text: 'Administrar Productos de Donaciones', path: 'mngproddonaciones' }, 

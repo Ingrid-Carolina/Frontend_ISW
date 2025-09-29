@@ -1,3 +1,6 @@
+// frontend/src/components/Post.jsx es un componente de React que representa una publicación o noticia. 
+// Muestra categorías, título, fecha, imagen, extracto, ubicación y hora. 
+// Utiliza CSS para los estilos y está diseñado para ser responsivo.
 import React from 'react';
 import './Post.css';
 

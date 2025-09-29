@@ -1,8 +1,13 @@
+/* frontend/src/components/FeaturedPost.css */
+/* FeaturedPost.css tiene los estilos para el componente FeaturedPost, el cual resalta una noticia destacada */
+
+/* Padding del componente */
 .featured-post {
     padding: 1rem;
     font-family: GroteskBold, sans-serif;
 }
 
+/* Etiqueta "Destacado" encima del título */
 .featured-label {
     color: #D7063C;
     /* Bright red */
@@ -13,6 +18,7 @@
     margin-bottom: 0.5rem;
 }
 
+/* Título de la noticia destacada */
 .featured-title {
     color: #00013A;
     /* Navy blue */
@@ -22,6 +28,7 @@
     margin: 0 0 0.75rem 0;
 }
 
+/* Efecto hover en el título */
 .featured-title:hover{
     color: #D7063C;
     cursor: pointer;

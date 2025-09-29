@@ -1,3 +1,6 @@
+/* ValuesSection.css contiene los estilos para el componente ValuesSection, que presenta una sección de valores de la pagina. junto con el acordeon.
+   Incluye estilos para el contenedor principal, títulos y elementos de la lista de valores, asegurando una presentación clara y atractiva. */
+
 .values-section {
   background-color: #10045c;
   color: white;

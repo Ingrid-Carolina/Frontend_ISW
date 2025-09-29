@@ -1,3 +1,4 @@
+/* EditableImage.jsx es un componente que muestra una imagen que puede ser editada (cambiada) por el usuario 'Admin'.*/
 import React, { useState, useRef } from "react";
 import { Box, IconButton, styled, CircularProgress } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";

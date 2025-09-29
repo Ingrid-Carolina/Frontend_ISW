@@ -1,3 +1,6 @@
+// src/components/Navbar.jsx es un componente de React que implementa una barra de navegación responsiva utilizando Material-UI.
+// La barra de navegación incluye enlaces a diferentes secciones del sitio, un menú desplegable para "Sobre Nosotros",
+// y opciones de autenticación como inicio de sesión y perfil de usuario.
 import * as React from 'react';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -61,7 +64,7 @@ const pulseAnimation = (
   `}
 	/>
 );
-
+// Estilos para el botón de navegación
 const UserAvatarMenu = ({
 	user,
 	avatarVer,
@@ -176,7 +179,7 @@ const UserAvatarMenu = ({
 		</>
 	);
 };
-
+// Validación de props para UserAvatarMenu
 UserAvatarMenu.propTypes = {
 	user: PropTypes.shape({
 		name: PropTypes.string.isRequired,
@@ -929,7 +932,7 @@ export default function CustomNavbar() {
 	);
 }
 
-// Estilos reutilizables
+// Estilos reutilizables para botones y menús de la barra de navegación
 const navBtnStyle = drawerOpen => ({
 	color: drawerOpen ? '#0c005a' : 'white',
 	fontWeight: 'bold',

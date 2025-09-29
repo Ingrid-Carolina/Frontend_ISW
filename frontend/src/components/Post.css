@@ -1,3 +1,5 @@
+/* Post.css: Estilos para el componente Post.jsx */
+/* El componente Post representa una entrada individual de un blog o noticia */
 .post {
     padding: 1.5rem 0;
     max-width: 800px;
@@ -5,25 +7,27 @@
     font-family: 'Segoe UI', sans-serif;
 }
 
+/* Categorías de la noticia */
 .post-categories {
     color: #D7063C;
     font-size: 0.75rem;
     font-weight: bold;
     margin-bottom: 0.5rem;
 }
-
+/* Título de la noticia */
 .post-title {
     font-size: 1.5rem;
     font-weight: 800;
     color: #00013A;
     margin: 0 0 0.5rem 0;
 }
-
+/* Efecto hover en el título */
 .post-title:hover{
     color: #D7063C;
     cursor: pointer;
 }
 
+/* Fecha de la noticia */
 .post-date {
     font-style: italic;
     font-size: 0.9rem;
@@ -31,6 +35,7 @@
     margin-bottom: 1rem;
 }
 
+/* Imagen de la noticia */
 .post-image {
     width: 100%;
     height: auto;
@@ -38,16 +43,19 @@
     border-radius: 5px;
 }
 
+/* Efecto hover en la imagen */
 .post-image:hover{
     cursor: pointer;
 }
 
+/* Extracto o resumen de la noticia */
 .post-excerpt {
     font-size: 0.95rem;
     color: #222;
     line-height: 1.5;
 }
 
+/* Ubicación y hora de la noticia */
 .post-location,
 .post-time {
     font-size: 0.9rem;

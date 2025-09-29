@@ -1,3 +1,6 @@
+// Componente ValuesSection.jsx es un componente de React que muestra una sección de valores con títulos y descripciones en un diseño estilizado.
+// Utiliza CSS para los estilos y presenta los valores en un formato claro y atractivo.
+import React from 'react';
 import './ValuesSection.css';
 const ValuesSection = () => {
   const values = [

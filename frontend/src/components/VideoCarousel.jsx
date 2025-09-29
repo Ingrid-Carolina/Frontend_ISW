@@ -1,3 +1,5 @@
+// Componente VideoCarousel.jsx es un carrusel de videos de YouTube Shorts que permite navegar entre varios videos, mostrando miniaturas y un botón para abrir cada Short en YouTube.
+// Utiliza Material-UI para los estilos y componentes, y maneja errores en la carga de miniaturas.
 import React, { useState } from "react";
 import { Box, IconButton, Typography, Chip, Button } from "@mui/material";
 import NavigateBeforeIcon from "@mui/icons-material/NavigateBefore";

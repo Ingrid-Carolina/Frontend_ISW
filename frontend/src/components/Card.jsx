@@ -1,3 +1,4 @@
+/*Card.jsx es el archivo principal de las tarjetas que se encuentran en la homepage*/
 import * as React from 'react';
 import Card from '@mui/material/Card';
 import CardMedia from '@mui/material/CardMedia';
@@ -12,7 +13,7 @@ export default function MediaCard({ title, to, content, image, date }) {
 
   return (
     <Card
-      sx={{
+      sx={{//Ajustes de la base de la tarjeta
         maxWidth: 400,
         width: '100%',
         margin: '15px',
@@ -22,7 +23,7 @@ export default function MediaCard({ title, to, content, image, date }) {
       }}
     >
       <CardMedia
-        component="img"
+        component="img"//Imagen de la tarjeta
         alt="card image"
         image={image}
         sx={{
@@ -30,12 +31,12 @@ export default function MediaCard({ title, to, content, image, date }) {
           height: { xs: 180, sm: 200, md: 240 },
         }}
       />
-      <CardContent sx={{ flexGrow: 1 }}>
+      <CardContent sx={{ flexGrow: 1 }}> {/* Contenido de la tarjeta */}
         <Typography
           gutterBottom
           variant="h4"
           component="div"
-          sx={{
+          sx={{ //Estilos del título de la tarjeta
             textAlign: 'left',
             fontWeight: 'bold',
             fontFamily: 'GroteskBold, sans-serif',
@@ -47,7 +48,7 @@ export default function MediaCard({ title, to, content, image, date }) {
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
         >
-          <Link
+          <Link // Enlace al detalle de la noticia
             to={to}
             style={{ textDecoration: 'none', color: 'inherit' }}
             onClick={() => window.scrollTo(0, 0)}

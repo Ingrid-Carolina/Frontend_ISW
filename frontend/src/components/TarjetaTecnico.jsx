@@ -1,3 +1,5 @@
+// Componente TarjetaTecnico.jsx es un componente de React que utiliza Material-UI para mostrar una tarjeta con información de un técnico, incluyendo su nombre, rol, descripción e imagen.
+// La tarjeta tiene un diseño atractivo con bordes redondeados y sombra, y utiliza tipografías personalizadas para cada sección de texto.
 import React from 'react';
 import { Card, CardMedia, CardContent, Typography, Box } from '@mui/material';
 

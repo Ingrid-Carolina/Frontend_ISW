@@ -1,6 +1,10 @@
+// Componente TextField.jsx es un componente de React que utiliza Material-UI para renderizar un campo de texto personalizable.
+// Permite definir el tipo de campo (texto, email, contraseña), manejar cambios en el valor, mostrar errores y mensajes de ayuda, y aplicar estilos personalizados.
+
 import React from 'react';
 import { TextField as MuiTextField, FormHelperText } from '@mui/material';
 
+// Componente TextField con props para personalización
 const TextField = ({ 
   nombre, 
   rol, 
@@ -13,6 +17,7 @@ const TextField = ({
   ...props 
 }) => {
   
+  // Maneja el cambio de valor y llama a la función onChange si está definida
   const handleChange = (event) => {
     const newValue = event.target.value;
     if (onChange) {

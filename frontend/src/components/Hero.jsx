@@ -1,10 +1,11 @@
+//Este es un componente tipo Hero (es decir, imagen de fondo con texto)
+// que se utiliza en la pagina de testimonios, el cual muestra un fondo de pantalla completo 
+// con un mensaje inspirador y una breve descripción.
+//No trae css aparte, ya que se maneja directamente con el sistema de estilos de Material UI.
 import React from 'react';
 import { Box, Typography, useTheme, useMediaQuery } from '@mui/material';
 import fondo from '/Images/TestimonioFondo1.jpg';
 
-
-//Este es un componente tipo Hero que se utiliza en la pagina de testimonios, el cual muestra un fondo de pantalla completo con un mensaje inspirador y una breve descripción.
-//No trae css aparte, ya que se maneja directamente con el sistema de estilos de Material UI.
 const Hero = () => {
   const theme = useTheme();
   const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));

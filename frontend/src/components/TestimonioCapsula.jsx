@@ -1,3 +1,5 @@
+// Componente TestimonioCapsula.jsx es un componente de React que utiliza Material-UI para mostrar un testimonio en una cápsula estilizada.
+// El componente presenta el nombre del testimonio, su contenido y una imagen asociada, con un diseño atractivo y responsivo.
 import React from 'react';
 import { Box, Typography, Avatar, Paper, useTheme } from '@mui/material';
 

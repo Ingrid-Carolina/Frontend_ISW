@@ -1,3 +1,5 @@
+// NewsSection.jsx es un componente de React que muestra una sección de noticias con un título, fecha, contenido e imagen. 
+// Utiliza CSS para los estilos y está diseñado para ser responsivo.
 import './NewsSection.css';
 
 function NewsSection({ titulo, fecha, contenido, imagen }) {
