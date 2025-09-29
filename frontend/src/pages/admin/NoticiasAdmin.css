@@ -1,20 +1,22 @@
+/* Contenedor principal de la sección de administración de noticias */
 .noticias-admin-container {
   padding: 20px;
   width: 100%;
   /* que ocupe todo el ancho disponible */
   box-sizing: border-box;
-  /*cubrimos toda la pagina*/
+  /* cubrimos toda la pagina */
 }
 
+/* Título principal de la sección */
 .titulo-seccion {
   font-family: "GroteskBold", sans-serif;
   color: #10045c;
   text-align: center;
   margin-bottom: 20px;
-   padding-top: 80px; 
-  
+  padding-top: 80px; 
 }
 
+/* Formulario para agregar o editar noticias */
 .form-noticia {
   display: flex;
   flex-direction: column;
@@ -27,6 +29,7 @@
   box-sizing: border-box;
 }
 
+/* Estilos para los inputs del formulario */
 .form-noticia input {
   font-family: "ManropeEB", sans-serif;
   padding: 12px;
@@ -37,7 +40,7 @@
   box-sizing: border-box;
 }
 
-/* Textarea más grande */
+/* Textarea más grande para la descripción de la noticia */
 .textarea-grande {
   min-height: 150px;
   resize: vertical;
@@ -50,7 +53,7 @@
   box-sizing: border-box;
 }
 
-
+/* Descripción de la sección debajo del título */
 .descripcion-seccion {
   font-family: "ManropeEB", sans-serif;
   font-size: 15px;
@@ -61,7 +64,7 @@
   line-height: 1.5;
 }
 
-
+/* Botón del formulario */
 .form-noticia button {
   font-family: "ManropeEB", sans-serif;
   background: #e06c14;
@@ -75,10 +78,12 @@
   width: 200px;
 }
 
+/* Efecto hover para el botón */
 .form-noticia button:hover {
   background: #c45a10;
 }
 
+/* Área para subir imágenes (drag & drop) */
 .dropzone {
   border: 2px dashed #ccc;
   border-radius: 8px;
@@ -91,11 +96,13 @@
   background: #fafafa;
 }
 
+/* Estilo de error para la dropzone */
 .dropzone.error {
   border-color: #e63946;
   background: #fff5f5;
 }
 
+/* Contenido interno de la dropzone */
 .drop-content {
   display: flex;
   flex-direction: column;
@@ -103,18 +110,21 @@
   gap: 0.6rem;
 }
 
+/* Icono dentro de la dropzone */
 .icon {
   width: 64px;
   height: 64px;
   margin-bottom: 0.5rem;
 }
 
+/* Título dentro de la dropzone */
 .title {
   font-size: 1.1rem;
   font-weight: 500;
   color: #333;
 }
 
+/* Etiqueta para seleccionar archivo */
 .file-label {
   color: #1d4ed8;
   cursor: pointer;
@@ -122,11 +132,13 @@
   text-decoration: underline;
 }
 
+/* Subtítulo dentro de la dropzone */
 .subtitle {
   font-size: 0.85rem;
   color: #555;
 }
 
+/* Texto de error en la dropzone */
 .error-text {
   color: #e63946;
   font-size: 0.85rem;
@@ -134,6 +146,7 @@
   font-weight: 500;
 }
 
+/* Vista previa de la imagen subida */
 .preview {
   margin-top: 1rem;
 }
@@ -144,23 +157,27 @@
   border: 1px solid #ddd;
 }
 
+/* Imagen de vista previa en el formulario */
 .vista-previa {
   max-width: 300px;
   border-radius: 6px;
   margin-top: 10px;
 }
 
+/* Lista de noticias */
 .lista-noticias {
   margin-top: 30px;
   width: 100%;
 }
 
+/* Título de la lista de noticias */
 .lista-noticias h2 {
   font-family: "GroteskBold", sans-serif;
   color: #10045c;
   margin-bottom: 15px;
 }
 
+/* Item individual de la noticia */
 .noticia-item {
   display: flex;
   justify-content: space-between;
@@ -174,11 +191,13 @@
   box-sizing: border-box;
 }
 
+/* Contenido textual de la noticia */
 .noticia-contenido {
   flex: 1;
   /* Ocupa todo el espacio disponible */
 }
 
+/* Imagen de la noticia */
 .noticia-imagen {
   width: 200px;
   height: auto;
@@ -186,7 +205,7 @@
   object-fit: cover;
 }
 
-
+/* Botones de editar/eliminar en cada noticia */
 .noticia-item .botones {
   display: flex !important;
   flex-direction: row !important;
@@ -212,12 +231,14 @@
   background: #c45a10;
 }
 
+/* Imagen dentro del item de noticia */
 .noticia-item img {
   width: 300px;
   height: auto;
   border-radius: 6px;
 }
 
+/* Contenedor de texto dentro del item de noticia */
 .noticia-item div {
   display: flex;
   flex-direction: column;
@@ -227,6 +248,7 @@
   /* ocupa el espacio disponible */
 }
 
+/* Título y párrafo de la noticia alineados a la izquierda */
 .noticia-item h3,
 .noticia-item p {
   text-align: left;
@@ -244,12 +266,12 @@
   margin: 5px 0;
 }
 
+/* Responsive para tablets y abajo */
 @media (max-width: 900px) {
-
-  /*Para tablets y abajo (computadoras, desktop, etc)*/
+  /* Para tablets y abajo (computadoras, desktop, etc) */
   .noticia-item {
     flex-direction: column;
-    /*apilar una tras de la otra*/
+    /* apilar una tras de la otra */
     align-items: center;
   }
 
@@ -268,16 +290,16 @@
   }
 }
 
+/* Responsive para celulares */
 @media (max-width: 600px) {
   /* Para celulares */
 
   .form-noticia button {
     width: 100%;
-
   }
 
   .vista-previa {
-    /*Tomar todo el ancho para la imagen*/
+    /* Tomar todo el ancho para la imagen */
     max-width: 100%;
     height: auto;
   }
@@ -287,25 +309,10 @@
   }
 
   .titulo-seccion,
-<<<<<<< Updated upstream
-.lista-noticias h2 {
-  text-align: center;
-  margin-bottom: 20px;
-
-}
-}
-
-
-
-
-
-
-=======
   .lista-noticias h2 {
     text-align: center;
     margin-bottom: 20px;
     font-size: clamp(2rem, 5vw, 2.25rem);
-    /* fluid scaling minimo 2rem, 5 viewport ideal, 2,25 rem maximo. Para ajustar texto */
+    /* Escalado fluido del texto para pantallas pequeñas */
   }
 }
->>>>>>> Stashed changes

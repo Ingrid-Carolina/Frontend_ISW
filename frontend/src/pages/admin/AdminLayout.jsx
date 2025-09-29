@@ -1,15 +1,18 @@
 import React from 'react';
+// Importa la barra de navegación personalizada
 import CustomNavbar from '../../components/Navbar';
+// Importa componentes de React Router para navegación y rutas
 import { Outlet, Link, useLocation } from 'react-router-dom';
+// Importa componentes de Material UI para el diseño y la interfaz
 import { Box, Drawer, List, ListItem, ListItemButton, ListItemText, Toolbar, Typography } from '@mui/material';
 import '../../components/styles.css';
+// Importa hooks y componentes adicionales de Material UI
 import { useTheme, useMediaQuery, IconButton } from '@mui/material';
 import { useState } from 'react';
+// Importa el ícono del menú hamburguesa
 import MenuIcon from '@mui/icons-material/Menu';
 
-
-
-
+// Array con los elementos del menú lateral, cada uno tiene texto y ruta
 const menuItems = [
   { text: 'Estadisticas del Sitio', path: 'dashboard' },
   { text: 'Noticias', path: 'newsadm' },
@@ -17,23 +20,30 @@ const menuItems = [
   { text: 'Testimonios', path: 'mngtestimonios' },
   { text: 'Administrar Órdenes', path: 'mngordenes' }, 
   { text: 'Administrar Productos de Donaciones', path: 'mngproddonaciones' }, 
-   { text: 'Administrar Roles', path: 'mngusuarios' }, 
+  { text: 'Administrar Roles', path: 'mngusuarios' }, 
   { text: 'Administrar Donaciones', path: 'mngdonaciones' },
 ];
 
+// Componente principal del layout de administrador
 export default function AdminLayout() {
+  // Hook para obtener la ubicación actual (ruta) del navegador
   const location = useLocation();
+  // Hook para obtener el tema de Material UI
   const theme = useTheme();
+  // Hook para detectar si la pantalla es extra pequeña (responsive)
   const isXsScreen = useMediaQuery(theme.breakpoints.down('sm'));  //para dispositos super chiquitos
 
+  // Ancho del drawer lateral
   const drawerWidth = 240; // Shrinks on mobile
+  // Estado para controlar si el drawer móvil está abierto
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Función para alternar el estado del drawer móvil
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
   };
 
-
+  // Renderizado del componente
   return (
     <Box>
       {/* Navbar superior */}
@@ -43,6 +53,7 @@ export default function AdminLayout() {
       <Box sx={{ display: 'flex' }}>
         {/* Drawer lateral */}
         {isXsScreen ? (
+          // Drawer temporal para pantallas pequeñas (móvil)
           <Drawer
             variant="temporary"
             open={mobileOpen}
@@ -56,9 +67,9 @@ export default function AdminLayout() {
               },
             }}
           >
-            {/* Drawer content here */}
+            {/* Contenido del drawer */}
             <Box sx={{ overflow: 'auto', placeItems: 'stretch', mt: { xs: 8, md: 10 } }}>
-              {/* Título agregado */}
+              {/* Título del panel */}
               <Box sx={{ mb: 2 }}>
                 <Typography
                   variant="h5"
@@ -73,6 +84,7 @@ export default function AdminLayout() {
                   }}
                 >Panel de Administrador</Typography>
               </Box>
+              {/* Lista de opciones del menú */}
               <List>
                 {menuItems.map((item) => (
                   <ListItem key={item.text} disablePadding>
@@ -89,6 +101,7 @@ export default function AdminLayout() {
             </Box>
           </Drawer>
         ) : (
+          // Drawer permanente para pantallas grandes (desktop/tablet)
           <Drawer
             variant="permanent"
             sx={{
@@ -106,11 +119,10 @@ export default function AdminLayout() {
                 transition: 'width 0.3s ease-in-out',
               },
             }}
-
           >
-
+            {/* Contenido del drawer */}
             <Box sx={{ overflow: 'auto', placeItems: 'stretch', mt: { xs: 8, md: 5 } }}>
-              {/* Título agregado */}
+              {/* Título del panel */}
               <Box sx={{ mb: 2 }}>
                 <Typography
                   variant="h5"
@@ -125,6 +137,7 @@ export default function AdminLayout() {
                   }}
                 >Panel de Administrador</Typography>
               </Box>
+              {/* Lista de opciones del menú */}
               <List>
                 {menuItems.map((item) => (
                   <ListItem key={item.text} disablePadding>
@@ -143,10 +156,11 @@ export default function AdminLayout() {
         )
         }
 
-        {/* Contenido renderizado */}
+        {/* Contenido principal renderizado según la ruta */}
         <Box component="main" sx={{ flexGrow: 1, p: { xs: 1, sm: 2, md: 3 }, placeItems: 'stretch' }}>
-
+          {/* Outlet renderiza el componente hijo según la ruta actual */}
           <Outlet />
+          {/* Toolbar con botón para abrir el drawer en móvil */}
           <Toolbar>
             {isXsScreen && (
               <IconButton
@@ -164,5 +178,4 @@ export default function AdminLayout() {
       </Box>
     </Box>
   )
-
 }

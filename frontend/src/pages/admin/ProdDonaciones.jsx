@@ -1,5 +1,7 @@
 import React, { useEffect, useState } from "react";
+// Importa el cliente API personalizado para peticiones al backend
 import { api } from "../../api/api";
+// Importa componentes de Material UI para la interfaz
 import {
     Box,
     Button,
@@ -18,12 +20,18 @@ import {
     Select,
     MenuItem,
 } from "@mui/material";
+// Importa íconos para editar y eliminar
 import { Delete, Edit } from "@mui/icons-material";
 
+// Componente principal para administrar productos de donación
 const ProdDonaciones = () => {
+    // Estado para la lista de productos obtenidos del backend
     const [productos, setProductos] = useState([]);
+    // Estado para controlar la apertura del modal de agregar/editar
     const [open, setOpen] = useState(false);
+    // Estado para saber si se está en modo edición
     const [editMode, setEditMode] = useState(false);
+    // Estado para los datos del formulario de producto
     const [formData, setFormData] = useState({
         id: null,
         nombre: "",
@@ -31,13 +39,14 @@ const ProdDonaciones = () => {
         imagen: "",
         estado: true,
     });
+    // Estado para el archivo de imagen seleccionado
     const [selectedFile, setSelectedFile] = useState(null);
 
-    // Popup de confirmación
+    // Estado para el popup de confirmación de eliminación
     const [deleteOpen, setDeleteOpen] = useState(false);
     const [deleteId, setDeleteId] = useState(null);
 
-    // Manejo de preview de imagen
+    // Función para obtener la imagen a mostrar (preview, defecto, etc)
     const getImagen = (imagen) => {
         if (!imagen) return "/Images/producto_defecto.png";
         if (imagen.startsWith("http")) return imagen;
@@ -45,23 +54,27 @@ const ProdDonaciones = () => {
         return "/Images/producto_defecto.png";
     };
 
-    // Cargar productos
+    // Función para cargar productos desde la API
     const fetchProductos = async () => {
         try {
+            // Realiza la petición GET para obtener productos
             const res = await api.get("/auth/donaciones/productos");
             setProductos(res.data.productos || []);
         } catch (e) {
+            // Muestra error en consola si la petición falla
             console.error("Error al obtener productos:", e);
         }
     };
 
+    // useEffect para cargar los productos al montar el componente
     useEffect(() => {
         fetchProductos();
     }, []);
 
-    // Abrir modal de agregar/editar
+    // Abrir modal de agregar/editar producto
     const handleOpen = (producto = null) => {
         if (producto) {
+            // Si hay producto, es edición: carga datos en el formulario
             setFormData({
                 id: producto.id,
                 nombre: producto.nombre,
@@ -71,6 +84,7 @@ const ProdDonaciones = () => {
             });
             setEditMode(true);
         } else {
+            // Si no hay producto, es agregar: limpia el formulario
             setFormData({ id: null, nombre: "", descripcion: "", imagen: "", estado: true });
             setEditMode(false);
         }
@@ -78,17 +92,18 @@ const ProdDonaciones = () => {
         setOpen(true);
     };
 
-    // Cerrar modal
+    // Cerrar modal de agregar/editar
     const handleClose = () => {
         setOpen(false);
         setSelectedFile(null);
     };
 
-    // Guardar producto
+    // Guardar producto (agregar o editar)
     const handleSave = async () => {
         try {
             let imagenUrl = formData.imagen;
 
+            // Si hay imagen seleccionada, súbela al backend
             if (selectedFile) {
                 const fd = new FormData();
                 fd.append("file", selectedFile);
@@ -100,17 +115,22 @@ const ProdDonaciones = () => {
                 imagenUrl = uploadRes.data.url;
             }
 
+            // Prepara el payload para el backend
             const payload = { ...formData, imagen: imagenUrl };
 
             if (editMode) {
+                // Si está en modo edición, actualiza el producto existente
                 await api.put(`/auth/donaciones/productos/${formData.id}`, payload);
             } else {
+                // Si no está en modo edición, crea un nuevo producto
                 await api.post("/auth/donaciones/productos", payload);
             }
 
+            // Recarga la lista de productos y cierra el modal
             fetchProductos();
             handleClose();
         } catch (e) {
+            // Muestra error en consola si la petición falla
             console.error("Error al guardar producto:", e);
         }
     };
@@ -118,19 +138,24 @@ const ProdDonaciones = () => {
     // Eliminar producto
     const handleDelete = async (id) => {
         try {
+            // Realiza la petición DELETE para eliminar el producto
             await api.delete(`/auth/donaciones/productos/${id}`);
             fetchProductos();
         } catch (e) {
+            // Muestra error en consola si la petición falla
             console.error("Error al eliminar producto:", e);
         }
     };
 
+    // Renderizado del componente
     return (
         <Box sx={{ pt: { xs: 10, sm: 12 }, px: 4 }}>
+            {/* Título principal */}
             <Typography variant="h4" sx={{ mb: 3, fontFamily: "GroteskBold" }}>
                 Administrar Productos de Donación
             </Typography>
 
+            {/* Botón para agregar producto */}
             <Button
                 variant="contained"
                 sx={{ mb: 3, backgroundColor: '#10045c' }}
@@ -139,6 +164,7 @@ const ProdDonaciones = () => {
                 Agregar Producto
             </Button>
 
+            {/* Grid de productos */}
             <Grid container spacing={3} justifyContent="center">
                 {productos.map((item) => (
                     <Grid item xs={12} sm={6} md={4} key={item.id}>
@@ -152,6 +178,7 @@ const ProdDonaciones = () => {
                             }}
                         >
                             <CardContent sx={{ textAlign: "center", flexGrow: 1 }}>
+                                {/* Imagen del producto */}
                                 <img
                                     src={getImagen(item.imagen)}
                                     alt={item.nombre}
@@ -167,6 +194,7 @@ const ProdDonaciones = () => {
                                         margin: "0 auto",
                                     }}
                                 />
+                                {/* Nombre del producto */}
                                 <Typography
                                     variant="h6"
                                     sx={{
@@ -179,6 +207,7 @@ const ProdDonaciones = () => {
                                 >
                                     {item.nombre}
                                 </Typography>
+                                {/* Descripción del producto */}
                                 <Typography
                                     variant="body2"
                                     sx={{
@@ -193,6 +222,7 @@ const ProdDonaciones = () => {
                                 >
                                     {item.descripcion}
                                 </Typography>
+                                {/* Estado del producto */}
                                 <Typography
                                     variant="body2"
                                     sx={{
@@ -203,6 +233,7 @@ const ProdDonaciones = () => {
                                     {item.estado ? "Activo" : "Inactivo"}
                                 </Typography>
                             </CardContent>
+                            {/* Botones de editar y eliminar */}
                             <Box sx={{ textAlign: "center", pb: 2 }}>
                                 <IconButton
                                     color="primary"
@@ -225,7 +256,7 @@ const ProdDonaciones = () => {
                 ))}
             </Grid>
 
-            {/* Modal de agregar/editar */}
+            {/* Modal de agregar/editar producto */}
             <Dialog
                 open={open}
                 onClose={handleClose}
@@ -248,7 +279,7 @@ const ProdDonaciones = () => {
                 </DialogTitle>
                 <DialogContent sx={{ mt: 2 }}>
                     <Grid container spacing={3}>
-                        {/* Vista previa */}
+                        {/* Vista previa del producto */}
                         <Grid item xs={12} md="auto">
                             <Box display="flex" flexDirection="column" alignItems="center">
                                 <Typography
@@ -325,7 +356,7 @@ const ProdDonaciones = () => {
                             </Box>
                         </Grid>
 
-                        {/* Formulario */}
+                        {/* Formulario para editar/agregar producto */}
                         <Grid item xs={12} md sx={{ flexGrow: 1, display: "flex" }}>
                             <Box display="flex" flexDirection="column" gap={2} sx={{ width: "100%", mt: 5 }}>
                                 <TextField
@@ -352,6 +383,7 @@ const ProdDonaciones = () => {
                                     InputProps={{ sx: { borderRadius: "12px", backgroundColor: "#fff" } }}
                                 />
 
+                                {/* Botón para subir imagen */}
                                 <Box textAlign="center">
                                     <Button
                                         variant="contained"
@@ -375,6 +407,7 @@ const ProdDonaciones = () => {
                                     </Button>
                                 </Box>
 
+                                {/* Selector de estado */}
                                 <FormControl fullWidth>
                                     <InputLabel>Estado</InputLabel>
                                     <Select
@@ -388,7 +421,7 @@ const ProdDonaciones = () => {
                                     </Select>
                                 </FormControl>
 
-                                {/* Botones centrados abajo del formulario */}
+                                {/* Botones de cancelar y guardar */}
                                 <Box display="flex" justifyContent="center" gap={2} mt={2}>
                                     <Button
                                         onClick={handleClose}

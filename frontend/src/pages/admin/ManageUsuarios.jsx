@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+// Importa el cliente API personalizado para peticiones al backend
 import { api } from '../../api/api';
+// Importa componentes de Material UI para la interfaz
 import {
   Box,
   Typography,
@@ -16,89 +18,74 @@ import {
   Select
 } from "@mui/material";
 
-const ManageUsuarios=()=> {
+// Componente principal para administrar usuarios
+const ManageUsuarios = () => {
 
+  // Estado para almacenar la lista de usuarios obtenidos del backend
+  const [usuarios, setusuarios] = useState([]);
 
-    const [usuarios, setusuarios]= useState([]);
+  // Función para obtener los usuarios desde la API
+  const fetchUsuarios = async () => {
+    try {
+      // Realiza la petición GET para obtener usuarios
+      const res = await api.get('/auth/obtenerusuarios', {
+        skipAuthRedirect: true,
+      });
 
+      const usuarios = res.data;
 
-    const fetchUsuarios=async()=>{
+      // Formatea la respuesta para el frontend
+      const usuariosLista = usuarios.map(usuario => ({
+        id: usuario.id,
+        nombre: usuario.nombre,
+        email: usuario.email,
+        rol: usuario.rol,
+      }));
 
-      try {
+      // Actualiza el estado con la lista de usuarios
+      setusuarios(usuariosLista);
+      console.log(usuarios);
 
-          const res = await api.get('/auth/obtenerusuarios',{ //hacemos fetch de los videos
-				skipAuthRedirect: true,
-			});
-
-        const usuarios= res.data;
-
-         const usuariosLista = usuarios.map(usuario => ({ //transformo my res.data en un array que el frontend pueda leer
-          id: usuario.id,
-          nombre: usuario.nombre,
-          email: usuario.email,
-          rol: usuario.rol,
-        }));
-
-
-        setusuarios(usuariosLista)
-        console.log(usuarios);
-        
-      } catch (error) {
-         console.error('Error al obtener testimonios:', error.message);
-        
-      }
-        
-
-
+    } catch (error) {
+      // Muestra error en consola si la petición falla
+      console.error('Error al obtener testimonios:', error.message);
     }
-
-
-  useEffect(() => {
-
-
-    fetchUsuarios();
-        
-        
-    }, []);
-
-
-
-  const handleRol = async (usuarioIndex, newRol) => {
-    const id = usuarios[usuarioIndex].id;
-  setusuarios((prevusuarios) => //solamente para frontend
-    prevusuarios.map((usuario, i) =>
-      i === usuarioIndex ? { ...usuario, rol: newRol } : usuario //iteramos hasta llegar al indice elegido
-    )
-  );
-
-
-  
-
-   const url = `/auth/usuario/${id}`;
-
-   const updatedrol={
-
-    rol: newRol
-
-   }
-
-   try {
-
-     const res = await api.put(url, updatedrol, {
-           headers: { "Content-Type": "application/json" }
-         });
-
-         console.log(res.data);
-    
-   } catch (error) {
-
-     console.error('Error al setear el rol:', error.message);
-    
-   }
-
   }
 
+  // useEffect para cargar los usuarios al montar el componente
+  useEffect(() => {
+    fetchUsuarios();
+  }, []);
 
+  // Función para cambiar el rol de un usuario
+  const handleRol = async (usuarioIndex, newRol) => {
+    const id = usuarios[usuarioIndex].id;
+    // Actualiza el estado localmente para feedback inmediato
+    setusuarios((prevusuarios) =>
+      prevusuarios.map((usuario, i) =>
+        i === usuarioIndex ? { ...usuario, rol: newRol } : usuario
+      )
+    );
+
+    // Prepara la petición para actualizar el rol en el backend
+    const url = `/auth/usuario/${id}`;
+    const updatedrol = {
+      rol: newRol
+    }
+
+    try {
+      // Realiza la petición PUT para actualizar el rol
+      const res = await api.put(url, updatedrol, {
+        headers: { "Content-Type": "application/json" }
+      });
+      console.log(res.data);
+    } catch (error) {
+      // Muestra error en consola si la actualización falla
+      console.error('Error al setear el rol:', error.message);
+    }
+  }
+
+  // Renderizado del componente
   return (
     <Box sx={{ mt: 12, px: { xs: 1, sm: 2, md: 3 } }}>
       {/* Título */}
@@ -114,7 +101,7 @@ const ManageUsuarios=()=> {
         Administrar Usuarios
       </Typography>
 
-      {/* Tabla de órdenes */}
+      {/* Tabla de usuarios */}
       <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
         <Table>
           <TableHead>
@@ -131,18 +118,16 @@ const ManageUsuarios=()=> {
             </TableRow>
           </TableHead>
           <TableBody>
+            {/* Filas de la tabla, una por cada usuario */}
             {usuarios.map((usuario, index) => {
-              // Calcular total de la orden
-
               return (
                 <TableRow key={usuario.id} hover>
+                  {/* Nombre del usuario */}
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>{usuario.nombre}</TableCell>
-
-
-                  {/* Cantidades en lista */}
+                  {/* Email del usuario */}
                   <TableCell sx={{ fontFamily: "PeterMedium" }}>{usuario.email} </TableCell>
-                  {/* Precio Total */}
-                <TableCell sx={{ fontFamily: "PeterMedium" }}>
+                  {/* Rol editable del usuario */}
+                  <TableCell sx={{ fontFamily: "PeterMedium" }}>
                     <Select
                       value={usuario.rol}
                       onChange={(e) => handleRol(index, e.target.value)}
@@ -153,7 +138,7 @@ const ManageUsuarios=()=> {
                       <MenuItem value="admin-calendario">admin-calendario</MenuItem>
                       <MenuItem value="cliente">cliente</MenuItem>
                     </Select>
-                </TableCell>
+                  </TableCell>
                 </TableRow>
               );
             })}

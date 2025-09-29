@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
+// Importa el cliente API personalizado
 import { api } from "../../api/api";
+// Importa componentes de Material UI para la interfaz
 import {
   Box,
   Typography,
@@ -14,41 +16,57 @@ import {
   Pagination,
 } from "@mui/material";
 
+// Componente principal para mostrar la bitácora de donaciones
 export default function BitacoraDonaciones() {
+  // Estado para almacenar la lista de donaciones obtenidas del backend
   const [donaciones, setDonaciones] = useState([]);
+  // Estado para el término de búsqueda ingresado por el usuario
   const [searchTerm, setSearchTerm] = useState("");
+  // Estado para la página actual de la paginación
   const [page, setPage] = useState(1);
+  // Cantidad de filas a mostrar por página
   const rowsPerPage = 10;
 
+  // Función para obtener las donaciones desde la API
   const fetchDonaciones = async () => {
     try {
+      // Realiza la petición GET a la ruta de donaciones
       const res = await api.get("/auth/donaciones", { skipAuthRedirect: true });
+      // Guarda las donaciones en el estado
       setDonaciones(res.data.donaciones);
+      // Imprime las donaciones en consola para depuración
       console.log(res.data.donaciones);
     } catch (error) {
+      // Muestra error en consola si la petición falla
       console.error("Error al obtener donaciones:", error.message);
     }
   };
 
+  // useEffect para cargar las donaciones al montar el componente
   useEffect(() => {
     fetchDonaciones();
   }, []);
 
+  // Filtra las donaciones según el término de búsqueda
   const filteredDonaciones = donaciones.filter((donacion) =>
+    // Busca el término en cualquier campo de la donación
     Object.values(donacion).some((val) =>
       String(val).toLowerCase().includes(searchTerm.toLowerCase())
     )
   );
 
+  // Calcula el número total de páginas para la paginación
   const totalPages = Math.ceil(filteredDonaciones.length / rowsPerPage);
+  // Obtiene las donaciones a mostrar en la página actual
   const paginatedDonaciones = filteredDonaciones.slice(
     (page - 1) * rowsPerPage,
     page * rowsPerPage
   );
 
+  // Renderizado del componente
   return (
     <Box sx={{ mt: 12, px: { xs: 1, sm: 2, md: 3 } }}>
-      {/* Título */}
+      {/* Título de la página */}
       <Typography
         variant="h4"
         sx={{
@@ -61,7 +79,7 @@ export default function BitacoraDonaciones() {
         Bitácora de Donaciones
       </Typography>
 
-      {/* 🔍 Search Bar (más pequeña, centrada y con bordes redondeados) */}
+      {/* Barra de búsqueda centrada y estilizada */}
       <Box display="flex" justifyContent="center" sx={{ mb: 3 }}>
         <TextField
           label="Buscar..."
@@ -69,11 +87,11 @@ export default function BitacoraDonaciones() {
           size="small"
           value={searchTerm}
           onChange={(e) => {
-            setSearchTerm(e.target.value);
-            setPage(1);
+            setSearchTerm(e.target.value); // Actualiza el término de búsqueda
+            setPage(1); // Reinicia la paginación al buscar
           }}
           sx={{
-            width: "50%", // más pequeño y centrado
+            width: "50%", // ancho reducido y centrado
             borderRadius: "30px",
             "& .MuiOutlinedInput-root": {
               borderRadius: "30px",
@@ -82,10 +100,11 @@ export default function BitacoraDonaciones() {
         />
       </Box>
 
-      {/* Tabla */}
+      {/* Tabla de donaciones */}
       <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
         <Table>
           <TableHead>
+            {/* Encabezado de la tabla con estilos personalizados */}
             <TableRow sx={{ backgroundColor: "#10045c" }}>
               <TableCell sx={{ fontFamily: "PeterMedium", fontWeight: "bold", color: "#fff" }}>
                 ID Donación
@@ -111,6 +130,7 @@ export default function BitacoraDonaciones() {
             </TableRow>
           </TableHead>
           <TableBody>
+            {/* Filas de la tabla, una por cada donación paginada */}
             {paginatedDonaciones.map((donacion, index) => (
               <TableRow key={index} hover>
                 <TableCell sx={{ fontFamily: "PeterMedium" }}>{donacion.id_donacion}</TableCell>
@@ -126,12 +146,12 @@ export default function BitacoraDonaciones() {
         </Table>
       </TableContainer>
 
-      {/* 📑 Paginación con color personalizado */}
+      {/* Paginación centrada y con estilos personalizados */}
       <Box display="flex" justifyContent="center" sx={{ mt: 3 }}>
         <Pagination
-          count={totalPages}
-          page={page}
-          onChange={(_, value) => setPage(value)}
+          count={totalPages} // Número total de páginas
+          page={page} // Página actual
+          onChange={(_, value) => setPage(value)} // Cambia la página al hacer clic
           sx={{
             "& .MuiPaginationItem-root.Mui-selected": {
               backgroundColor: "#10045c",

@@ -1,33 +1,30 @@
 import React, { useState, useEffect } from 'react';
+// Importa el componente para mostrar testimonios individuales
 import TestimonioCapsula from '../../components/TestimonioCapsula';
-//import axios from 'axios';
+// Importa el cliente API personalizado
 import { api } from '../../api/api';
-import { Grid } from '@mui/material';
+// Importa componentes de Material UI para la interfaz
+import { Grid, Box, Typography, TextField, Button, Stack, Divider } from '@mui/material';
 
-import {
-  Box,
-  Typography,
-  TextField,
-  Button,
-  Stack,
-  Divider
-} from '@mui/material';
-
+// Componente principal para gestionar testimonios
 const ManageTestimonios = () => {
+  // Estados para los campos del formulario
   const [nombre, setNombre] = useState('');
   const [contenido, setContenido] = useState('');
   const [imagen, setImagen] = useState('');
+  // Estado para la lista de testimonios
   const [testimonios, setTestimonios] = useState([]);
+  // Estado para modo edición y el índice seleccionado
   const [modoEdicion, setModoEdicion] = useState(false);
   const [selectedIndex, setSelectedIndex] = useState(null);
+  // Estados para el banner de mensajes (éxito/error)
   const [bannerMsg, setBannerMsg] = useState('');
-  const [bannerType, setBannerType] = useState('success'); // or 'error'
+  const [bannerType, setBannerType] = useState('success'); // 'success' o 'error'
   const [showBanner, setShowBanner] = useState(false);
 
-
+  // Función para registrar un nuevo testimonio en el backend
   const realizarPeticion = async () => {
     const url = `/auth/registrartestimonio`;
-
     const body = {
       nombre: nombre,
       contenido: contenido,
@@ -35,83 +32,76 @@ const ManageTestimonios = () => {
     };
 
     try {
+      // Envía el testimonio al backend
       const res = await api.post(url, body, {
         headers: { "Content-Type": "application/json" }
       });
+      // Muestra mensaje de éxito en el banner
       setBannerMsg(res.data.mensaje)
       setBannerType('success');
       setShowBanner(true);
-
-
       setTimeout(() => setShowBanner(false), 4000);
-
       return res.data;
-
     } catch (error) {
-      // Compatible con interceptor (error.message) y con respuestas crudas (error.response)
+      // Muestra mensaje de error en el banner
       const msg =
         error?.data?.mensaje || error?.message || 'Error en la Red';
-
       setBannerMsg(msg);
       setBannerType('error');
       setShowBanner(true);
       setTimeout(() => setShowBanner(false), 4000);
       throw error;
-
-
     }
   };
 
-  // Cargar desde localStorage
+  // useEffect para cargar los testimonios al montar el componente
   useEffect(() => {
     const fetchTestimonios = async () => {
       try {
+        // Obtiene los testimonios del backend
         const res = await api.get('/auth/obtenertestimonios');
-        const testimonios = res.data; //estoy trasladando a testimonios el fetch de la tabla del formato JSON sended del res en Authcontroller
-
-
-
-        const testimoniosLista = testimonios.map(testimonio => ({ //transformo my res.data en un array que el frontend pueda leer
+        const testimonios = res.data;
+        // Formatea los testimonios para el frontend
+        const testimoniosLista = testimonios.map(testimonio => ({
           id: testimonio.id_testimonio,
           nombre: testimonio.nombre,
           contenido: testimonio.contenido,
           imagen: testimonio.imagen,
         }));
-
         setTestimonios(testimoniosLista);
         console.log(testimonios);
-
-
       } catch (err) {
         console.error('Error al obtener testimonios:', err);
       }
     };
-
     fetchTestimonios();
   }, []);
 
+  // Función para agregar un nuevo testimonio
   const handleAgregar = async () => {
     if (!nombre || !contenido) return
     else
       await realizarPeticion();
 
+    // Limpia los campos del formulario
     setNombre('');
     setContenido('');
     setImagen('');
-
+    // Recarga la página para actualizar la lista
     setTimeout(() => {
       window.location.reload();
     }, 1000);
   };
 
+  // Función para eliminar un testimonio
   const handleEliminar = async (index) => {
     try {
-
       const id = testimonios[index].id;
       const url = `/auth/testimonio/${id}`;
       const res = await api.delete(url);
       console.log(id);
 
+      // Muestra mensaje de éxito en el banner
       setBannerMsg(res.data.mensaje)
       setBannerType('success');
       setShowBanner(true);
@@ -119,23 +109,23 @@ const ManageTestimonios = () => {
 
       window.scrollTo(0, 0);
 
-
+      // Elimina el testimonio de la lista local
       const nuevaLista = [...testimonios];
       nuevaLista.splice(index, 1);
       setTestimonios(nuevaLista);
     } catch (error) {
+      // Muestra mensaje de error en el banner
       const msg =
         error?.data?.mensaje || error?.message || 'Error en la Red'
-
       setBannerMsg(msg)
       setBannerType('error');
       setShowBanner(true);
       setTimeout(() => setShowBanner(false), 4000);
       console.error("Error eliminando testimonio:", error);
     }
-
   };
 
+  // Prepara el formulario para editar un testimonio existente
   const ActualizarContainer = (index) => {
     const testimonio = testimonios[index];
     setNombre(testimonio.nombre);
@@ -144,40 +134,31 @@ const ManageTestimonios = () => {
     setModoEdicion(true);
     setSelectedIndex(index);
     console.log("El index es" + " " + selectedIndex);
-
   }
 
-
-
+  // Función para modificar un testimonio existente
   const handleModificar = async (index) => {
     try {
-
       const id = testimonios[index].id;
-
       const url = `/auth/testimonio/${id}`;
-
       const updatedbody = {
         nombre: nombre,
         contenido: contenido,
         imagen: imagen,
-
       };
-
+      // Envía la actualización al backend
       const res = await api.put(url, updatedbody, {
         headers: { "Content-Type": "application/json" }
       });
-
       console.log(id);
 
+      // Muestra mensaje de éxito en el banner
       setBannerMsg(res.data.mensaje)
       setBannerType('success');
       setShowBanner(true);
-
       setTimeout(() => setShowBanner(false), 4000);
-
-
     } catch (error) {
-
+      // Muestra mensaje de error en el banner
       const mensaje = error?.data?.mensaje || error?.message || 'Error en la Red'
       console.log(error);
       console.error("Error modificando testimonio:", error);
@@ -186,23 +167,21 @@ const ManageTestimonios = () => {
       setShowBanner(true);
       setTimeout(() => setShowBanner(false), 4000);
       throw error;
-
     }
+    // Limpia los campos del formulario
     setNombre('');
     setContenido('');
     setImagen('');
-
+    // Recarga la página para actualizar la lista
     setTimeout(() => {
       window.location.reload();
     }, 1000);
-
-
-
   };
 
-
+  // Renderizado del componente
   return (
     <Box sx={{ p: { xs: 2, sm: 3, md: 4 }, backgroundColor: '#f9f9f9', minHeight: '100vh' }}>
+      {/* Título principal */}
       <Typography
         variant="h3"
         sx={{
@@ -217,7 +196,7 @@ const ManageTestimonios = () => {
         Gestión de Testimonios
       </Typography>
 
-      {/* Formulario */}
+      {/* Formulario para agregar o modificar testimonios */}
       <Stack spacing={2} sx={{ mb: 4 }}>
         <TextField
           label="Nombre del niño o niña"
@@ -263,6 +242,7 @@ const ManageTestimonios = () => {
         </Button>
       </Stack>
 
+      {/* Banner para mostrar mensajes de éxito o error */}
       {showBanner && (
         <Box
           sx={{
@@ -281,10 +261,9 @@ const ManageTestimonios = () => {
         </Box>
       )}
 
-
       <Divider sx={{ mb: 3 }} />
 
-      {/* Vista previa del último testimonio */}
+      {/* Vista previa del testimonio que se está editando/agregando */}
       {nombre || contenido || imagen ? (
         <>
           <Typography
@@ -319,7 +298,8 @@ const ManageTestimonios = () => {
       </Typography>
 
       <Stack spacing={3}>
-        {testimonios.length === 0 && ( //condicionalidad que no haya testimonios guardados
+        {/* Mensaje si no hay testimonios guardados */}
+        {testimonios.length === 0 && (
           <Typography
             variant="body1"
             sx={{ fontFamily: 'ManropeEB', color: '#555' }}
@@ -328,6 +308,7 @@ const ManageTestimonios = () => {
           </Typography>
         )}
 
+        {/* Renderiza cada testimonio guardado con botones para eliminar o modificar */}
         {testimonios.map((t, index) => (
           <Box key={index}>
             <TestimonioCapsula
