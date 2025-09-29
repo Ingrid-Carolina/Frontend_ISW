@@ -30,223 +30,331 @@ const videos = [
 ];
 
 const PaginaTestimonios = () => {
-  const theme = useTheme();
-  const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
+	const theme = useTheme();
+	const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
 
-  // ======== ESTADOS PARA HEADER ========
-  const [headerUrl, setHeaderUrl] = useState(null);
-  const [headerTitle, setHeaderTitle] = useState('Historias que inspiran.');
-  const [isAdmin, setIsAdmin] = useState(false);
+	// ======== ESTADOS PARA HEADER ========
+	const [headerUrl, setHeaderUrl] = useState(null);
+	const [headerTitle, setHeaderTitle] = useState('Historias que inspiran.');
+	const [isAdmin, setIsAdmin] = useState(false);
 
-  // ======== MODAL DE HEADER ========
-  const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
-  const [headerTitleInput, setHeaderTitleInput] = useState('Historias que inspiran.');
-  const [headerFile, setHeaderFile] = useState(null);
-  const [headerUploading, setHeaderUploading] = useState(false);
-  const [headerError, setHeaderError] = useState('');
-  const [headerPreview, setHeaderPreview] = useState(null);
+	// ======== MODAL DE HEADER ========
+	const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
+	const [headerTitleInput, setHeaderTitleInput] = useState('Historias que inspiran.');
+	const [headerFile, setHeaderFile] = useState(null);
+	const [headerUploading, setHeaderUploading] = useState(false);
+	const [headerError, setHeaderError] = useState('');
+	const [headerPreview, setHeaderPreview] = useState(null);
 
-  // ======== SNACKBAR ========
-  const [openSnackbar, setOpenSnackbar] = useState(false);
-  const [snackbarType, setSnackbarType] = useState('success');
-  const [snackbarMsg, setSnackbarMsg] = useState('');
+	// ======== SNACKBAR ========
+	const [openSnackbar, setOpenSnackbar] = useState(false);
+	const [snackbarType, setSnackbarType] = useState('success');
+	const [snackbarMsg, setSnackbarMsg] = useState('');
 
-  // ======== TESTIMONIOS ========
-  const [testimonios, setTestimonios] = useState([]);
-  const [testimoniosDestacados, setTestimoniosDestacados] = useState([]);
-  const [testimoniosNormales, setTestimoniosNormales] = useState([]);
-  const roles = [
-    'Jugador Profesional – Categoría Infantil',
-    'Jugador Profesional – Categoría Intermedia',
-    'Jugador Profesional – Categoría Juvenil',
-    'Madre de jugador – Categoría Juvenil',
-  ];
+	// ======== TESTIMONIOS ========
+	const [testimonios, setTestimonios] = useState([]);
+	const roles = [
+		'Jugador Profesional – Categoría Infantil',
+		'Jugador Profesional – Categoría Intermedia',
+		'Jugador Profesional – Categoría Juvenil',
+		'Madre de jugador – Categoría Juvenil',
+	];
 
-  // Preview local del archivo seleccionado
-  useEffect(() => {
-    if (!headerFile) {
-      setHeaderPreview(null);
-      return;
-    }
-    const url = URL.createObjectURL(headerFile);
-    setHeaderPreview(url);
-    return () => URL.revokeObjectURL(url);
-  }, [headerFile]);
+	// Preview local del archivo seleccionado
+	useEffect(() => {
+		if (!headerFile) {
+			setHeaderPreview(null);
+			return;
+		}
+		const url = URL.createObjectURL(headerFile);
+		setHeaderPreview(url);
+		return () => URL.revokeObjectURL(url);
+	}, [headerFile]);
 
-  // Comprobar rol (para mostrar botón "editar")
-  useEffect(() => {
-    const checkRole = async () => {
-      try {
-        const r = await api.get('/auth/obtenerperfil', {
-          withCredentials: true,
-          skipAuthRedirect: true,
-        });
-        const p = Array.isArray(r.data) ? r.data[0] : r.data;
-        const role = String(p?.rol || '').toLowerCase();
-        setIsAdmin(role === 'admin');
-      } catch {
-        setIsAdmin(false);
-      }
-    };
-    checkRole();
+	// Comprobar rol (para mostrar botón "editar")
+	useEffect(() => {
+		const checkRole = async () => {
+			try {
+				const r = await api.get('/auth/obtenerperfil', {
+					withCredentials: true,
+					skipAuthRedirect: true,
+				});
+				const p = Array.isArray(r.data) ? r.data[0] : r.data;
+				const role = String(p?.rol || '').toLowerCase();
+				setIsAdmin(role === 'admin');
+			} catch {
+				setIsAdmin(false);
+			}
+		};
+		checkRole();
 
-    const onAuthRefresh = () => checkRole();
-    window.addEventListener('auth:refresh', onAuthRefresh);
-    return () => window.removeEventListener('auth:refresh', onAuthRefresh);
-  }, []);
+		const onAuthRefresh = () => checkRole();
+		window.addEventListener('auth:refresh', onAuthRefresh);
+		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
+	}, []);
 
-  // Cargar info de testimonios (header_title)
-  useEffect(() => {
-    const fetchTestimoniosSite = async () => {
-      try {
-        const res = await api.get('/auth/testimoniossite', { skipAuthRedirect: true });
-        const payload = res?.data ?? null;
-        if (payload?.header_title) setHeaderTitle(String(payload.header_title));
-      } catch (e) {
-        console.log('No se pudo cargar /testimoniossite:', e.message);
-      }
-    };
-    fetchTestimoniosSite();
-  }, []);
+	// Cargar info de testimonios (header_title)
+	useEffect(() => {
+		const fetchTestimoniosSite = async () => {
+			try {
+				const res = await api.get('/auth/testimoniossite', { skipAuthRedirect: true });
+				const payload = res?.data ?? null;
+				if (payload?.header_title) setHeaderTitle(String(payload.header_title));
+			} catch (e) {
+				console.log('No se pudo cargar /testimoniossite:', e.message);
+			}
+		};
+		fetchTestimoniosSite();
+	}, []);
 
-  // Cargar imagen del header
-  useEffect(() => {
-    const loadHeader = async () => {
-      try {
-        const res = await api.get('/auth/testimoniosimages');
-        const rows = Array.isArray(res.data) ? res.data : [];
-        const row = rows.find(
-          r => String(r.type).toLowerCase() === 'testimonios_header',
-        );
-        setHeaderUrl(row?.url || null);
-      } catch (err) {
-        console.error('Error cargando testimonios_header:', err?.message || err);
-      }
-    };
-    loadHeader();
-  }, []);
+	// Cargar imagen del header
+	useEffect(() => {
+		const loadHeader = async () => {
+			try {
+				const res = await api.get('/auth/testimoniosimages');
+				const rows = Array.isArray(res.data) ? res.data : [];
+				const row = rows.find(
+					r => String(r.type).toLowerCase() === 'testimonios_header',
+				);
+				setHeaderUrl(row?.url || null);
+			} catch (err) {
+				console.error('Error cargando testimonios_header:', err?.message || err);
+			}
+		};
+		loadHeader();
+	}, []);
 
-  // Cargar testimonios y separar destacados de normales
-  useEffect(() => {
-    const fetchTestimonios = async () => {
-      try {
-        const res = await api.get('/auth/obtenertestimonios');
-        const testimoniosData = res.data;
-        
-        const testimoniosLista = testimoniosData.map(testimonio => ({
-          id: testimonio.id_testimonio,
-          nombre: testimonio.nombre,
-          cita: testimonio.contenido,
-          imagen: testimonio.imagen,
-          is_featured: testimonio.is_featured
-        }));
+	// Cargar testimonios
+	useEffect(() => {
+		const fetchTestimonios = async () => {
+			try {
+				const res = await api.get('/auth/obtenertestimonios');
+				const testimoniosData = res.data;
+				const testimoniosLista = testimoniosData.map(testimonio => ({
+					id: testimonio.id_testimonio,
+					nombre: testimonio.nombre,
+					cita: testimonio.contenido,
+					imagen: testimonio.imagen,
+				}));
+				setTestimonios(testimoniosLista);
+			} catch (err) {
+				console.error('Error al obtener testimonios:', err);
+			}
+		};
+		fetchTestimonios();
+	}, []);
 
-        setTestimonios(testimoniosLista);
-        
-        // Separar testimonios destacados de normales
-        const destacados = testimoniosLista.filter(t => t.is_featured);
-        const normales = testimoniosLista.filter(t => !t.is_featured);
-        
-        setTestimoniosDestacados(destacados);
-        setTestimoniosNormales(normales);
-      } catch (err) {
-        console.error('Error al obtener testimonios:', err);
-      }
-    };
-    fetchTestimonios();
-  }, []);
+	// Abre modal de header con datos actuales
+	const openHeaderEditor = () => {
+		setHeaderTitleInput(headerTitle || 'Historias que inspiran.');
+		setHeaderFile(null);
+		setHeaderError('');
+		setOpenHeaderEdit(true);
+	};
 
-  // ... resto de funciones se mantienen igual (openHeaderEditor, saveHeader, etc.)
+	// Guardar título/imagen del header
+	const saveHeader = async () => {
+		try {
+			setHeaderError('');
+			setHeaderUploading(true);
 
-  return (
-    <div style={{ overflowX: 'hidden' }}>
-      {/* ENCABEZADO CON SISTEMA DE EDICIÓN COMPLETO */}
-      {/* ... header se mantiene igual ... */}
+			// 1) Subir imagen si se seleccionó
+			let newUrl = headerUrl;
+			if (headerFile) {
+							const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
+							if (!allowed.includes(headerFile.type)) {
+								throw new Error('Formato no permitido. Usa JPG, PNG, WEBP o AVIF.');
+							}
+							if (headerFile.size > 8 * 1024 * 1024) {
+								throw new Error('La imagen supera los 8 MB.');
+							}
+			
+							const fd = new FormData();
+							fd.append('file', headerFile);
+							const up = await api.post('/auth/upload', fd, {
+								headers: { 'Content-Type': 'multipart/form-data' },
+							});
+				newUrl = up?.data?.url;
+				if (!newUrl) throw new Error('No se recibió URL de subida');
 
-      {/* SECCIÓN TESTIMONIOS DESTACADOS - Solo se muestra si hay destacados */}
-      {testimoniosDestacados.length > 0 && (
-        <Box sx={{ py: 6, backgroundColor: '#f1f5fb' }}>
-          <Typography
-            variant='h4'
-            sx={{
-              fontFamily: 'Varsity, sans-serif',
-              fontWeight: 'bold',
-              fontSize: isSmallScreen ? '1.8rem' : '4rem',	
-              color: '#c65402',
-              textAlign: 'center',
-              mb: 4,
-            }}
-          >
-            Testimonios Destacados
-          </Typography>
+				await api.put('/auth/testimonioimages', {
+					type: 'testimonio_header',
+					url: newUrl,
+				});
+			}
 
-          {/* Mostrar todos los testimonios destacados */}
-          {testimoniosDestacados.map((testimonio, index) => {
-            const invertir = index % 2 === 1;
-            const superponer = index !== 0;
-            const invertirDiagonal = index % 2 === 0;
-            const zIndex = 9 - (index % 9);
-            const rol = roles[Math.floor(Math.random() * roles.length)];
+			// 2) Actualizar título en testimonios_site
+			const payload = {
+				header_title: headerTitleInput?.trim() || 'Historias que inspiran.',
+			};
+			await api.put('/auth/testimoniossite', payload);
 
-            return (
-              <TestimonioTrapezoide
-                key={`destacado-${testimonio.id}`}
-                {...testimonio}
-                rol={rol}
-                invertir={invertir}
-                superponer={superponer}
-                invertirDiagonal={invertirDiagonal}
-                colorFondo={index % 2 === 0 ? '#c65402' : '#044c94'}
-                zIndex={zIndex}
-                finalTest={index === testimoniosDestacados.length - 1}
-                esDestacado={true}
-              />
-            );
-          })}
-        </Box>
-      )}
+			// 3) Refrescar UI
+			setHeaderUrl(newUrl);
+			setHeaderTitle((headerTitleInput || 'Historias que inspiran.').trim());
 
-      {/* TESTIMONIOS NORMALES */}
-      {testimoniosNormales.map((testimonio, index) => {
-        const invertir = index % 2 === 1;
-        const superponer = index !== 0;
-        const invertirDiagonal = index % 2 === 0;
-        const zIndex = 9 - (index % 9);
-        const rol = roles[Math.floor(Math.random() * roles.length)];
+			// limpia selección y preview
+			setHeaderFile(null);
+			setHeaderPreview(null);
 
-        return (
-          <TestimonioTrapezoide
-            key={testimonio.id}
-            {...testimonio}
-            rol={rol}
-            invertir={invertir}
-            superponer={superponer}
-            invertirDiagonal={invertirDiagonal}
-            colorFondo={index % 2 === 0 ? '#c65402' : '#044c94'}
-            zIndex={zIndex}
-            finalTest={index === testimoniosNormales.length - 1}
-            esDestacado={false}
-          />
-        );
-      })}
+			setOpenHeaderEdit(false);
+			setSnackbarType('success');
+			setSnackbarMsg('Encabezado actualizado');
+			setOpenSnackbar(true);
+		} catch (err) {
+			const msg =
+				err?.response?.data?.mensaje ||
+				err?.response?.data?.error ||
+				err?.message ||
+				'Error al actualizar el encabezado.';
+			setHeaderError(msg);
+		} finally {
+			setHeaderUploading(false);
+		}
+	};
 
-      {/* SECCIÓN VIDEOS */}
-      <Box sx={{ py: 6, backgroundColor: '#f1f5fb' }}>
-        <Typography
-          variant='h4'
-          sx={{
-            fontFamily: 'Varsity, sans-serif',
-            fontWeight: 'bold',
-            fontSize: isSmallScreen ? '1.8rem' : '3rem',	
-            color: '#002c6c',
-            textAlign: 'center',
-            mb: 4,
-          }}
-        >
-          Testimonios en Video
-        </Typography>
-        <VidCarousel videos={videos} />
-      </Box>
+	return (
+		<div style={{ overflowX: 'hidden' }}>
+			{/* ENCABEZADO CON SISTEMA DE EDICIÓN COMPLETO */}
+			<Box
+				sx={{
+					position: 'relative',
+					width: '100%',
+					minHeight: { xs: '75vh', md: '90vh' },
+					display: 'flex',
+					alignItems: 'center',
+					justifyContent: 'center',
+					backgroundImage: `url(${headerUrl || fondoDefault})`,
+					backgroundSize: 'cover',
+					backgroundPosition: 'center',
+					py: { xs: 6, md: 8 },
+				}}
+			>
+				<Box
+					sx={{
+						position: 'absolute',
+						top: 0,
+						left: 0,
+						width: '100%',
+						height: '100%',
+						backgroundColor: 'rgba(0, 0, 80, 0.75)',
+						zIndex: 1,
+					}}
+				/>
+
+				{/* Botón para editar TÍTULO + IMAGEN (solo admin) */}
+				{isAdmin && (
+					<Tooltip title='Editar título/imagen'>
+						<IconButton
+							onClick={openHeaderEditor}
+							sx={{
+								position: 'absolute',
+								bottom: 16,
+								right: 16,
+								color: 'white',
+								backgroundColor: 'rgba(0,0,0,0.4)',
+								'&:hover': { backgroundColor: 'rgba(255,255,255,0.3)' },
+								zIndex: 3,
+							}}
+						>
+							<EditIcon />
+						</IconButton>
+					</Tooltip>
+				)}
+
+				<Box
+					sx={{
+						position: 'relative',
+						zIndex: 2,
+						textAlign: 'center',
+						height: '100%',
+						display: 'flex',
+						alignItems: 'center',
+						justifyContent: 'center',
+						p: { xs: 2, sm: 4 },
+						width: '100%',
+						maxWidth: '1200px',
+					}}
+				>
+					<Box>
+						<Typography
+							variant='h1'
+							sx={{
+								fontFamily: 'Bulletto, cursive',
+								mb: 2,
+								fontSize: {
+									xs: '3.5rem',
+									sm: '5rem',
+									md: '6rem',
+									lg: '7rem',
+								},
+								color: 'white',
+								textShadow: '2px 2px 6px rgba(0,0,0,0.7)',
+							}}
+						>
+							{headerTitle}
+						</Typography>
+
+						<Typography
+							variant='h4'
+							sx={{
+								fontFamily: 'ManropeEB, sans-serif',
+								fontSize: {
+									xs: '1.2rem',
+									sm: '1.5rem',
+									md: '2rem',
+								},
+								color: 'white',
+								textShadow: '2px 2px 4px rgba(0,0,0,0.7)',
+							}}
+						>
+							Nuestros pilotos de béisbol comparten sus experiencias y logros a lo
+							largo de su trayectoria.
+						</Typography>
+					</Box>
+				</Box>
+			</Box>
+
+			{/* TESTIMONIOS */}
+			{testimonios.map((testimonio, index) => {
+				const invertir = index % 2 === 1;
+				const superponer = index !== 0;
+				const invertirDiagonal = index % 2 === 0;
+				const zIndex = 9 - (index % 9);
+				const rol = roles[Math.floor(Math.random() * roles.length)];
+
+				return (
+					<TestimonioTrapezoide
+						key={index}
+						{...testimonio}
+						rol={rol}
+						invertir={invertir}
+						superponer={superponer}
+						invertirDiagonal={invertirDiagonal}
+						colorFondo={index % 2 === 0 ? '#c65402' : '#044c94'}
+						zIndex={zIndex}
+						finalTest={index === testimonios.length - 1}
+					/>
+				);
+			})}
+
+			{/* SECCIÓN VIDEOS */}
+			<Box sx={{ py: 6, backgroundColor: '#f1f5fb' }}>
+				<Typography
+					variant='h4'
+					sx={{
+						fontFamily: 'Varsity, sans-serif',
+						fontWeight: 'bold',
+						fontSize: isSmallScreen ? '1.8rem' : '4rem',	
+						color: '#002c6c',
+						textAlign: 'center',
+						mb: 4,
+					}}
+				>
+					Testimonios en Video
+				</Typography>
+				<VidCarousel videos={videos} />
+			</Box>
 
 			{/* SNACKBAR FEEDBACK */}
 			<Snackbar
