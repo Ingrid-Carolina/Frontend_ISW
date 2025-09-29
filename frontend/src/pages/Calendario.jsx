@@ -169,7 +169,7 @@ const Calendario = () => {
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 	const [eventImage, setEventImage] = useState(null);
-	const [errorImg, setErrorImg] = useState("");
+	const [errorImg, setErrorImg] = useState('');
 	const [previewImg, setPreviewImg] = useState(null);
 
 	function createDateFromInput(dateStr, timeStr = '00:00') {
@@ -353,7 +353,7 @@ const Calendario = () => {
 		});
 		setEventImage(null);
 		setPreviewImg(null);
-		setErrorImg("");
+		setErrorImg('');
 	};
 
 	const editEvent = index => {
@@ -390,34 +390,45 @@ const Calendario = () => {
 
 			if (eventImage) {
 				body = new FormData();
-				body.append("nombre", eventoActualizado.title);
-				body.append("fecha_inicio", eventoActualizado.date.toISOString());
-				body.append("fecha_final", eventoActualizado.endDate ? eventoActualizado.endDate.toISOString() : null);
-				body.append("descripcion", eventoActualizado.description);
-				if (eventoActualizado.img_url) body.append("img_url", eventoActualizado.img_url);
-				body.append("file", eventImage);
+				body.append('nombre', eventoActualizado.title);
+				body.append('fecha_inicio', eventoActualizado.date.toISOString());
+				body.append(
+					'fecha_final',
+					eventoActualizado.endDate
+						? eventoActualizado.endDate.toISOString()
+						: null,
+				);
+				body.append('descripcion', eventoActualizado.description);
+				if (eventoActualizado.img_url)
+					body.append('img_url', eventoActualizado.img_url);
+				body.append('file', eventImage);
 			} else {
 				body = {
 					nombre: eventoActualizado.title,
 					fecha_inicio: eventoActualizado.date.toISOString(),
-					fecha_final: eventoActualizado.endDate ? eventoActualizado.endDate.toISOString() : null,
+					fecha_final: eventoActualizado.endDate
+						? eventoActualizado.endDate.toISOString()
+						: null,
 					descripcion: eventoActualizado.description,
 					img_url: eventoActualizado.img_url || null,
 				};
 			}
 
 			const res = await api.put(`/auth/evento/${Number(id)}`, body, {
-				headers: eventImage ? { "Content-Type": "multipart/form-data" } : undefined,
+				headers: eventImage
+					? { 'Content-Type': 'multipart/form-data' }
+					: undefined,
 			});
 
 			setBannerMsg(res.data.mensaje);
-			setBannerType("success");
+			setBannerType('success');
 			setShowBanner(true);
 			setTimeout(() => setShowBanner(false), 4000);
 		} catch (error) {
-			const mensaje = error?.data?.mensaje || error?.message || "Error en la Red";
+			const mensaje =
+				error?.data?.mensaje || error?.message || 'Error en la Red';
 			setBannerMsg(mensaje);
-			setBannerType("error");
+			setBannerType('error');
 			setShowBanner(true);
 			setTimeout(() => setShowBanner(false), 4000);
 		}
@@ -529,12 +540,12 @@ const Calendario = () => {
 
 			if (eventImage) {
 				body = new FormData();
-				body.append("nombre", eventForm.title);
-				body.append("fecha_inicio", date);
-				if (endDate) body.append("fecha_final", endDate);
-				body.append("descripcion", eventForm.description);
-				if (eventForm.img_url) body.append("img_url", eventForm.img_url); // URL opcional
-				body.append("file", eventImage); // 👈 archivo real
+				body.append('nombre', eventForm.title);
+				body.append('fecha_inicio', date);
+				if (endDate) body.append('fecha_final', endDate);
+				body.append('descripcion', eventForm.description);
+				if (eventForm.img_url) body.append('img_url', eventForm.img_url); // URL opcional
+				body.append('file', eventImage); // 👈 archivo real
 			} else {
 				body = {
 					nombre: eventForm.title,
@@ -546,20 +557,23 @@ const Calendario = () => {
 			}
 
 			const res = await api.post('/auth/registrarevento', body, {
-				headers: eventImage ? { "Content-Type": "multipart/form-data" } : undefined,
+				headers: eventImage
+					? { 'Content-Type': 'multipart/form-data' }
+					: undefined,
 			});
 
 			const nuevoId = res?.data?.id;
 			setBannerMsg(res.data.mensaje);
-			setBannerType("success");
+			setBannerType('success');
 			setShowBanner(true);
 			setTimeout(() => setShowBanner(false), 4000);
 
 			return { id: nuevoId, ...res.data };
 		} catch (error) {
-			const mensaje = error?.data?.mensaje || error?.message || "Error en la Red";
+			const mensaje =
+				error?.data?.mensaje || error?.message || 'Error en la Red';
 			setBannerMsg(mensaje);
-			setBannerType("error");
+			setBannerType('error');
 			setShowBanner(true);
 			setTimeout(() => setShowBanner(false), 4000);
 			throw error;
@@ -644,19 +658,19 @@ const Calendario = () => {
 		openModal(targetDate);
 	};
 
-	const handleImageChange = (e) => {
+	const handleImageChange = e => {
 		const file = e.target.files?.[0];
 		if (!file) return;
 
-		const allowed = ["image/jpeg", "image/png", "image/webp", "image/avif"];
+		const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
 		if (!allowed.includes(file.type)) {
-			setErrorImg("Tipo inválido. Usa JPG, PNG, WEBP o AVIF");
+			setErrorImg('Tipo inválido. Usa JPG, PNG, WEBP o AVIF');
 			setEventImage(null);
 			setPreviewImg(null);
 			return;
 		}
 
-		setErrorImg("");
+		setErrorImg('');
 		setEventImage(file);
 		setPreviewImg(URL.createObjectURL(file));
 	};
@@ -673,20 +687,21 @@ const Calendario = () => {
 					<button className='today-button' onClick={goToToday}>
 						Hoy
 					</button>
+					<div className='title-nav'>
+						<button className='nav-button' onClick={() => navigate(-1)}>
+							<ChevronLeft />
+						</button>
 
-					<button className='nav-button' onClick={() => navigate(-1)}>
-						<ChevronLeft />
-					</button>
+						<h2 className='month-title'>
+							{view === 'month'
+								? `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`
+								: getWeekDateRange()}
+						</h2>
 
-					<h2 className='month-title'>
-						{view === 'month'
-							? `${months[currentDate.getMonth()]} ${currentDate.getFullYear()}`
-							: getWeekDateRange()}
-					</h2>
-
-					<button className='nav-button' onClick={() => navigate(1)}>
-						<ChevronRight />
-					</button>
+						<button className='nav-button' onClick={() => navigate(1)}>
+							<ChevronRight />
+						</button>
+					</div>
 				</div>
 
 				{/* Lado derecho: Login/Logout y botones de vista */}
@@ -727,61 +742,66 @@ const Calendario = () => {
 				</div>
 			</div>
 
-			{/* Headers de los días */}
-			<div className='days-header'>
-				{daysOfWeek.map(day => (
-					<div key={day} className='day-header'>
-						{day}
-					</div>
-				))}
-			</div>
-
-			{/* Grid del calendario */}
-			<div className='calendar-grid'>
-				{days.map((day, index) => {
-					const dayEvents = getEventsForDate(day.fullDate);
-					const hasEvents = dayEvents.length > 0;
-
-					let cellClasses = 'day-cell';
-					if (isToday(day.fullDate)) cellClasses += ' today';
-					if (!day.isCurrentMonth) cellClasses += ' inactive';
-
-					let numberClasses = 'day-number';
-					if (isToday(day.fullDate)) numberClasses += ' today';
-					if (!day.isCurrentMonth) numberClasses += ' inactive';
-
-					return (
-						<div
-							key={index}
-							className={cellClasses}
-							onClick={() => openModal(day.fullDate)}
-						>
-							<div className={numberClasses}>
-								<span>{day.date}</span>
-								{hasEvents && <div className='event-indicator'></div>}
-							</div>
-
-							<div className='events-container'>
-								{dayEvents.slice(0, 2).map(event => (
-									<div
-										key={event.id}
-										className={`event-item ${event.type === 'event' ? 'event-type' : 'note-type'}`}
-									>
-										{event.time && (
-											<span style={{ fontWeight: '600' }}>{event.time}</span>
-										)}
-										<span style={event.time ? { marginLeft: '4px' } : {}}>
-											{event.title}
-										</span>
-									</div>
-								))}
-								{dayEvents.length > 2 && (
-									<div className='more-events'>+{dayEvents.length - 2} más</div>
-								)}
-							</div>
+			{/* CONTENEDOR CON SCROLL HORIZONTAL */}
+			<div className='calendar-scroll'>
+				{/* Header de los días */}
+				<div className='days-header'>
+					{['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'].map(d => (
+						<div key={d} className='day-header'>
+							{d}
 						</div>
-					);
-				})}
+					))}
+				</div>
+
+				{/* Grid del calendario */}
+				<div className='calendar-grid'>
+					{days.map((day, index) => {
+						const dayEvents = getEventsForDate(day.fullDate);
+						const hasEvents = dayEvents.length > 0;
+
+						let cellClasses = 'day-cell';
+						if (isToday(day.fullDate)) cellClasses += ' today';
+						if (!day.isCurrentMonth) cellClasses += ' inactive';
+
+						let numberClasses = 'day-number';
+						if (isToday(day.fullDate)) numberClasses += ' today';
+						if (!day.isCurrentMonth) numberClasses += ' inactive';
+
+						return (
+							<div
+								key={index}
+								className={cellClasses}
+								onClick={() => openModal(day.fullDate)}
+							>
+								<div className={numberClasses}>
+									<span>{day.date}</span>
+									{hasEvents && <div className='event-indicator' />}
+								</div>
+
+								<div className='events-container'>
+									{dayEvents.slice(0, 2).map(event => (
+										<div
+											key={event.id}
+											className={`event-item ${event.type === 'event' ? 'event-type' : 'note-type'}`}
+										>
+											{event.time && (
+												<span style={{ fontWeight: 600 }}>{event.time}</span>
+											)}
+											<span style={event.time ? { marginLeft: 4 } : {}}>
+												{event.title}
+											</span>
+										</div>
+									))}
+									{dayEvents.length > 2 && (
+										<div className='more-events'>
+											+{dayEvents.length - 2} más
+										</div>
+									)}
+								</div>
+							</div>
+						);
+					})}
+				</div>
 			</div>
 
 			{/* Modal de Eventos */}
@@ -912,12 +932,20 @@ const Calendario = () => {
 											onChange={handleImageChange}
 											disabled={!isLoggedIn}
 										/>
-										{errorImg && <p style={{ color: "red", fontSize: "12px" }}>{errorImg}</p>}
+										{errorImg && (
+											<p style={{ color: 'red', fontSize: '12px' }}>
+												{errorImg}
+											</p>
+										)}
 										{previewImg && (
 											<img
 												src={previewImg}
 												alt='Vista previa'
-												style={{ maxWidth: "120px", marginTop: "6px", borderRadius: "6px" }}
+												style={{
+													maxWidth: '120px',
+													marginTop: '6px',
+													borderRadius: '6px',
+												}}
 											/>
 										)}
 									</div>
