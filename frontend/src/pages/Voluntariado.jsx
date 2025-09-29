@@ -17,6 +17,7 @@ import React, { useState, useRef, useEffect } from 'react';
 // Importa componentes personalizados para edición de imágenes
 import EditableImage from '../components/EditableImage';
 import EditableHeaderImage from '../components/EditableHeaderImage';
+import EditableText from '../components/EditableText';
 
 // Variantes de animación para la entrada en vista
 const fadeIn = {
@@ -77,6 +78,79 @@ const Voluntariado = () => {
     autoplaySpeed: 5000,
   };
 
+    const [headerText, setHeaderText] = useState({
+           header_l1: 'Se Parte De',
+           header_l2: 'PILOTOS FAH',
+       });
+
+        const [sloganText, setsloganText] = useState({
+           slogan: '¿Te apasiona el béisbol y el servicio a la comunidad? Si es así, Pilotos FAH te está llamando. Al unirte a nuestra misión, te convertirás en parte fundamental de la próxima generación de líderes y, a través del espíritu del béisbol, fomentarás un cambio social positivo, llevando nuestra pasión a nuevas alturas. Descubre cómo puedes marcar la diferencia hoy mismo con Pilotos FAH.',
+       });
+
+       const [titutloText, settituloText] = useState({
+           contenido_titulo: 'Convierte en un Voluntario',
+       });
+
+        const [subtitutloText, setsubtituloText] = useState({
+           contenido_subtitulo: 'Tú oportunidad de hacer la diferencia',
+       });
+
+       const [descripcionText, setdescripcionText] = useState({
+           descripcion: ' El voluntariado con Pilotos FAH es una oportunidad única para combinar tu pasión por el béisbol con un impacto real en la vida de los demás. Al unirte a nosotros, aprenderás valiosas habilidades de liderazgo, harás amigos y te convertirás en parte de algo más grande, contribuyendo a un cambio positivo en nuestra comunidad.',
+       });
+
+ const saveHeaderText = async (clave, valor) => {
+      // Optimistic update
+      setHeaderText(prev => ({ ...prev, [clave]: valor }));
+      try {
+        await api.put('/auth/voluntariado/texto', { clave, valor }, { withCredentials: true });
+      } catch {
+        // si falla el backend, no rompemos la UI
+      }
+    };
+
+    const savesloganText = async (clave, valor) => {
+      // Optimistic update
+      setsloganText(prev => ({ ...prev, [clave]: valor }));
+      try {
+        await api.put('/auth/voluntariado/texto', { clave, valor }, { withCredentials: true });
+      } catch {
+        // si falla el backend, no rompemos la UI
+      }
+    };
+
+    const savetituloText = async (clave, valor) => {
+      // Optimistic update
+      settituloText(prev => ({ ...prev, [clave]: valor }));
+      try {
+        await api.put('/auth/voluntariado/texto', { clave, valor }, { withCredentials: true });
+      } catch {
+        // si falla el backend, no rompemos la UI
+      }
+    };
+
+    const savesubtituloText = async (clave, valor) => {
+      // Optimistic update
+      setsubtituloText(prev => ({ ...prev, [clave]: valor }));
+      try {
+        await api.put('/auth/voluntariado/texto', { clave, valor }, { withCredentials: true });
+      } catch {
+        // si falla el backend, no rompemos la UI
+      }
+    };
+
+    const savedescripcionText = async (clave, valor) => {
+      // Optimistic update
+      setdescripcionText(prev => ({ ...prev, [clave]: valor }));
+      try {
+        await api.put('/auth/voluntariado/texto', { clave, valor }, { withCredentials: true });
+      } catch {
+        // si falla el backend, no rompemos la UI
+      }
+    };
+
+
+
   // Maneja la subida y actualización de imágenes en el backend
   const handleImageChange = async (key, file) => {
     if (!(file instanceof File)) return;
@@ -119,6 +193,106 @@ const Voluntariado = () => {
     };
     checkRole();
   }, []);
+
+   // Carga los textos del header desde el backend
+      useEffect(() => {
+          let cancelled = false;
+          (async () => {
+              try {
+                  const res = await api.get('/auth/voluntariado/texto', {
+                      withCredentials: true,
+                      skipAuthRedirect: true,
+                  });
+                  if (!cancelled && res?.data?.success && res.data.data) {
+                      // merge para no perder defaults si faltara alguna clave
+                      setHeaderText(prev => ({ ...prev, ...res.data.data }));
+                  }
+              } catch {
+                  /* si falla, seguimos con defaults locales */
+              }
+          })();
+          return () => { cancelled = true; };
+      }, []);
+
+       // Carga el texto del slogan desde el backend
+      useEffect(() => {
+          let cancelled = false;
+          (async () => {
+              try {
+                  const res = await api.get('/auth/voluntariado/texto', {
+                      withCredentials: true,
+                      skipAuthRedirect: true,
+                  });
+                  if (!cancelled && res?.data?.success && res.data.data) {
+                      // merge para no perder defaults si faltara alguna clave
+                      setsloganText(prev => ({ ...prev, ...res.data.data }));
+                  }
+              } catch {
+                  /* si falla, seguimos con defaults locales */
+              }
+          })();
+          return () => { cancelled = true; };
+      }, []);
+
+       // Carga el contenido del titulo desde el backend
+      useEffect(() => {
+          let cancelled = false;
+          (async () => {
+              try {
+                  const res = await api.get('/auth/voluntariado/texto', {
+                      withCredentials: true,
+                      skipAuthRedirect: true,
+                  });
+                  if (!cancelled && res?.data?.success && res.data.data) {
+                      // merge para no perder defaults si faltara alguna clave
+                      settituloText(prev => ({ ...prev, ...res.data.data }));
+                  }
+              } catch {
+                  /* si falla, seguimos con defaults locales */
+              }
+          })();
+          return () => { cancelled = true; };
+      }, []);
+
+       // Carga el contenido del subtitulo desde el backend
+      useEffect(() => {
+          let cancelled = false;
+          (async () => {
+              try {
+                  const res = await api.get('/auth/voluntariado/texto', {
+                      withCredentials: true,
+                      skipAuthRedirect: true,
+                  });
+                  if (!cancelled && res?.data?.success && res.data.data) {
+                      // merge para no perder defaults si faltara alguna clave
+                      setdescripcionText(prev => ({ ...prev, ...res.data.data }));
+                  }
+              } catch {
+                  /* si falla, seguimos con defaults locales */
+              }
+          })();
+          return () => { cancelled = true; };
+      }, []);
+
+       // Carga la descripcion desde el backend
+      useEffect(() => {
+          let cancelled = false;
+          (async () => {
+              try {
+                  const res = await api.get('/auth/voluntariado/texto', {
+                      withCredentials: true,
+                      skipAuthRedirect: true,
+                  });
+                  if (!cancelled && res?.data?.success && res.data.data) {
+                      // merge para no perder defaults si faltara alguna clave
+                      setsubtituloText(prev => ({ ...prev, ...res.data.data }));
+                  }
+              } catch {
+                  /* si falla, seguimos con defaults locales */
+              }
+          })();
+          return () => { cancelled = true; };
+      }, []);
 
   return (
     <>
@@ -189,9 +363,20 @@ const Voluntariado = () => {
                 display: 'block',
               }}
             >
-              Se Parte De
+               <EditableText
+            text={headerText.header_l1 ||'Se Parte De'}
+            onTextSave={(t) => saveHeaderText('header_l1', t)}
+            isAdmin={isAdmin}
+            variant='p'
+          />
+
             </Typography>
-            Pilotos FAH
+             <EditableText
+            text={headerText.header_l2 ||'Pilotos FAH'}
+            onTextSave={(t) => saveHeaderText('header_l2', t)}
+            isAdmin={isAdmin}
+            variant='p'
+          />
           </Typography>
           {/* SVG decorativo debajo del título */}
           <svg
@@ -239,7 +424,12 @@ const Voluntariado = () => {
             font: 'bold',
           }}
         >
-          ¿Te apasiona el béisbol y el servicio a la comunidad? Si es así, Pilotos FAH te está llamando. Al unirte a nuestra misión, te convertirás en parte fundamental de la próxima generación de líderes y, a través del espíritu del béisbol, fomentarás un cambio social positivo, llevando nuestra pasión a nuevas alturas. Descubre cómo puedes marcar la diferencia hoy mismo con Pilotos FAH.
+         <EditableText
+            text={sloganText.slogan ||'¿Te apasiona el béisbol y el servicio a la comunidad? Si es así, Pilotos FAH te está llamando. Al unirte a nuestra misión, te convertirás en parte fundamental de la próxima generación de líderes y, a través del espíritu del béisbol, fomentarás un cambio social positivo, llevando nuestra pasión a nuevas alturas. Descubre cómo puedes marcar la diferencia hoy mismo con Pilotos FAH.'}
+            onTextSave={(t) => savesloganText('slogan', t)}
+            isAdmin={isAdmin}
+            variant='p'
+          />
         </Typography>
 
         {/* Sección principal de voluntariado con texto y imagen */}
@@ -282,7 +472,12 @@ const Voluntariado = () => {
                 fontWeight: '900',
               }}
             >
-              Convierte en un Voluntario
+               <EditableText
+            text={titutloText.contenido_titulo ||'Convierte en un Voluntario'}
+            onTextSave={(t) => savetituloText('contenido_titulo', t)}
+            isAdmin={isAdmin}
+            variant='p'
+          />
             </Typography>
             <Typography
               variant="h2"
@@ -293,7 +488,12 @@ const Voluntariado = () => {
                 fontWeight: '700',
               }}
             >
-              Tú oportunidad de hacer la diferencia
+              <EditableText
+            text={subtitutloText.contenido_subtitulo ||'Tú oportunidad de hacer la diferencia'}
+            onTextSave={(t) => savesubtituloText('contenido_subtitulo', t)}
+            isAdmin={isAdmin}
+            variant='p'
+          />
             </Typography>
             {/* Texto descriptivo sobre el voluntariado */}
             <Typography
@@ -305,19 +505,14 @@ const Voluntariado = () => {
                 fontWeight: '500',
               }}
             >
-              El voluntariado con Pilotos FAH es una oportunidad única para combinar tu pasión por el béisbol con un impacto real en la vida de los demás. Al unirte a nosotros, aprenderás valiosas habilidades de liderazgo, harás amigos y te convertirás en parte de algo más grande, contribuyendo a un cambio positivo en nuestra comunidad.
+              <EditableText
+            text={descripcionText.descripcion ||'El voluntariado con Pilotos FAH es una oportunidad única para combinar tu pasión por el béisbol con un impacto real en la vida de los demás. Al unirte a nosotros, aprenderás valiosas habilidades de liderazgo, harás amigos y te convertirás en parte de algo más grande, contribuyendo a un cambio positivo en nuestra comunidad.'}
+            onTextSave={(t) => savedescripcionText('descripcion', t)}
+            isAdmin={isAdmin}
+            variant='p'
+          />
             </Typography>
-            <Typography
-              variant="body1"
-              sx={{
-                fontFamily:
-                  '-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-                lineHeight: '1.6',
-                fontWeight: '500',
-              }}
-            >
-              No importa tu edad o nivel de experiencia en el béisbol, en Pilotos FAH, damos la bienvenida a cualquier persona que desee trabajar como voluntario. Hay una oportunidad para todos de tener un impacto positivo y significativo.
-            </Typography>
+           
             {/* Botón para ir a la página de contacto */}
             <Box sx={{ marginTop: '1rem' }}>
               <Link
