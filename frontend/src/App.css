@@ -1,28 +1,26 @@
 #root {
-	height: 100%;
-	margin: 0;
-	padding: 0;
-  	box-sizing: border-box;
-	display: flex;
-	text-align: center;
-	flex-direction: column;
+	height: 100%; /* Ocupa todo el alto disponible */
+	margin: 0; /* Elimina márgenes por defecto */
+	padding: 0; /* Elimina padding por defecto */
+	box-sizing: border-box; /* Incluye el padding y borde en el tamaño total */
+	display: flex; /* Usa flexbox para organizar hijos */
+	text-align: center; /* Centra el texto horizontalmente */
+	flex-direction: column; /* Apila los hijos verticalmente */
 }
 .app-container {
-	display: flex;
-	flex-direction: column;
-	min-height: 100vh;
-	background-color: white;
+	display: flex; /* Flexbox para estructura vertical */
+	flex-direction: column; /* Apila los hijos verticalmente */
+	min-height: 100vh; /* Mínimo alto de la ventana */
+	background-color: white; /* Fondo blanco */
 }
-
 .main-content {
-	flex: 1;
+	flex: 1; /* Ocupa el espacio restante entre header y footer */
 }
-
 .logo {
-	height: 6em;
-	padding: 1.5em;
-	will-change: filter;
-	transition: filter 300ms;
+	height: 6em; /* Altura fija */
+	padding: 1.5em; /* Espaciado interno */
+	will-change: filter; /* Optimiza animaciones de filtro */
+	transition: filter 300ms; /* Transición suave al aplicar filtro */
 }
 .logo:hover {
 	filter: drop-shadow(0 0 2em #646cffaa);
@@ -30,7 +28,6 @@
 .logo.react:hover {
 	filter: drop-shadow(0 0 2em #61dafbaa);
 }
-
 @keyframes logo-spin {
 	from {
 		transform: rotate(0deg);
@@ -39,21 +36,19 @@
 		transform: rotate(360deg);
 	}
 }
-
 @media (prefers-reduced-motion: no-preference) {
 	a:nth-of-type(2) .logo {
 		animation: logo-spin infinite 20s linear;
 	}
 }
 .card {
-	padding: 2em;
+	padding: 2em; /* Espaciado interno amplio */
 }
-
 .read-the-docs {
-	color: #888;
+	color: #888; /* Color gris para texto secundario */
 }
-
-/* Corrige el fondo gris en inputs con autofill de Chrome NO BORRAR*/
+/* Corrige el fondo gris en inputs con autofill de Chrome NO BORRAR */
+/* Fuerza el fondo blanco y color de texto azul en campos autocompletados */
 input:-webkit-autofill,
 input:-webkit-autofill:hover,
 input:-webkit-autofill:focus,
