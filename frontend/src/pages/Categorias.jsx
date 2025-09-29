@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Typography, IconButton, Alert, TextField, Button, Modal } from '@mui/material';
+import { Box, Typography, IconButton, Alert, TextField, Button, Modal, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import EditIcon from '@mui/icons-material/Edit';
@@ -17,17 +17,58 @@ const Categorias = () => {
   const [currentCat, setCurrentCat] = useState(null);
   const [formData, setFormData] = useState({ titletext: '', tipo: '', descripcion: '', image: null, imagePreview: '' });
   const [isAdmin, setIsAdmin] = useState(false);
+  const [headerPreview, setHeaderPreview] = useState(null);
+  const [headerData, setHeaderData] = useState({});
+  const [headerTitleInput, setHeaderTitleInput] = useState('');
+  const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
+  const [headerFile, setHeaderFile] = useState(null);
+  const [headerUploading, setHeaderUploading] = useState(false);
+  const [openCarruselEdit, setOpenCarruselEdit] = useState(false);
+  const [carruselFile, setCarruselFile] = useState(null);
+  const [carruselPreview, setCarruselPreview] = useState(null);
+  const [carruselData, setCarruselData] = useState({ carrusel_title: '', carrusel_subtitle: '', carrusel_image: '' });
+  const [carruselTitleInput, setCarruselTitleInput] = useState('');
+  const [carruselSubtitleInput, setCarruselSubtitleInput] = useState('');
+  const [carruselUploading, setCarruselUploading] = useState(false);
+
 
   useEffect(() => {
-  let mounted = true;
-  (async () => {
-    try {
-      const response = await api.get('/auth/categorias');
-      if (mounted && response.data?.categorias) {
-        setCategorias(response.data.categorias);
-      }
+    let mounted = true;
 
-      const checkRole = async () => {
+    (async () => {
+      try {
+        // 1️⃣ Traer categorías + header
+
+        const response2 = await api.get('/auth/categorias/site/all'); // o '/auth/categorias/site/all'
+        if (!mounted) return;
+
+        const data2 = response2.data;
+
+        const response = await api.get('/auth/categorias'); // o '/auth/categorias/site/all'
+        if (!mounted) return;
+
+        const data = response.data;
+
+        // Categorías
+        if (data?.categorias) setCategorias(data.categorias);
+
+        // Header
+        if (data2?.header_title || data2?.header_img) {
+          setHeaderData({
+            header_title: data2.header_title || '',
+            header_img: data2.header_img || '',
+            carrusel_title: data2.carrusel_title || '',
+            carrusel_subtitle: data2.carrusel_subtitle || '',
+            carrusel_img: data2.carrusel_image || '',
+
+          });
+          setHeaderTitleInput(data2.header_title || '');
+          setCarruselTitleInput(data2.carrusel_title || '');
+          setCarruselSubtitleInput(data2.carrusel_subtitle || '');
+          setCarruselPreview(data2.carrusel_image || null);
+        }
+
+        // 2️⃣ Chequear rol admin
         try {
           const r = await api.get('/auth/obtenerperfil', {
             withCredentials: true,
@@ -35,22 +76,67 @@ const Categorias = () => {
           });
           const p = Array.isArray(r.data) ? r.data[0] : r.data;
           const role = String(p?.rol || '').toLowerCase();
-          setIsAdmin(role === 'admin');
+          if (mounted) setIsAdmin(role === 'admin');
         } catch {
-          setIsAdmin(false);
+          if (mounted) setIsAdmin(false);
         }
-      };
 
-      await checkRole();
-    } catch (err) {
-      console.error('Error al cargar categorías:', err);
-    }
-  })();
-  return () => { mounted = false; };
-}, []);
+      } catch (err) {
+        console.error('Error al cargar datos de categorías y header:', err);
+        if (mounted) setError('No se pudieron cargar las categorías ni el header.');
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, []);
 
   const handleNext = () => setStartIndex((prev) => (prev + 1) % categorias.length);
   const handlePrev = () => setStartIndex((prev) => (prev - 1 + categorias.length) % categorias.length);
+
+  const saveCarrusel = async () => {
+    try {
+      // Si no hay nueva imagen y ya existe en DB, usar la existente
+      let imageUrl = carruselFile ? '' : (carruselData.carrusel_image || '');
+
+      if (carruselFile) {
+        setCarruselUploading(true);
+
+        const fd = new FormData();
+        fd.append("file", carruselFile);
+
+        const uploadRes = await api.post("/auth/upload", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        imageUrl = uploadRes.data.url;
+        setCarruselUploading(false);
+      }
+
+      const payload = {
+        carrusel_title: carruselTitleInput || carruselData.carrusel_title,
+        carrusel_subtitle: carruselSubtitleInput || carruselData.carrusel_subtitle,
+        carrusel_image: imageUrl || carruselData.carrusel_image, // ⚡ aquí se asegura de no borrar la existente
+      };
+
+      const res = await api.put('/auth/categorias/site/carrusel', payload);
+
+      setCarruselData(res.data);
+      setHeaderData(prev => ({
+        ...prev,
+        carrusel_title: res.data.carrusel_title,
+        carrusel_subtitle: res.data.carrusel_subtitle,
+        carrusel_img: res.data.carrusel_image,
+      }));
+
+      setOpenCarruselEdit(false);
+      setCarruselFile(null);
+      setCarruselPreview(null);
+    } catch (err) {
+      console.error("Error al guardar carrusel:", err);
+      setError("Error al actualizar carrusel.");
+      setCarruselUploading(false);
+    }
+  };
 
   const getVisibleCards = () => {
     const cards = [];
@@ -60,6 +146,53 @@ const Categorias = () => {
     }
     return cards;
   };
+
+  const saveHeader = async () => {
+    try {
+      let headerUrl = headerData.header_img || '';
+
+      if (headerFile) {
+        setHeaderUploading(true);
+
+        const fd = new FormData();
+        fd.append("file", headerFile);
+
+        const uploadRes = await api.post("/auth/upload", fd, {
+          headers: { "Content-Type": "multipart/form-data" },
+        });
+
+        headerUrl = uploadRes.data.url;
+        setHeaderUploading(false);
+      }
+
+      const payload = {
+        header_title: headerTitleInput || headerData.header_title || '',
+        header_img: headerUrl,
+      };
+
+      const res = await api.put('/auth/categorias/site/header', payload);
+
+      // ⚡ Merge en vez de reemplazar
+      setHeaderData(prev => ({
+        ...prev,
+        header_title: res.data.header_title,
+        header_img: res.data.header_img
+      }));
+
+      setOpenHeaderEdit(false);
+      setHeaderFile(null);
+      setHeaderPreview(null);
+
+    } catch (error) {
+      console.error("Error al guardar header:", error);
+      setError("Error al actualizar header.");
+      setHeaderUploading(false);
+    }
+  };
+
+
+
+
 
   const scrollToCategory = (slug) => {
     const element = document.getElementById(`detalle-${slug}`);
@@ -147,13 +280,14 @@ const Categorias = () => {
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          backgroundImage: `url(${Img})`,
+          backgroundImage: `url(${headerPreview || headerData?.header_img || '/Images/Categoria.png'})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           py: { xs: 6, md: 8 },
         }}
       >
-        <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }} />
+
+
         <Box
           sx={{
             position: 'relative',
@@ -163,6 +297,7 @@ const Categorias = () => {
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
+            flexDirection: 'column',
           }}
         >
           <Typography
@@ -175,9 +310,29 @@ const Categorias = () => {
               textAlign: 'center',
             }}
           >
-            CATEGORIAS
+            {headerData?.header_title || 'Cargando...'}
           </Typography>
+
+          {/* Capa oscura */}
+          <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }} />
+
         </Box>
+        {/* Botón editar header (solo admin) */}
+        {isAdmin && (
+          <IconButton
+            onClick={() => setOpenHeaderEdit(true)}
+            sx={{
+              position: 'absolute',
+              bottom: 16,
+              right: 16,
+              bgcolor: 'rgba(230,105,29,0.8)',
+              '&:hover': { bgcolor: 'rgba(230,105,29,1)' },
+              color: '#fff',
+            }}
+          >
+            <EditIcon />
+          </IconButton>
+        )}
       </Box>
 
       {/* CARRUSEL */}
@@ -185,7 +340,7 @@ const Categorias = () => {
         sx={{
           py: 6,
           px: { xs: 3, md: 10 },
-          backgroundImage: `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url('/Images/Fondo_Carrusel_Categorias.png')`,
+          backgroundImage: `linear-gradient(rgba(0,0,0,0.8), rgba(0,0,0,0.1)), url(${headerData?.carrusel_img || '/Images/Fondo_Carrusel_Categorias.png'})`,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -201,7 +356,7 @@ const Categorias = () => {
               color: '#e6691d',
             }}
           >
-            LAS CATEGORÍAS
+            {headerData?.carrusel_title}
           </Typography>
           <Typography
             variant='body1'
@@ -212,10 +367,9 @@ const Categorias = () => {
               lineHeight: 4.0,
             }}
           >
-            Explora cada categoría del béisbol juvenil y profesional. ¡Deslizá las tarjetas para conocerlas todas!
+            {headerData?.carrusel_subtitle}
           </Typography>
         </Box>
-
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
           <IconButton
             onClick={handlePrev}
@@ -230,6 +384,21 @@ const Categorias = () => {
           </IconButton>
 
           <Box sx={{ display: 'flex', gap: 3, overflow: 'hidden', width: '80%', justifyContent: 'center' }}>
+            {isAdmin && (
+              <IconButton
+                onClick={() => setOpenCarruselEdit(true)}
+                sx={{
+                  position: 'absolute',
+                  bottom: 16,
+                  right: 16,
+                  bgcolor: 'rgba(230,105,29,0.8)',
+                  '&:hover': { bgcolor: 'rgba(230,105,29,1)' },
+                  color: '#fff',
+                }}
+              >
+                <EditIcon />
+              </IconButton>
+            )}
             {getVisibleCards().map((categoria) => (
               <Box
                 key={categoria.slugs}
@@ -261,6 +430,7 @@ const Categorias = () => {
                   {categoria.titletext}
                 </Typography>
               </Box>
+
             ))}
           </Box>
 
@@ -277,6 +447,142 @@ const Categorias = () => {
           </IconButton>
         </Box>
       </Box>
+
+      <Dialog open={openCarruselEdit} onClose={() => !carruselUploading && setOpenCarruselEdit(false)} maxWidth='sm' fullWidth>
+        <DialogTitle>Editar Carrusel</DialogTitle>
+        <DialogContent dividers sx={{ pt: 1.5, pb: 2, px: 2 }}>
+          <TextField
+            label='Título del carrusel'
+            value={carruselTitleInput}
+            onChange={e => setCarruselTitleInput(e.target.value)}
+            fullWidth size='small' margin='dense'
+          />
+          <TextField
+            label='Subtítulo del carrusel'
+            value={carruselSubtitleInput}
+            onChange={e => setCarruselSubtitleInput(e.target.value)}
+            fullWidth size='small' margin='dense'
+          />
+          <Button
+            variant='contained' component='label' disabled={carruselUploading} sx={{ mt: 2, fontWeight: 'bold', textTransform: 'none' }}
+          >
+            {carruselFile ? 'Imagen seleccionada' : 'Seleccionar nueva imagen'}
+            <input
+              type='file'
+              hidden
+              accept='image/jpeg,image/png,image/webp,image/avif'
+              onChange={e => {
+                const f = e.target.files?.[0] || null;
+                setCarruselFile(f);
+                if (f) setCarruselPreview(URL.createObjectURL(f));
+              }}
+            />
+          </Button>
+
+          {carruselPreview && (
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>Vista previa</Typography>
+              <Box
+                component='img'
+                src={carruselPreview}
+                alt='Vista previa'
+                sx={{ width: '100%', maxHeight: 250, objectFit: 'cover', borderRadius: 1.5 }}
+              />
+              <Button size='small' onClick={() => { setCarruselFile(null); setCarruselPreview(null); }} sx={{ mt: 1 }}>
+                Quitar selección
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => { setOpenCarruselEdit(false); setCarruselFile(null); setCarruselPreview(null); }} disabled={carruselUploading}>Cancelar</Button>
+          <Button onClick={saveCarrusel} variant='contained' disabled={carruselUploading}>Guardar</Button>
+        </DialogActions>
+      </Dialog>
+
+      <Dialog
+        open={openHeaderEdit}
+        onClose={() => !headerUploading && setOpenHeaderEdit(false)}
+        maxWidth='sm'
+        fullWidth
+      >
+        <DialogTitle>Editar encabezado</DialogTitle>
+        <DialogContent dividers sx={{ pt: 1.5, pb: 2, px: 2 }}>
+          <TextField
+            label='Título del header'
+            value={headerTitleInput}
+            onChange={e => setHeaderTitleInput(e.target.value)}
+            fullWidth
+            size='small'
+            margin='dense'
+            InputLabelProps={{ shrink: true }}
+            sx={{ '& .MuiOutlinedInput-root': { borderRadius: 1.2 } }}
+          />
+
+          <Button
+            variant='contained'
+            component='label'
+            disabled={headerUploading}
+            sx={{ mt: 2, fontWeight: 'bold', textTransform: 'none' }}
+          >
+            {headerFile ? 'Imagen seleccionada' : 'Seleccionar nueva imagen'}
+            <input
+              type='file'
+              hidden
+              accept='image/jpeg,image/png,image/webp,image/avif'
+              onChange={e => {
+                const f = e.target.files?.[0] || null;
+                setHeaderFile(f);
+                if (f) setHeaderPreview(URL.createObjectURL(f));
+              }}
+            />
+          </Button>
+          <Box sx={{ mt: 1, opacity: 0.8, fontSize: 12 }}>
+            Formatos: JPG, PNG, WEBP, AVIF.
+          </Box>
+
+          {/* Vista previa */}
+          {headerPreview && (
+            <Box sx={{ mt: 2, textAlign: 'center' }}>
+              <Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>Vista previa</Typography>
+              <Box
+                sx={{
+                  width: '100%',
+                  maxWidth: 400,
+                  mx: 'auto',
+                  border: '1px solid',
+                  borderColor: 'divider',
+                  borderRadius: 1.5,
+                  overflow: 'hidden',
+                  pt: '30%',
+                  bgcolor: '#f7f7f7',
+                  boxShadow: 1,
+                  position: 'relative',
+                }}
+              >
+                <Box
+                  component='img'
+                  src={headerPreview}
+                  alt='Vista previa'
+                  sx={{ position: 'absolute', inset: 0, width: '100%', height: '100%', objectFit: 'cover' }}
+                />
+              </Box>
+              <Button size='small' onClick={() => { setHeaderFile(null); setHeaderPreview(null); }} sx={{ mt: 1 }}>
+                Quitar selección
+              </Button>
+            </Box>
+          )}
+        </DialogContent>
+
+        <DialogActions>
+          <Button onClick={() => { setOpenHeaderEdit(false); setHeaderFile(null); setHeaderPreview(null); }} disabled={headerUploading}>
+            Cancelar
+          </Button>
+          <Button onClick={saveHeader} variant='contained' disabled={headerUploading}>
+            Guardar
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       {/* DETALLE DE CATEGORÍAS */}
       <Box
@@ -296,7 +602,6 @@ const Categorias = () => {
             textAlign: 'center',
           }}
         >
-          Conocé cada categoría en detalle
         </Typography>
 
         {categorias.map((cat) => (
@@ -325,7 +630,7 @@ const Categorias = () => {
 
             <Box sx={{ p: 4, flex: 1, position: 'relative' }}>
               <Box sx={{ height: '4px', background: 'linear-gradient(to right, transparent, #f26c23)', borderRadius: 2, width: '100%', }} />
-              {isAdmin && ( 
+              {isAdmin && (
                 <IconButton onClick={() => openModal(cat)} sx={{ position: 'absolute', top: 46, right: 30, color: '#e6691d' }}>
                   <EditIcon />
                 </IconButton>
