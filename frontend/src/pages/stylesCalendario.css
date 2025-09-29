@@ -1319,3 +1319,34 @@ input[type='time'] {
 	font-size: 12px;
 	color: #6b7280;
 }
+
+/* Evitar que se rompa la fila del bloque de navegación/título */
+.header-left {
+  flex-wrap: nowrap;       
+  gap: 12px;
+  min-width: 0;    
+  justify-content: center;         
+}
+
+.month-title {
+  flex: 0 1 auto;           
+  min-width: 0;             
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;  
+}
+
+@media (max-width: 575.98px) {
+  .header-left {
+    width: 100%;
+    justify-content: space-between; 
+  }
+}
+.title-nav {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1 1 auto;
+  justify-content: center;
+  min-width: 0;              
+}

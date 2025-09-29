@@ -46,7 +46,6 @@ import { api } from '../api/api';
 const baseMenuItems = [
 	{ text: 'Calendario', icon: <CalendarMonthIcon />, path: '/calendario' },
 	{ text: 'Noticias y Eventos', icon: <EventIcon />, path: '/eventos' },
-	{ text: 'Logros', icon: <EmojiEventsIcon />, path: '/logros' },
 	{ text: 'Voluntariado', icon: <PersonAddIcon />, path: '/voluntariado' },
 	{ text: 'Contacto', icon: <CallIcon />, path: '/Contacto' },
 ];
