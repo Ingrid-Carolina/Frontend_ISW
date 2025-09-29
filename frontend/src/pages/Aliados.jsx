@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+// Importa componentes de Material UI para la interfaz y utilidades
 import {
   Box,
   Button,
@@ -19,16 +20,20 @@ import {
   Backdrop,
 } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
+// Importa animaciones de Framer Motion
 import { motion } from "framer-motion";
+// Importa el cliente API personalizado
 import { api } from "../api/api";
+// Importa componentes personalizados para edición de imagen y texto
 import EditableImageCircular from "../components/EditableImageCircular";
 import EditableText from "../components/EditableText";
+// Importa ícono de edición
 import EditIcon from "@mui/icons-material/Edit";
 
-// Imagen por defecto - definir como string
+// Imagen por defecto para el header
 const DefaultHeaderImg = '/Images/Fondojugadores.png';
 
-// Variantes de animación
+// Variantes de animación para Framer Motion
 const fadeUp = {
   hidden: { opacity: 0, y: 24 },
   visible: { opacity: 1, y: 0, transition: { duration: 0.6, ease: "easeOut" } },
@@ -47,6 +52,7 @@ const stagger = {
   visible: { transition: { staggerChildren: 0.08 } },
 };
 
+// Componente para mostrar la sección de cada aliado/partner
 function PartnerSection({ 
   name, 
   img, 
@@ -56,12 +62,13 @@ function PartnerSection({
   isAdmin, 
   textos,
   onTextSave,
-  textKey // Nueva prop para identificar qué texto usar
+  textKey // Identificador para el texto editable
 }) {
 
   const theme = useTheme();
   const isMdUp = useMediaQuery(theme.breakpoints.up("md"));
 
+  // Orden de los elementos según el layout y si está invertido
   const textOrder = isMdUp ? (reverse ? 2 : 1) : 1;
   const imgOrder = isMdUp ? (reverse ? 1 : 2) : 2;
 
@@ -69,7 +76,7 @@ function PartnerSection({
   const textSlideDir = reverse ? "right" : "left";
 
   // Texto por defecto si no existe en la base de datos
-   const getDefaultText = (key) => {
+  const getDefaultText = (key) => {
     const defaults = {
       aliado_lufussa_descripcion:
         "Gracias al apoyo de Lufussa, hemos podido implementar proyectos de electrificación en comunidades rurales y promover el desarrollo sostenible en distintas regiones del país.",
@@ -87,6 +94,8 @@ function PartnerSection({
       "Gracias al apoyo de nuestros aliados estratégicos, hemos podido implementar proyectos sociales, apoyar comunidades vulnerables y promover la educación ambiental en distintas regiones del país."
     );
   };
+
+  // Renderizado de la sección del aliado
   return (
     <Box
       component="section"
@@ -103,7 +112,7 @@ function PartnerSection({
         justifyContent="space-between"
         wrap={isMdUp ? "nowrap" : "wrap"}
       >
-        {/* Texto */}
+        {/* Texto del aliado */}
         <Grid item xs={12} md={7} order={textOrder} sx={{ minWidth: 0, flexShrink: 1 }}>
           <motion.div
             initial="hidden"
@@ -142,6 +151,7 @@ function PartnerSection({
                   mx: { xs: "auto", md: 0 },
                 }}
               />
+              {/* Texto editable del aliado */}
               <EditableText
                 text={textos[textKey] || getDefaultText(textKey)}
                 onTextSave={(newText) => onTextSave(textKey, newText)}
@@ -158,6 +168,7 @@ function PartnerSection({
                 multiline={true}
               />
 
+              {/* Botones de enlaces del aliado */}
               <motion.div
                 initial="hidden"
                 whileInView="visible"
@@ -195,7 +206,7 @@ function PartnerSection({
           </motion.div>
         </Grid>
 
-        {/* Imagen */}
+        {/* Imagen del aliado */}
         <Grid item xs={12} md={5} order={imgOrder} sx={{ minWidth: 0, flexShrink: 1 }}>
           <motion.div
             initial="hidden"
@@ -221,6 +232,7 @@ function PartnerSection({
                   flexShrink: 0,
                 }}
               >
+                {/* Imagen editable si es admin, sino solo muestra la imagen */}
                 {isAdmin ? (
                   <EditableImageCircular
                     src={img}
@@ -268,7 +280,9 @@ function PartnerSection({
   );
 }
 
+// Componente principal de la página de Aliados
 export default function Aliados() {
+  // Estados para carga, error, imágenes, textos y permisos de admin
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [images, setImages] = useState({});
@@ -279,7 +293,7 @@ export default function Aliados() {
   const [bannerType, setBannerType] = useState('success');
   const [showBanner, setShowBanner] = useState(false);
 
-  // NUEVO: Estados para el header editable (copiado de NuestroEquipo.jsx)
+  // Estados para el header editable (imagen y título)
   const [headerUrl, setHeaderUrl] = useState(null);
   const [headerTitle, setHeaderTitle] = useState('ALIADOS');
   const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
@@ -290,7 +304,7 @@ export default function Aliados() {
   const [headerPreview, setHeaderPreview] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
 
-  // NUEVO: Effect para gestionar preview de imagen del header
+  // Effect para gestionar preview de imagen del header
   useEffect(() => {
     if (!headerFile) {
       setHeaderPreview(null);
@@ -301,6 +315,7 @@ export default function Aliados() {
     return () => URL.revokeObjectURL(url);
   }, [headerFile]);
 
+  // Muestra mensajes tipo banner
   const showMessage = (message, type = 'success') => {
     setBannerMsg(message || 'Operación completada');
     setBannerType(type);
@@ -308,7 +323,7 @@ export default function Aliados() {
     setTimeout(() => setShowBanner(false), 4000);
   };
 
-  // NUEVO: Funciones para gestionar el header (copiadas de NuestroEquipo.jsx)
+  // Abre el editor de header (título e imagen)
   const openHeaderEditor = () => {
     const currentTitle = textos.aliados_titulo_principal || headerTitle || 'ALIADOS';
     setHeaderTitleInput(currentTitle);
@@ -317,6 +332,7 @@ export default function Aliados() {
     setOpenHeaderEdit(true);
   };
 
+  // Guarda el header (título e imagen)
   const saveHeader = async () => {
     try {
       setHeaderError('');
@@ -324,14 +340,14 @@ export default function Aliados() {
 
       const titleToSave = (headerTitleInput || '').trim() || 'ALIADOS';
 
-      // 1) Actualizar títulos inmediatamente
+      // Actualiza el título localmente
       setTextos(prevTextos => ({
         ...prevTextos,
         aliados_titulo_principal: titleToSave
       }));
       setHeaderTitle(titleToSave);
 
-      // 2) Subir imagen si se seleccionó
+      // Sube la imagen si se seleccionó
       let newUrl = headerUrl;
       if (headerFile) {
         const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/avif'];
@@ -367,14 +383,14 @@ export default function Aliados() {
         }
       }
 
-      // 3) Guardar título en servidor
+      // Guarda el título en el servidor
       try {
         await handleTextSave('aliados_titulo_principal', titleToSave);
       } catch (textError) {
         console.warn('Error al guardar título:', textError);
       }
 
-      // 4) Limpiar y cerrar
+      // Limpia y cierra el editor
       setHeaderFile(null);
       setHeaderPreview(null);
       setOpenHeaderEdit(false);
@@ -382,7 +398,7 @@ export default function Aliados() {
       
     } catch (err) {
       console.error('Error en saveHeader:', err);
-      // Revertir cambios
+      // Revertir cambios locales si falla
       const originalTitle = textos.aliados_titulo_principal || 'ALIADOS';
       setTextos(prevTextos => ({
         ...prevTextos,
@@ -400,6 +416,7 @@ export default function Aliados() {
     }
   };
 
+  // Lista de socios principales
   const partners = [
     {
       name: "Luz y Fuerza de San Lorenzo S.A. (Lufussa)",
@@ -427,6 +444,7 @@ export default function Aliados() {
     },
   ];
 
+  // Lista de aliados estratégicos
   const strategicAllies = [
     {
       name: "Fundación Angelitos",
@@ -447,75 +465,54 @@ export default function Aliados() {
     },
   ];
 
+  // Carga los textos editables desde la API
   const fetchTextos = async () => {
       try {
-          console.log('ALIADOS: Iniciando carga de textos...');
-          
           const res = await api.get('/auth/aliados/textos', {
               withCredentials: true,
               skipAuthRedirect: true,
           });
-          
-          console.log('ALIADOS: Response:', res);
-          
           if (res.data.success) {
-              console.log('ALIADOS: Textos cargados exitosamente:', res.data.data);
               setTextos(prevTextos => ({
                 ...prevTextos,
                 ...res.data.data
               }));
-              
-              // Sincronizar headerTitle si existe aliados_titulo_principal
+              // Sincroniza el título del header si existe
               if (res.data.data.aliados_titulo_principal) {
                 setHeaderTitle(res.data.data.aliados_titulo_principal);
               }
-          } else {
-              console.error('ALIADOS: Success = false:', res.data);
           }
       } catch (error) {
           console.error('ALIADOS: Error al cargar textos:', error);
       }
   };
 
-  
-  // Función para guardar textos editables
+  // Guarda textos editables en la API
   const handleTextSave = async (clave, nuevoTexto) => {
       if (!clave || !nuevoTexto) {
         showMessage('Datos inválidos para guardar texto', 'error');
         return;
       }
-
       try {
-          console.log('ALIADOS: Guardando texto:', { clave, nuevoTexto });
-          
-          // Actualizar estado local inmediatamente
           setTextos(prevTextos => ({
             ...prevTextos,
             [clave]: nuevoTexto
           }));
-
-          // Sincronizar headerTitle si es el título principal
           if (clave === 'aliados_titulo_principal') {
             setHeaderTitle(nuevoTexto);
           }
-          
           const res = await api.put('/auth/aliados/textos', {
               clave,
               valor: nuevoTexto
           }, {
               withCredentials: true
           });
-
-          console.log('ALIADOS: Respuesta de guardado:', res);
-
           if (res.data.success) {
               showMessage('Texto actualizado correctamente', 'success');
           } else {
               throw new Error('Respuesta inválida del servidor');
           }
       } catch (error) {
-          console.error('ALIADOS: Error al guardar:', error);
-          // Revertir cambio local
           setTextos(prevTextos => ({
             ...prevTextos,
             [clave]: textos[clave] || ''
@@ -527,7 +524,7 @@ export default function Aliados() {
       }
   };
 
-  // Obtener rol
+  // Obtiene el rol del usuario para mostrar opciones de edición si es admin
   useEffect(() => {
     const checkRole = async () => {
       try {
@@ -545,17 +542,16 @@ export default function Aliados() {
     };
     checkRole();
     fetchTextos();
-    
+    // Actualiza rol y textos si hay evento de autenticación
     const onAuthRefresh = () => {
       checkRole(); 
       fetchTextos();
     };
     window.addEventListener('auth:refresh', onAuthRefresh);
     return () => window.removeEventListener('auth:refresh', onAuthRefresh);
-  
   }, []);
 
-  // Cargar imágenes
+  // Carga las imágenes de los aliados desde la API
   useEffect(() => {
     const fetchImages = async () => {
       try {
@@ -564,13 +560,11 @@ export default function Aliados() {
           withCredentials: true,
           skipAuthRedirect: true,
         });
-        
         if (response.data && Array.isArray(response.data)) {
           const imagesMap = response.data.reduce((acc, current) => {
             if (current?.type) acc[current.type] = current.url;
             return acc;
           }, {});
-
           const headerImageUrl = imagesMap.aliados_header || DefaultHeaderImg;
           setHeaderUrl(headerImageUrl);
           setImages(prev => ({
@@ -580,7 +574,6 @@ export default function Aliados() {
           }));
         }
       } catch (err) {
-        console.error("Error al cargar imágenes:", err);
         setError("No se pudieron cargar las imágenes. Inténtelo de nuevo más tarde.");
       } finally {
         setLoading(false);
@@ -589,40 +582,35 @@ export default function Aliados() {
     fetchImages();
   }, []);
 
-  // Guardar imagen
+  // Guarda la imagen de un aliado en la API
   const handleImageChange = async (type, file) => {
     try {
       if (!(file instanceof File)) return;
-
       setUploadingImage(true);
       showMessage('Subiendo imagen...', 'info');
-
       const formData = new FormData();
       formData.append("file", file);
-
       const uploadResponse = await api.post("/auth/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
         withCredentials: true,
       });
       const finalUrl = uploadResponse.data.url;
-
       await api.put("/auth/images", { type, url: finalUrl }, {
         withCredentials: true,
       });
-
       if (type === 'aliados_header') {
         setHeaderUrl(finalUrl);
       }
       setImages((prev) => ({ ...prev, [type]: finalUrl }));
       showMessage('Imagen actualizada correctamente', 'success');
     } catch (err) {
-      console.error(`Error al actualizar la imagen de tipo ${type}:`, err);
       showMessage(`Error al actualizar la imagen.`, 'error');
     } finally {
       setUploadingImage(false);
     }
   };
 
+  // Renderizado principal del componente
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" alignItems="center" height="60vh">
@@ -646,7 +634,7 @@ export default function Aliados() {
       </Backdrop>
 
       <Box sx={{ py: 0, px: 0, bgcolor: "#fff", textAlign: "center" }}>
-        {/* HEADER MEJORADO CON FUNCIONALIDAD COMPLETA DE EDICIÓN */}
+        {/* Header editable con imagen y título */}
         <Box
           sx={{
             position: "relative",
@@ -662,7 +650,7 @@ export default function Aliados() {
             justifyContent: "center",
           }}
         >
-          {/* Overlay */}
+          {/* Overlay oscuro para mejorar contraste */}
           <Box
             sx={{
               position: "absolute",
@@ -675,7 +663,7 @@ export default function Aliados() {
             }}
           />
 
-          {/* Botón único para editar TÍTULO + IMAGEN (solo admin) */}
+          {/* Botón para editar el header (solo admin) */}
           {isAdmin && (
             <Tooltip title='Editar título/imagen'>
               <IconButton
@@ -695,7 +683,7 @@ export default function Aliados() {
             </Tooltip>
           )}
 
-          {/* Contenido */}
+          {/* Contenido del header */}
           <Box
             sx={{
               position: "relative",
@@ -754,7 +742,9 @@ export default function Aliados() {
           </Box>
         </Box>
 
+        {/* Contenido principal de la página */}
         <Container maxWidth="xl">
+          {/* Título editable de socios */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -778,6 +768,7 @@ export default function Aliados() {
             />
           </motion.div>
 
+          {/* Descripción editable de socios */}
           <EditableText
             text={textos.aliados_descripcion_socios || "La Asociación de Béisbol Menor Pilotos de Honduras (FAH) cuenta con más de 76 años de historia desde su formación en 1948. Nuestro principal objetivo es la formación integral de jóvenes atletas, no solo en el juego del béisbol, sino también en la generación de líderes y ciudadanos de sus comunidades y país."}
             onTextSave={(newText) => handleTextSave("aliados_descripcion_socios", newText)}
@@ -793,6 +784,7 @@ export default function Aliados() {
             multiline={true}
           />
 
+          {/* Sección de socios principales */}
           {partners.map((p, idx) => (
             <PartnerSection
               key={p.name}
@@ -803,10 +795,11 @@ export default function Aliados() {
               isAdmin={isAdmin}
               textos={textos}
               onTextSave={handleTextSave}
-              textKey={`${p.type}_descripcion`} //
+              textKey={`${p.type}_descripcion`}
             />
           ))}
 
+          {/* Título editable de aliados estratégicos */}
           <EditableText
             text={textos.aliados_titulo_estrategicos || "Alianzas Estratégicas"}
             onTextSave={(newText) => handleTextSave("aliados_titulo_estrategicos", newText)}
@@ -823,6 +816,7 @@ export default function Aliados() {
             className="heading-title"
           />
 
+          {/* Subtítulo editable de aliados estratégicos */}
           <EditableText
             text={textos.aliados_subtitulo_estrategicos || "Unidos con nuestros aliados estratégicos, impulsamos el deporte y transformamos comunidades."}
             onTextSave={(newText) => handleTextSave("aliados_subtitulo_estrategicos", newText)}
@@ -839,6 +833,7 @@ export default function Aliados() {
             multiline={true}
           />
 
+          {/* Sección de aliados estratégicos */}
           {strategicAllies.map((ally, idx) => (
             <PartnerSection
               key={ally.name}
@@ -854,7 +849,7 @@ export default function Aliados() {
           ))}
         </Container>
 
-        {/* Banner Global */}
+        {/* Banner global para mensajes de éxito/error */}
         {showBanner && (
           <Box
             sx={{
@@ -881,7 +876,7 @@ export default function Aliados() {
           </Box>
         )}
 
-        {/* MODAL EDITAR HEADER (título + imagen) */}
+        {/* Modal para editar el header (título + imagen) */}
         <Dialog
           open={openHeaderEdit}
           onClose={() => !headerUploading && setOpenHeaderEdit(false)}
@@ -922,7 +917,7 @@ export default function Aliados() {
               Formatos: JPG, PNG, WEBP, AVIF.
             </Box>
             
-            {/* Vista previa */}
+            {/* Vista previa de la imagen seleccionada */}
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>
                 Vista previa
@@ -1005,8 +1000,8 @@ export default function Aliados() {
             </Button>
           </DialogActions>
         </Dialog>
-         </Box>
+      </Box>
     </>
   );
-  };
+}
 

@@ -1,58 +1,82 @@
 import React, { useState, useEffect } from 'react';
+// Importa componentes de Material UI para la interfaz y utilidades
 import { Box, Typography, IconButton, Alert, TextField, Button, Modal, Dialog, DialogTitle, DialogContent, DialogActions } from '@mui/material';
 import ArrowBackIosIcon from '@mui/icons-material/ArrowBackIos';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
 import EditIcon from '@mui/icons-material/Edit';
+// Importa el cliente API personalizado
 import { api } from '../api/api';
 
+// Imágenes usadas en la página
 import Img from '/Images/Categoria.png';
 import LogoPilotos from '/Images/Logo-pilotos.png';
 
+// Componente principal de la página de categorías
 const Categorias = () => {
+  // Estado para la lista de categorías obtenidas del backend
   const [categorias, setCategorias] = useState([]);
+  // Estado para el índice inicial del carrusel
   const [startIndex, setStartIndex] = useState(0);
+  // Número de tarjetas visibles en el carrusel
   const visibleCards = 3;
+  // Estado para errores generales
   const [error, setError] = useState('');
+  // Estado para el modal de edición de categoría
   const [modalOpen, setModalOpen] = useState(false);
+  // Categoría actualmente seleccionada para editar
   const [currentCat, setCurrentCat] = useState(null);
+  // Estado para los datos del formulario de edición de categoría
   const [formData, setFormData] = useState({ titletext: '', tipo: '', descripcion: '', image: null, imagePreview: '' });
+  // Estado para saber si el usuario es admin
   const [isAdmin, setIsAdmin] = useState(false);
+  // Estado para la vista previa de la imagen del header
   const [headerPreview, setHeaderPreview] = useState(null);
+  // Estado para los datos del header (título, imagen, carrusel)
   const [headerData, setHeaderData] = useState({});
+  // Estado para el input de título del header
   const [headerTitleInput, setHeaderTitleInput] = useState('');
+  // Estado para el modal de edición del header
   const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
+  // Estado para el archivo de imagen del header
   const [headerFile, setHeaderFile] = useState(null);
+  // Estado para mostrar carga al guardar el header
   const [headerUploading, setHeaderUploading] = useState(false);
+  // Estado para el modal de edición del carrusel
   const [openCarruselEdit, setOpenCarruselEdit] = useState(false);
+  // Estado para el archivo de imagen del carrusel
   const [carruselFile, setCarruselFile] = useState(null);
+  // Estado para la vista previa de la imagen del carrusel
   const [carruselPreview, setCarruselPreview] = useState(null);
+  // Estado para los datos del carrusel
   const [carruselData, setCarruselData] = useState({ carrusel_title: '', carrusel_subtitle: '', carrusel_image: '' });
+  // Estado para el input de título del carrusel
   const [carruselTitleInput, setCarruselTitleInput] = useState('');
+  // Estado para el input de subtítulo del carrusel
   const [carruselSubtitleInput, setCarruselSubtitleInput] = useState('');
+  // Estado para mostrar carga al guardar el carrusel
   const [carruselUploading, setCarruselUploading] = useState(false);
 
 
+  // useEffect para cargar categorías, header y verificar rol admin al montar el componente
   useEffect(() => {
     let mounted = true;
 
     (async () => {
       try {
-        // 1️⃣ Traer categorías + header
-
-        const response2 = await api.get('/auth/categorias/site/all'); // o '/auth/categorias/site/all'
+        // 1️⃣ Traer datos del header (título, imagen, carrusel)
+        const response2 = await api.get('/auth/categorias/site/all');
         if (!mounted) return;
-
         const data2 = response2.data;
 
-        const response = await api.get('/auth/categorias'); // o '/auth/categorias/site/all'
+        // 2️⃣ Traer categorías
+        const response = await api.get('/auth/categorias');
         if (!mounted) return;
-
         const data = response.data;
 
-        // Categorías
+        // Actualiza estado de categorías
         if (data?.categorias) setCategorias(data.categorias);
 
-        // Header
+        // Actualiza estado del header y carrusel
         if (data2?.header_title || data2?.header_img) {
           setHeaderData({
             header_title: data2.header_title || '',
@@ -60,7 +84,6 @@ const Categorias = () => {
             carrusel_title: data2.carrusel_title || '',
             carrusel_subtitle: data2.carrusel_subtitle || '',
             carrusel_img: data2.carrusel_image || '',
-
           });
           setHeaderTitleInput(data2.header_title || '');
           setCarruselTitleInput(data2.carrusel_title || '');
@@ -68,7 +91,7 @@ const Categorias = () => {
           setCarruselPreview(data2.carrusel_image || null);
         }
 
-        // 2️⃣ Chequear rol admin
+        // 3️⃣ Chequear si el usuario es admin
         try {
           const r = await api.get('/auth/obtenerperfil', {
             withCredentials: true,
@@ -90,9 +113,12 @@ const Categorias = () => {
     return () => { mounted = false; };
   }, []);
 
+  // Navega al siguiente grupo de tarjetas en el carrusel
   const handleNext = () => setStartIndex((prev) => (prev + 1) % categorias.length);
+  // Navega al grupo anterior de tarjetas en el carrusel
   const handlePrev = () => setStartIndex((prev) => (prev - 1 + categorias.length) % categorias.length);
 
+  // Guarda los cambios del carrusel (título, subtítulo, imagen)
   const saveCarrusel = async () => {
     try {
       // Si no hay nueva imagen y ya existe en DB, usar la existente
@@ -115,7 +141,7 @@ const Categorias = () => {
       const payload = {
         carrusel_title: carruselTitleInput || carruselData.carrusel_title,
         carrusel_subtitle: carruselSubtitleInput || carruselData.carrusel_subtitle,
-        carrusel_image: imageUrl || carruselData.carrusel_image, // ⚡ aquí se asegura de no borrar la existente
+        carrusel_image: imageUrl || carruselData.carrusel_image,
       };
 
       const res = await api.put('/auth/categorias/site/carrusel', payload);
@@ -138,6 +164,7 @@ const Categorias = () => {
     }
   };
 
+  // Devuelve las tarjetas visibles en el carrusel según el índice actual
   const getVisibleCards = () => {
     const cards = [];
     for (let i = 0; i < visibleCards; i++) {
@@ -147,6 +174,7 @@ const Categorias = () => {
     return cards;
   };
 
+  // Guarda los cambios del header (título, imagen)
   const saveHeader = async () => {
     try {
       let headerUrl = headerData.header_img || '';
@@ -172,7 +200,6 @@ const Categorias = () => {
 
       const res = await api.put('/auth/categorias/site/header', payload);
 
-      // ⚡ Merge en vez de reemplazar
       setHeaderData(prev => ({
         ...prev,
         header_title: res.data.header_title,
@@ -190,15 +217,13 @@ const Categorias = () => {
     }
   };
 
-
-
-
-
+  // Hace scroll a la sección de detalle de la categoría seleccionada
   const scrollToCategory = (slug) => {
     const element = document.getElementById(`detalle-${slug}`);
     if (element) element.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
+  // Abre el modal de edición de categoría y carga los datos actuales
   const openModal = (cat) => {
     setCurrentCat(cat);
     setFormData({
@@ -211,11 +236,13 @@ const Categorias = () => {
     setModalOpen(true);
   };
 
+  // Cierra el modal de edición de categoría
   const closeModal = () => {
     setModalOpen(false);
     setCurrentCat(null);
   };
 
+  // Maneja los cambios en los inputs del formulario de edición
   const handleInputChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image" && files.length > 0) {
@@ -229,6 +256,7 @@ const Categorias = () => {
     }
   };
 
+  // Guarda los cambios de la categoría editada
   const handleUpdate = async () => {
     if (!currentCat) return;
     try {
@@ -265,10 +293,12 @@ const Categorias = () => {
     }
   };
 
+  // Si no hay categorías, muestra mensaje de carga o error
   if (!categorias.length) {
     return error ? <Alert severity="error">{error}</Alert> : <Typography>Cargando categorías...</Typography>;
   }
 
+  // Renderizado principal del componente
   return (
     <>
       {/* HEADER */}
@@ -286,8 +316,6 @@ const Categorias = () => {
           py: { xs: 6, md: 8 },
         }}
       >
-
-
         <Box
           sx={{
             position: 'relative',
@@ -312,10 +340,8 @@ const Categorias = () => {
           >
             {headerData?.header_title || 'Cargando...'}
           </Typography>
-
           {/* Capa oscura */}
           <Box sx={{ position: 'absolute', top: 0, left: 0, width: '100%', height: '100%', zIndex: 1 }} />
-
         </Box>
         {/* Botón editar header (solo admin) */}
         {isAdmin && (
@@ -371,6 +397,7 @@ const Categorias = () => {
           </Typography>
         </Box>
         <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 2 }}>
+          {/* Botón anterior del carrusel */}
           <IconButton
             onClick={handlePrev}
             sx={{
@@ -383,7 +410,9 @@ const Categorias = () => {
             <ArrowBackIosIcon sx={{ color: 'white' }} />
           </IconButton>
 
+          {/* Tarjetas del carrusel */}
           <Box sx={{ display: 'flex', gap: 3, overflow: 'hidden', width: '80%', justifyContent: 'center' }}>
+            {/* Botón editar carrusel (solo admin) */}
             {isAdmin && (
               <IconButton
                 onClick={() => setOpenCarruselEdit(true)}
@@ -430,10 +459,10 @@ const Categorias = () => {
                   {categoria.titletext}
                 </Typography>
               </Box>
-
             ))}
           </Box>
 
+          {/* Botón siguiente del carrusel */}
           <IconButton
             onClick={handleNext}
             sx={{
@@ -448,6 +477,7 @@ const Categorias = () => {
         </Box>
       </Box>
 
+      {/* Modal para editar carrusel */}
       <Dialog open={openCarruselEdit} onClose={() => !carruselUploading && setOpenCarruselEdit(false)} maxWidth='sm' fullWidth>
         <DialogTitle>Editar Carrusel</DialogTitle>
         <DialogContent dividers sx={{ pt: 1.5, pb: 2, px: 2 }}>
@@ -479,6 +509,7 @@ const Categorias = () => {
             />
           </Button>
 
+          {/* Vista previa de la imagen seleccionada */}
           {carruselPreview && (
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>Vista previa</Typography>
@@ -500,6 +531,7 @@ const Categorias = () => {
         </DialogActions>
       </Dialog>
 
+      {/* Modal para editar header */}
       <Dialog
         open={openHeaderEdit}
         onClose={() => !headerUploading && setOpenHeaderEdit(false)}
@@ -541,7 +573,7 @@ const Categorias = () => {
             Formatos: JPG, PNG, WEBP, AVIF.
           </Box>
 
-          {/* Vista previa */}
+          {/* Vista previa de la imagen seleccionada */}
           {headerPreview && (
             <Box sx={{ mt: 2, textAlign: 'center' }}>
               <Typography sx={{ fontSize: 13, mb: 1, color: 'text.secondary' }}>Vista previa</Typography>
@@ -604,6 +636,7 @@ const Categorias = () => {
         >
         </Typography>
 
+        {/* Muestra cada categoría en su sección de detalle */}
         {categorias.map((cat) => (
           <Box
             key={cat.slugs}
@@ -620,6 +653,7 @@ const Categorias = () => {
               mx: 'auto',
             }}
           >
+            {/* Imagen de la categoría */}
             <Box sx={{ width: { xs: '100%', md: '40%' } }}>
               <img
                 src={cat.image}
@@ -628,8 +662,10 @@ const Categorias = () => {
               />
             </Box>
 
+            {/* Información de la categoría */}
             <Box sx={{ p: 4, flex: 1, position: 'relative' }}>
               <Box sx={{ height: '4px', background: 'linear-gradient(to right, transparent, #f26c23)', borderRadius: 2, width: '100%', }} />
+              {/* Botón editar categoría (solo admin) */}
               {isAdmin && (
                 <IconButton onClick={() => openModal(cat)} sx={{ position: 'absolute', top: 46, right: 30, color: '#e6691d' }}>
                   <EditIcon />
@@ -663,7 +699,7 @@ const Categorias = () => {
         ))}
       </Box>
 
-      {/* MODAL PARA EDITAR */}
+      {/* MODAL PARA EDITAR CATEGORÍA */}
       <Modal open={modalOpen} onClose={closeModal}>
         <Box
           sx={{
@@ -684,7 +720,7 @@ const Categorias = () => {
             backgroundImage: 'linear-gradient(145deg, #fff5f0, #ffe6d6)',
           }}
         >
-          {/* CABECERA */}
+          {/* CABECERA del modal */}
           <Box sx={{ textAlign: 'center', mb: 2 }}>
             <Typography variant="h5" sx={{ fontWeight: 'bold', color: '#e6691d', letterSpacing: 1.5 }}>
               Editar Categoría
@@ -692,7 +728,7 @@ const Categorias = () => {
             <Box sx={{ width: 60, height: 4, bgcolor: '#e6691d', mx: 'auto', mt: 1, borderRadius: 2 }} />
           </Box>
 
-          {/* CAMPOS */}
+          {/* CAMPOS del formulario */}
           <TextField
             label="Título"
             name="titletext"
@@ -754,7 +790,7 @@ const Categorias = () => {
             </Button>
           </Box>
 
-          {/* BOTONES */}
+          {/* BOTONES del modal */}
           <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 2, mt: 2 }}>
             <Button
               variant="outlined"
@@ -774,7 +810,7 @@ const Categorias = () => {
         </Box>
       </Modal>
 
-
+      {/* Mensaje de error global */}
       {error && <Alert severity="error" sx={{ my: 2 }}>{error}</Alert>}
     </>
   );

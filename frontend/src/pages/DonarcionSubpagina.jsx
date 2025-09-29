@@ -1,48 +1,63 @@
 import React, { useState, useEffect } from 'react';
 import { api } from '../api/api';
 
+// Opciones de donación predefinidas
 const donationOptions = ['L.100', 'L.200', 'L.500', 'L.1000'];
 
+// Componente principal de la subpágina de donación general
 const DonarcionSubpagina = ({ onClose }) => {
-	const [selectedAmount, setSelectedAmount] = useState(null);
-	const [customAmount, setCustomAmount] = useState('');
-	const [isCustomSelected, setIsCustomSelected] = useState(false);
-	const [screenSize, setScreenSize] = useState('xl');
-	const [notification, setNotification] = useState({ message: '', type: '' });
-	const [showPaymentModal, setShowPaymentModal] = useState(false);
-	const [uploadedFile, setUploadedFile] = useState(null);
-	const [previewUrl, setPreviewUrl] = useState(null);
-	const [emailDonante, setEmailDonante] = useState('');
+    // Estado para la cantidad seleccionada (opción rápida)
+    const [selectedAmount, setSelectedAmount] = useState(null);
+    // Estado para cantidad personalizada
+    const [customAmount, setCustomAmount] = useState('');
+    // Estado para saber si el usuario está usando el campo personalizado
+    const [isCustomSelected, setIsCustomSelected] = useState(false);
+    // Estado para el tamaño de pantalla (responsive)
+    const [screenSize, setScreenSize] = useState('xl');
+    // Estado para notificaciones (éxito/error)
+    const [notification, setNotification] = useState({ message: '', type: '' });
+    // Estado para mostrar el modal de pago/comprobante
+    const [showPaymentModal, setShowPaymentModal] = useState(false);
+    // Estado para el archivo de comprobante subido
+    const [uploadedFile, setUploadedFile] = useState(null);
+    // Estado para la URL de vista previa del comprobante
+    const [previewUrl, setPreviewUrl] = useState(null);
+    // Estado para el correo del donante (opcional)
+    const [emailDonante, setEmailDonante] = useState('');
 
-	const getScreenSize = () => {
-		if (typeof window === 'undefined') return 'xl';
-		const width = window.innerWidth;
-		if (width < 480) return 'xs';
-		if (width < 768) return 'sm';
-		if (width < 1024) return 'md';
-		if (width < 1280) return 'lg';
-		if (width < 1536) return 'xl';
-		return 'xxl';
-	};
+    // Función para obtener el tamaño de pantalla actual
+    const getScreenSize = () => {
+        if (typeof window === 'undefined') return 'xl';
+        const width = window.innerWidth;
+        if (width < 480) return 'xs';
+        if (width < 768) return 'sm';
+        if (width < 1024) return 'md';
+        if (width < 1280) return 'lg';
+        if (width < 1536) return 'xl';
+        return 'xxl';
+    };
 
-	useEffect(() => {
-		const handleResize = () => setScreenSize(getScreenSize());
-		setScreenSize(getScreenSize());
-		window.addEventListener('resize', handleResize);
-		return () => window.removeEventListener('resize', handleResize);
-	}, []);
+    // Actualiza el tamaño de pantalla al cambiar el tamaño de la ventana
+    useEffect(() => {
+        const handleResize = () => setScreenSize(getScreenSize());
+        setScreenSize(getScreenSize());
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
+    }, []);
 
-	useEffect(() => {
-		if (uploadedFile) {
-			const url = URL.createObjectURL(uploadedFile);
-			setPreviewUrl(url);
-			return () => URL.revokeObjectURL(url);
-		} else {
-			setPreviewUrl(null);
-		}
-	}, [uploadedFile]);
+    // Actualiza la vista previa del comprobante cuando se sube un archivo
+    useEffect(() => {
+        if (uploadedFile) {
+            const url = URL.createObjectURL(uploadedFile);
+            setPreviewUrl(url);
+            return () => URL.revokeObjectURL(url);
+        } else {
+            setPreviewUrl(null);
+        }
+    }, [uploadedFile]);
 
-	const rootStyles = {
+    // --- Estilos en línea para cada sección (responsive) ---
+    const rootStyles = {
 		width: '100%',
 		minHeight: '100vh',
 		backgroundColor: screenSize === 'xs' ? '#ffffff' : '#f8fafc',
@@ -356,6 +371,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 		overflow: 'hidden',
 	});
 
+	// Selecciona una cantidad rápida y desactiva el campo personalizado
 	const handleSelectAmount = amount => {
 		setSelectedAmount(amount);
 		setIsCustomSelected(false);
@@ -366,6 +382,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 		}
 	};
 
+	// Maneja el cambio en el campo de cantidad personalizada
 	const handleCustomAmountChange = event => {
 		const value = event.target.value;
 		if (value === '' || /^\d*\.?\d*$/.test(value)) {
@@ -375,6 +392,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 		}
 	};
 
+	// Devuelve el valor de la cantidad seleccionada (rápida o personalizada)
 	const getSelectedAmountValue = () => {
 		if (isCustomSelected && customAmount) {
 			const parsed = parseFloat(customAmount);
@@ -386,17 +404,20 @@ const DonarcionSubpagina = ({ onClose }) => {
 		return '0.00';
 	};
 
+	// Regresa a la página anterior
 	const handleBack = () => {
 		if (onClose) {
 			onClose();
 		}
 	};
 
+	// Activa el campo personalizado al enfocarlo
 	const handleCustomFocus = () => {
 		setSelectedAmount(null);
 		setIsCustomSelected(true);
 	};
 
+	// Continúa al modal de pago si la cantidad es válida
 	const handleContinue = () => {
 		const amount = getSelectedAmountValue();
 
@@ -412,6 +433,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 		setShowPaymentModal(true);
 	};
 
+	// Maneja el cambio de archivo para el comprobante
 	const handleFileChange = event => {
 		const file = event.target.files[0];
 		if (file) {
@@ -430,6 +452,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 		}
 	};
 
+	// Envía el comprobante y muestra mensaje de éxito
 	const handleSubmitPayment = async () => {
 		if (!uploadedFile) {
 			setNotification({
@@ -475,6 +498,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 		}
 	};
 
+	// Efecto visual en tarjetas al tocar en móviles
 	const handleCardTouch = (e, amount) => {
 		if (screenSize === 'xs') {
 			e.currentTarget.style.transform = 'scale(0.98)';
@@ -487,8 +511,10 @@ const DonarcionSubpagina = ({ onClose }) => {
 		}
 	};
 
+	// Renderizado principal del componente
 	return (
 		<>
+			{/* Notificación de éxito/error */}
 			{notification.message && (
 				<div
 					style={{
@@ -515,6 +541,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 
 			<div style={rootStyles}>
 				<div style={containerStyles}>
+					{/* Panel izquierdo: selección de cantidad */}
 					<div style={leftPanelStyles}>
 						<button
 							style={backButtonStyles}
@@ -528,6 +555,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 
 						<h1 style={titleStyles}>Selecciona una cantidad para donar</h1>
 
+						{/* Opciones rápidas */}
 						<div style={gridStyles}>
 							{donationOptions.map(amount => (
 								<div
@@ -562,6 +590,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 							))}
 						</div>
 
+						{/* Campo de cantidad personalizada */}
 						<div style={customAmountContainerStyles}>
 							<label style={customAmountLabelStyles}>
 								Cantidad personalizada
@@ -610,6 +639,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 						</div>
 					</div>
 
+					{/* Panel derecho: resumen y botón continuar */}
 					<div style={rightPanelStyles}>
 						<h2 style={contributionTitleStyles}>Tu contribución</h2>
 
@@ -633,6 +663,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 				</div>
 			</div>
 
+			{/* Modal para subir comprobante de donación */}
 			{showPaymentModal && (
 				<div
 					style={modalOverlayStyles}
@@ -651,6 +682,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 							Información de la Donacion
 						</h2>
 
+						{/* Información de cuenta bancaria */}
 						<div
 							style={{
 								backgroundColor: '#fef3c7',
@@ -687,6 +719,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 							</p>
 						</div>
 
+						{/* Subida de comprobante */}
 						<div
 							style={{
 								border: '2px dashed #cbd5e1',
@@ -744,6 +777,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 							/>
 						</div>
 
+						{/* Vista previa del comprobante */}
 						{previewUrl && (
 							<div
 								style={{
@@ -775,6 +809,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 							</div>
 						)}
 
+						{/* Botones de acción en el modal */}
 						<div
 							style={{
 								display: 'flex',

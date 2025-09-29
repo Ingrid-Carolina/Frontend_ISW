@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import './stylesCalendario.css';
-//import axios from 'axios';
+// Importa el cliente API personalizado
 import { api } from '../api/api';
 import { Box, Typography } from '@mui/material';
 
-// Componentes de iconos SVG simples
+// Componentes de iconos SVG simples para la interfaz
 const ChevronLeft = () => (
 	<svg
 		width='20'
@@ -138,16 +138,26 @@ const EditIcon = () => (
 	</svg>
 );
 
+// Componente principal del calendario
 const Calendario = () => {
+	// Estado para la fecha actual mostrada en el calendario
 	const [currentDate, setCurrentDate] = useState(new Date());
+	// Estado para los eventos agrupados por fecha
 	const [events, setEvents] = useState({});
-	const [editingIndex, setEditingIndex] = useState(null); // null si es nuevo
+	// Estado para edición de eventos (índice y fecha original)
+	const [editingIndex, setEditingIndex] = useState(null);
 	const [originalDateKey, setOriginalDateKey] = useState(null);
+	// Estado para datos del evento en edición/creación
 	const [eventData, setEventData] = useState({ titulo: '', descripcion: '' });
+	// Estado para mostrar el modal de evento
 	const [showModal, setShowModal] = useState(false);
+	// Estado para mostrar el modal de confirmación de eliminación
 	const [showConfirmModal, setShowConfirmModal] = useState(false);
-	const [eventToDelete, setEventToDelete] = useState(null); // { dateKey, id }
+	// Estado para el evento a eliminar
+	const [eventToDelete, setEventToDelete] = useState(null);
+	// Estado para la fecha seleccionada en el calendario
 	const [selectedDate, setSelectedDate] = useState(null);
+	// Estado para el formulario de evento
 	const [eventForm, setEventForm] = useState({
 		title: '',
 		time: '',
@@ -158,20 +168,25 @@ const Calendario = () => {
 		date: '',
 		img_url: '',
 	});
-	const [view, setView] = useState('month'); // 'week' o 'month'
+	// Estado para la vista del calendario ('month' o 'week')
+	const [view, setView] = useState('month');
+	// Estado para mostrar el modal de eventos del mes
 	const [showMonthEvents, setShowMonthEvents] = useState(false);
 
-	//Declaracion
+	// Estado para banners de mensajes (éxito/error)
 	const [bannerMsg, setBannerMsg] = useState('');
-	const [bannerType, setBannerType] = useState('success'); // or 'error'
+	const [bannerType, setBannerType] = useState('success');
 	const [showBanner, setShowBanner] = useState(false);
 
+	// Estado para saber si el usuario es admin
 	const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+	// Estado para la imagen del evento y su preview
 	const [eventImage, setEventImage] = useState(null);
 	const [errorImg, setErrorImg] = useState('');
 	const [previewImg, setPreviewImg] = useState(null);
 
+	// Función auxiliar para crear un objeto Date desde input de fecha y hora
 	function createDateFromInput(dateStr, timeStr = '00:00') {
 		const [year, month, day] = dateStr.split('-').map(Number);
 		const [hours, minutes] = timeStr.split(':').map(Number);
@@ -209,12 +224,13 @@ const Calendario = () => {
 
 		fetchRole();
 
-		// refrescar después de login/logout
+		// Actualiza rol si hay evento de autenticación
 		const onAuthRefresh = () => fetchRole();
 		window.addEventListener('auth:refresh', onAuthRefresh);
 		return () => window.removeEventListener('auth:refresh', onAuthRefresh);
 	}, []);
 
+	// Arrays de nombres de meses y días para mostrar en la interfaz
 	const months = [
 		'Enero',
 		'Febrero',
@@ -232,6 +248,7 @@ const Calendario = () => {
 
 	const daysOfWeek = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
+	// Función para obtener los días a mostrar en la vista mensual
 	const getDaysInMonth = date => {
 		const year = date.getFullYear();
 		const month = date.getMonth();
@@ -276,6 +293,7 @@ const Calendario = () => {
 		return days;
 	};
 
+	// Función para obtener los días de la semana actual
 	const getWeekDays = date => {
 		const startOfWeek = new Date(date);
 		const day = startOfWeek.getDay();
@@ -308,14 +326,17 @@ const Calendario = () => {
 		});
 	};
 
+	// Función para volver a la fecha de hoy
 	const goToToday = () => {
 		setCurrentDate(new Date());
 	};
 
+	// Formatea una fecha a clave tipo 'YYYY-MM-DD'
 	const formatDateKey = date => {
 		return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')}`;
 	};
 
+	// Abre el modal para agregar/editar evento en una fecha
 	const openModal = date => {
 		setSelectedDate(date);
 		setShowModal(true);
@@ -337,6 +358,7 @@ const Calendario = () => {
 		});
 	};
 
+	// Cierra el modal de evento y limpia estados
 	const closeModal = () => {
 		setShowModal(false);
 		setEditingIndex(null);
@@ -356,6 +378,7 @@ const Calendario = () => {
 		setErrorImg('');
 	};
 
+	// Prepara el formulario para editar un evento existente
 	const editEvent = index => {
 		const dateKey = formatDateKey(selectedDate);
 		const event = events[dateKey][index];
@@ -384,6 +407,7 @@ const Calendario = () => {
 		});
 	};
 
+	// Actualiza un evento en el backend y muestra mensaje
 	const actualizarEvento = async (id, eventoActualizado) => {
 		try {
 			let body;
@@ -434,6 +458,7 @@ const Calendario = () => {
 		}
 	};
 
+	// Prepara la eliminación de un evento
 	const deleteEvent = (dateKey, eventId) => {
 		if (!isLoggedIn) {
 			alert('Solo el modificaristrador puede eliminar eventos');
@@ -443,6 +468,7 @@ const Calendario = () => {
 		setShowConfirmModal(true);
 	};
 
+	// Obtiene los eventos de una fecha específica
 	const getEventsForDate = date => {
 		const dateKey = formatDateKey(date);
 		return events[dateKey] || [];
@@ -580,6 +606,7 @@ const Calendario = () => {
 		}
 	};
 
+	// useEffect para cargar los eventos desde el backend al montar el componente
 	useEffect(() => {
 		const fetchEventos = async () => {
 			try {
@@ -658,6 +685,7 @@ const Calendario = () => {
 		openModal(targetDate);
 	};
 
+	// Maneja el cambio de imagen para el evento
 	const handleImageChange = e => {
 		const file = e.target.files?.[0];
 		if (!file) return;
@@ -678,6 +706,7 @@ const Calendario = () => {
 	const days =
 		view === 'month' ? getDaysInMonth(currentDate) : getWeekDays(currentDate);
 
+	// Renderizado principal del componente
 	return (
 		<div className='calendar-container'>
 			{/* Header del calendario */}

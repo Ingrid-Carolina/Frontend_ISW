@@ -1,11 +1,16 @@
 import React, { useState } from 'react';
+// Importa subpáginas para donación general y de indumentaria/equipamiento
 import DonarcionSubpagina from './DonarcionSubpagina';
 import DonacionSubpagina from './DonarIndumentarea';
+// Importa hook para navegación interna
 import { useNavigate } from "react-router-dom";
 
+// Componente para mostrar cada tarjeta de donación
 const MediaCard = ({ title, content, image, onDonateClick }) => {
+    // Estado para efecto hover en la tarjeta
     const [isHovered, setIsHovered] = useState(false);
 
+    // Estilos para la tarjeta y sus elementos
     const cardStyles = {
         width: '100%',
         maxWidth: '345px',
@@ -67,6 +72,7 @@ const MediaCard = ({ title, content, image, onDonateClick }) => {
         backgroundColor: '#d65a0c'
     };
 
+    // Renderiza la tarjeta con imagen, título, descripción y botón "Donar"
     return (
         <div 
             style={cardStyles}
@@ -93,7 +99,9 @@ const MediaCard = ({ title, content, image, onDonateClick }) => {
     );
 };
 
+// Componente principal de la página de donaciones
 const Donaciones = () => {
+    // Estados para controlar expansión de texto, modal y tipo de donación
     const [expanded, setExpanded] = useState(false);
     const [open, setOpen] = useState(false);
     const [donationType, setDonationType] = useState('');
@@ -102,6 +110,7 @@ const Donaciones = () => {
     const [showDonacionSubpagina, setShowDonacionSubpagina] = useState(false);
     const navigate = useNavigate();
 
+    // Texto largo y corto para la sección naranja
     const longText = `Creemos que cada niño merece la oportunidad de practicar el deporte que ama, recibir una educación de calidad y perseguir sus sueños. Hoy, les pedimos su apoyo para hacer realidad esta convicción.
     Gracias a nuestros generosos donantes y socios, hemos logrado avances increíbles en los últimos 15 años. Nuestro dedicado equipo se ha enfocado en abordar los problemas fundamentales que impactan a las comunidades y el crecimiento del béisbol y el sóftbol en Latinoamérica. Desde México y Nicaragua hasta Colombia y Brasil, hemos perfeccionado nuestro enfoque para generar cambios positivos y duraderos en la vida de los niños a través de los valores del trabajo en equipo, la estrategia y el esfuerzo.
     Al apoyar la campaña Habilidades para la Vida, usted brinda esperanza a los niños que enfrentan circunstancias difíciles; muchos de ellos son refugiados lejos de su hogar, sin un camino claro hacia adelante. Su apoyo no solo les proporciona habilidades esenciales para la vida, sino que también les infunde la esperanza y el coraje para aspirar a más. Juntos, estamos construyendo comunidades fuertes e iluminando el camino a seguir.
@@ -362,36 +371,38 @@ const Donaciones = () => {
         transition: 'background-color 0.3s'
     });
 
+    // Alterna entre texto largo y corto en la sección naranja
     const handleToggleExpand = () => {
         setExpanded(!expanded);
     };
 
+    // Abre el modal de donación y guarda la tarjeta seleccionada
     const handleOpen = (cardTitle) => {
         setOpen(true);
         setDonationCard(cardTitle);
         setDonationType('');
     };
 
+    // Cierra el modal de donación
     const handleClose = () => setOpen(false);
 
+    // Cambia el tipo de donación seleccionado en el modal
     const handleOptionChange = (value) => {
         setDonationType(value);
     };
 
+    // Continúa a la subpágina de donación según el tipo seleccionado
     const handleContinue = () => {
-        console.log('Botón continuar clickeado, tipo de donación:', donationType);
-        
         if (donationType === 'general') {
-            console.log('Navegando a subpágina de donación...');
             setShowDonarcionSubpagina(true);
             handleClose();
         } else if (donationType === 'campaign') {
-            console.log(`Se ha seleccionado la opción de donación: ${donationType} para la tarjeta: ${donationCard}`);
             setShowDonacionSubpagina(true);
             handleClose();
         }
     };
 
+    // Renderiza la subpágina de donación si corresponde
     if (showDonarcionSubpagina) {
         return <DonarcionSubpagina onClose={() => setShowDonarcionSubpagina(false)} />;
     }
@@ -399,9 +410,10 @@ const Donaciones = () => {
         return <DonacionSubpagina onClose={() => setShowDonacionSubpagina(false)} />;
     }
 
+    // Renderizado principal de la página de donaciones
     return (
         <div style={{ width: '100%', overflowX: 'hidden' }}>
-            {/* Hero Section */}
+            {/* Sección Hero con título, subtítulo y botones */}
             <div style={heroSectionStyles}>
                 <div style={heroOverlayStyles}></div>
                 <div style={heroContentStyles}>
@@ -431,7 +443,7 @@ const Donaciones = () => {
                 </div>
             </div>
 
-            {/* Orange Section */}
+            {/* Sección naranja con texto largo/corto y botón leer más */}
             <div style={orangeSectionStyles}>
                 <div style={orangeContentStyles}>
                     <h2 style={orangeTitleStyles}>
@@ -446,7 +458,7 @@ const Donaciones = () => {
                 </div>
             </div>
 
-            {/* Cards Section */}
+            {/* Sección de tarjetas de donación */}
             <div style={cardsSectionStyles}>
                 <h2 style={cardsTitleStyles}>Asociación de Béisbol</h2>
                 <p style={cardsSubtitleStyles}>Cada Lempira Cuenta</p>
@@ -473,7 +485,7 @@ const Donaciones = () => {
                 </div>
             </div>
 
-            {/* Modal */}
+            {/* Modal para seleccionar tipo de donación */}
             {open && (
                 <div style={modalOverlayStyles} onClick={handleClose}>
                     <div style={modalContentStyles} onClick={(e) => e.stopPropagation()}>

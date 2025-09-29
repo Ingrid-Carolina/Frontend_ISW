@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from "react";
+// Hook para navegación interna
 import { useNavigate } from "react-router-dom";
+// Componente para input de teléfono internacional
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+// Utilidad para parsear y validar números de teléfono
 import parsePhoneNumberFromString from "libphonenumber-js";
 
+// Importa componentes de Material UI para la interfaz
 import {
   Dialog,
   DialogTitle,
@@ -18,18 +22,28 @@ import {
   Alert,
 } from "@mui/material";
 import { Visibility } from "@mui/icons-material";
+// Imagen de fondo
 import fondo from "/Images/TestimonioFondo1.jpg";
+// Cliente API personalizado
 import { api } from "../api/api";
 import { red } from "@mui/material/colors";
 
+// Componente principal de la subpágina de donación de indumentaria/equipamiento
 const DonarIndumentarea = () => {
   const navigate = useNavigate();
+
+  // Estado para la lista de productos disponibles para donar
   const [seleccion, setSeleccion] = useState([]);
+  // Estado para mostrar el modal de formulario de donación
   const [open, setOpen] = useState(false);
+  // Estado para errores de validación en el formulario
   const [errores, setErrores] = useState({});
+  // Estado para el nombre del producto y cantidad (no usado directamente)
   const [producto, setproducto] = useState("");
   const [cantidad, setcantidad] = useState("");
+  // Estado para mostrar el teléfono formateado
   const [displayPhone, setDisplayPhone] = useState("");
+  // Estado para los datos del formulario de donación
   const [formData, setFormData] = useState({
     nombre: "",
     telefono: "",
@@ -42,12 +56,13 @@ const DonarIndumentarea = () => {
     cantidad: "",
   });
 
-  // ✅ Estado para notificaciones
+  // Estado para notificaciones flotantes (éxito, error, advertencia)
   const [notificacion, setNotificacion] = useState({ open: false, mensaje: "", tipo: "info" });
 
-  // 🔹 Modal para ficha completa
+  // Estado para mostrar el modal de ficha completa del producto
   const [modalFicha, setModalFicha] = useState({ open: false, producto: null });
 
+  // Función para obtener la imagen del producto (local, CDN o defecto)
   const getImagen = (imagen) => {
     if (!imagen) return "/Images/producto_defecto.png";
     if (imagen.startsWith("http")) return imagen;       // Supabase u otro CDN
@@ -55,13 +70,13 @@ const DonarIndumentarea = () => {
     return "/Images/producto_defecto.png";              // Fallback
   };
 
-
-
+  // Carga la lista de productos disponibles desde el backend al montar el componente
   useEffect(() => {
     const fetchProductos = async () => {
       try {
         const res = await api.get("/auth/donaciones/productos");
         const productos = res.data.productos || [];
+        // Filtra solo productos activos y agrega propiedades para el formulario
         const productosActivos = productos
           .filter((p) => p.estado === true)
           .map((p) => ({ ...p, checked: false, cantidad: 0 }));
@@ -70,13 +85,13 @@ const DonarIndumentarea = () => {
         setSeleccion(productosActivos);
       } catch (err) {
         console.error("Error al cargar productos:", err);
-        // ❌ Antes: alert()
         setNotificacion({ open: true, mensaje: "No se pudieron cargar los productos.", tipo: "error" });
       }
     };
     fetchProductos();
   }, []);
 
+  // Maneja el check/uncheck de un producto y su cantidad
   const handleCheckbox = (id) => {
     setSeleccion((prev) => {
       const updated = prev.map((item) =>
@@ -91,6 +106,7 @@ const DonarIndumentarea = () => {
     });
   };
 
+  // Maneja el cambio de cantidad de un producto seleccionado
   const handleCantidad = (id, cantidad) => {
     setSeleccion((prev) =>
       prev.map((item) =>
@@ -99,17 +115,17 @@ const DonarIndumentarea = () => {
     );
   };
 
+  // Confirma la donación y abre el modal de formulario si hay al menos un producto seleccionado
   const confirmarDonacion = () => {
     const donaciones = seleccion.filter((item) => item.checked && item.cantidad > 0);
     if (donaciones.length === 0) {
-      // ❌ Antes: alert()
       setNotificacion({ open: true, mensaje: "Selecciona al menos una pieza de indumentaria.", tipo: "warning" });
       return;
     }
     setOpen(true);
   };
 
-  // 🔹 Validaciones
+  // Validaciones del formulario antes de enviar
   const ValidarErrores = () => {
     const errors = {};
     if (!formData.nombre || formData.nombre.trim().length < 3) {
@@ -133,22 +149,23 @@ const DonarIndumentarea = () => {
     return Object.keys(errors).length === 0;
   };
 
+  // Maneja el cambio de los campos del formulario
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     setErrores((prev) => ({ ...prev, [name]: "" }));
   };
 
+  // Envía el formulario de donación al backend
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!ValidarErrores()) return;
 
     const donaciones = seleccion
-
       .filter((item) => item.checked && item.cantidad > 0)
       .map((item) => ({ nombre: item.nombre, cantidad: item.cantidad }));
 
-    // Validar teléfono
+    // Validar y formatear teléfono internacional
     const rawPhone = formData.telefono?.replace(/\s+/g, "");
     const countryCode = formData.pais?.toUpperCase();
     const parsedPhone = parsePhoneNumberFromString(rawPhone, countryCode);
@@ -163,30 +180,19 @@ const DonarIndumentarea = () => {
       descripcion: formData.descripcion,
     }
 
-
     try {
-
       const res = await api.post('/auth/donaciones/registrardonacion', body, {
         headers: { "Content-Type": "application/json" }
       })
-
       const donaciondata = res.data;
-
       console.log(donaciondata);
-
-
     } catch (error) {
-
       const msg =
         error?.data?.mensaje || error?.message || 'Error en la Red';
       console.log(msg);
-
       setNotificacion({ open: true, mensaje: msg, tipo: "error" });
       setOpen(false);
-
-
     }
-
 
     setFormData({
       nombre: '',
@@ -200,11 +206,12 @@ const DonarIndumentarea = () => {
 
     console.log(formData)
 
-    // ✅ Éxito al enviar
+    // Notificación de éxito al enviar
     setNotificacion({ open: true, mensaje: "Donación enviada correctamente. ¡Gracias!", tipo: "success" });
     setOpen(false);
   };
 
+  // Renderizado principal del componente
   return (
     <div
       style={{
@@ -214,7 +221,7 @@ const DonarIndumentarea = () => {
         position: "relative",
       }}
     >
-      {/* ✅ Notificación flotante */}
+      {/* Notificación flotante de éxito/error/advertencia */}
       <Snackbar
         open={notificacion.open}
         autoHideDuration={4000}
@@ -230,7 +237,7 @@ const DonarIndumentarea = () => {
         </Alert>
       </Snackbar>
 
-      {/* Fondo */}
+      {/* Fondo de la página */}
       <div
         style={{
           position: "absolute",
@@ -251,7 +258,7 @@ const DonarIndumentarea = () => {
         }}
       />
 
-      {/* Contenido */}
+      {/* Contenido principal */}
       <div
         style={{
           position: "relative",
@@ -271,6 +278,7 @@ const DonarIndumentarea = () => {
           Donación de Indumentaria
         </h1>
 
+        {/* Grid de productos disponibles para donar */}
         <div
           style={{
             display: "grid",
@@ -295,12 +303,13 @@ const DonarIndumentarea = () => {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                width: "100%",       // se ajusta al minmax
-                maxWidth: "300px",   // ancho uniforme de las tarjetas
-                minHeight: "400px",  // altura uniforme
+                width: "100%",
+                maxWidth: "300px",
+                minHeight: "400px",
                 position: "relative",
               }}
             >
+              {/* Imagen del producto */}
               <img
                 src={getImagen(p.imagen)}
                 alt={p.nombre}
@@ -311,9 +320,10 @@ const DonarIndumentarea = () => {
                   objectFit: "cover",
                   borderRadius: "8px",
                   marginBottom: "0.5rem",
-                  marginInline: "auto", // asegura que la imagen esté centrada
+                  marginInline: "auto",
                 }}
               />
+              {/* Nombre del producto */}
               <h3
                 style={{
                   fontFamily: "GroteskBold",
@@ -328,6 +338,7 @@ const DonarIndumentarea = () => {
               >
                 {p.nombre}
               </h3>
+              {/* Descripción del producto */}
               <p
                 style={{
                   fontFamily: "GroteskRegular",
@@ -343,6 +354,7 @@ const DonarIndumentarea = () => {
                 {p.descripcion}
               </p>
 
+              {/* Checkbox para seleccionar producto */}
               <div
                 style={{
                   margin: "0.3rem 0",
@@ -360,6 +372,7 @@ const DonarIndumentarea = () => {
                 <span>Seleccionar</span>
               </div>
 
+              {/* Input para cantidad de producto seleccionado */}
               <div
                 style={{
                   marginBottom: "0.3rem",
@@ -380,6 +393,7 @@ const DonarIndumentarea = () => {
                 />
               </div>
 
+              {/* Botón para ver ficha completa del producto */}
               <IconButton
                 onClick={() => setModalFicha({ open: true, producto: p })}
                 style={{
@@ -395,8 +409,7 @@ const DonarIndumentarea = () => {
           ))}
         </div>
 
-
-
+        {/* Botón para confirmar donación */}
         <div style={{ marginTop: "2rem", textAlign: "center" }}>
           <button
             onClick={confirmarDonacion}
@@ -436,6 +449,7 @@ const DonarIndumentarea = () => {
               error={!!errores.nombre}
               helperText={errores.nombre}
             />
+            {/* Input de teléfono internacional */}
             <PhoneInput
               country={"us"}
               name="telefono"
@@ -520,86 +534,84 @@ const DonarIndumentarea = () => {
       </Dialog>
 
       {/* Modal ficha completa rediseñado */}
-<Dialog
-  open={modalFicha.open}
-  onClose={() => setModalFicha({ open: false, producto: null })}
-  fullWidth
-  maxWidth="sm"
-  PaperProps={{
-    style: {
-      borderRadius: "20px",
-      padding: "1rem",
-      backgroundColor: "#f5f5f5",
-      boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
-    },
-  }}
->
-  <DialogContent
-    sx={{
-      display: "flex",
-      flexDirection: "column",
-      alignItems: "center",
-      textAlign: "center",
-      gap: "1rem",
-    }}
-  >
-    <img
-      src={getImagen(modalFicha.producto?.imagen)}
-      alt={modalFicha.producto?.nombre}
-      onError={(e) => {
-        e.target.onerror = null;
-        e.target.src = "/Images/producto_defecto.png";
-      }}
-      style={{
-        width: "80%",
-        maxHeight: "500px",
-        objectFit: "cover",
-        borderRadius: "15px",
-        boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
-      }}
-    />
-    <Typography
-      variant="h4"
-      sx={{
-        fontFamily: "GroteskBold",
-        fontSize: "1.8rem",
-        color: "#10045c",
-      }}
-    >
-      {modalFicha.producto?.nombre}
-    </Typography>
-    <Typography
-      sx={{
-        fontSize: "1rem",
-        fontFamily: "GroteskRegular",
-        color: "#333",
-      }}
-    >
-      {modalFicha.producto?.descripcion}
-    </Typography>
+      <Dialog
+        open={modalFicha.open}
+        onClose={() => setModalFicha({ open: false, producto: null })}
+        fullWidth
+        maxWidth="sm"
+        PaperProps={{
+          style: {
+            borderRadius: "20px",
+            padding: "1rem",
+            backgroundColor: "#f5f5f5",
+            boxShadow: "0 10px 30px rgba(0,0,0,0.3)",
+          },
+        }}
+      >
+        <DialogContent
+          sx={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            textAlign: "center",
+            gap: "1rem",
+          }}
+        >
+          <img
+            src={getImagen(modalFicha.producto?.imagen)}
+            alt={modalFicha.producto?.nombre}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = "/Images/producto_defecto.png";
+            }}
+            style={{
+              width: "80%",
+              maxHeight: "500px",
+              objectFit: "cover",
+              borderRadius: "15px",
+              boxShadow: "0 5px 15px rgba(0,0,0,0.2)",
+            }}
+          />
+          <Typography
+            variant="h4"
+            sx={{
+              fontFamily: "GroteskBold",
+              fontSize: "1.8rem",
+              color: "#10045c",
+            }}
+          >
+            {modalFicha.producto?.nombre}
+          </Typography>
+          <Typography
+            sx={{
+              fontSize: "1rem",
+              fontFamily: "GroteskRegular",
+              color: "#333",
+            }}
+          >
+            {modalFicha.producto?.descripcion}
+          </Typography>
 
-    {/* Botón cerrar centrado */}
-    <Button
-      variant="contained"
-      onClick={() => setModalFicha({ open: false, producto: null })}
-      sx={{
-        mt: 2,
-        backgroundColor: "#ff6600",
-        color: "#fff",
-        fontFamily: "GroteskBold",
-        '&:hover': { backgroundColor: "#e65c00" },
-        width: "50%",
-        borderRadius: "10px",
-      }}
-    >
-      Cerrar
-    </Button>
-  </DialogContent>
-</Dialog>
-
+          {/* Botón cerrar centrado */}
+          <Button
+            variant="contained"
+            onClick={() => setModalFicha({ open: false, producto: null })}
+            sx={{
+              mt: 2,
+              backgroundColor: "#ff6600",
+              color: "#fff",
+              fontFamily: "GroteskBold",
+              '&:hover': { backgroundColor: "#e65c00" },
+              width: "50%",
+              borderRadius: "10px",
+            }}
+          >
+            Cerrar
+          </Button>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
-
 
 export default DonarIndumentarea;

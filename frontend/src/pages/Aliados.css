@@ -1,16 +1,20 @@
+/* Importa la fuente Varsity para títulos principales */
 @font-face {
   font-family: 'Varsity';
   src: url('./fonts/Varsity.woff2') format('woff2');
 }
+/* Importa la fuente Petermedium para textos de sección */
 @font-face {
   font-family: 'Petermedium';
   src: url('./fonts/Petermedium.woff2') format('woff2');
 }
+/* Importa la fuente Groteskbold para títulos de aliados */
 @font-face {
   font-family: 'Groteskbold';
   src: url('./fonts/Groteskbold.woff2') format('woff2');
 }
 
+/* Estilo para el título principal de la página de aliados */
 .heading-title {
   font-family: 'Varsity', sans-serif;
   font-size: 3.5rem;
@@ -19,6 +23,7 @@
   margin-bottom: 1.5rem;
 }
 
+/* Estilo para el texto descriptivo de la sección */
 .section-text {
   font-family: 'Petermedium', sans-serif;
   font-size: 1.3rem;
@@ -27,6 +32,7 @@
   max-width: 50vw;
 }
 
+/* Estilo para el título de cada aliado/partner */
 .partner-title {
   font-family: 'Groteskbold', sans-serif;
   font-size: 2.75rem;
@@ -36,6 +42,7 @@
   margin-bottom: 1rem;
 }
 
+/* Estilo para imágenes de aliados, redondas y responsivas */
 .responsive-img {
   width: 100%;
   max-width: 400px;
@@ -45,6 +52,7 @@
   border: 6px solid #e06c14;
 }
 
+/* Media query para pantallas pequeñas (tablets y móviles) */
 @media (max-width: 768px) {
   .responsive-img {
     max-width: 300px;

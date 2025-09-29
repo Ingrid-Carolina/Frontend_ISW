@@ -1,20 +1,22 @@
 .perfil-container {
-  padding: 110px 40px 40px;
+  padding: 110px 40px 40px; /* Espaciado superior para header fijo */
   width: 100%;
-  max-width: 80%;
-  margin: auto;
+  max-width: 80%; /* Limita el ancho máximo */
+  margin: auto; /* Centra el contenedor */
   box-sizing: border-box;
   font-family: 'GroteskBold', sans-serif;
   text-align: left;
 }
 
+/* Contenido interno del perfil: avatar + info */
 .perfil-content {
   display: flex;
-  gap: 60px;
+  gap: 60px; /* Espacio entre avatar e info */
   padding: 50px;
-  flex-wrap: wrap;
+  flex-wrap: wrap; /* Permite que los elementos bajen en pantallas pequeñas */
 }
 
+/* Sección del avatar (foto de perfil) */
 .avatar-section {
   flex: 1;
   display: flex;
@@ -24,14 +26,16 @@
   gap: 15px;
 }
 
+/* Imagen del avatar */
 .avatar-img {
   width: 180px;
   height: 180px;
-  border-radius: 50%;
+  border-radius: 50%; /* Circular */
   object-fit: cover;
-  border: 3px solid #10045c;
+  border: 3px solid #10045c; /* Borde azul oscuro */
 }
 
+/* Botón para cambiar avatar */
 .avatar-button {
   display: inline-block;
   margin-top: 15px;
@@ -43,6 +47,7 @@
   cursor: pointer;
 }
 
+/* Sección de información del usuario */
 .info-section {
   flex: 2;
   display: flex;
@@ -50,11 +55,13 @@
   gap: 15px;
 }
 
+/* Etiquetas de los campos */
 label {
   font-family: 'GroteskBold';
   font-size: 1rem;
 }
 
+/* Campos de entrada y textarea */
 .input-field,
 .textarea-field {
   width: 100%;
@@ -66,12 +73,14 @@ label {
   box-sizing: border-box;
 }
 
+/* Contenedor de botones de acción */
 .botones {
   margin-top: 20px;
   display: flex;
   gap: 10px;
 }
 
+/* Botones guardar y cancelar */
 .guardar-btn,
 .cancelar-btn {
   padding: 10px 20px;
@@ -81,27 +90,31 @@ label {
   cursor: pointer;
 }
 
+/* Botón guardar: azul oscuro */
 .guardar-btn {
   background-color: #10045c;
   color: white;
 }
 
+/* Botón cancelar: gris */
 .cancelar-btn {
   background-color: #ccc;
   color: black;
 }
 
+/* Popup de feedback (éxito/error) */
 .popup {
   position: fixed;
   top: 0; left: 0;
   width: 100%; height: 100%;
-  background-color: rgba(0,0,0,0.5);
+  background-color: rgba(0,0,0,0.5); /* Fondo oscuro semitransparente */
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 999;
 }
 
+/* Contenido del popup */
 .popup-content {
   background-color: white;
   padding: 30px 40px;
@@ -113,25 +126,30 @@ label {
   box-shadow: 0px 5px 15px rgba(0,0,0,0.2);
 }
 
+/* Título del popup */
 .popup-content h2 {
   margin-top: 0;
   font-size: 1.5rem;
   color: #10045c;
 }
 
+/* Texto del popup */
 .popup-content p {
   margin: 15px 0;
   font-size: 1rem;
 }
 
+/* Borde verde para popup de éxito */
 .popup-success {
   border: 3px solid #4CAF50;
 }
 
+/* Borde rojo para popup de error */
 .popup-error {
   border: 3px solid #f44336;
 }
 
+/* Botón dentro del popup */
 .popup-content button {
   margin-top: 20px;
   padding: 10px 20px;
@@ -144,6 +162,7 @@ label {
   transition: background-color 0.3s ease;
 }
 
+/* Hover en botón del popup */
 .popup-content button:hover {
   background-color: #2d2d81;
 }
@@ -162,6 +181,7 @@ label {
   color: #e06c14 !important; 
 }
 
+/* Deshabilitado: mantiene color original y cursor */
 .guardar-btn:disabled:hover,
 .cancelar-btn:disabled:hover {
   color: inherit !important;
