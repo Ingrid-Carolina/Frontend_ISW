@@ -1,12 +1,12 @@
 {
-	"folders": [
-		{
-			"path": "../../.."
-		},
-		{
-			"name": "Backend_ISW",
-			"path": "../../../../../Backend_ISW"
-		}
-	],
-	"settings": {}
+    "folders": [
+        {
+            "path": "../../.."           // Carpeta principal del proyecto Frontend_ISW (nivel superior)
+        },
+        {
+            "name": "Backend_ISW",       // Nombre personalizado para la carpeta del backend
+            "path": "../../../../../Backend_ISW" // Ruta relativa a la carpeta Backend_ISW (fuera del frontend)
+        }
+    ],
+    "settings": {}                      // Espacio para agregar configuraciones específicas de VS Code (vacío por ahora)
 }

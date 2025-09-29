@@ -27,19 +27,21 @@ import { Link } from "react-router-dom";
 //import axios from 'axios';
 import { api } from '../api/api';
 
+// Función utilitaria para dividir un array en chunks (paginación)
 const chunk = (arr, size) =>
   Array.from({ length: Math.ceil(arr.length / size) }, (_, i) =>
     arr.slice(i * size, i * size + size)
   );
 
-// --- Lista de próximos eventos (como lo tenías) ---
+// --- Lista de próximos eventos (carousel y grid) ---
 const ListaEventos = () => {
+  // Estado para eventos, carga, error y página actual
   const [eventos, setEventos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [page, setPage] = useState(0);
 
-
+  // Carga los eventos al montar el componente
   useEffect(() => {
     const cargarEventos = async () => {
       try {
@@ -54,6 +56,7 @@ const ListaEventos = () => {
     cargarEventos();
   }, []);
 
+  // Muestra spinner mientras carga
   if (loading) {
     return (
       <Box display="flex" justifyContent="center" mt={4}>
@@ -62,6 +65,7 @@ const ListaEventos = () => {
     );
   }
 
+  // Muestra error si falla la carga
   if (error) {
     return (
       <Box mt={4}>
@@ -70,19 +74,18 @@ const ListaEventos = () => {
     );
   }
 
-  // --- Carousel por páginas ---
+  // Configuración de paginación para el carousel
   const pageSize = 4; // cuántas cards por página
   const pages = chunk(eventos, pageSize);
   const total = pages.length || 1;
   const prev = () => setPage(p => Math.max(0, p - 1));
   const next = () => setPage(p => Math.min(total - 1, p + 1));
 
-  {/*Grid de eventos */ }
+  // Renderiza grid en móvil/tablet y carousel en desktop
   return (
     <div className="w-full bg-background py-8">
       <div className="container mx-auto px-4">
         <Container sx={{ py: 2, position: 'relative' }}>
-
           {/* 📱 Móvil/Tablet: grid normal */}
           <Box sx={{ display: { xs: 'block', md: 'none' } }}>
             <Grid container spacing={3}>
@@ -98,6 +101,7 @@ const ListaEventos = () => {
                       '&:hover': { boxShadow: 6 },
                     }}
                   >
+                    {/* Imagen del evento o inicial si no hay imagen */}
                     {e.img_url ? (
                       <CardMedia
                         component="img"
@@ -121,6 +125,7 @@ const ListaEventos = () => {
                       </Box>
                     )}
 
+                    {/* Contenido de la card */}
                     <CardContent sx={{ display: 'flex', flexDirection: 'column' }}>
                       <Typography variant="h6" sx={{ fontWeight: 'bold', mb: .5 }}>
                         {e.titulo}
@@ -164,9 +169,9 @@ const ListaEventos = () => {
             </Grid>
           </Box>
 
-          {/* 💻 Desktop: carousel */}
+          {/* 💻 Desktop: carousel de eventos */}
           <Box sx={{ display: { xs: 'none', md: 'block' } }}>
-            {/* Controles */}
+            {/* Controles de navegación */}
             <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
               <IconButton onClick={prev} disabled={page === 0}>
                 <ChevronLeftIcon />
@@ -178,7 +183,7 @@ const ListaEventos = () => {
 
             {/* Viewport del carousel */}
             <Box sx={{ overflow: 'hidden', borderRadius: 2 }}>
-              {/* Track */}
+              {/* Track de páginas */}
               <Box
                 sx={{
                   display: 'flex',
@@ -196,7 +201,7 @@ const ListaEventos = () => {
                           <Card
                             sx={{
                               width: 350,
-                              height: 380, // alinea botones
+                              height: 380,
                               display: 'flex',
                               flexDirection: 'column',
                               borderRadius: 3,
@@ -205,6 +210,7 @@ const ListaEventos = () => {
                               '&:hover': { boxShadow: 6 },
                             }}
                           >
+                            {/* Imagen del evento o inicial si no hay imagen */}
                             {e.img_url ? (
                               <CardMedia
                                 component="img"
@@ -228,6 +234,7 @@ const ListaEventos = () => {
                               </Box>
                             )}
 
+                            {/* Contenido de la card */}
                             <CardContent sx={{ display: 'flex', flexDirection: 'column', flex: 1 }}>
                               <Typography variant="h6" sx={{ fontWeight: 'bold', mb: .5, textAlign: 'center' }}>
                                 {e.titulo}
@@ -301,6 +308,7 @@ const ListaEventos = () => {
   );
 };
 
+// Componente destacado (no usado en el render principal)
 const Featured = () => (
   <FeaturedPost
     title="Inicia la Temporada 2025 con Nuevas Metas y Más Pasión por el Béisbol"
@@ -310,14 +318,17 @@ const Featured = () => (
   />
 );
 
+// Componente principal de la página de eventos y noticias
 const Eventos = () => {
+  // Estado para el filtro de búsqueda
   const [query, setQuery] = useState('');
 
-  // Estados reales para NOTICIAS (tabla noticia)
+  // Estados para noticias (tabla noticia)
   const [noticias, setNoticias] = useState([]);
   const [loadingNoticias, setLoadingNoticias] = useState(false);
   const [errorNoticias, setErrorNoticias] = useState(null);
 
+  // Carga las noticias al montar el componente
   useEffect(() => {
     let cancelled = false;
 
@@ -330,6 +341,7 @@ const Eventos = () => {
 
         const lista = Array.isArray(data?.noticias) ? data.noticias : [];
 
+        // Mapea los datos relevantes de cada noticia
         const mapeadas = lista.map((n) => ({
           id: n.id,
           titulo: n.titulo,
@@ -365,6 +377,7 @@ const Eventos = () => {
     );
   });
 
+  // Formatea la fecha de publicación
   const formatFechaPub = (iso) =>
     iso
       ? new Date(iso).toLocaleDateString('es-ES', {
@@ -374,10 +387,10 @@ const Eventos = () => {
       })
       : '';
 
+  // Render principal de la página
   return (
     <div style={{ paddingTop: '90px' }}>
-
-      {/*Encabezado*/}
+      {/* Encabezado con fondo e información */}
       <Box
         sx={{
           position: 'relative',
@@ -392,7 +405,7 @@ const Eventos = () => {
           py: { xs: 6, md: 8 },
         }}
       >
-        {/* Overlay */}
+        {/* Overlay para oscurecer el fondo */}
         <Box
           sx={{
             position: 'absolute',
@@ -402,7 +415,7 @@ const Eventos = () => {
           }}
         />
 
-        {/* Contenido */}
+        {/* Contenido del encabezado */}
         <Box
           sx={{
             position: 'relative',
@@ -444,7 +457,7 @@ const Eventos = () => {
       </Box>
 
       <Container maxWidth="xl">
-        {/* Buscador */}
+        {/* Buscador de noticias */}
         <Box paddingTop="70px" display="flex" alignItems="center" mb={3}>
           <SearchIcon style={{ marginRight: '8px' }} />
           <TextField
@@ -478,7 +491,7 @@ const Eventos = () => {
           <div className="sin-noticias">No hay noticias por mostrar.</div>
         )}
 
-        {/* Grid de noticias  */}
+        {/* Grid de noticias */}
         <Grid container spacing={3} justifyContent="center">
           {[...filteredNews]
             .sort((a, b) => new Date(b.fecha_publicacion) - new Date(a.fecha_publicacion))
@@ -489,7 +502,7 @@ const Eventos = () => {
                     width: 350,
                     minHeight: 450,
                     display: "flex",
-                    flexDirection: "column",   // 🔹 hace que el contenido se estire
+                    flexDirection: "column",
                     borderRadius: 3,
                     boxShadow: 3,
                     transition: "0.3s",
@@ -497,6 +510,7 @@ const Eventos = () => {
                     mb: { xs: 2, md: 0 },
                   }}
                 >
+                  {/* Imagen de la noticia */}
                   <CardMedia
                     component="img"
                     height="160"
@@ -554,7 +568,6 @@ const Eventos = () => {
         </Grid>
 
         {/* Lista de próximos eventos */}
-
         <div className="eventos-container" style={{ paddingTop: '2rem' }}>
           <h1 className="eventos-titulo" style={{ fontFamily: 'GroteskBold' }}>
             Próximos Eventos

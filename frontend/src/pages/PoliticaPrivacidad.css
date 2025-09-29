@@ -1,66 +1,72 @@
+/* Contenedor principal de la política de privacidad */
 .politica-container {
-  width: 100%;
-  margin: auto;
-  padding: 90px 90px 70px 90px; /* espacio arriba, derecha, abajo, izquierda */
-  box-sizing: border-box;
-  background-color: #ffffff;
+  width: 100%; /* Ocupa todo el ancho disponible */
+  margin: auto; /* Centra el contenedor horizontalmente */
+  padding: 90px 90px 70px 90px; /* Espaciado interno: arriba, derecha, abajo, izquierda */
+  box-sizing: border-box; /* Incluye el padding en el tamaño total */
+  background-color: #ffffff; /* Fondo blanco para claridad */
 }
 
+/* Encabezado de la política */
 .politica-header {
-  margin-top: 50px;
-  text-align: left;
+  margin-top: 50px; /* Espacio superior para separar del borde */
+  text-align: left; /* Alinea el texto a la izquierda */
 }
 
+/* Título principal de la política */
 .politica-titulo {
-  font-family: "GroteskBold", sans-serif;
-  font-size: 4rem;
-  margin-bottom: 5px;
-  color: #10045c;
+  font-family: "GroteskBold", sans-serif; /* Fuente personalizada y respaldo */
+  font-size: 4rem; /* Tamaño grande para destacar */
+  margin-bottom: 5px; /* Espacio inferior mínimo */
+  color: #10045c; /* Color azul institucional */
 }
 
+/* Separador visual debajo del título */
 .politica-separador {
-  border: none;
-  height: 2px;
-  background-color: #eb873b; /* tu naranja */
-  width: 100%;
-  margin: auto;
-  margin-bottom: 25px;
+  border: none; /* Elimina borde por defecto */
+  height: 2px; /* Grosor del separador */
+  background-color: #eb873b; /* Color naranja corporativo */
+  width: 100%; /* Ocupa todo el ancho */
+  margin: auto; /* Centra horizontalmente */
+  margin-bottom: 25px; /* Espacio inferior para separar del contenido */
 }
 
+/* Contenedor del cuerpo de la política */
 .politica-cuerpo {
-  display: block;
+  display: block; /* Asegura que el contenido se muestre en bloque */
 }
 
+/* Texto principal de la política */
 .politica-texto {
-  font-family: "PeterMedium", sans-serif;
-  font-size: 1.1rem;
-  text-align: justify;
-  line-height: 1.7;
-  margin-bottom: 1.2rem;
-  color: #000000;
+  font-family: "PeterMedium", sans-serif; /* Fuente personalizada y respaldo */
+  font-size: 1.1rem; /* Tamaño de fuente legible */
+  text-align: justify; /* Justifica el texto para mejor presentación */
+  line-height: 1.7; /* Espaciado entre líneas para facilitar la lectura */
+  margin-bottom: 1.2rem; /* Espacio inferior entre párrafos */
+  color: #000000; /* Color negro para contraste */
 }
 
-/* Responsive */
+/* --- Estilos responsivos para adaptar a pantallas pequeñas --- */
 @media screen and (max-width: 900px) {
   .politica-container {
-    padding: 90px 20px 40px 20px;
+    padding: 90px 20px 40px 20px; /* Reduce el padding lateral y abajo */
   }
 
   .politica-titulo {
-    font-size: 3rem;
+    font-size: 3rem; /* Reduce el tamaño del título */
   }
 
   .politica-texto {
-    font-size: 1rem;
+    font-size: 1rem; /* Reduce el tamaño del texto */
   }
 }
 
 @media screen and (max-width: 480px) {
   .politica-titulo {
-    font-size: 2.2rem;
+    font-size: 2.2rem; /* Título aún más pequeño en móviles */
   }
 
   .politica-texto {
-    font-size: 0.95rem;
+    font-size: 0.95rem; /* Texto más pequeño para móviles */
   }
 }

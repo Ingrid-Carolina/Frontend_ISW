@@ -1,30 +1,33 @@
+/* --- Header principal con imagen de fondo y título alineado a la derecha --- */
 .header {
-  background-image: url('/Images/HeaderBeisbol.png');
-  background-size: cover;
-  background-position: center;
-  height: 470px;
+  background-image: url('/Images/HeaderBeisbol.png'); /* Imagen de fondo */
+  background-size: cover;         /* La imagen cubre todo el área */
+  background-position: center;    /* Centrada */
+  height: 470px;                  /* Altura fija del header */
   position: relative;
   display: flex;
-  align-items: center;
-  justify-content: flex-end; /* Sigue alineado a la derecha */
-  padding-right: 20px;
+  align-items: center;            /* Centra verticalmente el contenido */
+  justify-content: flex-end;      /* Alinea el contenido a la derecha */
+  padding-right: 20px;            /* Espacio a la derecha */
   box-sizing: border-box;
 }
- 
+
+/* --- Título grande dentro del header --- */
 .header-title {
   color: white;
-  font-size: 4.9vw; /* Escala según el ancho de pantalla */
+  font-size: 4.9vw;               /* Escala el tamaño según el ancho de pantalla */
   font-weight: bold;
   text-align: right;
-  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7);
+  text-shadow: 2px 2px 5px rgba(0, 0, 0, 0.7); /* Sombra para mejor legibilidad */
   font-family: 'Varsity', sans-serif;
   line-height: 1.3;
   margin-right: 5%;
 }
 
+/* --- Responsive: Ajusta el título en tablets --- */
 @media (max-width: 830px) {
   .header-title {
-    font-size: 6.3vw;  /* Más grande pero aún proporcional */
+    font-size: 6.3vw;             /* Más grande pero proporcional */
     line-height: 1.2;
     text-align: right;
     margin-right: 0;
@@ -32,9 +35,10 @@
   }
 }
 
+/* --- Responsive: Ajusta el título en móviles --- */
 @media (max-width: 480px) {
   .header-title {
-    font-size: 10vw;  /* Más grande pero aún proporcional */
+    font-size: 10vw;              /* Mucho más grande en móvil */
     line-height: 1.2;
     text-align: center;
     margin-right: 0;
@@ -42,38 +46,41 @@
   }
 }
 
+/* --- Botón de contacto debajo del header --- */
 .contact-button {
-    display: block;
-    margin: 10px auto 0; 
-    padding: 10px 20px;
-    background-color: brown;
-    color: white;
-    border: none;
-    border-radius: 5px;
-    font-size: 35px;
-    cursor: pointer;
-    margin-left: 350px;
-}
-
-.contact-button:hover {
-    background-color: #e6b800;
-}
-
-
-.about-us {
-  background-color: #10045c; /* Azul oscuro */
+  display: block;
+  margin: 10px auto 0;            /* Centrado horizontalmente */
+  padding: 10px 20px;
+  background-color: brown;
   color: white;
-  padding: 40px 60px; /* espacio amplio en escritorio */
+  border: none;
+  border-radius: 5px;
+  font-size: 35px;
+  cursor: pointer;
+  margin-left: 350px;             /* Desplazado a la derecha */
+}
+
+/* --- Efecto hover en el botón de contacto --- */
+.contact-button:hover {
+  background-color: #e6b800;      /* Cambia a dorado al pasar el mouse */
+}
+
+/* --- Sección "Sobre Nosotros" con fondo azul oscuro --- */
+.about-us {
+  background-color: #10045c;      /* Azul oscuro */
+  color: white;
+  padding: 40px 60px;             /* Espacio amplio en escritorio */
   margin: 0;
   width: 100%;
   box-sizing: border-box;
   font-family: 'Varsity', sans-serif;
-  font-size: 1.2rem; /* base legible en pantallas grandes */
+  font-size: 1.2rem;              /* Base legible en pantallas grandes */
   text-align: left;
 }
 
+/* --- Título principal de la sección "Sobre Nosotros" --- */
 .about-us h2 {
-  font-size: 4rem; /* escalable en desktop */
+  font-size: 4rem;                /* Muy grande en desktop */
   color: white;
   text-align: left;
   font-family: 'Varsity', sans-serif;
@@ -81,6 +88,7 @@
   margin-bottom: 15px;
 }
 
+/* --- Subtítulo/descripción de la sección --- */
 .about-us h3 {
   font-family: 'GroteskBold', sans-serif;
   line-height: 1.4;
@@ -88,21 +96,21 @@
   font-size: 1.5rem;
 }
 
-/* Ajustes para tablet y móviles */
+/* --- Responsive: Ajustes para tablet y móviles --- */
 @media (max-width: 768px) {
   .about-us {
-    padding: 30px 25px; /* menos padding lateral */
-    text-align: center; /* centra el texto en móviles */
+    padding: 30px 25px;           /* Menos padding lateral */
+    text-align: center;           /* Centra el texto en móviles */
     font-size: 1rem;
   }
 
   .about-us h2 {
-    font-size: 6vw; /* título más grande pero legible */
+    font-size: 6vw;               /* Título más grande pero legible */
     text-align: center;
   }
 
   .about-us h3 {
-    font-size: 1.4rem; /* descripción más pequeña en tablet */
+    font-size: 1.4rem;            /* Descripción más pequeña en tablet */
     line-height: 1.6;
   }
 }
@@ -114,7 +122,7 @@
   }
 
   .about-us h2 {
-    font-size: 7.5vw; /* aún más adaptable en móvil */
+    font-size: 7.5vw;             /* Aún más adaptable en móvil */
   }
 
   .about-us h3 {
@@ -122,11 +130,10 @@
   }
 }
 
-
-
+/* --- Secciones de valores y nota de eventos --- */
 .values, .noteve {
   background-color: white;
-  padding: 40px 20px; /* más aire en desktop */
+  padding: 40px 20px;             /* Más aire en desktop */
   margin: 0;
   width: 100%;
   box-sizing: border-box;
@@ -134,37 +141,40 @@
   text-align: center;
 }
 
+/* --- Colores específicos para cada sección --- */
 .values {
-  color: #e06c14; /* Naranja */
+  color: #e06c14;                 /* Naranja */
 }
 
 .noteve {
-  color: #10045c; /* Azul oscuro */
+  color: #10045c;                 /* Azul oscuro */
 }
 
+/* --- Títulos grandes en valores y nota de eventos --- */
 .values h2, .noteve h2 {
-  font-size: 3.7rem; /* Escalable en desktop */
+  font-size: 3.7rem;              /* Escalable en desktop */
   font-family: 'Varsity', sans-serif;
   margin-top: 0;
   margin-bottom: 15px;
 }
 
+/* --- Subtítulos/descripciones en valores y nota de eventos --- */
 .values h3, .noteve h3 {
   font-family: 'GroteskBold', sans-serif;
   line-height: 1.4;
   margin: 0 auto;
-  max-width: 800px; /* para no extenderse demasiado en pantallas grandes */
+  max-width: 800px;               /* Para no extenderse demasiado en pantallas grandes */
   font-size: 1.6rem;
 }
 
-/*  Ajustes para tablets */
+/* --- Responsive: Ajustes para tablets --- */
 @media (max-width: 768px) {
   .values, .noteve {
     padding: 30px 25px;
   }
 
   .values h2, .noteve h2 {
-    font-size: 3.5rem; /* más grande en tablet */
+    font-size: 3.5rem;            /* Más grande en tablet */
   }
 
   .values h3, .noteve h3 {
@@ -173,7 +183,7 @@
   }
 }
 
-/*  Ajustes para móviles */
+/* --- Responsive: Ajustes para móviles --- */
 @media (max-width: 480px) {
   .values, .noteve {
     padding: 20px 15px;
@@ -181,7 +191,7 @@
   }
 
   .values h2, .noteve h2 {
-    font-size: 9vw; /* fluido en móvil */
+    font-size: 9vw;               /* Fluido en móvil */
   }
 
   .values h3, .noteve h3 {
@@ -189,64 +199,67 @@
   }
 }
 
-
+/* --- Contenedor de tarjetas (cards) --- */
 .cards {
   background-color: white;
   display: flex;
-  justify-content: center; /* centra horizontalmente */
-  gap: 40px;               /* espacio entre tarjetas */
-  flex-wrap: wrap;         /* permite que se ajusten en pantallas pequeñas */
+  justify-content: center;        /* Centra horizontalmente */
+  gap: 40px;                      /* Espacio entre tarjetas */
+  flex-wrap: wrap;                /* Permite que se ajusten en pantallas pequeñas */
   padding: 40px;
   box-sizing: border-box;
 }
 
+/* --- Botón de noticias destacado --- */
 .news-button {
-    display: inline-block;
-    padding: 12px 24px;
-    background-color: #10045c; 
-    color: white;
-    font-family: 'GroteskBold', sans-serif;
-    font-size: 25px;
-    font-weight: bold;
-    text-transform: uppercase;
-    text-decoration: none;
-    border-radius: 30px;
-    border: none;
-    cursor: pointer;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: all 0.3s ease;
-    position: relative;
-    overflow: hidden;
+  display: inline-block;
+  padding: 12px 24px;
+  background-color: #10045c; 
+  color: white;
+  font-family: 'GroteskBold', sans-serif;
+  font-size: 25px;
+  font-weight: bold;
+  text-transform: uppercase;
+  text-decoration: none;
+  border-radius: 30px;
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
 }
 
+/* --- Efecto hover en el botón de noticias --- */
 .news-button:hover {
-    background-color: #e06c14;  /* Goldenrod */
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+  background-color: #e06c14;      /* Cambia a naranja */
+  transform: translateY(-2px);
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
 }
 
+/* --- Efecto al hacer click en el botón de noticias --- */
 .news-button:active {
-    transform: translateY(0);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
-/* Optional: Add a subtle shine effect */
+/* --- Efecto brillo sutil en el botón de noticias --- */
 .news-button::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -60%;
-    width: 50%;
-    height: 200%;
-    background: rgba(255, 255, 255, 0.2);
-    transform: rotate(30deg);
-    transition: all 0.3s;
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -60%;
+  width: 50%;
+  height: 200%;
+  background: rgba(255, 255, 255, 0.2);
+  transform: rotate(30deg);
+  transition: all 0.3s;
 }
 
 .news-button:hover::after {
-    left: 120%;
+  left: 120%;
 }
- 
+
 
 
 

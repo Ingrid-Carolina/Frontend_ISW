@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
+// Importa componentes de Material UI para estructura y estilos visuales
 import { Box, Typography, TextField, Button, Alert, Link } from '@mui/material';
+// Importa el logo del club para mostrar en el formulario
 import logo from '/Images/Logo-pilotos.png';
-//import axios from 'axios';
+// Importa el cliente API para realizar peticiones al backend
 import { api } from '../api/api';
 
+// Componente funcional para el registro de nuevos usuarios
 const Registro = ({ onLoginClick }) => {
+  // Estado para almacenar los datos del formulario
   const [formData, setFormData] = useState({
     nombre: '',
     email: '',
@@ -12,20 +16,24 @@ const Registro = ({ onLoginClick }) => {
     confirmarPassword: ''
   });
 
+  // Estado para almacenar errores de validación por campo
   const [errors, setErrors] = useState({});
+  // Estado para mostrar mensajes de éxito o error tras el envío
   const [submitMessage, setSubmitMessage] = useState({ success: '', error: '' });
 
+  // Función para validar los datos del formulario antes de enviar
   const validateForm = () => {
     const newErrors = {};
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    // Valida que el nombre no comience con espacio
     if (formData.nombre.startsWith(' ')) {
       newErrors.nombre = 'Formato de nombre Invalido';
     }
-
+    // Valida que el nombre no esté vacío
     if (!formData.nombre.trim()) {
       newErrors.nombre = 'El nombre es obligatorio';
     }
-
+    // Valida el correo electrónico
     if (!formData.email.trim()) {
       newErrors.email = 'El correo electrónico es obligatorio';
     } else if (!emailRegex.test(formData.email)) {
@@ -35,11 +43,10 @@ const Registro = ({ onLoginClick }) => {
         'Solo se permiten correos de Gmail, Outlook o Hotmail';
     }
 
-
+    // Validaciones de la contraseña: mínimo 8 caracteres, al menos una mayúscula, una minúscula y un número
     let num = false;
     let May = false;
     let Min = false;
-
     for (let i = 0; i < formData.password.length; i++) {
       let carac = formData.password.charCodeAt(i);
       if (carac >= 97 && carac <= 122) {
@@ -52,7 +59,6 @@ const Registro = ({ onLoginClick }) => {
         num = true;
       }
     }
-
     if (!formData.password) {
       newErrors.password = 'La contraseña es obligatoria';
     } else if (formData.password.length < 8) {
@@ -73,17 +79,19 @@ const Registro = ({ onLoginClick }) => {
       newErrors.password = 'Debe tener al menos 1 número';
     }
 
-
+    // Valida la confirmación de la contraseña
     if (!formData.confirmarPassword) {
       newErrors.confirmarPassword = 'Confirma tu contraseña';
     } else if (formData.password !== formData.confirmarPassword) {
       newErrors.confirmarPassword = 'Las contraseñas no coinciden';
     }
 
+    // Actualiza el estado de errores y retorna si el formulario es válido
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
+  // Maneja el cambio de los campos del formulario y limpia mensajes previos
   const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
@@ -96,48 +104,46 @@ const Registro = ({ onLoginClick }) => {
     }));
   };
 
-  // Repeticion de logica aqui.
+  // Realiza la petición de registro al backend usando la API
   const realizarPeticion = async () => {
-  try {
-    const res = await api.post('/auth/signup', {
-      nombre: formData.nombre,
-      email: formData.email,
-      password: formData.password
-    });
-    return res; // Return full response to handleSubmit
-  } catch (error) {
-    
-    const mensaje =   error?.data?.mensaje|| error?.message|| 'Error en la Red';
-     setSubmitMessage({ success: '', error: mensaje });
-  }
-};
+    try {
+      const res = await api.post('/auth/signup', {
+        nombre: formData.nombre,
+        email: formData.email,
+        password: formData.password
+      });
+      return res; // Retorna la respuesta para manejar en handleSubmit
+    } catch (error) {
+      // Muestra mensaje de error si la petición falla
+      const mensaje = error?.data?.mensaje || error?.message || 'Error en la Red';
+      setSubmitMessage({ success: '', error: mensaje });
+    }
+  };
 
+  // Maneja el envío del formulario: valida, envía y muestra mensajes
   const handleSubmit = async () => {
-  if (!validateForm()) return;
+    if (!validateForm()) return;
 
-  const respuesta = await realizarPeticion();
-  console.log("Respuesta:", respuesta);
+    const respuesta = await realizarPeticion();
+    console.log("Respuesta:", respuesta);
 
-  if (respuesta.status) {
-    setSubmitMessage({ success: respuesta.data?.mensaje, error: '' });
-    setFormData({
-      nombre: '',
-      email: '',
-      password: '',
-      confirmarPassword: ''
-    });
-    setTimeout(() => {
-      onLoginClick();
-    }, 2000);
-  }
-  
-};
+    // Si la respuesta es exitosa, muestra mensaje y limpia el formulario
+    if (respuesta.status) {
+      setSubmitMessage({ success: respuesta.data?.mensaje, error: '' });
+      setFormData({
+        nombre: '',
+        email: '',
+        password: '',
+        confirmarPassword: ''
+      });
+      // Redirige al login después de 2 segundos
+      setTimeout(() => {
+        onLoginClick();
+      }, 2000);
+    }
+  };
 
-
-
-
-
-
+  // Renderiza el formulario de registro con validaciones y mensajes
   return (
     <Box
       sx={{
@@ -150,12 +156,14 @@ const Registro = ({ onLoginClick }) => {
         px: 2
       }}
     >
+      {/* Logo del club en la parte superior */}
       <img
         src={logo}
         alt="Logo Pilotos"
         style={{ width: '300px', marginBottom: '1rem' }}
       />
 
+      {/* Contenedor del formulario con estilos de tarjeta */}
       <Box
         sx={{
           bgcolor: '#fff',
@@ -166,6 +174,7 @@ const Registro = ({ onLoginClick }) => {
           maxWidth: 400
         }}
       >
+        {/* Título del formulario */}
         <Typography variant="h5" sx={{
           fontFamily: '"Varsity", cursive',
           fontWeight: 'bold',
@@ -177,9 +186,11 @@ const Registro = ({ onLoginClick }) => {
           Regístrate
         </Typography>
 
+        {/* Mensaje de error o éxito tras el envío */}
         {submitMessage.error && <Alert severity="error" sx={{ mb: 2 }}>{submitMessage.error}</Alert>}
         {submitMessage.success && <Alert severity="success" sx={{ mb: 2 }}>{submitMessage.success}</Alert>}
 
+        {/* Campo de nombre */}
         <TextField
           label="Nombre"
           name="nombre"
@@ -191,6 +202,7 @@ const Registro = ({ onLoginClick }) => {
           helperText={errors.nombre}
         />
 
+        {/* Campo de correo electrónico */}
         <TextField
           label="Correo electrónico"
           name="email"
@@ -202,6 +214,7 @@ const Registro = ({ onLoginClick }) => {
           helperText={errors.email}
         />
 
+        {/* Campo de contraseña */}
         <TextField
           label="Contraseña"
           type="password"
@@ -220,6 +233,7 @@ const Registro = ({ onLoginClick }) => {
           }
         />
 
+        {/* Campo para confirmar la contraseña */}
         <TextField
           label="Confirmar contraseña"
           type="password"
@@ -232,6 +246,7 @@ const Registro = ({ onLoginClick }) => {
           helperText={errors.confirmarPassword}
         />
 
+        {/* Botón para enviar el formulario de registro */}
         <Button
           fullWidth
           variant="contained"
@@ -241,6 +256,7 @@ const Registro = ({ onLoginClick }) => {
           REGISTRARSE
         </Button>
 
+        {/* Enlace para ir al login si ya tiene cuenta */}
         <Typography variant="body2" align="center" sx={{ mt: 2 }}>
           ¿Ya tienes una cuenta?{' '}
           <Link
@@ -256,4 +272,5 @@ const Registro = ({ onLoginClick }) => {
   );
 };
 
+// Exporta el componente para su uso en el sistema de rutas
 export default Registro;

@@ -1,16 +1,22 @@
 import { Box, Typography } from '@mui/material';
+// Importa motion para animaciones de entrada
 import { motion } from 'framer-motion';
+// Importa Slider para carrusel (no usado en este archivo)
 import Slider from 'react-slick';
+// Importa imágenes locales para el header y sección voluntariado
 import equipoImg from '/Images/greyimg.jpg';
 import equipoImg2 from '/Images/equipo2.jpg';
+// Importa Link para navegación interna
 import { Link } from 'react-router-dom';
+// Importa ícono de edición para el header
 import EditIcon from '@mui/icons-material/Edit';
+// Importa cliente API para peticiones al backend
 import { api } from '../api/api';
+// Importa React y hooks para estado y efectos
 import React, { useState, useRef, useEffect } from 'react';
+// Importa componentes personalizados para edición de imágenes
 import EditableImage from '../components/EditableImage';
 import EditableHeaderImage from '../components/EditableHeaderImage';
-
-
 
 // Variantes de animación para la entrada en vista
 const fadeIn = {
@@ -23,25 +29,31 @@ const scaleIn = {
   visible: { opacity: 1, scale: 1, transition: { duration: 0.8 } },
 };
 
+// Componente principal de la página de voluntariado
 const Voluntariado = () => {
+  // Estado para almacenar URLs de imágenes del header y sección voluntariado
   const [images, setImages] = useState({
     header: equipoImg,
     voluntariado: "",
   });
 
+  // Efecto para cargar imágenes desde el backend al montar el componente
   useEffect(() => {
     const fetchImages = async () => {
       const fallbackUrl = "https://projectbeisbol.org/wp-content/uploads/2023/05/Become-a-Volunteer-1024x768.jpeg";
       try {
+        // Solicita las imágenes al backend
         const res = await api.get('/auth/voluntariado/getimages', { withCredentials: true });
         const imgObj = {};
+        // Asigna cada imagen recibida por tipo
         res.data.forEach(item => {
           imgObj[item.type] = item.url|| fallbackUrl;
         });
+        // Actualiza el estado con las imágenes obtenidas
         setImages(prev => ({
-        ...prev,
-        ...imgObj,
-            }));
+          ...prev,
+          ...imgObj,
+        }));
       } catch (err) {
         console.error('Error al cargar imágenes:', err);
       }
@@ -50,12 +62,10 @@ const Voluntariado = () => {
     fetchImages();
   }, []);
 
-
+  // Estado para saber si el usuario es administrador
   const [isAdmin, setIsAdmin] = useState(false);
 
-
-
-
+  // Configuración del carrusel (no usado en este archivo)
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -67,6 +77,7 @@ const Voluntariado = () => {
     autoplaySpeed: 5000,
   };
 
+  // Maneja la subida y actualización de imágenes en el backend
   const handleImageChange = async (key, file) => {
     if (!(file instanceof File)) return;
 
@@ -74,14 +85,17 @@ const Voluntariado = () => {
     formData.append("file", file);
 
     try {
+      // Sube la imagen al backend y obtiene la URL final
       const uploadResponse = await api.post("/auth/upload", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
 
       const finalUrl = uploadResponse?.data?.url;
 
+      // Actualiza la imagen en el backend para el tipo correspondiente
       await api.put("/auth/voluntariado/images", { type: key, url: finalUrl });
 
+      // Actualiza el estado local con la nueva imagen
       setImages((prev) => ({
         ...prev,
         [key]: finalUrl,
@@ -91,7 +105,7 @@ const Voluntariado = () => {
     }
   };
 
-
+  // Efecto para verificar el rol del usuario al montar el componente
   useEffect(() => {
     const checkRole = async () => {
       try {
@@ -106,11 +120,9 @@ const Voluntariado = () => {
     checkRole();
   }, []);
 
-
-
   return (
     <>
-      {/* ENCABEZADO CON IMAGEN */}
+      {/* ENCABEZADO CON IMAGEN Y EDICIÓN (solo admin) */}
       <Box
         sx={{
           position: 'relative',
@@ -128,17 +140,15 @@ const Voluntariado = () => {
           marginTop: '90px',
           '&:hover .edit-btn': { opacity: 1 },
         }}
-
       >
+        {/* Componente para editar la imagen del header si es admin */}
         {isAdmin && (
           <EditableHeaderImage
             onImageUpload={file => handleImageChange('header', file)}
           />
         )}
 
-
-
-        {/* Capa de filtro de color semitransparente */}
+        {/* Capa de filtro de color semitransparente sobre la imagen */}
         <Box
           sx={{
             position: 'absolute',
@@ -151,7 +161,7 @@ const Voluntariado = () => {
             clipPath: 'polygon(0 0, 100% 0, 100% 90%, 0 100%)',
           }}
         />
-        {/* Contenido del encabezado (títulos y SVG) */}
+        {/* Contenido del encabezado: títulos y SVG decorativo */}
         <Box
           sx={{
             position: 'relative',
@@ -161,6 +171,7 @@ const Voluntariado = () => {
             padding: '0 2rem',
           }}
         >
+          {/* Título principal y subtítulo */}
           <Typography
             variant="h1"
             sx={{
@@ -182,6 +193,7 @@ const Voluntariado = () => {
             </Typography>
             Pilotos FAH
           </Typography>
+          {/* SVG decorativo debajo del título */}
           <svg
             version="1.1"
             xmlns="http://www.w3.org/2000/svg"
@@ -190,66 +202,32 @@ const Voluntariado = () => {
             viewBox="0 0 364 93"
             style={{ width: '100%', maxWidth: '400px', height: 'auto' }}
           >
-            <path
-              d="m337.02 67.25 2.6-10.25 2.5-9.96h18l-10.66 9.51z"
-              fill="#be1e2d"
-            />
-            <path
-              d="m337.02 26.82 2.6 10.25 2.5 9.96h18l-10.66-9.5z"
-              fill="#ed1c24"
-            />
-            <path
-              d="m282.53 71.76 3.18-12.54 3.06-12.17H310.78l-13.04 11.62z"
-              fill="#be1e2d"
-            />
-            <path
-              d="m282.53 22.32 3.18 12.53 3.06 12.18H310.78l-13.04-11.62z"
-              fill="#ed1c24"
-            />
-            <path
-              d="m220.48 76.71 3.82-15.04 3.67-14.62h26.43L238.74 61z"
-              fill="#be1e2d"
-            />
-            <path
-              d="m220.48 17.36 3.82 15.05 3.67 14.62h26.43l-15.66-13.95z"
-              fill="#ed1c24"
-            />
+            {/* ...SVG paths decorativos... */}
+            <path d="m337.02 67.25 2.6-10.25 2.5-9.96h18l-10.66 9.51z" fill="#be1e2d" />
+            <path d="m337.02 26.82 2.6 10.25 2.5 9.96h18l-10.66-9.5z" fill="#ed1c24" />
+            <path d="m282.53 71.76 3.18-12.54 3.06-12.17H310.78l-13.04 11.62z" fill="#be1e2d" />
+            <path d="m282.53 22.32 3.18 12.53 3.06 12.18H310.78l-13.04-11.62z" fill="#ed1c24" />
+            <path d="m220.48 76.71 3.82-15.04 3.67-14.62h26.43L238.74 61z" fill="#be1e2d" />
+            <path d="m220.48 17.36 3.82 15.05 3.67 14.62h26.43l-15.66-13.95z" fill="#ed1c24" />
             <g>
-              <path
-                d="m151.74 81.97 4.49-17.71 4.33-17.21h31.11l-18.43 16.42z"
-                fill="#be1e2d"
-              />
-              <path
-                d="m151.74 12.11 4.49 17.7 4.33 17.21h31.11l-18.43-16.41z"
-                fill="#ed1c24"
-              />
+              <path d="m151.74 81.97 4.49-17.71 4.33-17.21h31.11l-18.43 16.42z" fill="#be1e2d" />
+              <path d="m151.74 12.11 4.49 17.7 4.33 17.21h31.11l-18.43-16.41z" fill="#ed1c24" />
             </g>
             <g>
-              <path
-                d="m77.91 86.39 5.06-19.95 4.87-19.39h35.04l-20.75 18.5z"
-                fill="#be1e2d"
-              />
-              <path
-                d="m77.91 7.69 5.06 19.95 4.87 19.38h35.04l-20.75-18.49z"
-                fill="#ed1c24"
-              />
+              <path d="m77.91 86.39 5.06-19.95 4.87-19.39h35.04l-20.75 18.5z" fill="#be1e2d" />
+              <path d="m77.91 7.69 5.06 19.95 4.87 19.38h35.04l-20.75-18.49z" fill="#ed1c24" />
             </g>
             <g>
-              <path
-                d="m4.2 89.74 5.48-21.65 5.29-21.04H53L30.48 67.12z"
-                fill="#be1e2d"
-              />
-              <path
-                d="m4.2 4.33 5.48 21.65 5.29 21.04H53L30.48 26.95z"
-                fill="#ed1c24"
-              />
+              <path d="m4.2 89.74 5.48-21.65 5.29-21.04H53L30.48 67.12z" fill="#be1e2d" />
+              <path d="m4.2 4.33 5.48 21.65 5.29 21.04H53L30.48 26.95z" fill="#ed1c24" />
             </g>
           </svg>
         </Box>
       </Box>
 
-      {/* SECCIÓN DE TEXTO Y CONTENIDO */}
+      {/* SECCIÓN DE TEXTO Y CONTENIDO PRINCIPAL */}
       <Box sx={{ padding: '40px 0', marginTop: '1rem' }}>
+        {/* Texto introductorio sobre el voluntariado */}
         <Typography
           variant="body1"
           sx={{
@@ -264,7 +242,7 @@ const Voluntariado = () => {
           ¿Te apasiona el béisbol y el servicio a la comunidad? Si es así, Pilotos FAH te está llamando. Al unirte a nuestra misión, te convertirás en parte fundamental de la próxima generación de líderes y, a través del espíritu del béisbol, fomentarás un cambio social positivo, llevando nuestra pasión a nuevas alturas. Descubre cómo puedes marcar la diferencia hoy mismo con Pilotos FAH.
         </Typography>
 
-        {/* Sección de Voluntariado */}
+        {/* Sección principal de voluntariado con texto y imagen */}
         <Box
           sx={{
             display: 'flex',
@@ -274,14 +252,14 @@ const Voluntariado = () => {
             justifyContent: 'center',
             gap: '1rem',
             backgroundColor: '#ff914d',
-            padding: { xs: '3rem 2rem', md: '4rem 2rem' }, // Adjusted padding for mobile
+            padding: { xs: '3rem 2rem', md: '4rem 2rem' }, // Ajusta padding para móvil
             width: '100%',
             maxWidth: 'none',
             marginTop: '3rem',
             clipPath: 'polygon(0 8%, 100% 0, 100% 100%, 0 100%)',
           }}
         >
-          {/* Contenedor del texto (con animación) */}
+          {/* Contenedor del texto con animación de entrada */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -293,6 +271,7 @@ const Voluntariado = () => {
               textAlign: 'center',
             }}
           >
+            {/* Título y subtítulo de la sección */}
             <Typography
               variant="h2"
               sx={{
@@ -316,6 +295,7 @@ const Voluntariado = () => {
             >
               Tú oportunidad de hacer la diferencia
             </Typography>
+            {/* Texto descriptivo sobre el voluntariado */}
             <Typography
               variant="body1"
               sx={{
@@ -338,6 +318,7 @@ const Voluntariado = () => {
             >
               No importa tu edad o nivel de experiencia en el béisbol, en Pilotos FAH, damos la bienvenida a cualquier persona que desee trabajar como voluntario. Hay una oportunidad para todos de tener un impacto positivo y significativo.
             </Typography>
+            {/* Botón para ir a la página de contacto */}
             <Box sx={{ marginTop: '1rem' }}>
               <Link
                 to="/Contacto"
@@ -356,7 +337,7 @@ const Voluntariado = () => {
             </Box>
           </motion.div>
 
-          {/* Contenedor de la imagen (con animación) */}
+          {/* Contenedor de la imagen con animación de escala */}
           <motion.div
             initial="hidden"
             whileInView="visible"
@@ -368,6 +349,7 @@ const Voluntariado = () => {
               justifyContent: 'center',
             }}
           >
+            {/* Si es admin, permite editar la imagen; si no, solo la muestra */}
             {isAdmin ? (
               <EditableImage
                 src={images.voluntariado}
@@ -388,15 +370,12 @@ const Voluntariado = () => {
                 }}
               />
             )}
-
-
           </motion.div>
-
         </Box>
       </Box>
     </>
   );
-
 };
 
+// Exporta el componente principal para su uso en rutas
 export default Voluntariado;

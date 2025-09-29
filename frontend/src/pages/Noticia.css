@@ -1,60 +1,66 @@
 
 .titulo-noticia{
-  font-family: 'GroteskBold', sans-serif;
-  color: #00013A;
-  font-weight: lighter;
-  font-size: 1rem;
-  line-height: 1.2;
-  justify-content: flex-start;
-  display: flex;
-  margin: 0 0 0.75rem 0;
-  padding: 0px 50px;
+  /* Estilo para el título de la noticia */
+  font-family: 'GroteskBold', sans-serif; /* Fuente personalizada y respaldo sans-serif */
+  color: #00013A; /* Color azul oscuro para el texto */
+  font-weight: lighter; /* Peso de fuente más ligero */
+  font-size: 1rem; /* Tamaño de fuente pequeño */
+  line-height: 1.2; /* Altura de línea ajustada */
+  justify-content: flex-start; /* Alinea el contenido al inicio */
+  display: flex; /* Usa flexbox para alineación */
+  margin: 0 0 0.75rem 0; /* Margen inferior para separación */
+  padding: 0px 50px; /* Espaciado horizontal interno */
 }
 
 
 .date-noticia{
-
-  font-family: 'GroteskBold', sans-serif;
-  line-height: 1;
-  justify-content: flex-start;
-  display: flex;
-  margin-left: 75px;
-  font-size: 1.5rem;
+  /* Estilo para la fecha de la noticia */
+  font-family: 'GroteskBold', sans-serif; /* Fuente personalizada */
+  line-height: 1; /* Altura de línea compacta */
+  justify-content: flex-start; /* Alinea el contenido al inicio */
+  display: flex; /* Flexbox para alineación */
+  margin-left: 75px; /* Margen izquierdo para separación del borde */
+  font-size: 1.5rem; /* Tamaño de fuente grande para destacar la fecha */
 }
 
 .container-image{
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  max-width: 100%;
-  margin: 2rem auto;
-  padding: 20px;
+  /* Contenedor para la imagen principal de la noticia */
+  display: flex; /* Flexbox para centrar imagen */
+  justify-content: center; /* Centra horizontalmente */
+  align-items: center; /* Centra verticalmente */
+  max-width: 100%; /* No excede el ancho del contenedor padre */
+  margin: 2rem auto; /* Margen vertical y centrado horizontal */
+  padding: 20px; /* Espaciado interno */
 }
 
 .enhanced{
+  /* Aplica bordes redondeados a la imagen para mejorar la estética */
   border-radius: 10px;
 }
 
 
 .contenido-noticia {
-  font-size: 1.2vw;
-  line-height: 1.8;
-  color: black;
-  text-align: justify;
-  font-family: 'PeterMedium', sans-serif;
-  box-sizing: border-box;
-  margin: 0 auto;
-  max-width: 1200px; /* o 90% si prefieres */
-  width: 100%;
-  padding: 0 24px; /* padding fijo para evitar overflow */
-  display: flex;
-  padding-bottom: 100px;
+  /* Estilo para el contenido textual de la noticia */
+  font-size: 1.2vw; /* Tamaño de fuente responsivo según ancho de ventana */
+  line-height: 1.8; /* Espaciado entre líneas para mejor lectura */
+  color: black; /* Texto en negro */
+  text-align: justify; /* Justifica el texto para apariencia profesional */
+  font-family: 'PeterMedium', sans-serif; /* Fuente personalizada */
+  box-sizing: border-box; /* Incluye padding y border en el tamaño total */
+  margin: 0 auto; /* Centra el contenido horizontalmente */
+  max-width: 1200px; /* Limita el ancho máximo del contenido */
+  /* Alternativamente puedes usar 90% para mayor flexibilidad */
+  width: 100%; /* Ocupa todo el ancho disponible */
+  padding: 0 24px; /* Espaciado horizontal fijo para evitar overflow */
+  display: flex; /* Flexbox para estructura interna */
+  padding-bottom: 100px; /* Espacio inferior para separar de otros elementos */
 }
 
-@media (max-width: 768px) { /*Para responsiveness*/
+/* Media query para dispositivos móviles y tablets */
+@media (max-width: 768px) {
   .contenido-noticia {
-    font-size: 1.2vw; 
-    max-width: 90%;
-    padding: 0 5%;
+    font-size: 1.2vw; /* Mantiene tamaño responsivo en pantallas pequeñas */
+    max-width: 90%; /* Reduce el ancho máximo para mejor adaptación */
+    padding: 0 5%; /* Padding proporcional para evitar overflow */
   }
 }

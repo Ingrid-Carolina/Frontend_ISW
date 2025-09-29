@@ -1,31 +1,23 @@
+// Importa React y hooks para manejar estado y efectos
 import React, { useState, useEffect } from 'react';
+// Importa componentes de Material UI para la interfaz
 import { 
-    Box, 
-    Typography, 
-    Paper, 
-    Button, 
-    TextField, 
-    MenuItem, 
-    CircularProgress, 
-    Alert, 
-    Backdrop,
-    Dialog,
-    DialogTitle,
-    DialogContent,
-    DialogActions,
-    IconButton,
-    Tooltip,
-    LinearProgress
+    Box, Typography, Paper, Button, TextField, MenuItem, CircularProgress, Alert, Backdrop,
+    Dialog, DialogTitle, DialogContent, DialogActions, IconButton, Tooltip, LinearProgress
 } from '@mui/material';
+// Importa el cliente API para peticiones al backend
 import { api } from '../api/api';
+// Importa imagen de fondo para el header de equipo
 import Imgjud from '/Images/Fondojugadores.png';
+// Importa componentes personalizados para edición de header y textos
 import EditableHeaderImage from '../components/EditableHeaderImage';
 import EditableText from '../components/EditableText';
+// Importa ícono de edición de Material UI
 import EditIcon from '@mui/icons-material/Edit';
+// Importa estilos CSS específicos de la página
 import './NuestroEquipo.css';
 
-
-// SVG Icons (los mismos que tienes)
+// SVG Icons personalizados para acciones (cerrar, editar, agregar, eliminar)
 const X = () => (
     <svg
         width='20'
@@ -86,36 +78,37 @@ const Trash = () => (
 
 // Roles disponibles para la junta directiva
 const rolesDisponibles = [
-    'Presidente',
-    'Vicepresidente', 
-    'Secretaria',
-    'Tesorera',
-    'Fiscal',
-    'Vocal I',
-    'Vocal II',
-    'Vocal III'
+    'Presidente', 'Vicepresidente', 'Secretaria', 'Tesorera',
+    'Fiscal', 'Vocal I', 'Vocal II', 'Vocal III'
 ];
 
+// Componente principal de la página NuestroEquipo
 const NuestroEquipo = () => {
+    // Estados para autenticación y permisos
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
     const [showModal, setShowModal] = useState(false);
     const [modalMode, setModalMode] = useState('add'); // 'add' o 'edit'
-    const [cuerpoTecnico, setCuerpoTecnico] = useState([]); // Inicializar vacío
-    const [formData, setFormData] = useState({
-        id: null,
-        nombre: '',
-        rol: ''
-    });
+
+    // Estado para miembros de la junta directiva
+    const [cuerpoTecnico, setCuerpoTecnico] = useState([]);
+    // Estado para el formulario de agregar/editar miembro
+    const [formData, setFormData] = useState({ id: null, nombre: '', rol: '' });
+
+    // Estados para mensajes globales (banner)
     const [bannerMsg, setBannerMsg] = useState('');
     const [bannerType, setBannerType] = useState('success');
     const [showBanner, setShowBanner] = useState(false);
+
+    // Estados para carga y errores
     const [loading, setLoading] = useState(false);
     const [checkingAuth, setCheckingAuth] = useState(true);
+    const [error, setError] = useState('');
 
+    // Estado para textos editables (títulos, categorías, mensajes)
     const [textos, setTextos] = useState({});
 
-    // NUEVO: Estados para el header como en Contacto.jsx
+    // Estados para el header (imagen y título)
     const [headerUrl, setHeaderUrl] = useState(null);
     const [headerTitle, setHeaderTitle] = useState('NUESTRO EQUIPO');
     const [openHeaderEdit, setOpenHeaderEdit] = useState(false);
@@ -125,11 +118,14 @@ const NuestroEquipo = () => {
     const [headerError, setHeaderError] = useState('');
     const [headerPreview, setHeaderPreview] = useState(null);
 
+    // Estado para galería de imágenes (no usado aquí)
     const [galeriaImages, setGaleriaImages] = useState([]);
     const [uploadingImage, setUploadingImage] = useState(false);
-    const [error, setError] = useState('');
 
-    // NUEVO: Effect para gestionar preview de imagen del header
+    // Estado para imágenes generales
+    const [images, setImages] = useState({ Equipo_header: Imgjud });
+
+    // Efecto para mostrar preview de imagen seleccionada para el header
     useEffect(() => {
         if (!headerFile) {
             setHeaderPreview(null);
@@ -140,6 +136,7 @@ const NuestroEquipo = () => {
         return () => URL.revokeObjectURL(url);
     }, [headerFile]);
 
+    // Función para cargar textos editables desde el backend
     const fetchTextos = async () => {
         try {
             const res = await api.get('/auth/nuestroequipo/textos', {
@@ -161,6 +158,7 @@ const NuestroEquipo = () => {
         }
     };
 
+    // Función para guardar textos editables en el backend
     const handleTextSave = async (clave, nuevoTexto) => {
         if (!clave || !nuevoTexto) {
             showMessage('Datos inválidos para guardar texto', 'error');
@@ -206,11 +204,7 @@ const NuestroEquipo = () => {
         }
     };
 
-    const [images, setImages] = useState({
-        Equipo_header: Imgjud,
-    });
-
-    // Función para obtener la junta directiva desde el backend
+    // Función para cargar miembros de la junta directiva desde el backend
     const fetchCuerpoTecnico = async () => {
         try {
             const res = await api.get('/auth/junta-directiva', {
@@ -234,6 +228,7 @@ const NuestroEquipo = () => {
         }
     };
 
+    // Función para cargar imágenes desde el backend
     const fetchImages = async () => {
         try {
             const response = await api.get('/auth/images', {
@@ -262,8 +257,8 @@ const NuestroEquipo = () => {
         }
     };
 
-    // NUEVO: Funciones para gestionar el header como en Contacto.jsx
-     const openHeaderEditor = () => {
+    // Función para abrir el editor de header (imagen y título)
+    const openHeaderEditor = () => {
         const currentTitle = textos.titulo_principal || headerTitle || 'NUESTRO EQUIPO';
         setHeaderTitleInput(currentTitle);
         setHeaderFile(null);
@@ -271,7 +266,8 @@ const NuestroEquipo = () => {
         setOpenHeaderEdit(true);
     };
 
-     const saveHeader = async () => {
+    // Función para guardar cambios en el header (imagen y título)
+    const saveHeader = async () => {
         try {
             setHeaderError('');
             setHeaderUploading(true);
@@ -354,11 +350,11 @@ const NuestroEquipo = () => {
         }
     };
 
-    // Check if user is admin - No bloquea el acceso si falla
-     useEffect(() => {
+    // Efecto para inicializar la página: verifica rol, carga textos, imágenes y miembros
+    useEffect(() => {
         const initializeComponent = async () => {
             try {
-                // Verificar rol
+                // Verifica el perfil y rol del usuario
                 const res = await api.get('/auth/obtenerperfil', {
                     withCredentials: true,
                     skipAuthRedirect: true,
@@ -370,24 +366,15 @@ const NuestroEquipo = () => {
                 setIsLoggedIn(!!perfil);
                 setIsAdmin(isAdminUser);
             } catch (error) {
-                console.log('Usuario no logueado:', error.message);
                 setIsLoggedIn(false);
                 setIsAdmin(false);
             }
-
-            // Cargar datos en paralelo
-            await Promise.allSettled([
-                fetchTextos(),
-                fetchImages(),
-                fetchCuerpoTecnico()
-            ]);
-
+            // Carga datos en paralelo
+            await Promise.allSettled([ fetchTextos(), fetchImages(), fetchCuerpoTecnico() ]);
             setCheckingAuth(false);
         };
-
         initializeComponent();
-
-        // Event listener para refresh de auth
+        // Listener para refrescar autenticación
         const onAuthRefresh = () => {
             setCheckingAuth(true);
             initializeComponent();
@@ -396,7 +383,7 @@ const NuestroEquipo = () => {
         return () => window.removeEventListener('auth:refresh', onAuthRefresh);
     }, []);
 
-    // Subida/guardado genérico
+    // Función para subir y guardar imágenes (header o galería)
     const handleImageChange = async (type, file) => {
         if (!file || !(file instanceof File)) {
             showMessage('Error: No se seleccionó un archivo válido.', 'error');
@@ -528,6 +515,7 @@ const NuestroEquipo = () => {
         setTimeout(() => setShowBanner(false), 4000);
     };
 
+    // Función para abrir el modal de agregar/editar miembro
     const openModal = (mode = 'add', member = null) => {
         if (!isLoggedIn) {
             showMessage('Debes iniciar sesión para modificar la junta directiva', 'error');
@@ -556,6 +544,7 @@ const NuestroEquipo = () => {
         setShowModal(true);
     };
 
+    // Función para cerrar el modal
     const closeModal = () => {
         setShowModal(false);
         setFormData({
@@ -566,6 +555,7 @@ const NuestroEquipo = () => {
         setShowBanner(false);
     };
 
+    // Función para validar el formulario de miembro
     const validateForm = () => {
         if (!formData.nombre.trim()) {
             showMessage('El nombre es requerido', 'error');
@@ -591,6 +581,7 @@ const NuestroEquipo = () => {
         return true;
     };
 
+    // Función para guardar miembro (agregar o editar) en el backend
     const saveMember = async () => {
         if (!validateForm()) return;
 
@@ -668,6 +659,7 @@ const NuestroEquipo = () => {
         }
     };
 
+    // Función para eliminar miembro de la junta directiva
     const deleteMember = async (memberId) => {
         if (!isLoggedIn || !isAdmin) {
             showMessage('Solo el administrador puede eliminar miembros', 'error');
@@ -718,7 +710,7 @@ const NuestroEquipo = () => {
         }
     };
 
-    // Tarjeta de miembro mejorada con diseño más atractivo
+    // Componente para mostrar tarjeta de miembro con diseño y acciones de administración
     const MemberCard = ({ member }) => (
         <Paper
             elevation={8}
@@ -911,17 +903,10 @@ const NuestroEquipo = () => {
         return resultado;
     };
 
+    // Renderiza pantalla de carga si está verificando autenticación
     if (checkingAuth) {
         return (
-            <Box
-                sx={{
-                    minHeight: '100vh',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    backgroundColor: '#10045c',
-                }}
-            >
+            <Box sx={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', backgroundColor: '#10045c' }}>
                 <Typography variant='h6' sx={{ color: 'white' }}>
                     Cargando...
                 </Typography>
@@ -929,8 +914,10 @@ const NuestroEquipo = () => {
         );
     }
 
+    // Organiza los miembros por categoría para mostrar en secciones
     const miembrosPorCategoria = organizarMiembrosPorCategoria();
 
+    // Render principal de la página
     return (
         <>
             {/* Backdrop para mostrar carga de imagen */}
@@ -1016,12 +1003,8 @@ const NuestroEquipo = () => {
                     </Typography>
                 </Box>
             </Box>
-            <Dialog
-                open={openHeaderEdit}
-                onClose={() => !headerUploading && setOpenHeaderEdit(false)}
-                maxWidth='sm'
-                fullWidth
-            >
+            {/* Diálogo para editar header (imagen y título) */}
+            <Dialog open={openHeaderEdit} onClose={() => !headerUploading && setOpenHeaderEdit(false)} maxWidth='sm' fullWidth>
                 <DialogTitle>Editar encabezado</DialogTitle>
                 <DialogContent dividers sx={{ pt: 1.5, pb: 2, px: 2 }}>
                     <TextField
@@ -1606,7 +1589,7 @@ const NuestroEquipo = () => {
                             boxShadow: '0 25px 50px rgba(0,0,0,0.25)',
                         }}
                     >
-                        {/* Modal Header */}
+                        {/* Header del modal con título y botón cerrar */}
                         <div
                             style={{
                                 display: 'flex',
@@ -1661,7 +1644,7 @@ const NuestroEquipo = () => {
                             </button>
                         </div>
 
-                        {/* Form */}
+                        {/* Formulario para agregar/editar miembro */}
                         <div
                             style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}
                         >
@@ -1736,7 +1719,7 @@ const NuestroEquipo = () => {
                             </Box>
                         )}
 
-                        {/* Buttons */}
+                        {/* Botones de acción en el modal */}
                         <div
                             style={{
                                 display: 'flex',
@@ -1815,4 +1798,5 @@ const NuestroEquipo = () => {
     );
 };
 
+// Exporta el componente principal para su uso en rutas
 export default NuestroEquipo;

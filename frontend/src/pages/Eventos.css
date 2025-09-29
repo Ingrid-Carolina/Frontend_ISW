@@ -1,48 +1,51 @@
-/* Grid para las cards */
+/* Grid para las cards de eventos/noticias */
 .noticia-grid {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
+  display: flex;                /* Usa flexbox para el layout */
+  flex-direction: column;       /* Las cards se apilan verticalmente */
+  gap: 16px;                    /* Espacio entre cada card */
 }
 
-/* Card horizontal */
+/* Card horizontal: estructura principal de cada evento/noticia */
 .noticia-card-horizontal {
-  display: flex;
-  background: #fff;
-  border-radius: 12px;
-  border: 1px solid #e8ecf0;
-  overflow: hidden;
-  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.06);
-  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  display: flex;                /* Layout horizontal: imagen + texto */
+  background: #fff;             /* Fondo blanco */
+  border-radius: 12px;          /* Bordes redondeados */
+  border: 1px solid #e8ecf0;    /* Borde gris claro */
+  overflow: hidden;             /* Oculta el contenido que sobresale */
+  box-shadow: 0 4px 12px rgba(17, 24, 39, 0.06); /* Sombra suave */
+  transition: transform 0.15s ease, box-shadow 0.15s ease; /* Animación al hacer hover */
 }
 
+/* Efecto hover: eleva la card y aumenta la sombra */
 .noticia-card-horizontal:hover {
   transform: translateY(-2px);
   box-shadow: 0 8px 18px rgba(17, 24, 39, 0.10);
 }
 
-/* Imagen a la izquierda */
+/* Imagen a la izquierda de la card */
 .noticia-img-wrap-horizontal {
-  flex: 0 0 220px; /* ancho fijo de imagen */
-  height: 160px;
-  background: #f6f6f6;
+  flex: 0 0 220px;              /* Ancho fijo para la imagen */
+  height: 160px;                /* Alto fijo para la imagen */
+  background: #f6f6f6;          /* Fondo gris claro si no hay imagen */
 }
 
+/* Imagen dentro del contenedor */
 .noticia-img-horizontal {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100%;                  /* Imagen ocupa todo el ancho */
+  height: 100%;                 /* Imagen ocupa todo el alto */
+  object-fit: cover;            /* Recorta la imagen para cubrir el área */
 }
 
-/* Texto a la derecha */
+/* Texto a la derecha de la imagen */
 .noticia-body-horizontal {
-  flex: 1;
-  padding: 14px 18px;
+  flex: 1;                      /* Ocupa el espacio restante */
+  padding: 14px 18px;           /* Espaciado interno */
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 6px;                     /* Espacio entre título, meta y contenido */
 }
 
+/* Título del evento/noticia */
 .noticia-title-horizontal {
   margin: 0;
   font-family: 'GroteskBold', sans-serif;
@@ -51,15 +54,18 @@
   color: #0b1f3a;
 }
 
+/* Meta información (autor, fecha, etc.) */
 .noticia-meta-horizontal {
   font-size: 0.85rem;
   color: #607d8b;
 }
 
+/* Icono de calendario antes de la fecha */
 .noticia-fecha-horizontal::before {
   content: "🗓 ";
 }
 
+/* Contenido resumido del evento/noticia */
 .noticia-contenido-horizontal {
   margin: 0;
   font-family: 'PeterMedium', sans-serif;
@@ -67,19 +73,19 @@
   line-height: 1.4;
   color: #2a2f36;
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 3;        /* Limita a 3 líneas */
   -webkit-box-orient: vertical;
-  overflow: hidden;
+  overflow: hidden;             /* Oculta el texto que excede */
 }
 
-/* Responsive: en móvil pasa a vertical */
+/* Responsive: en móvil la card pasa a vertical */
 @media (max-width: 640px) {
   .noticia-card-horizontal {
-    flex-direction: column;
+    flex-direction: column;     /* Imagen arriba, texto abajo */
   }
   .noticia-img-wrap-horizontal {
     flex: none;
-    width: 100%;
-    height: 200px;
+    width: 100%;                /* Imagen ocupa todo el ancho */
+    height: 200px;              /* Imagen más alta en móvil */
   }
 }

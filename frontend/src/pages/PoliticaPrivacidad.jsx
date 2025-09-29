@@ -1,15 +1,23 @@
 import React from "react";
+// Importa los estilos CSS específicos para la política de privacidad
 import "./PoliticaPrivacidad.css";
 
+// Componente funcional que muestra la política de privacidad
 const PoliticaPrivacidad = () => {
   return (
+    // Contenedor principal con clase para estilos generales
     <div className="politica-container">
+      {/* Encabezado de la política con título y separador visual */}
       <div className="politica-header">
+        {/* Título principal de la política */}
         <h1 className="politica-titulo">Política de Privacidad</h1>
+        {/* Línea separadora debajo del título */}
         <hr className="politica-separador" />
       </div>
 
+      {/* Cuerpo de la política, contiene todos los párrafos informativos */}
       <div className="politica-cuerpo">
+        {/* Primer párrafo: Explica el compromiso con la privacidad y la información que se recopila */}
         <p className="politica-texto">
           En nuestro sitio de béisbol valoramos tu privacidad y nos comprometemos a
           proteger la información personal que nos compartes. Al navegar en nuestra
@@ -22,6 +30,7 @@ const PoliticaPrivacidad = () => {
           experiencia transparente y segura para cada usuario.
         </p>
 
+        {/* Segundo párrafo: Describe el uso de la información y el compromiso de no compartirla */}
         <p className="politica-texto">
           La información que recopilamos se emplea principalmente para responder a
           tus consultas, mejorar el funcionamiento y la usabilidad de nuestra
@@ -34,6 +43,7 @@ const PoliticaPrivacidad = () => {
           buenas manos.
         </p>
 
+        {/* Tercer párrafo: Explica el uso de cookies y las opciones del usuario */}
         <p className="politica-texto">
           Nuestro sitio utiliza cookies con el propósito de optimizar tu experiencia
           de navegación, permitiendo que el contenido se adapte mejor a tus
@@ -46,6 +56,7 @@ const PoliticaPrivacidad = () => {
           una protección absoluta frente a todos los riesgos potenciales.
         </p>
 
+        {/* Cuarto párrafo: Informa sobre los derechos del usuario y cómo ejercerlos */}
         <p className="politica-texto">
           Como usuario, cuentas con derechos importantes sobre tu información
           personal. Puedes solicitar en cualquier momento el acceso, modificación o
@@ -57,6 +68,7 @@ const PoliticaPrivacidad = () => {
           principios de transparencia y legalidad.
         </p>
 
+        {/* Quinto párrafo: Indica la posibilidad de cambios en la política y cómo se notifican */}
         <p className="politica-texto">
           Finalmente, nos reservamos el derecho de actualizar esta Política de
           Privacidad en cualquier momento para adaptarnos a cambios normativos,
@@ -68,9 +80,9 @@ const PoliticaPrivacidad = () => {
           gusto atenderemos tu consulta.
         </p>
       </div>
-
     </div>
   );
 };
 
+// Exporta el componente para su uso en el sistema de rutas
 export default PoliticaPrivacidad;

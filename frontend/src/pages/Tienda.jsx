@@ -1,59 +1,39 @@
 import React, { useState, useMemo, useEffect } from 'react';
+// Importa componentes de Material UI para estructura visual y formularios
 import {
-  Box,
-  Container,
-  Drawer,
-  AppBar,
-  Toolbar,
-  TextField,
-  IconButton,
-  Button,
-  Badge,
-  Typography,
-  Paper,
-  List,
-  ListItem,
-  Divider,
-  Snackbar,
-  Alert,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  Stack,
-  OutlinedInput,
-  FormHelperText,
+  Box, Container, Drawer, AppBar, Toolbar, TextField, IconButton, Button, Badge,
+  Typography, Paper, List, ListItem, Divider, Snackbar, Alert, Dialog, DialogTitle,
+  DialogContent, DialogActions, FormControl, InputLabel, Select, MenuItem, Stack,
+  OutlinedInput, FormHelperText
 } from '@mui/material';
+// Importa íconos de Material UI para acciones en la tienda
 import {
-  Search as SearchIcon,
-  ShoppingCart as ShoppingCartIcon,
-  Close as CloseIcon,
-  Add as AddIcon,
-  Remove as RemoveIcon,
-  Delete as DeleteIcon,
-  Add as Add,
+  Search as SearchIcon, ShoppingCart as ShoppingCartIcon, Close as CloseIcon,
+  Add as AddIcon, Remove as RemoveIcon, Delete as DeleteIcon, Add as Add,
 } from '@mui/icons-material';
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import Menu from '@mui/material/Menu';
 
+// Importa librerías para generación de PDF de la factura
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 
+// Importa cliente API para peticiones al backend
 import { api } from '../api/api';
+// Importa componente para edición de textos en la tienda
 import EditableText from '../components/EditableText';
 
 // -------------------- Constantes y helpers --------------------
+// Lista de tallas disponibles para productos tipo camisa/camiseta
 const TALLAS = ['6', '8', '10', '12', '14', '16', 'XS', 'S', 'M', 'L', 'XL', '2XL'];
 
+// Determina si el producto requiere selección de talla
 const productoRequiereTalla = (producto) => {
   const nombre = (producto?.nombre_producto || '').toLowerCase();
   return nombre.includes('camisa') || nombre.includes('camiseta');
 };
 
+// Calcula el precio según la talla seleccionada (descuento para tallas de niño)
 const getPrecioByTalla = (producto, talla) => {
   if (!producto) return 0;
   const base = Number(producto.precio_unitario) || 0;
@@ -62,6 +42,7 @@ const getPrecioByTalla = (producto, talla) => {
   return tallasNino.includes(talla) ? base - 50 : base;
 };
 
+// Permite buscar productos por categoría usando palabras clave
 const buscarPorCategoria = (producto, searchTerm) => {
   const nombre = (producto.nombre_producto || '').toLowerCase();
   const categorias = {
@@ -86,7 +67,7 @@ const buscarPorCategoria = (producto, searchTerm) => {
 
 // -------------------- Componente principal --------------------
 export default function Tienda() {
-  // Estado UI
+  // Estados para búsqueda, tallas seleccionadas, carrito, productos y mensajes
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedSizes, setSelectedSizes] = useState({});
   const [cartItems, setCartItems] = useState([]);
@@ -98,25 +79,24 @@ export default function Tienda() {
   const [loadingProductos, setLoadingProductos] = useState(false);
   const [errorProductos, setErrorProductos] = useState(null);
 
-  // Imágenes (Agregar)
+  // Estados para manejo de imágenes al agregar y editar productos
   const [errorImgAdd, setErrorImgAdd] = useState('');
   const [previewImgAdd, setPreviewImgAdd] = useState(null);
   const [productImageAdd, setProductImageAdd] = useState(null);
 
-  // Imágenes (Editar)
   const [errorImgEdit, setErrorImgEdit] = useState('');
   const [previewImgEdit, setPreviewImgEdit] = useState(null);
   const [productImageEdit, setProductImageEdit] = useState(null);
   const [imageUrlEdit, setImageUrlEdit] = useState('');
 
-  // Textos editables
+  // Estados para textos editables en la tienda
   const [textos, setTextos] = useState({});
 
-  // Menú contextual por tarjeta
+  // Estados para menú contextual de acciones en cada producto
   const [menuAnchorEl, setMenuAnchorEl] = useState(null);
   const [menuProduct, setMenuProduct] = useState(null);
 
-  // Edit dialog
+  // Estados para edición de productos
   const [editOpen, setEditOpen] = useState(false);
   const [editFormData, setEditFormData] = useState({
     idproducto: null,
@@ -130,11 +110,11 @@ export default function Tienda() {
   const [editErrors, setEditErrors] = useState({});
   const [editSaving, setEditSaving] = useState(false);
 
-  // Delete dialog
+  // Estados para eliminación de productos
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteProduct, setDeleteProduct] = useState(null);
 
-  // Form Dialog (Agregar)
+  // Estados para agregar productos
   const [addOpen, setAddOpen] = useState(false);
   const [formData, setFormData] = useState({
     nombre_producto: '',
@@ -147,10 +127,11 @@ export default function Tienda() {
   const [formErrors, setFormErrors] = useState({});
   const [saving, setSaving] = useState(false);
 
-  // Rol desde backend
+  // Estado para saber si el usuario es administrador
   const [isAdmin, setIsAdmin] = useState(false);
 
   // -------------------- Textos editables --------------------
+  // Obtiene los textos editables desde el backend
   const fetchTextos = async () => {
     try {
       const res = await api.get('/auth/tienda/textos', {
@@ -163,6 +144,7 @@ export default function Tienda() {
     }
   };
 
+  // Guarda los textos editables en el backend
   const handleTextSave = async (clave, nuevoTexto) => {
     try {
       const res = await api.put(
@@ -188,6 +170,7 @@ export default function Tienda() {
   };
 
   // -------------------- Auth/rol y textos --------------------
+  // Verifica el rol del usuario y carga los textos editables al montar el componente
   useEffect(() => {
     const checkRole = async () => {
       try {
@@ -205,6 +188,7 @@ export default function Tienda() {
     checkRole();
     fetchTextos();
 
+    // Listener para refrescar autenticación y textos
     const onAuthRefresh = () => {
       checkRole();
       fetchTextos();
@@ -214,6 +198,7 @@ export default function Tienda() {
   }, []);
 
   // -------------------- Memos --------------------
+  // Determina si el producto a agregar o editar es tipo camisa/camiseta
   const isShirt = useMemo(() => {
     const n = (formData.nombre_producto || '').toLowerCase();
     return n.includes('camisa') || n.includes('camiseta');
@@ -225,23 +210,27 @@ export default function Tienda() {
   }, [editFormData.nombre_producto]);
 
   // -------------------- Handlers comunes --------------------
+  // Cierra el diálogo de agregar producto y limpia errores
   const handleClose = () => {
     if (saving) return;
     setAddOpen(false);
     setFormErrors({});
   };
 
+  // Maneja el cambio de campos en el formulario de agregar producto
   const handleChangeForm = (field) => (e) => {
     const value = e.target.value;
     setFormData((s) => ({ ...s, [field]: value }));
   };
 
+  // Maneja el cambio de campos en el formulario de edición de producto
   const handleEditChange = (field) => (e) => {
     const value = e.target.value;
     setEditFormData((s) => ({ ...s, [field]: value }));
     if (field === 'image_url') setImageUrlEdit(value);
   };
 
+  // Valida los campos del formulario de agregar producto
   const validateForm = () => {
     const e = {};
     if (!formData.nombre_producto?.trim()) e.nombre_producto = 'Requerido';
@@ -254,6 +243,7 @@ export default function Tienda() {
     return Object.keys(e).length === 0;
   };
 
+  // Valida los campos del formulario de edición de producto
   const validateEdit = () => {
     const e = {};
     if (!editFormData.nombre_producto?.trim()) e.nombre_producto = 'Requerido';
@@ -267,6 +257,7 @@ export default function Tienda() {
   };
 
   // -------------------- Imagen: seleccionar archivo --------------------
+  // Maneja la selección de imagen al agregar producto
   const handleImageChangeAdd = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -282,6 +273,7 @@ export default function Tienda() {
     setPreviewImgAdd(URL.createObjectURL(file));
   };
 
+  // Maneja la selección de imagen al editar producto
   const handleImageChangeEdit = (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -298,12 +290,13 @@ export default function Tienda() {
   };
 
   // -------------------- Submit Agregar --------------------
+  // Envía el formulario para agregar un producto nuevo
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!validateForm()) return;
     setSaving(true);
     try {
-      // Campos base
+      // Construye el cuerpo de la petición según si hay imagen
       const base = {
         nombre_producto: formData.nombre_producto.trim(),
         descripcion: formData.descripcion?.trim() || null,
@@ -337,8 +330,10 @@ export default function Tienda() {
         headers = undefined;
       }
 
+      // Realiza la petición al backend para agregar el producto
       const { data } = await api.post('/auth/tienda/agregarproducto', body, { headers });
 
+      // Agrega el producto a la lista local
       const nuevo = data?.producto
         ? {
             idproducto: data.producto.idproducto,
@@ -357,7 +352,7 @@ export default function Tienda() {
       setBannerType('success');
       setShowBanner(true);
 
-      // Limpieza
+      // Limpia el formulario y estados
       setFormData({
         nombre_producto: '',
         descripcion: '',
@@ -381,6 +376,7 @@ export default function Tienda() {
   };
 
   // -------------------- Menú contextual --------------------
+  // Abre el menú contextual de acciones para un producto
   const handleMenuOpen = (event, product) => {
     setMenuAnchorEl(event.currentTarget);
     setMenuProduct(product);
@@ -391,6 +387,7 @@ export default function Tienda() {
   };
 
   // -------------------- Editar --------------------
+  // Abre el diálogo de edición de producto y carga los datos actuales
   const handleEditOpen = () => {
     if (!menuProduct) return;
     setEditFormData({
@@ -411,6 +408,7 @@ export default function Tienda() {
     handleMenuClose();
   };
 
+  // Cierra el diálogo de edición de producto y limpia estados
   const handleEditClose = () => {
     if (editSaving) return;
     setEditOpen(false);
@@ -421,6 +419,7 @@ export default function Tienda() {
     setErrorImgEdit('');
   };
 
+  // Envía el formulario para editar un producto existente
   const handleEditSubmit = async (e) => {
     e.preventDefault();
     if (!validateEdit()) return;
@@ -461,12 +460,14 @@ export default function Tienda() {
         headers = undefined;
       }
 
+      // Realiza la petición al backend para editar el producto
       const { data } = await api.put(
         `/auth/tienda/modificarproducto/${editFormData.idproducto}`,
         body,
         { headers }
       );
 
+      // Actualiza el producto en la lista local
       setProductos((prev) =>
         prev.map((p) => (p.idproducto === editFormData.idproducto ? { ...p, ...data.producto } : p))
       );
@@ -489,6 +490,7 @@ export default function Tienda() {
   };
 
   // -------------------- Eliminar --------------------
+  // Abre el diálogo de confirmación para eliminar producto
   const handleDeleteClick = () => {
     if (!menuProduct) return;
     setDeleteProduct(menuProduct);
@@ -496,11 +498,13 @@ export default function Tienda() {
     handleMenuClose();
   };
 
+  // Cierra el diálogo de eliminación
   const handleDeleteClose = () => {
     setDeleteOpen(false);
     setDeleteProduct(null);
   };
 
+  // Confirma y elimina el producto del backend y la lista local
   const handleDeleteConfirm = async () => {
     try {
       await api.delete(`/auth/tienda/eliminarproducto/${deleteProduct.idproducto}`);
@@ -518,6 +522,7 @@ export default function Tienda() {
   };
 
   // -------------------- Cargar productos --------------------
+  // Carga la lista de productos desde el backend al montar el componente
   useEffect(() => {
     let cancelled = false;
     async function loadProductos() {
@@ -553,6 +558,7 @@ export default function Tienda() {
   }, []);
 
   // -------------------- Carrito --------------------
+  // Agrega un producto al carrito, validando talla si es necesario
   const addToCart = (producto) => {
     const requiere = productoRequiereTalla(producto);
     const tallaSel = selectedSizes[producto.idproducto] || null;
@@ -590,6 +596,7 @@ export default function Tienda() {
     });
   };
 
+  // Aumenta la cantidad de un producto en el carrito
   const aumentarCantidad = (productId, talla) => {
     setCartItems((prev) =>
       prev.map((it) =>
@@ -600,6 +607,7 @@ export default function Tienda() {
     );
   };
 
+  // Disminuye la cantidad de un producto en el carrito
   const disminuirCantidad = (productId, talla) => {
     setCartItems((prev) =>
       prev.map((it) =>
@@ -610,12 +618,14 @@ export default function Tienda() {
     );
   };
 
+  // Elimina un producto del carrito
   const eliminarDelCarrito = (productId, talla) => {
     setCartItems((prev) =>
       prev.filter((it) => !(it.idproducto === productId && it.talla === talla))
     );
   };
 
+  // Calcula el total a pagar en el carrito
   const calcularTotal = useMemo(() => {
     const total = cartItems.reduce((acc, it) => {
       const unit = getPrecioByTalla(it, it.talla);
@@ -625,9 +635,11 @@ export default function Tienda() {
   }, [cartItems]);
 
   // -------------------- Factura (modal + PDF) --------------------
+  // Estados para modal de factura y snackbar de confirmación
   const [open, setopen] = useState(false);
   const [openSnackbar, setOpenSnackbar] = useState(false);
 
+  // Abre el modal de factura si hay productos en el carrito
   const openFactura = () => {
     if (cartItems.length === 0) {
       setBannerMsg('Tu carrito está vacío.');
@@ -638,6 +650,7 @@ export default function Tienda() {
     setopen(true);
   };
 
+  // Genera el PDF de la factura usando jsPDF y autoTable
   const generateFacturaPDF = async (idorden) => {
     const doc = new jsPDF();
     const fecha = new Date().toLocaleDateString('es-HN', {
@@ -688,6 +701,7 @@ export default function Tienda() {
     doc.save(`factura_${idorden || 'compra'}.pdf`);
   };
 
+  // Procesa la orden, la guarda en el backend y genera la factura PDF
   const CerrarModal = async () => {
     try {
       const uidRes = await api.get('/auth/obteneruid', {
@@ -705,7 +719,7 @@ export default function Tienda() {
         headers: { 'Content-Type': 'application/json' },
       });
 
-      // Obtener id de la orden (si tu backend lo expone así)
+      // Obtener id de la orden (si el backend lo expone)
       let idorden = null;
       try {
         const res = await api.get('/auth/idorden');
@@ -731,6 +745,7 @@ export default function Tienda() {
   };
 
   // -------------------- Filtrado --------------------
+  // Filtra los productos según la búsqueda y categorías
   const filteredProducts = useMemo(() => {
     const q = (searchQuery || '').toLowerCase().trim();
     if (!q) return productos;
@@ -746,14 +761,17 @@ export default function Tienda() {
     });
   }, [searchQuery, productos]);
 
+  // Calcula el total de artículos en el carrito
   const totalItems = useMemo(
     () => cartItems.reduce((acc, it) => acc + (parseInt(it.cantidad) || 0), 0),
     [cartItems]
   );
 
   // -------------------- Render --------------------
+  // Renderiza la interfaz principal de la tienda, formularios, productos y carrito
   return (
     <>
+      {/* Contenedor principal de la tienda */}
       <Box
         sx={{
           minHeight: '100vh',
@@ -767,7 +785,7 @@ export default function Tienda() {
       >
         <Box sx={{ height: '20px' }} />
 
-        {/* AppBar */}
+        {/* Barra superior con búsqueda y acciones */}
         <AppBar
           position="static"
           elevation={2}
@@ -784,6 +802,7 @@ export default function Tienda() {
               minHeight: '70px !important',
             }}
           >
+            {/* Campo de búsqueda de productos */}
             <Box
               component="form"
               onSubmit={(e) => e.preventDefault()}
@@ -832,6 +851,7 @@ export default function Tienda() {
               />
             </Box>
 
+            {/* Botones de búsqueda, carrito y agregar producto (admin) */}
             <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mr: 2 }}>
               <IconButton
                 sx={{
@@ -874,10 +894,10 @@ export default function Tienda() {
           </Toolbar>
         </AppBar>
 
-        {/* Contenido */}
+        {/* Contenido principal de la tienda */}
         <Box sx={{ flex: 1, backgroundColor: '#ffffff', overflow: 'hidden' }}>
           <Container maxWidth="lg" sx={{ py: 4 }}>
-            {/* Título editable */}
+            {/* Título editable de la tienda */}
             <EditableText
               text={textos.tienda_titulo_principal || 'Bienvenido a la Tienda de Pilotos'}
               onTextSave={(newText) => handleTextSave('tienda_titulo_principal', newText)}
@@ -891,7 +911,7 @@ export default function Tienda() {
               }}
             />
 
-            {/* Dialog de agregar */}
+            {/* Diálogos para agregar, editar y eliminar productos */}
             <Dialog
               open={addOpen}
               onClose={handleClose}
@@ -1026,7 +1046,6 @@ export default function Tienda() {
               </DialogActions>
             </Dialog>
 
-            {/* Dialog de editar */}
             <Dialog
               open={editOpen}
               onClose={handleEditClose}
@@ -1177,7 +1196,7 @@ export default function Tienda() {
               </DialogActions>
             </Dialog>
 
-            {/* Grid de productos */}
+            {/* Grid de productos disponibles */}
             <Box
               sx={{
                 display: 'grid',
@@ -1206,7 +1225,7 @@ export default function Tienda() {
                       height: 'fit-content',
                     }}
                   >
-                    {/* Tres puntitos */}
+                    {/* Menú de acciones para admin */}
                     {isAdmin && (
                       <Box sx={{ position: 'relative' }}>
                         <IconButton
@@ -1251,6 +1270,7 @@ export default function Tienda() {
                       />
                     )}
 
+                    {/* Nombre y descripción del producto */}
                     <Typography
                       variant="h6"
                       gutterBottom
@@ -1267,6 +1287,7 @@ export default function Tienda() {
                       {p.descripcion}
                     </Typography>
 
+                    {/* Selección de talla si aplica */}
                     {productoRequiereTalla(p) && (
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 2 }}>
                         {TALLAS.map((size) => (
@@ -1299,6 +1320,7 @@ export default function Tienda() {
                       </Box>
                     )}
 
+                    {/* Precio y botón para agregar al carrito */}
                     <Typography
                       variant="h5"
                       sx={{
@@ -1333,7 +1355,7 @@ export default function Tienda() {
         </Box>
       </Box>
 
-      {/* Drawer Carrito */}
+      {/* Drawer lateral para mostrar el carrito de compras */}
       <Drawer
         anchor="right"
         open={cartModalOpen}
@@ -1562,7 +1584,7 @@ export default function Tienda() {
         </Box>
       </Drawer>
 
-      {/* Modal factura de cliente */}
+      {/* Modal para mostrar la factura y resumen de la orden */}
       <Dialog open={open} onClose={() => setopen(false)} fullWidth maxWidth="sm" sx={{ zIndex: 1300 }}>
         <DialogContent>
           <DialogTitle
@@ -1684,6 +1706,7 @@ export default function Tienda() {
         </Button>
       </Dialog>
 
+      {/* Snackbar para mostrar confirmación de orden registrada */}
       <Snackbar
         open={openSnackbar}
         autoHideDuration={4000}
