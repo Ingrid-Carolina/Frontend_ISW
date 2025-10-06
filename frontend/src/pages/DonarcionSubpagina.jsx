@@ -6,58 +6,58 @@ const donationOptions = ['L.100', 'L.200', 'L.500', 'L.1000'];
 
 // Componente principal de la subpágina de donación general
 const DonarcionSubpagina = ({ onClose }) => {
-    // Estado para la cantidad seleccionada (opción rápida)
-    const [selectedAmount, setSelectedAmount] = useState(null);
-    // Estado para cantidad personalizada
-    const [customAmount, setCustomAmount] = useState('');
-    // Estado para saber si el usuario está usando el campo personalizado
-    const [isCustomSelected, setIsCustomSelected] = useState(false);
-    // Estado para el tamaño de pantalla (responsive)
-    const [screenSize, setScreenSize] = useState('xl');
-    // Estado para notificaciones (éxito/error)
-    const [notification, setNotification] = useState({ message: '', type: '' });
-    // Estado para mostrar el modal de pago/comprobante
-    const [showPaymentModal, setShowPaymentModal] = useState(false);
-    // Estado para el archivo de comprobante subido
-    const [uploadedFile, setUploadedFile] = useState(null);
-    // Estado para la URL de vista previa del comprobante
-    const [previewUrl, setPreviewUrl] = useState(null);
-    // Estado para el correo del donante (opcional)
-    const [emailDonante, setEmailDonante] = useState('');
+	// Estado para la cantidad seleccionada (opción rápida)
+	const [selectedAmount, setSelectedAmount] = useState(null);
+	// Estado para cantidad personalizada
+	const [customAmount, setCustomAmount] = useState('');
+	// Estado para saber si el usuario está usando el campo personalizado
+	const [isCustomSelected, setIsCustomSelected] = useState(false);
+	// Estado para el tamaño de pantalla (responsive)
+	const [screenSize, setScreenSize] = useState('xl');
+	// Estado para notificaciones (éxito/error)
+	const [notification, setNotification] = useState({ message: '', type: '' });
+	// Estado para mostrar el modal de pago/comprobante
+	const [showPaymentModal, setShowPaymentModal] = useState(false);
+	// Estado para el archivo de comprobante subido
+	const [uploadedFile, setUploadedFile] = useState(null);
+	// Estado para la URL de vista previa del comprobante
+	const [previewUrl, setPreviewUrl] = useState(null);
+	// Estado para el correo del donante (opcional)
+	const [emailDonante, setEmailDonante] = useState('');
 
-    // Función para obtener el tamaño de pantalla actual
-    const getScreenSize = () => {
-        if (typeof window === 'undefined') return 'xl';
-        const width = window.innerWidth;
-        if (width < 480) return 'xs';
-        if (width < 768) return 'sm';
-        if (width < 1024) return 'md';
-        if (width < 1280) return 'lg';
-        if (width < 1536) return 'xl';
-        return 'xxl';
-    };
+	// Función para obtener el tamaño de pantalla actual
+	const getScreenSize = () => {
+		if (typeof window === 'undefined') return 'xl';
+		const width = window.innerWidth;
+		if (width < 480) return 'xs';
+		if (width < 768) return 'sm';
+		if (width < 1024) return 'md';
+		if (width < 1280) return 'lg';
+		if (width < 1536) return 'xl';
+		return 'xxl';
+	};
 
-    // Actualiza el tamaño de pantalla al cambiar el tamaño de la ventana
-    useEffect(() => {
-        const handleResize = () => setScreenSize(getScreenSize());
-        setScreenSize(getScreenSize());
-        window.addEventListener('resize', handleResize);
-        return () => window.removeEventListener('resize', handleResize);
-    }, []);
+	// Actualiza el tamaño de pantalla al cambiar el tamaño de la ventana
+	useEffect(() => {
+		const handleResize = () => setScreenSize(getScreenSize());
+		setScreenSize(getScreenSize());
+		window.addEventListener('resize', handleResize);
+		return () => window.removeEventListener('resize', handleResize);
+	}, []);
 
-    // Actualiza la vista previa del comprobante cuando se sube un archivo
-    useEffect(() => {
-        if (uploadedFile) {
-            const url = URL.createObjectURL(uploadedFile);
-            setPreviewUrl(url);
-            return () => URL.revokeObjectURL(url);
-        } else {
-            setPreviewUrl(null);
-        }
-    }, [uploadedFile]);
+	// Actualiza la vista previa del comprobante cuando se sube un archivo
+	useEffect(() => {
+		if (uploadedFile) {
+			const url = URL.createObjectURL(uploadedFile);
+			setPreviewUrl(url);
+			return () => URL.revokeObjectURL(url);
+		} else {
+			setPreviewUrl(null);
+		}
+	}, [uploadedFile]);
 
-    // --- Estilos en línea para cada sección (responsive) ---
-    const rootStyles = {
+	// --- Estilos en línea para cada sección (responsive) ---
+	const rootStyles = {
 		width: '100%',
 		minHeight: '100vh',
 		backgroundColor: screenSize === 'xs' ? '#ffffff' : '#f8fafc',
@@ -436,19 +436,18 @@ const DonarcionSubpagina = ({ onClose }) => {
 	// Maneja el cambio de archivo para el comprobante
 	const handleFileChange = event => {
 		const file = event.target.files[0];
-		if (file) {
-			const ok =
-				file.type.startsWith('image/') || file.type === 'application/pdf';
+		if (!file) return;
 
-			if (ok) {
-				setUploadedFile(file);
-			} else {
-				setNotification({
-					message: 'Selecciona una imagen o PDF válido',
-					type: 'error',
-				});
-				setTimeout(() => setNotification({ message: '', type: '' }), 4000);
-			}
+		const ok =
+			file.type.startsWith('image/') || file.type === 'application/pdf';
+		if (ok) {
+			setUploadedFile(file);
+		} else {
+			setNotification({
+				message: 'Selecciona una imagen o PDF válido',
+				type: 'error',
+			});
+			setTimeout(() => setNotification({ message: '', type: '' }), 4000);
 		}
 	};
 
@@ -464,16 +463,16 @@ const DonarcionSubpagina = ({ onClose }) => {
 		}
 
 		try {
-			const monto = getSelectedAmountValue(); 
+			const monto = getSelectedAmountValue();
 			const form = new FormData();
-			form.append('comprobante', uploadedFile); 
+			form.append('comprobante', uploadedFile);
 			if (monto && monto !== '0.00') form.append('monto', monto);
 			if (emailDonante) form.append('correo', emailDonante.trim());
 
 			await api.post('/auth/donaciones/enviar-comprobante', form, {
 				headers: { 'Content-Type': 'multipart/form-data' },
-				withCredentials: true, 
-				skipAuthRedirect: true, 
+				withCredentials: true,
+				skipAuthRedirect: true,
 			});
 
 			setNotification({
@@ -765,13 +764,13 @@ const DonarcionSubpagina = ({ onClose }) => {
 										margin: 0,
 									}}
 								>
-									Haz clic para seleccionar una imagen
+									Haz clic para seleccionar una imagen o PDF
 								</p>
 							</label>
 							<input
 								id='file-upload'
 								type='file'
-								accept='image/*,application/pdf' 
+								accept='image/*,application/pdf'
 								onChange={handleFileChange}
 								style={{ display: 'none' }}
 							/>
@@ -779,12 +778,7 @@ const DonarcionSubpagina = ({ onClose }) => {
 
 						{/* Vista previa del comprobante */}
 						{previewUrl && (
-							<div
-								style={{
-									marginBottom: '20px',
-									textAlign: 'center',
-								}}
-							>
+							<div style={{ marginBottom: '20px', textAlign: 'center' }}>
 								<p
 									style={{
 										fontSize: '0.9rem',
@@ -795,17 +789,42 @@ const DonarcionSubpagina = ({ onClose }) => {
 								>
 									Vista previa:
 								</p>
-								<img
-									src={previewUrl}
-									alt='Comprobante'
-									style={{
-										maxWidth: '100%',
-										maxHeight: '200px',
-										borderRadius: '8px',
-										border: '2px solid #e2e8f0',
-										objectFit: 'contain',
-									}}
-								/>
+
+								{uploadedFile?.type === 'application/pdf' ? (
+									<>
+										<embed
+											src={previewUrl}
+											type='application/pdf'
+											style={{
+												width: '100%',
+												height: '260px',
+												borderRadius: '8px',
+												border: '2px solid #e2e8f0',
+											}}
+										/>
+										<div style={{ marginTop: 8 }}>
+											<a
+												href={previewUrl}
+												target='_blank'
+												rel='noopener noreferrer'
+											>
+												Abrir PDF en nueva pestaña
+											</a>
+										</div>
+									</>
+								) : (
+									<img
+										src={previewUrl}
+										alt='Comprobante'
+										style={{
+											maxWidth: '100%',
+											maxHeight: '200px',
+											borderRadius: '8px',
+											border: '2px solid #e2e8f0',
+											objectFit: 'contain',
+										}}
+									/>
+								)}
 							</div>
 						)}
 

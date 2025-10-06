@@ -216,6 +216,7 @@ export default function CustomNavbar() {
 	//esta logueado const
 	const isLoggedIn = !!userName;
 	const avatarLetter = (userName || 'U').charAt(0).toUpperCase();
+	const [unauth, setUnauth] = React.useState(false);
 
 	//revisar si esta envivo
 	const [isLive, setIsLive] = React.useState(false);
@@ -253,11 +254,12 @@ export default function CustomNavbar() {
 		let intervalId;
 
 		const fetchProfile = async () => {
-			if (!mounted) return;
+			if (!mounted || unauth) return; // 👈 si ya sabemos que no hay sesión, no sigas pegando
 			setLoadingUser(true);
 			try {
 				const res = await api.get('/auth/obtenerperfil', {
 					withCredentials: true,
+					skipAuthRedirect: true,
 				});
 
 				const perfil = Array.isArray(res.data) ? res.data[0] : res.data;
@@ -265,38 +267,35 @@ export default function CustomNavbar() {
 				const nombre = perfil?.nombre ?? perfil?.name ?? '';
 				if (mounted) setUserName(nombre);
 
-				// normaliza rol
 				const rolesArr = Array.isArray(perfil?.roles)
 					? perfil.roles.map(r => String(r).toLowerCase())
 					: [];
 				const roleStr = String(perfil?.rol ?? perfil?.role ?? '').toLowerCase();
-
 				const effectiveRole =
 					roleStr || (rolesArr.includes('admin') ? 'admin' : rolesArr[0] || '');
 				if (mounted) setUserRole(effectiveRole);
 
-				// por mientras 
-				//localStorage.setItem('userRole', effectiveRole);
-				//window.dispatchEvent(new CustomEvent('auth:role', { detail: { role: effectiveRole } }));
-
-				// avatar
-				if (perfil?.avatar) {
-					if (mounted) {
-						setAvatarUrl(perfil.avatar);
-						setAvatarVer(Date.now());
-					}
-				} else if (mounted) {
-					setAvatarUrl('');
-				}
+				if (perfil?.avatar && mounted) setAvatarUrl(perfil.avatar);
+				if (mounted) setUnauth(false); // por si veníamos de no autenticado
 			} catch (e) {
-				console.error("Error al obtener perfil:", e);
-				// si no hay sesión, limpiamos estado
-				if (mounted) {
+				console.warn('Error al obtener perfil:', e?.message || e);
+				if (!mounted) return;
+
+				if (e?.status === 401) {
+					// ❌ No redirijas. Sólo marca como no autenticado y limpia datos.
 					setUserName('');
 					setUserRole('');
 					setAvatarUrl('');
-					navigate('/login');
+					setUnauth(true); // 👈 marca estado no autenticado
+					// Opcional: detener el polling hasta que haya login
+					if (intervalId) clearInterval(intervalId);
+					return; // 👈 evita que el finally vuelva a arrancar spinner
 				}
+
+				// Otros errores (500, red, etc.)
+				setUserName('');
+				setUserRole('');
+				setAvatarUrl('');
 			} finally {
 				if (mounted) setLoadingUser(false);
 			}
@@ -305,19 +304,22 @@ export default function CustomNavbar() {
 		// primera carga
 		fetchProfile();
 
-		// refresco periodico (cada hora)
+		// refresco periódico sólo si hay sesión
 		intervalId = setInterval(fetchProfile, 60 * 60 * 1000);
 
-		const onAuthRefresh = () => fetchProfile();
+		const onAuthRefresh = () => {
+			// Cuando el usuario inicia sesión, intentamos otra vez
+			setUnauth(false);
+			fetchProfile();
+		};
 		window.addEventListener('auth:refresh', onAuthRefresh);
 
-		// cleanup unico
 		return () => {
 			mounted = false;
 			clearInterval(intervalId);
 			window.removeEventListener('auth:refresh', onAuthRefresh);
 		};
-	}, []);
+	}, [unauth]);
 
 	//verifica si un video esta envivo
 	React.useEffect(() => {
@@ -332,7 +334,7 @@ export default function CustomNavbar() {
 					? res.data
 					: res.data?.videos || [];
 
-				// ordenar por id_envivo 
+				// ordenar por id_envivo
 				const last = data.sort((a, b) => b.id_envivo - a.id_envivo)[0];
 
 				if (!cancelled) {
