@@ -254,7 +254,7 @@ export default function CustomNavbar() {
 		let intervalId;
 
 		const fetchProfile = async () => {
-			if (!mounted || unauth) return; // 👈 si ya sabemos que no hay sesión, no sigas pegando
+			if (!mounted || unauth) return;
 			setLoadingUser(true);
 			try {
 				const res = await api.get('/auth/obtenerperfil', {
@@ -282,14 +282,14 @@ export default function CustomNavbar() {
 				if (!mounted) return;
 
 				if (e?.status === 401) {
-					// ❌ No redirijas. Sólo marca como no autenticado y limpia datos.
+					// marca como no autenticado y limpia datos.
 					setUserName('');
 					setUserRole('');
 					setAvatarUrl('');
-					setUnauth(true); // 👈 marca estado no autenticado
+					setUnauth(true); // marca estado no autenticado
 					// Opcional: detener el polling hasta que haya login
 					if (intervalId) clearInterval(intervalId);
-					return; // 👈 evita que el finally vuelva a arrancar spinner
+					return; // evita que el finally vuelva a arrancar spinner
 				}
 
 				// Otros errores (500, red, etc.)
