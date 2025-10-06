@@ -54,6 +54,24 @@ const productoRequiereTalla = (producto) => {
   return nombre.includes('camisa') || nombre.includes('camiseta');
 };
 
+// Extrae talla directamente del item; si no hay, intenta leer desde detalle_camisa
+function pickSize(it) {
+  if (it?.talla) return String(it.talla);
+  const s = String(it?.detalle_camisa || "");
+  let m = s.match(/talla\s*:\s*([A-Za-z0-9+]+)/i);
+  if (m) return m[1];
+  m = s.match(/\b(4XL|3XL|2XL|XL|L|M|S|XS|16|14|12|10|8|6)\b/i);
+  return m ? m[1] : "-";
+}
+
+// Saca { name, num } desde "Nombre: Juan Perez Numero: 10"
+function pickNameNumber(it) {
+  const s = String(it?.detalle_camisa ?? "");
+  const name = (s.match(/nombre\s*:\s*([^,]+?)(?:\s+numero|\s*$)/i)?.[1] || "-").trim();
+  const num  = (s.match(/numero\s*:\s*([0-9]+)/i)?.[1] || "-");
+  return { name, num };
+}
+
 const getPrecioByTalla = (producto, talla) => {
   if (!producto) return 0;
   const base = Number(producto.precio_unitario) || 0;
@@ -736,24 +754,39 @@ export default function Tienda() {
     doc.text('PILOTOS FAH. Campo de la Fuerza Aérea Hondureña.', 14, 32);
     if (idorden) doc.text(`Orden #${idorden}`, 14, 39);
 
-    const rows = cartItems.map((it) => {
-      const unit = getPrecioByTalla(it, it.talla);
-      return [
-        it.nombre_producto,
-        it.talla || '-',
-        it.cantidad,
-        `L.${unit.toFixed(2)}`,
-        `L.${(unit * it.cantidad).toFixed(2)}`,
-      ];
-    });
+    const rows = cartItems.map(it => {
+			const talla = pickSize(it);
+			const { name, num } = pickNameNumber(it);
+			const unit = getPrecioByTalla(it, talla);
+			return [
+				it.nombre_producto,
+				talla || '-',
+				name,
+				num,
+				it.cantidad,
+				`L.${Number(unit).toFixed(2)}`,
+				`L.${(Number(unit) * Number(it.cantidad)).toFixed(2)}`,
+			];
+		});
 
-    autoTable(doc, {
-      head: [['Producto', 'Talla', 'Cantidad', 'Precio Unitario', 'Precio Total']],
-      body: rows,
-      startY: 45,
-      styles: { fontSize: 10 },
-      headStyles: { fillColor: [44, 26, 153] },
-    });
+		autoTable(doc, {
+			head: [
+				[
+					'Producto',
+					'Talla',
+					'Nombre',
+					'Número',
+					'Cantidad',
+					'P. Unitario',
+					'Subtotal',
+				],
+			],
+			body: rows,
+			startY: 45,
+			styles: { fontSize: 10 },
+			headStyles: { fillColor: [44, 26, 153] },
+		});
+
 
     const total = cartItems.reduce((acc, item) => {
       const unit = getPrecioByTalla(item, item.talla);
@@ -1778,25 +1811,33 @@ export default function Tienda() {
                 <tr style={{ backgroundColor: '#2c1a99' }}>
                   <th style={{ padding: '8px', border: '1px solid #ccc', color: 'white' }}>Producto</th>
                   <th style={{ padding: '8px', border: '1px solid #ccc', color: 'white' }}>Talla</th>
+                  <th style={{ padding: '8px', border: '1px solid #ccc', color: 'white' }}>Nombre</th>
+                  <th style={{ padding: '8px', border: '1px solid #ccc', color: 'white' }}>Número</th>
                   <th style={{ padding: '8px', border: '1px solid #ccc', color: 'white' }}>Cantidad</th>
                   <th style={{ padding: '8px', border: '1px solid #ccc', color: 'white' }}>Precio Unitario</th>
                   <th style={{ padding: '8px', border: '1px solid #ccc', color: 'white' }}>Precio Total</th>
                 </tr>
               </thead>
               <tbody>
-                {cartItems.map((item, index) => {
-                  const unit = getPrecioByTalla(item, item.talla);
-                  return (
-                    <tr key={index}>
-                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.nombre_producto}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.talla || '-'}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.cantidad}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>L.{unit.toFixed(2)}</td>
-                      <td style={{ padding: '8px', border: '1px solid #ccc' }}>L.{(unit * item.cantidad).toFixed(2)}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
+                  {cartItems.map((item, index) => {
+                    const talla = pickSize(item);
+                    const { name, num } = pickNameNumber(item);
+                    const unit = getPrecioByTalla(item, talla);
+                    return (
+                      <tr key={index}>
+                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.nombre_producto}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>{talla || '-'}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>{name}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>{num}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>{item.cantidad}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>L.{Number(unit).toFixed(2)}</td>
+                        <td style={{ padding: '8px', border: '1px solid #ccc' }}>
+                          L.{(Number(unit) * Number(item.cantidad)).toFixed(2)}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
             </table>
           )}
 
