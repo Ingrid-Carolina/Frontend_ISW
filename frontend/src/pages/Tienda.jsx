@@ -1307,143 +1307,169 @@ export default function Tienda() {
                 const esCamisa = productoRequiereTalla(p);
                 
                 return (
-                  <Paper
-                    key={p.idproducto}
-                    elevation={2}
-                    sx={{
-                      p: 2,
-                      borderRadius: 2,
-                      transition: 'transform 0.2s, box-shadow 0.2s, border 0.2s',
-                      border: '2px solid transparent',
-                      '&:hover': {
-                        transform: 'translateY(-4px)',
-                        boxShadow: '0 8px 25px #2c1a99',
-                        border: '2px solid #2c1a99',
-                      },
-                      height: 'fit-content',
-                    }}
-                  >
-                    {/* Tres puntitos */}
-                    {isAdmin && (
-                      <Box sx={{ position: 'relative' }}>
-                        <IconButton
-                          size="small"
-                          onClick={(e) => handleMenuOpen(e, p)}
-                          sx={{ position: 'absolute', top: 4, right: 4 }}
-                          aria-label="Más acciones"
-                        >
-                          <MoreVertIcon />
-                        </IconButton>
-                      </Box>
-                    )}
+									<Paper
+										key={p.idproducto}
+										elevation={2}
+										sx={{
+											p: 2,
+											borderRadius: 2,
+											position: 'relative',
+											transition:
+												'transform 0.2s, box-shadow 0.2s, border 0.2s',
+											border: '2px solid transparent',
+											'&:hover': {
+												transform: 'translateY(-4px)',
+												boxShadow: '0 8px 25px #2c1a99',
+												border: '2px solid #2c1a99',
+											},
+											height: 'fit-content',
+										}}
+									>
+										{/* Tres puntitos */}
+										{isAdmin && (
+											<IconButton
+												size='small'
+												onClick={e => handleMenuOpen(e, p)}
+												sx={{
+													position: 'absolute',
+													top: 6,
+													right: 6,
+													zIndex: 10,
+													bgcolor: 'transparent', 
+													boxShadow: 'none', 
+													color: 'black', 
+													'&:hover': {
+														bgcolor: 'transparent', 
+													},
+												}}
+												aria-label='Más acciones'
+											>
+												<MoreVertIcon />
+											</IconButton>
+										)}
 
-                    {/* Dropdown */}
-                    <Menu
-                      anchorEl={menuAnchorEl}
-                      open={Boolean(menuAnchorEl)}
-                      onClose={handleMenuClose}
-                      anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                      transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-                    >
-                      <MenuItem onClick={handleEditOpen}>Editar</MenuItem>
-                      <MenuItem onClick={handleDeleteClick} sx={{ color: 'error.main' }}>
-                        Eliminar
-                      </MenuItem>
-                    </Menu>
+										{/* Dropdown */}
+										<Menu
+											anchorEl={menuAnchorEl}
+											open={Boolean(menuAnchorEl)}
+											onClose={handleMenuClose}
+											anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+											transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+										>
+											<MenuItem onClick={handleEditOpen}>Editar</MenuItem>
+											<MenuItem
+												onClick={handleDeleteClick}
+												sx={{ color: 'error.main' }}
+											>
+												Eliminar
+											</MenuItem>
+										</Menu>
 
-                    {/* Imagen del producto */}
-                    {p.image_url && (
-                      <Box
-                        component="img"
-                        src={p.image_url}
-                        alt={p.nombre_producto}
-                        sx={{
-                          width: '100%',
-                          height: 200,
-                          objectFit: 'cover',
-                          borderRadius: 1.5,
-                          mb: 1.5,
-                          border: '1px solid #eee',
-                        }}
-                      />
-                    )}
+										{/* Imagen del producto */}
+										{p.image_url && (
+											<Box
+												component='img'
+												src={p.image_url}
+												alt={p.nombre_producto}
+												sx={{
+													width: '100%',
+													height: 200,
+													objectFit: 'cover',
+													borderRadius: 1.5,
+													mb: 1.5,
+													border: '1px solid #eee',
+												}}
+											/>
+										)}
 
-                    <Typography
-                      variant="h6"
-                      gutterBottom
-                      sx={{ fontWeight: 'bold', fontFamily: 'Varsity' }}
-                    >
-                      {p.nombre_producto}
-                    </Typography>
+										<Typography
+											variant='h6'
+											gutterBottom
+											sx={{ fontWeight: 'bold', fontFamily: 'Varsity' }}
+										>
+											{p.nombre_producto}
+										</Typography>
 
-                    <Typography
-                      variant="body2"
-                      color="text.secondary"
-                      sx={{ fontFamily: 'PeterMedium', fontWeight: 'bold' }}
-                    >
-                      {p.descripcion}
-                    </Typography>
+										<Typography
+											variant='body2'
+											color='text.secondary'
+											sx={{ fontFamily: 'PeterMedium', fontWeight: 'bold' }}
+										>
+											{p.descripcion}
+										</Typography>
 
-                    {esCamisa && (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, my: 2 }}>
-                        {TALLAS.map((size) => (
-                          <Button
-                            key={size}
-                            onClick={() =>
-                              setSelectedSizes((prev) => ({
-                                ...prev,
-                                [p.idproducto]: size,
-                              }))
-                            }
-                            variant={tallaSel === size ? 'contained' : 'outlined'}
-                            sx={{
-                              minWidth: 0,
-                              width: 36,
-                              height: 36,
-                              borderRadius: '50%',
-                              p: 0,
-                              fontFamily: 'Varsity',
-                              fontWeight: 'bold',
-                              bgcolor: tallaSel === size ? '#2c1a99' : '#fff',
-                              color: tallaSel === size ? '#fff' : '#999',
-                              border: tallaSel === size ? '2px solid #2c1a99' : '2px solid #999',
-                              '&:hover': { bgcolor: '#2c1a99', color: '#fff' },
-                            }}
-                          >
-                            {size}
-                          </Button>
-                        ))}
-                      </Box>
-                    )}
+										{esCamisa && (
+											<Box
+												sx={{
+													display: 'flex',
+													flexWrap: 'wrap',
+													gap: 1,
+													my: 2,
+												}}
+											>
+												{TALLAS.map(size => (
+													<Button
+														key={size}
+														onClick={() =>
+															setSelectedSizes(prev => ({
+																...prev,
+																[p.idproducto]: size,
+															}))
+														}
+														variant={
+															tallaSel === size ? 'contained' : 'outlined'
+														}
+														sx={{
+															minWidth: 0,
+															width: 36,
+															height: 36,
+															borderRadius: '50%',
+															p: 0,
+															fontFamily: 'Varsity',
+															fontWeight: 'bold',
+															bgcolor: tallaSel === size ? '#2c1a99' : '#fff',
+															color: tallaSel === size ? '#fff' : '#999',
+															border:
+																tallaSel === size
+																	? '2px solid #2c1a99'
+																	: '2px solid #999',
+															'&:hover': { bgcolor: '#2c1a99', color: '#fff' },
+														}}
+													>
+														{size}
+													</Button>
+												))}
+											</Box>
+										)}
 
-                    <Typography
-                      variant="h5"
-                      sx={{
-                        color: '#2c1a99',
-                        fontWeight: 'bold',
-                        fontFamily: 'Varsity',
-                      }}
-                    >
-                      L.{precioCard}
-                    </Typography>
+										<Typography
+											variant='h5'
+											sx={{
+												color: '#2c1a99',
+												fontWeight: 'bold',
+												fontFamily: 'Varsity',
+											}}
+										>
+											L.{precioCard}
+										</Typography>
 
-                    <Button
-                      variant="contained"
-                      fullWidth
-                      sx={{
-                        bgcolor: '#E06C14',
-                        fontFamily: 'GroteskBold',
-                        color: 'white',
-                        fontWeight: 'bold',
-                        mt: 2,
-                        '&:hover': { bgcolor: '#28a428' },
-                      }}
-                      onClick={() => addToCart(p)}
-                    >
-                      Agregar al Carrito
-                    </Button>
-                  </Paper>
-                );
+										<Button
+											variant='contained'
+											fullWidth
+											sx={{
+												bgcolor: '#E06C14',
+												fontFamily: 'GroteskBold',
+												color: 'white',
+												fontWeight: 'bold',
+												mt: 2,
+												'&:hover': { bgcolor: '#28a428' },
+											}}
+											onClick={() => addToCart(p)}
+										>
+											Agregar al Carrito
+										</Button>
+									</Paper>
+								);
               })}
             </Box>
           </Container>
