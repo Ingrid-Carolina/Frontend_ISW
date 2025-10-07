@@ -11,8 +11,16 @@ import {
   Divider,
   FormControlLabel,
   Checkbox,
-  Chip
+  Chip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  IconButton,
+  Alert
 } from '@mui/material';
+import EditIcon from '@mui/icons-material/Edit';
+import DeleteIcon from '@mui/icons-material/Delete';
 
 const ManageTestimonios = () => {
   const [nombre, setNombre] = useState('');
@@ -26,6 +34,54 @@ const ManageTestimonios = () => {
   const [bannerType, setBannerType] = useState('success');
   const [showBanner, setShowBanner] = useState(false);
 
+  // Estados para videos
+  const [videos, setVideos] = useState([]);
+  const [openVideoDialog, setOpenVideoDialog] = useState(false);
+  const [videoNombre, setVideoNombre] = useState('');
+  const [videoUrl, setVideoUrl] = useState('');
+  const [editandoVideo, setEditandoVideo] = useState(false);
+  const [videoEditId, setVideoEditId] = useState(null);
+
+  // Cargar testimonios
+  useEffect(() => {
+    const fetchTestimonios = async () => {
+      try {
+        const res = await api.get('/auth/obtenertestimonios');
+        const testimonios = res.data;
+
+        const testimoniosLista = testimonios.map(testimonio => ({
+          id: testimonio.id_testimonio,
+          nombre: testimonio.nombre,
+          contenido: testimonio.contenido,
+          imagen: testimonio.imagen,
+          is_featured: testimonio.is_featured
+        }));
+
+        setTestimonios(testimoniosLista);
+
+      } catch (err) {
+        console.error('Error al obtener testimonios:', err);
+      }
+    };
+
+    fetchTestimonios();
+  }, []);
+
+  // Cargar videos
+  const fetchVideos = async () => {
+    try {
+      const res = await api.get('/auth/obtenervideotestimonio');
+      setVideos(res.data);
+    } catch (err) {
+      console.error('Error al obtener videos:', err);
+    }
+  };
+
+  useEffect(() => {
+    fetchVideos();
+  }, []);
+
+  // Funciones para testimonios (tu código existente)
   const realizarPeticion = async () => {
     const url = `/auth/registrartestimonio`;
     const body = {
@@ -39,7 +95,6 @@ const ManageTestimonios = () => {
         headers: { "Content-Type": "application/json" }
       });
       
-      // Si está marcado como destacado, marcarlo después de crear
       if (isFeatured) {
         await destacarTestimonioRecienCreado();
       }
@@ -61,14 +116,12 @@ const ManageTestimonios = () => {
     }
   };
 
-  // Función para destacar testimonio recién creado
   const destacarTestimonioRecienCreado = async () => {
     try {
-      // Obtener el último testimonio creado (que debería ser este)
       const res = await api.get('/auth/obtenertestimonios');
       const testimonios = res.data;
       if (testimonios.length > 0) {
-        const ultimoTestimonio = testimonios[0]; // El más reciente
+        const ultimoTestimonio = testimonios[0];
         await api.put('/auth/testimonios/destacado', { 
           id: ultimoTestimonio.id_testimonio 
         });
@@ -77,32 +130,6 @@ const ManageTestimonios = () => {
       console.error('Error al destacar testimonio:', error);
     }
   };
-
-  // Cargar testimonios
-  useEffect(() => {
-    const fetchTestimonios = async () => {
-      try {
-        const res = await api.get('/auth/obtenertestimonios');
-        const testimonios = res.data;
-
-        const testimoniosLista = testimonios.map(testimonio => ({
-          id: testimonio.id_testimonio,
-          nombre: testimonio.nombre,
-          contenido: testimonio.contenido,
-          imagen: testimonio.imagen,
-          is_featured: testimonio.is_featured
-        }));
-
-        setTestimonios(testimoniosLista);
-        console.log(testimonios);
-
-      } catch (err) {
-        console.error('Error al obtener testimonios:', err);
-      }
-    };
-
-    fetchTestimonios();
-  }, []);
 
   const handleAgregar = async () => {
     if (!nombre || !contenido) return;
@@ -166,11 +193,9 @@ const ManageTestimonios = () => {
         headers: { "Content-Type": "application/json" }
       });
 
-      // Manejar el destacado por separado
       if (isFeatured) {
         await api.put('/auth/testimonios/destacado', { id: id });
       } else {
-        // Si se está editando un testimonio destacado y se quita el check, quitar el destacado
         const testimonioActual = testimonios[index];
         if (testimonioActual.is_featured && !isFeatured) {
           await api.put('/auth/testimonios/destacado', { id: null });
@@ -216,7 +241,6 @@ const ManageTestimonios = () => {
       setShowBanner(true);
       setTimeout(() => setShowBanner(false), 4000);
       
-      // Recargar la lista
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -237,7 +261,6 @@ const ManageTestimonios = () => {
       setShowBanner(true);
       setTimeout(() => setShowBanner(false), 4000);
       
-      // Recargar la lista
       setTimeout(() => {
         window.location.reload();
       }, 1000);
@@ -250,7 +273,120 @@ const ManageTestimonios = () => {
     }
   };
 
-  // Encontrar testimonio destacado actual
+  // Funciones para videos
+  const abrirDialogVideo = () => {
+    setOpenVideoDialog(true);
+    setEditandoVideo(false);
+    setVideoNombre('');
+    setVideoUrl('');
+    setVideoEditId(null);
+  };
+
+  const cerrarDialogVideo = () => {
+    setOpenVideoDialog(false);
+    setEditandoVideo(false);
+    setVideoNombre('');
+    setVideoUrl('');
+    setVideoEditId(null);
+  };
+
+  const agregarVideo = async () => {
+    if (!videoNombre || !videoUrl) {
+      setBannerMsg('Nombre y URL son requeridos');
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+      return;
+    }
+
+    try {
+      const body = {
+        nombre_video: videoNombre,
+        url: videoUrl
+      };
+
+      await api.post('/auth/registrarvideotestimonio', body, {
+        headers: { "Content-Type": "application/json" }
+      });
+
+      setBannerMsg('Video agregado correctamente');
+      setBannerType('success');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+
+      cerrarDialogVideo();
+      fetchVideos();
+    } catch (error) {
+      const msg = error?.data?.mensaje || error?.message || 'Error en la Red';
+      setBannerMsg(msg);
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+    }
+  };
+
+  const editarVideo = (video) => {
+    setEditandoVideo(true);
+    setVideoNombre(video.nombre_video);
+    setVideoUrl(video.url);
+    setVideoEditId(video.id_video);
+    setOpenVideoDialog(true);
+  };
+
+  const actualizarVideo = async () => {
+    if (!videoNombre || !videoUrl) {
+      setBannerMsg('Nombre y URL son requeridos');
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+      return;
+    }
+
+    try {
+      const body = {
+        nombre_video: videoNombre,
+        url: videoUrl
+      };
+
+      await api.put(`/auth/videotestimonio/${videoEditId}`, body, {
+        headers: { "Content-Type": "application/json" }
+      });
+
+      setBannerMsg('Video actualizado correctamente');
+      setBannerType('success');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+
+      cerrarDialogVideo();
+      fetchVideos();
+    } catch (error) {
+      const msg = error?.data?.mensaje || error?.message || 'Error en la Red';
+      setBannerMsg(msg);
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+    }
+  };
+
+  const eliminarVideo = async (id) => {
+    try {
+      await api.delete(`/auth/videotestimonio/${id}`);
+      
+      setBannerMsg('Video eliminado correctamente');
+      setBannerType('success');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+
+      fetchVideos();
+    } catch (error) {
+      const msg = error?.data?.mensaje || error?.message || 'Error en la Red';
+      setBannerMsg(msg);
+      setBannerType('error');
+      setShowBanner(true);
+      setTimeout(() => setShowBanner(false), 4000);
+    }
+  };
+
   const testimonioDestacado = testimonios.find(t => t.is_featured);
 
   return (
@@ -269,7 +405,9 @@ const ManageTestimonios = () => {
         Gestión de Testimonios
       </Typography>
 
-      {/* Formulario */}
+     
+
+      {/* Formulario de testimonios (tu código existente) */}
       <Stack spacing={2} sx={{ mb: 4 }}>
         <TextField
           label="Nombre del niño o niña"
@@ -315,8 +453,8 @@ const ManageTestimonios = () => {
             Ya hay un testimonio destacado. Para destacar este, primero quite el destacado actual.
           </Typography>
         )}
-
-        <Button
+ <Box sx={{ display: 'flex', gap: 2, mb: 4, flexWrap: 'wrap' }}>
+       <Button
           variant="contained"
           onClick={modoEdicion ? () => handleModificar(selectedIndex) : handleAgregar}
           sx={{
@@ -331,6 +469,23 @@ const ManageTestimonios = () => {
         >
           {modoEdicion ? 'Modificar Testimonio' : 'Agregar Testimonio'}
         </Button>
+        
+        <Button
+          variant="contained"
+          onClick={abrirDialogVideo}
+          sx={{
+            backgroundColor: '#c65402',
+            fontFamily: 'GroteskBold',
+            '&:hover': {
+              backgroundColor: '#e56502'
+            },
+            flex: { xs: '1 1 100%', sm: '0 1 auto' }
+          }}
+        >
+          Agregar Testimonio en Video
+        </Button>
+      </Box>
+        
       </Stack>
 
       {showBanner && (
@@ -353,7 +508,7 @@ const ManageTestimonios = () => {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Gestión de testimonio destacado */}
+      {/* Gestión de testimonio destacado (tu código existente) */}
       <Box sx={{ mb: 4, p: 2, backgroundColor: '#fff', borderRadius: 2, boxShadow: 1 }}>
         <Typography
           variant="h5"
@@ -392,7 +547,7 @@ const ManageTestimonios = () => {
 
       <Divider sx={{ mb: 3 }} />
 
-      {/* Vista previa del último testimonio */}
+      {/* Vista previa del último testimonio (tu código existente) */}
       {nombre || contenido || imagen ? (
         <>
           <Typography
@@ -414,7 +569,7 @@ const ManageTestimonios = () => {
         </>
       ) : null}
 
-      {/* Lista de testimonios actuales */}
+      {/* Lista de testimonios actuales (tu código existente) */}
       <Typography
         variant="h5"
         sx={{
@@ -489,6 +644,133 @@ const ManageTestimonios = () => {
           </Box>
         ))}
       </Stack>
+
+      {/* Dialog para gestionar videos */}
+      <Dialog 
+        open={openVideoDialog} 
+        onClose={cerrarDialogVideo}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle sx={{ fontFamily: 'GroteskBold', color: '#10045c' }}>
+          {editandoVideo ? 'Editar Video Testimonio' : 'Agregar Video Testimonio'}
+        </DialogTitle>
+        <DialogContent>
+          <Stack spacing={2} sx={{ mt: 2 }}>
+            <TextField
+              label="Nombre del video"
+              value={videoNombre}
+              onChange={(e) => setVideoNombre(e.target.value)}
+              fullWidth
+              InputLabelProps={{ style: { fontFamily: 'GroteskBold' } }}
+              inputProps={{ style: { fontFamily: 'ManropeEB' } }}
+            />
+            
+            <Box>
+              <Typography 
+                variant="body2" 
+                sx={{ 
+                  color: 'error.main', 
+                  fontFamily: 'ManropeEB',
+                  mb: 1
+                }}
+              >
+                * El video debe estar en formato de Youtube Shorts
+              </Typography>
+              <TextField
+                label="URL de Youtube Shorts"
+                value={videoUrl}
+                onChange={(e) => setVideoUrl(e.target.value)}
+                fullWidth
+                InputLabelProps={{ style: { fontFamily: 'GroteskBold' } }}
+                inputProps={{ style: { fontFamily: 'ManropeEB' } }}
+                placeholder="https://www.youtube.com/shorts/..."
+              />
+            </Box>
+
+            {/* Lista de videos existentes */}
+            {videos.length > 0 && (
+              <Box sx={{ mt: 2 }}>
+                <Typography 
+                  variant="h6" 
+                  sx={{ 
+                    fontFamily: 'GroteskBold', 
+                    color: '#10045c',
+                    mb: 2
+                  }}
+                >
+                  Videos existentes:
+                </Typography>
+                <Stack spacing={1}>
+                  {videos.map((video) => (
+                    <Box 
+                      key={video.id_video}
+                      sx={{ 
+                        p: 2, 
+                        border: '1px solid #ddd', 
+                        borderRadius: 1,
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                    >
+                      <Box>
+                        <Typography sx={{ fontFamily: 'ManropeEB', fontWeight: 'bold' }}>
+                          {video.nombre_video}
+                        </Typography>
+                        <Typography 
+                          sx={{ 
+                            fontFamily: 'ManropeEB', 
+                            fontSize: '0.8rem',
+                            color: '#666'
+                          }}
+                        >
+                          {video.url}
+                        </Typography>
+                      </Box>
+                      <Box>
+                        <IconButton 
+                          onClick={() => editarVideo(video)}
+                          sx={{ color: '#10045c' }}
+                        >
+                          <EditIcon />
+                        </IconButton>
+                        <IconButton 
+                          onClick={() => eliminarVideo(video.id_video)}
+                          sx={{ color: 'error.main' }}
+                        >
+                          <DeleteIcon />
+                        </IconButton>
+                      </Box>
+                    </Box>
+                  ))}
+                </Stack>
+              </Box>
+            )}
+          </Stack>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={cerrarDialogVideo}
+            sx={{ fontFamily: 'ManropeEB' }}
+          >
+            Cancelar
+          </Button>
+          <Button 
+            onClick={editandoVideo ? actualizarVideo : agregarVideo}
+            variant="contained"
+            sx={{ 
+              backgroundColor: '#c65402',
+              fontFamily: 'GroteskBold',
+              '&:hover': {
+                backgroundColor: '#e56502'
+              }
+            }}
+          >
+            {editandoVideo ? 'Actualizar Video' : 'Agregar Video'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

@@ -23,16 +23,6 @@ import { api } from '../api/api';
 import EditIcon from '@mui/icons-material/Edit';
 import fondoDefault from '/Images/TestimonioFondo1.jpg';
 
-const videos = [
-	{ url: 'https://www.youtube.com/shorts/-J3Fy6iyMgY' },
-	{ url: 'https://www.youtube.com/shorts/1IzwLvkmtu0' },
-	{ url: 'https://www.youtube.com/shorts/aDV-PF32GXQ' },
-	{ url: 'https://www.youtube.com/shorts/a0S_W989rHE' },
-	{ url: 'https://www.youtube.com/shorts/Pu3UF_mdrt0' },
-	{ url: 'https://www.youtube.com/shorts/3ZSh5IuaCxA' },
-	{ url: 'https://www.youtube.com/shorts/tDngfZRNfsA' },
-];
-
 const PaginaTestimonios = () => {
 	const theme = useTheme();
 	const isSmallScreen = useMediaQuery(theme.breakpoints.down('sm'));
@@ -59,6 +49,11 @@ const PaginaTestimonios = () => {
 	const [testimonios, setTestimonios] = useState([]);
 	const [testimoniosDestacados, setTestimoniosDestacados] = useState([]);
 	const [testimoniosNormales, setTestimoniosNormales] = useState([]);
+	
+	// ======== VIDEOS ========
+	const [videos, setVideos] = useState([]);
+	const [cargandoVideos, setCargandoVideos] = useState(true);
+
 	const roles = [
 		'Jugador Profesional – Categoría Infantil',
 		'Jugador Profesional – Categoría Intermedia',
@@ -66,6 +61,42 @@ const PaginaTestimonios = () => {
 		'Madre de jugador – Categoría Juvenil',
 	];
 
+	// Cargar videos desde la base de datos
+	useEffect(() => {
+		const fetchVideos = async () => {
+			try {
+				setCargandoVideos(true);
+				const res = await api.get('/auth/obtenervideotestimonio', { skipAuthRedirect: true });
+				const videosData = res.data;
+				
+				// Formatear los videos para el carousel
+				const videosFormateados = videosData.map(video => ({
+					url: video.url,
+					nombre: video.nombre_video
+				}));
+				
+				setVideos(videosFormateados);
+			} catch (error) {
+				console.error('Error al cargar videos:', error);
+				// En caso de error, usar videos por defecto
+				setVideos([
+					{ url: 'https://www.youtube.com/shorts/-J3Fy6iyMgY' },
+					{ url: 'https://www.youtube.com/shorts/1IzwLvkmtu0' },
+					{ url: 'https://www.youtube.com/shorts/aDV-PF32GXQ' },
+					{ url: 'https://www.youtube.com/shorts/a0S_W989rHE' },
+					{ url: 'https://www.youtube.com/shorts/Pu3UF_mdrt0' },
+					{ url: 'https://www.youtube.com/shorts/3ZSh5IuaCxA' },
+					{ url: 'https://www.youtube.com/shorts/tDngfZRNfsA' },
+				]);
+			} finally {
+				setCargandoVideos(false);
+			}
+		};
+
+		fetchVideos();
+	}, []);
+
+	// Resto de tu código existente (useEffects, funciones, etc.)...
 	// Preview local del archivo seleccionado
 	useEffect(() => {
 		if (!headerFile) {
@@ -452,7 +483,26 @@ const PaginaTestimonios = () => {
 				>
 					Testimonios en Video
 				</Typography>
-				<VidCarousel videos={videos} />
+				
+				{cargandoVideos ? (
+					<Box sx={{ display: 'flex', justifyContent: 'center', py: 4 }}>
+						<CircularProgress />
+					</Box>
+				) : videos.length > 0 ? (
+					<VidCarousel videos={videos} />
+				) : (
+					<Typography
+						variant='h6'
+						sx={{
+							fontFamily: 'ManropeEB, sans-serif',
+							color: '#666',
+							textAlign: 'center',
+							py: 4,
+						}}
+					>
+						No hay videos disponibles en este momento.
+					</Typography>
+				)}
 			</Box>
 
 			{/* SNACKBAR FEEDBACK */}
