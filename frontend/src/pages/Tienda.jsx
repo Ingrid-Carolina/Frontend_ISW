@@ -657,7 +657,7 @@ export default function Tienda() {
     }
 
     // Si es una camisa y es admin, abrir modal de detalles
-    if (requiere && isAdmin) {
+    if (requiere) {
       abrirModalDetallesCamisa(producto, tallaSel);
       return;
     }
@@ -1794,10 +1794,11 @@ export default function Tienda() {
 
       {/* Modal factura de cliente */}
       <Dialog open={open} onClose={() => setopen(false)} fullWidth maxWidth="sm" sx={{ zIndex: 1300 }}>
-        <DialogContent>
+        <DialogContent sx={{overflowX:'hidden'}}>
           <DialogTitle
             variant="h5"
             sx={{
+              marginTop:'20px',
               color: '#2c1a99',
               fontFamily: 'Varsity',
               fontWeight: 'bold',
