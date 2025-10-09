@@ -14,6 +14,8 @@ import {
   Paper,
   TextField,
   Pagination,
+  Select,
+  MenuItem
 } from "@mui/material";
 
 // Componente principal para mostrar la bitácora de donaciones
@@ -63,6 +65,28 @@ export default function BitacoraDonaciones() {
     page * rowsPerPage
   );
 
+   const handleEstado = async (donacionIndex, newEstado) => {
+      const id_donacion = donaciones[donacionIndex].id_donacion;
+      setDonaciones((prevdonaciones) =>
+        prevdonaciones.map((donacion, i) =>
+          i === donacionIndex ? { ...donacion, estado: newEstado } : donacion
+        )
+      );
+      const url = `/auth/donaciones/${id_donacion}`;
+      const updatedestado = {
+        estado: newEstado
+      };
+  
+      console.log(updatedestado);
+      try {
+        const res = await api.put(url, updatedestado, {
+          headers: { "Content-Type": "application/json" }
+        });
+        console.log(res.data);
+      } catch (error) {
+        console.error('Error al setear el estado:', error.message);
+      }
+    };
   // Renderizado del componente
   return (
     <Box sx={{ mt: 12, px: { xs: 1, sm: 2, md: 3 } }}>
@@ -127,6 +151,9 @@ export default function BitacoraDonaciones() {
               <TableCell sx={{ fontFamily: "PeterMedium", fontWeight: "bold", color: "#fff" }}>
                 Descripción
               </TableCell>
+                <TableCell sx={{ fontFamily: "PeterMedium", fontWeight: "bold", color: "#fff" }}>
+                Estado
+              </TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
@@ -140,6 +167,18 @@ export default function BitacoraDonaciones() {
                 <TableCell sx={{ fontFamily: "PeterMedium" }}>{donacion.dia}</TableCell>
                 <TableCell sx={{ fontFamily: "PeterMedium" }}>{donacion.horario}</TableCell>
                 <TableCell sx={{ fontFamily: "PeterMedium" }}>{donacion.descripcion}</TableCell>
+                 <TableCell sx={{ fontFamily: "PeterMedium" , fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }}}>
+                                    <Select
+                                      value={donacion.estado}
+                                      onChange={(e) => handleEstado(index , e.target.value)}
+                                      variant="standard"
+                                      sx={{ fontFamily: "PeterMedium", minWidth: 120,fontSize: { xs: '0.75rem', sm: '0.875rem', md: '1rem' }}}
+                                      
+                                    >
+                                      <MenuItem value="Pendiente">Pendiente</MenuItem>
+                                      <MenuItem value="Entregado">Entregado</MenuItem>
+                                    </Select>
+                                  </TableCell>
               </TableRow>
             ))}
           </TableBody>

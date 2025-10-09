@@ -15,7 +15,8 @@ import {
   List,
   ListItem,
   MenuItem,
-  Select
+  Select,
+  TextField
 } from "@mui/material";
 
 // Componente principal para administrar usuarios
@@ -23,6 +24,7 @@ const ManageUsuarios = () => {
 
   // Estado para almacenar la lista de usuarios obtenidos del backend
   const [usuarios, setusuarios] = useState([]);
+    const [searchTerm, setSearchTerm] = useState("");
 
   // Función para obtener los usuarios desde la API
   const fetchUsuarios = async () => {
@@ -85,6 +87,14 @@ const ManageUsuarios = () => {
     }
   }
 
+  const filteredUsuarios = usuarios.filter((usuario) =>
+    // Busca el término en cualquier campo del usuario
+      Object.values(usuario).some((val) =>
+      String(val).toLowerCase().includes(searchTerm.toLowerCase())
+    )
+
+);
+
   // Renderizado del componente
   return (
     <Box sx={{ mt: 12, px: { xs: 1, sm: 2, md: 3 } }}>
@@ -100,6 +110,41 @@ const ManageUsuarios = () => {
       >
         Administrar Usuarios
       </Typography>
+
+      {/* Barra de búsqueda centrada y responsiva */}
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        sx={{
+          mb: { xs: 2, sm: 3, md: 4 }, // margin bottom changes per device
+          px: { xs: 1, sm: 2, md: 3 }, // horizontal padding for breathing room
+        }}
+      >
+        <TextField
+          label="Buscar..."
+          variant="outlined"
+          size="small"
+          value={searchTerm}
+          onChange={(e) => {
+            setSearchTerm(e.target.value);
+          }}
+          fullWidth
+          sx={{
+            maxWidth: { xs: 300, sm: 500, md: 600 }, // limit width but let it scale
+            borderRadius: "30px",
+            "& .MuiOutlinedInput-root": {
+              borderRadius: "30px",
+            },
+            "& .MuiInputLabel-root": {
+              fontFamily: "PeterMedium",
+            },
+            "& .MuiOutlinedInput-input": {
+              fontFamily: "PeterMedium",
+            },
+          }}
+        />
+      </Box>
 
       {/* Tabla de usuarios */}
       <TableContainer component={Paper} sx={{ borderRadius: 3 }}>
@@ -119,7 +164,7 @@ const ManageUsuarios = () => {
           </TableHead>
           <TableBody>
             {/* Filas de la tabla, una por cada usuario */}
-            {usuarios.map((usuario, index) => {
+            {filteredUsuarios.map((usuario, index) => {
               return (
                 <TableRow key={usuario.id} hover>
                   {/* Nombre del usuario */}
