@@ -652,8 +652,8 @@ const ManageTestimonios = () => {
         maxWidth="sm"
         fullWidth
       >
-        <DialogTitle sx={{ fontFamily: 'GroteskBold', color: '#10045c' }}>
-          {editandoVideo ? 'Editar Video Testimonio' : 'Agregar Video Testimonio'}
+        <DialogTitle sx={{ fontFamily: 'GroteskBold', color: '#10045c', marginTop: '50px' }}>
+          {editandoVideo ? 'Editar Testimonio en Video' : 'Agregar Testimonio en Video'}
         </DialogTitle>
         <DialogContent>
           <Stack spacing={2} sx={{ mt: 2 }}>
